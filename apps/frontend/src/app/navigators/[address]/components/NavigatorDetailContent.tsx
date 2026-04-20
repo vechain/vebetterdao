@@ -19,9 +19,7 @@ import { AnnounceExitModal } from "./modals/AnnounceExitModal"
 import { EditNavigatorProfileModal } from "./modals/EditNavigatorProfileModal"
 import { ManageStakeModal } from "./modals/ManageStakeModal"
 import { NavigatorCitizensModal } from "./modals/NavigatorCitizensModal"
-import { NavigatorDelegationsModal } from "./modals/NavigatorDelegationsModal"
 import { NavigatorReportModal } from "./modals/NavigatorReportModal"
-import { NavigatorStakeHistoryModal } from "./modals/NavigatorStakeHistoryModal"
 import { WithdrawStakeModal } from "./modals/WithdrawStakeModal"
 import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
@@ -43,8 +41,6 @@ export const NavigatorDetailContent = () => {
   const [isDelegationOpen, setIsDelegationOpen] = useState(false)
   const [isExitMode, setIsExitMode] = useState(false)
   const [isCitizensOpen, setIsCitizensOpen] = useState(false)
-  const [isStakeHistoryOpen, setIsStakeHistoryOpen] = useState(false)
-  const [isDelegationsOpen, setIsDelegationsOpen] = useState(false)
   const [isManageStakeOpen, setIsManageStakeOpen] = useState(false)
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [isAnnounceExitOpen, setIsAnnounceExitOpen] = useState(false)
@@ -168,12 +164,7 @@ export const NavigatorDetailContent = () => {
         onAnnounceExit={() => setIsAnnounceExitOpen(true)}
       />
 
-      <NavigatorStatsGrid
-        navigator={nav}
-        onCitizensClick={() => setIsCitizensOpen(true)}
-        onStakedClick={() => setIsStakeHistoryOpen(true)}
-        onDelegatedClick={() => setIsDelegationsOpen(true)}
-      />
+      <NavigatorStatsGrid navigator={nav} onCitizensClick={() => setIsCitizensOpen(true)} />
 
       {isOwnPage && (
         <>
@@ -199,16 +190,6 @@ export const NavigatorDetailContent = () => {
         exitMode={isExitMode}
       />
       <NavigatorCitizensModal isOpen={isCitizensOpen} onClose={() => setIsCitizensOpen(false)} address={address} />
-      <NavigatorStakeHistoryModal
-        isOpen={isStakeHistoryOpen}
-        onClose={() => setIsStakeHistoryOpen(false)}
-        address={address}
-      />
-      <NavigatorDelegationsModal
-        isOpen={isDelegationsOpen}
-        onClose={() => setIsDelegationsOpen(false)}
-        address={address}
-      />
       <ManageStakeModal isOpen={isManageStakeOpen} onClose={() => setIsManageStakeOpen(false)} navigator={nav} />
       <WithdrawStakeModal isOpen={isWithdrawStakeOpen} onClose={() => setIsWithdrawStakeOpen(false)} navigator={nav} />
       <AnnounceExitModal isOpen={isAnnounceExitOpen} onClose={() => setIsAnnounceExitOpen(false)} />

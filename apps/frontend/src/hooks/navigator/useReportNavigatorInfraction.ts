@@ -4,7 +4,6 @@ import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
 
 import { getGetStakeQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
-import { invalidateNavigatorStakeHistoryQueries } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
 import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
 import { buildClause } from "@/utils/buildClause"
 
@@ -37,7 +36,7 @@ type ReportParams = {
 type Props = {
   onSuccess?: () => void
   additionalRefetchKeys?: QueryKey[]
-  /** When set, also refreshes on-chain stake, indexer navigator stats (e.g. Total Staked), and stake history events */
+  /** When set, also refreshes on-chain stake and indexer navigator stats (e.g. Total Staked) */
   navigatorAddress?: string
 }
 
@@ -70,7 +69,6 @@ export const useReportNavigatorInfraction = ({ onSuccess, additionalRefetchKeys 
     }
     if (navigatorAddress) {
       invalidateNavigatorQueries(queryClient)
-      invalidateNavigatorStakeHistoryQueries(queryClient)
     }
     onSuccess?.()
   }, [invalidateKeys, navigatorAddress, onSuccess, queryClient])

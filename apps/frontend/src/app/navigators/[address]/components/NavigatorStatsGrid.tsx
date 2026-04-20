@@ -13,11 +13,9 @@ const formatter = getCompactFormatter(2)
 type Props = {
   navigator: NavigatorEntityFormatted
   onCitizensClick: () => void
-  onStakedClick: () => void
-  onDelegatedClick: () => void
 }
 
-export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedClick, onDelegatedClick }: Props) => {
+export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick }: Props) => {
   const { t } = useTranslation()
 
   const stats = useMemo(
@@ -60,8 +58,6 @@ export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedCl
 
   const clickHandlers: Record<string, () => void> = {
     citizens: onCitizensClick,
-    staked: onStakedClick,
-    delegated: onDelegatedClick,
   }
 
   return (
