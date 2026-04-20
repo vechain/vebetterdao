@@ -74,6 +74,8 @@ jobs:
         id: determine
         env:
           BASE_REF: ${{ github.base_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
@@ -91,8 +93,6 @@ jobs:
             exit 1
           fi
 
-          HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
-          REPO="${{ github.repository }}"
           if [ "$HEAD_REPO" != "$REPO" ]; then
             echo "is_fork_pr=true" >> $GITHUB_OUTPUT
           else
