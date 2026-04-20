@@ -793,7 +793,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               <SummaryItem label={t("Title (optional)")} value={form.title || t("Skip")} />
               <SummaryItem label={t(amountLabelKey)} value={`${form.stakeAmount} B3TR`} />
               <SummaryItem label={t("Start round")} value={form.startRound} />
-              <SummaryItem label={t("End round")} value={form.endRound} />
+              <SummaryItem label={t("Duration")} value={`${duration} ${duration === 1 ? t("round") : t("rounds")}`} />
               {isSponsored && (
                 <SummaryItem label={t("Winner")} value={t(isSplitPrize ? "Split prize" : "Max actions")} />
               )}
