@@ -844,7 +844,7 @@ const InviteeRow = ({ value, error, onChange, onRemove, t }: InviteeRowProps) =>
     <VStack align="stretch" gap="1">
       <HStack gap="2">
         <Input
-          placeholder="0x..."
+          placeholder={t("0x... or name.vet")}
           value={value}
           onChange={e => onChange(e.target.value)}
           onBlur={() => setTouched(true)}

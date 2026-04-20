@@ -64,13 +64,14 @@ export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }
   const timeLabel = (() => {
     if (!statusTime) return null
     const time = statusTime.fromNow()
+    const opts = { time, interpolation: { escapeValue: false } }
     switch (challenge.status) {
       case ChallengeStatus.Pending:
-        return t("Starts {{time}}", { time })
+        return t("Starts {{time}}", opts)
       case ChallengeStatus.Active:
-        return t("Ends {{time}}", { time })
+        return t("Ends {{time}}", opts)
       case ChallengeStatus.Finalized:
-        return t("Ended {{time}}", { time })
+        return t("Ended {{time}}", opts)
       default:
         return null
     }
