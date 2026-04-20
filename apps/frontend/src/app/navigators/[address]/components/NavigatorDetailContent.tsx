@@ -1,19 +1,24 @@
 import { Alert, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass, LuDoorOpen, LuUserCheck } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
+import { useAllocationsRoundsEvents } from "@/api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
+import { useEvents } from "@/hooks/useEvents"
 
 import { AnnounceExitModal } from "./modals/AnnounceExitModal"
 import { EditNavigatorProfileModal } from "./modals/EditNavigatorProfileModal"
@@ -59,6 +64,33 @@ export const NavigatorDetailContent = () => {
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: status } = useNavigatorStatus(address)
   const { data: delegationInfo } = useMyDelegationInfo(address)
+
+  const { data: registrationBlock } = useEvents({
+    contractAddress: getConfig().navigatorRegistryContractAddress,
+    abi: NavigatorRegistry__factory.abi,
+    eventName: "NavigatorRegistered",
+    filterParams: { navigator: address as `0x${string}` },
+    select: events => events[0]?.meta.blockNumber ?? 0,
+  })
+  const { data: roundsData } = useAllocationsRoundsEvents()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
+  // Round active at the time of registration: latest round whose voteStart <= registrationBlock.
+  // Rounds are returned in ascending order, so the last match is the active one.
+  const joinedRoundId = useMemo(() => {
+    if (!registrationBlock || !roundsData?.created.length) return undefined
+    let result: string | undefined
+    for (const round of roundsData.created) {
+      if (Number(round.voteStart) <= registrationBlock) result = round.roundId
+      else break
+    }
+    return result
+  }, [registrationBlock, roundsData])
+
+  // NavigatorRoundHistory only renders rounds that started after registration,
+  // so there is history to show iff at least one round followed the join round.
+  const hasRoundHistory =
+    currentRoundId != null && (joinedRoundId == null || Number(currentRoundId) > Number(joinedRoundId))
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
 
@@ -186,11 +218,13 @@ export const NavigatorDetailContent = () => {
           </HStack>
         </>
       )}
-      <Heading size="lg">{t("Activity")}</Heading>
+
+      {/* Show activity title only if not own page or joined round is before current round */}
+      {(!isOwnPage || hasRoundHistory) && <Heading size="lg">{t("Activity")}</Heading>}
 
       <NavigatorRoundHistory address={address} isOwnPage={isOwnPage} />
 
-      <NavigatorGovernanceActivity address={address} />
+      {!isOwnPage && <NavigatorGovernanceActivity address={address} />}
 
       <DelegationModal
         isOpen={isDelegationOpen}
