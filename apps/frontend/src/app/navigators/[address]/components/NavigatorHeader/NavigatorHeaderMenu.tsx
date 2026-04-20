@@ -36,6 +36,10 @@ export const NavigatorHeaderMenu = ({
       <Portal>
         <Menu.Positioner>
           <Menu.Content bg={{ base: "white", _dark: "#2D3748" }}>
+            <Menu.Item value="share" cursor="pointer" onClick={onShareClick}>
+              <LuShare2 />
+              {t("Share")}
+            </Menu.Item>
             {isOwnPage && (
               <Menu.Item value="edit-profile" cursor="pointer" onClick={onEditProfile}>
                 <LuPencil />
@@ -54,10 +58,6 @@ export const NavigatorHeaderMenu = ({
                 {t("Announce Exit")}
               </Menu.Item>
             )}
-            <Menu.Item value="share" cursor="pointer" onClick={onShareClick}>
-              <LuShare2 />
-              {t("Share")}
-            </Menu.Item>
           </Menu.Content>
         </Menu.Positioner>
       </Portal>
