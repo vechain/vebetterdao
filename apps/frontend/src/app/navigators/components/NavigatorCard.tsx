@@ -7,6 +7,7 @@ import { FaXTwitter } from "react-icons/fa6"
 import { LuSettings, LuUsers } from "react-icons/lu"
 
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
+import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
@@ -26,12 +27,12 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
   const { data: isNavigator } = useIsNavigator()
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(nav.address)
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
+  const { data: metadata } = useNavigatorMetadata(nav.metadataURI)
   const isActive = nav.status === "ACTIVE"
   const isOwnCard = account?.address?.toLowerCase() === nav.address.toLowerCase()
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 8, 6)
   const twitterHandle = textRecords?.["com.x"]
-  const bio = textRecords?.description
 
   return (
     <Card.Root
@@ -102,8 +103,8 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
               </HStack>
             </HStack>
 
-            <Text textStyle="xs" color="fg.muted" lineClamp={2}>
-              {bio || t("No bio provided")}
+            <Text textStyle="xs" color="fg.muted" lineClamp={3}>
+              {metadata?.votingStrategy || t("No voting strategy provided")}
             </Text>
           </VStack>
 
