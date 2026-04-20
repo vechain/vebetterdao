@@ -1,0 +1,9 @@
+{
+  "name": "@repo/indexer",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "docker-compose.yaml",
+    "genesis-vet-balances-solo.json"
+  ]
+}
