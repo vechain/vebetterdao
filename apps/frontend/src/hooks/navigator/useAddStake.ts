@@ -8,6 +8,7 @@ import { useCallback } from "react"
 
 import { getGetStakeQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { invalidateNavigatorStakeHistoryQueries } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
+import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
 import { buildClause } from "@/utils/buildClause"
 
 import { useBuildTransaction } from "../useBuildTransaction"
@@ -54,7 +55,7 @@ export const useAddStake = ({ onSuccess }: Props) => {
     const addr = account?.address ?? ""
     queryClient.invalidateQueries({ queryKey: getGetStakeQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getB3trBalanceQueryKey(addr) })
-    queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators"] })
+    invalidateNavigatorQueries(queryClient)
     invalidateNavigatorStakeHistoryQueries(queryClient)
     queryClient.invalidateQueries({ queryKey: ["bestBlockCompressed"] })
     onSuccess?.()

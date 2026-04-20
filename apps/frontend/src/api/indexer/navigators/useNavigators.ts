@@ -1,6 +1,7 @@
+import { QueryClient, useQuery } from "@tanstack/react-query"
 import { formatEther } from "ethers"
 
-import { indexerQueryClient } from "../api"
+import { indexerFetch, indexerQueryClient } from "../api"
 import { paths } from "../schema"
 
 type NavigatorsQuery = paths["/api/v1/b3tr/navigators"]["get"]
@@ -24,6 +25,9 @@ export type NavigatorOverviewFormatted = NavigatorOverview & {
   totalDelegatedFormatted: string
 }
 
+export const NAVIGATORS_QUERY_KEY = ["get", "/api/v1/b3tr/navigators"] as const
+export const NAVIGATOR_BY_ADDRESS_QUERY_KEY = ["navigator", "byAddress"] as const
+
 const formatNavigator = (nav: NavigatorEntity): NavigatorEntityFormatted => ({
   ...nav,
   stakeFormatted: formatEther(nav.stake),
@@ -42,27 +46,40 @@ export const useNavigators = (params?: NavigatorsQueryParams) =>
     },
   )
 
+const fetchNavigatorByAddress = async (address: string): Promise<NavigatorEntityFormatted | null> => {
+  const res = await indexerFetch(`/api/v1/b3tr/navigators/${address.toLowerCase()}`)
+
+  if (res.status === 404) {
+    return null
+  }
+
+  if (!res.ok) {
+    throw new Error(`Navigator fetch error: ${res.status}`)
+  }
+
+  return formatNavigator((await res.json()) as NavigatorEntity)
+}
+
+export const getNavigatorByAddressQueryKey = (address: string) =>
+  [...NAVIGATOR_BY_ADDRESS_QUERY_KEY, address.toLowerCase()] as const
+
+export const invalidateNavigatorQueries = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: NAVIGATORS_QUERY_KEY })
+  queryClient.invalidateQueries({ queryKey: NAVIGATOR_BY_ADDRESS_QUERY_KEY })
+}
+
 // waitForIndexer: after registration the indexer may not have the data yet,
 // so we poll every 2s until it appears (triggered via ?registered=true redirect).
 export const useNavigatorByAddress = (address: string, { waitForIndexer = false } = {}) =>
-  indexerQueryClient.useQuery(
-    "get",
-    "/api/v1/b3tr/navigators",
-    {
-      params: { query: { navigator: address } },
+  useQuery({
+    queryKey: getNavigatorByAddressQueryKey(address),
+    queryFn: () => fetchNavigatorByAddress(address),
+    enabled: !!address,
+    refetchInterval: query => {
+      if (waitForIndexer && !query.state.data) return 2000
+      return false
     },
-    {
-      enabled: !!address,
-      select: data => {
-        const nav = data.data[0]
-        return nav ? formatNavigator(nav) : null
-      },
-      refetchInterval: query => {
-        if (waitForIndexer && !query.state.data?.data?.[0]) return 2000
-        return false
-      },
-    },
-  )
+  })
 
 export const useNavigatorRegistrations = (params?: Omit<NavigatorsQueryParams, "status">) =>
   useNavigators({ ...params, status: ["ACTIVE", "EXITING"] })

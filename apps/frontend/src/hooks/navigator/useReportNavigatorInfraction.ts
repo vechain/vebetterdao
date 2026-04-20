@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react"
 
 import { getGetStakeQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { invalidateNavigatorStakeHistoryQueries } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStakeHistory"
+import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
 import { buildClause } from "@/utils/buildClause"
 
 import { useBuildTransaction } from "../useBuildTransaction"
@@ -68,7 +69,7 @@ export const useReportNavigatorInfraction = ({ onSuccess, additionalRefetchKeys 
       void queryClient.invalidateQueries({ queryKey })
     }
     if (navigatorAddress) {
-      void queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators"] })
+      invalidateNavigatorQueries(queryClient)
       invalidateNavigatorStakeHistoryQueries(queryClient)
     }
     onSuccess?.()

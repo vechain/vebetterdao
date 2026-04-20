@@ -7,6 +7,7 @@ import { useCallback } from "react"
 import { getExitAnnouncedRoundQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useExitAnnouncedRound"
 import { getIsNavigatorQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { getNavigatorStatusQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
+import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
 import { buildClause } from "@/utils/buildClause"
 
 import { useBuildTransaction } from "../useBuildTransaction"
@@ -40,7 +41,7 @@ export const useAnnounceExit = ({ onSuccess }: Props) => {
     queryClient.invalidateQueries({ queryKey: getNavigatorStatusQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getExitAnnouncedRoundQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getIsNavigatorQueryKey(addr) })
-    queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators"] })
+    invalidateNavigatorQueries(queryClient)
     queryClient.invalidateQueries({ queryKey: ["bestBlockCompressed"] })
     onSuccess?.()
   }, [queryClient, account, onSuccess])
