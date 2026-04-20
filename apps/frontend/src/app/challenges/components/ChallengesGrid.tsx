@@ -1,8 +1,10 @@
-import { Box, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Box, SimpleGrid } from "@chakra-ui/react"
+import { UilCompass } from "@iconscout/react-unicons"
 import { useCallback, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ChallengeView, PaginatedChallengeSection } from "@/api/challenges/types"
+import { EmptyState } from "@/components/ui/empty-state"
 
 import { ChallengeCard } from "./ChallengeCard"
 import { CompactSkeleton } from "./CompactSkeleton"
@@ -45,11 +47,12 @@ export const ChallengesGrid = ({ items, section }: ChallengesGridProps) => {
 
   if (items.length === 0) {
     return (
-      <VStack py="16" gap="2">
-        <Text color="text.subtle" textStyle="md">
-          {t("No quests to show")}
-        </Text>
-      </VStack>
+      <EmptyState
+        py="16"
+        icon={<UilCompass />}
+        title={t("No quests to show")}
+        description={t("There are no quests matching your current filters")}
+      />
     )
   }
 

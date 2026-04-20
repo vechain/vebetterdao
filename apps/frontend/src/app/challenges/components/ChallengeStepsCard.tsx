@@ -84,7 +84,7 @@ export const ChallengeStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
       {
         key: "explore",
         title: t("Rewards & discovery"),
-        image: "/assets/mascot/mascot-holding-tokens.webp",
+        image: "/assets/mascot/B3MO_Tokens_3.png",
         heading: t("4. Earn & explore"),
         listItems: [
           t(

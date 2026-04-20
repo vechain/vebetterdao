@@ -26,7 +26,7 @@ export const ChallengeFinalizeModal = ({ isOpen, onClose, onFinalize }: Props) =
             <CloseButton />
           </Dialog.CloseTrigger>
           <VStack align="center" p={8} gap={6}>
-            <Image src="/assets/mascot/mascot-holding-tokens.webp" alt="B3MO" boxSize="200px" objectFit="contain" />
+            <Image src="/assets/mascot/B3MO_Tokens_3.png" alt="B3MO" boxSize="200px" objectFit="contain" />
 
             <VStack gap={1}>
               <Heading size="xl" fontWeight="bold" textAlign="center">
