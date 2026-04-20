@@ -85,7 +85,9 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
                 <LuInfo />
               </Icon>
               <Text textStyle="sm">
-                {t("Currently you do not have any tasks to complete. Your tasks will begin next round.")}
+                {t(
+                  "Currently you do not have any tasks to complete. You will see here your tasks starting from the next round.",
+                )}
               </Text>
             </HStack>
           </VStack>
