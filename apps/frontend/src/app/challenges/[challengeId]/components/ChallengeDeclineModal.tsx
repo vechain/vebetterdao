@@ -33,7 +33,7 @@ export const ChallengeDeclineModal = ({ isOpen, onClose, onDecline }: Props) => 
                 {t("Decline invitation")}
               </Heading>
               <Text textStyle="md" color="text.subtle" textAlign="center">
-                {t("Once declined, to join the quest again, the creator will need to invite you again.")}
+                {t("You can still join later if you change your mind.")}
               </Text>
             </VStack>
 
