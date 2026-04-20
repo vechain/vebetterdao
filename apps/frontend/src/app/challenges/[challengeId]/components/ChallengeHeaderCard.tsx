@@ -108,7 +108,13 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
             {challengeDescription}
           </Text>
 
-          <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="md" w="fit-content">
+          <Badge
+            variant={getChallengeStatusBadgeVariant(challenge.status)}
+            size="md"
+            w="fit-content"
+            maxW="full"
+            whiteSpace="normal"
+            textAlign="left">
             {statusTimeLabel ?? getChallengeInvalidReason(challenge, t) ?? t(challengeStatusLabel(challenge.status))}
           </Badge>
 

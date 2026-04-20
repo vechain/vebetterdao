@@ -114,9 +114,9 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       isComplete: kindChosen,
       prompt: (
         <VStack align="start" gap="1" w="full">
-          <Text textStyle="sm">{t("Hi, I'm B3MO. I'll guide you through your challenge setup.")}</Text>
+          <Text textStyle="sm">{t("Hi, I'm B3MO. I'll guide you through your quest setup.")}</Text>
           <Text textStyle="sm" fontWeight="semibold">
-            {t("Choose challenge type")}
+            {t("Choose quest type")}
           </Text>
         </VStack>
       ),
@@ -772,7 +772,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       isComplete: false,
       prompt: (
         <Text textStyle="sm" fontWeight="semibold">
-          {t("Review your challenge")}
+          {t("Review your quest")}
         </Text>
       ),
       controls: (
@@ -787,7 +787,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
             boxShadow="sm">
             <SimpleGrid columns={{ base: 1, md: 2 }} gap="4">
               <SummaryItem
-                label={t("Choose challenge type")}
+                label={t("Choose quest type")}
                 value={t(form.kind === ChallengeKind.Stake ? "Bet" : "Sponsored")}
               />
               <SummaryItem label={t("Title (optional)")} value={form.title || t("Skip")} />

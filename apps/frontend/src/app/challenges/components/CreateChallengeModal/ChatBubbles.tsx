@@ -11,7 +11,7 @@ const AssistantAvatar = () => (
     border="1px solid"
     borderColor="border.secondary"
     p="1">
-    <Image src="/assets/images/B3MO_Rewards.png" alt="B3MO" boxSize="full" objectFit="contain" />
+    <Image src="/assets/mascot/mascot-welcoming-left-head-2.png" alt="B3MO" boxSize="full" objectFit="contain" />
   </Box>
 )
 
