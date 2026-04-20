@@ -69,7 +69,7 @@
     "rehype-sanitize": "^6.0.0",
     "swiper": "^12.1.2",
     "uuid": "^9.0.1",
-    "zustand": "^4.5.2"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@chakra-ui/cli": "^3.5.0",
