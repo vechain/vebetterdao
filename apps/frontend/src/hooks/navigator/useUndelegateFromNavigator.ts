@@ -5,6 +5,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback } from "react"
 
+import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
 import { buildClause } from "@/utils/buildClause"
 
 import { getVotesOnBlockPrefixQueryKey } from "../../api/contracts/governance/hooks/useVotesOnBlock"
@@ -41,7 +42,7 @@ const useInvalidateNavigatorQueries = () => {
     queryClient.invalidateQueries({ queryKey: getIsNavigatorQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getVot3BalanceQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getVot3UnlockedBalanceQueryKey(addr) })
-    queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators"] })
+    invalidateNavigatorQueries(queryClient)
     queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/citizens"] })
     queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/delegations"] })
     queryClient.invalidateQueries({ queryKey: getVotesOnBlockPrefixQueryKey() })
