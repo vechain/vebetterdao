@@ -123,7 +123,7 @@ The local setup includes a block explorer and indexer running against the solo n
 - Block explorer: http://localhost:8088
 - Insight: http://localhost:8086
 - Inspector: http://localhost:8087
-- Indexer API health: http://localhost:8089/actuator/health
+- Indexer API health: http://localhost:8080/actuator/health
 
 #### Indexer Commands
 
@@ -138,7 +138,7 @@ make indexer-clean   # Stop + remove indexer volumes
 | File                                             | Purpose                                                 |
 | ------------------------------------------------ | ------------------------------------------------------- |
 | `packages/contracts/docker-compose.yaml`         | Solo node + block explorer                              |
-| `packages/contracts/docker-compose.indexer.yaml` | MongoDB + indexer services                              |
+| `packages/indexer/docker-compose.yaml`           | MongoDB + indexer services                              |
 | `scripts/extract-local-config.sh`                | Extracts contract addresses from `local.ts` as env vars |
 
 #### Notes

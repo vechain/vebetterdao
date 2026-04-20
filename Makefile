@@ -14,11 +14,11 @@ solo-clean: #@ Clean Thor solo
 # Indexer
 indexer-up: #@ Start indexer (requires deployed contracts)
 	@source scripts/extract-local-config.sh && \
-		docker compose -f packages/contracts/docker-compose.indexer.yaml up -d
+		docker compose -f packages/indexer/docker-compose.yaml up -d
 indexer-down: #@ Stop indexer
-	docker compose -f packages/contracts/docker-compose.indexer.yaml down
+	docker compose -f packages/indexer/docker-compose.yaml down
 indexer-clean: #@ Clean indexer (removes volumes)
-	docker compose -f packages/contracts/docker-compose.indexer.yaml down -v
+	docker compose -f packages/indexer/docker-compose.yaml down -v --remove-orphans
 indexer-restart: #@ Restart indexer
 	make indexer-down
 	make indexer-up
