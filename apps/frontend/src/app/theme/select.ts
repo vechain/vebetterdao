@@ -19,8 +19,8 @@ export const selectSlotRecipe = defineSlotRecipe({
           },
         },
         item: {
-          _hover: {
-            bg: "bg.secondary",
+          _highlighted: {
+            bg: "card.hover",
           },
           _selected: {
             bg: "bg.secondary",
@@ -46,8 +46,8 @@ export const selectSlotRecipe = defineSlotRecipe({
           },
         },
         item: {
-          _hover: {
-            bg: "bg.secondary",
+          _highlighted: {
+            bg: "card.hover",
           },
           _selected: {
             bg: "bg.secondary",
