@@ -41,7 +41,7 @@ jobs:
           role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
@@ -162,7 +162,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Update PR comment - Destroyed
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           DESTROYED_FLAVORS: ${{ needs.destroy.outputs.destroyed_flavors }}
         with:
