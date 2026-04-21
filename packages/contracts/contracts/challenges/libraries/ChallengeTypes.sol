@@ -12,16 +12,18 @@ library ChallengeTypes {
     Private
   }
 
-  enum ThresholdMode {
-    None,
-    SplitAboveThreshold,
-    TopAboveThreshold
+  /// @notice Discriminates the two challenge mechanics.
+  /// - `MaxActions`: capped participant pool, top scorer wins after completion.
+  /// - `SplitWin`: uncapped participants, sponsored only, first-to-claim wins one of `numWinners` slots.
+  enum ChallengeType {
+    MaxActions,
+    SplitWin
   }
 
   enum ChallengeStatus {
     Pending,
     Active,
-    Finalized,
+    Completed,
     Cancelled,
     Invalid
   }
@@ -29,8 +31,8 @@ library ChallengeTypes {
   enum SettlementMode {
     None,
     TopWinners,
-    QualifiedSplit,
-    CreatorRefund
+    CreatorRefund,
+    SplitWinCompleted
   }
 
   enum ParticipantStatus {
@@ -43,11 +45,12 @@ library ChallengeTypes {
   struct CreateChallengeParams {
     ChallengeKind kind;
     ChallengeVisibility visibility;
-    ThresholdMode thresholdMode;
+    ChallengeType challengeType;
     uint256 stakeAmount;
     uint256 startRound;
     uint256 endRound;
     uint256 threshold;
+    uint256 numWinners;
     bytes32[] appIds;
     address[] invitees;
     string title;
@@ -77,7 +80,7 @@ library ChallengeTypes {
   struct Challenge {
     ChallengeKind kind;
     ChallengeVisibility visibility;
-    ThresholdMode thresholdMode;
+    ChallengeType challengeType;
     ChallengeStatus status;
     SettlementMode settlementMode;
     address creator;
@@ -85,15 +88,18 @@ library ChallengeTypes {
     uint256 startRound;
     uint256 endRound;
     uint256 threshold;
+    uint256 numWinners;
+    uint256 winnersClaimed;
+    uint256 prizePerWinner;
     bool allApps;
     uint256 totalPrize;
     uint256 bestScore;
     uint256 bestCount;
-    uint256 qualifiedCount;
     uint256 payoutsClaimed;
     address[] participants;
     address[] invited;
     address[] declined;
+    address[] winners;
     bytes32[] appIds;
     string title;
     string description;
@@ -105,7 +111,7 @@ library ChallengeTypes {
     uint256 challengeId;
     ChallengeKind kind;
     ChallengeVisibility visibility;
-    ThresholdMode thresholdMode;
+    ChallengeType challengeType;
     ChallengeStatus status;
     SettlementMode settlementMode;
     address creator;
@@ -114,15 +120,18 @@ library ChallengeTypes {
     uint256 endRound;
     uint256 duration;
     uint256 threshold;
+    uint256 numWinners;
+    uint256 winnersClaimed;
+    uint256 prizePerWinner;
     bool allApps;
     uint256 totalPrize;
     uint256 participantCount;
     uint256 invitedCount;
     uint256 declinedCount;
     uint256 selectedAppsCount;
+    uint256 winnersCount;
     uint256 bestScore;
     uint256 bestCount;
-    uint256 qualifiedCount;
     uint256 payoutsClaimed;
     string title;
     string description;

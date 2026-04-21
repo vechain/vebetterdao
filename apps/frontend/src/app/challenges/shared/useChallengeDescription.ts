@@ -1,14 +1,14 @@
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-import { ChallengeKind, ChallengeStatus, ChallengeView, ThresholdMode } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeStatus, ChallengeType, ChallengeView } from "@/api/challenges/types"
 
 export const useChallengeDescription = (challenge: ChallengeView): string => {
   const { t } = useTranslation()
 
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isStake = challenge.kind === ChallengeKind.Stake
-  const isSplit = isSponsored && challenge.thresholdMode === ThresholdMode.SplitAboveThreshold
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
 
   // For Stake quests, the user's own stake adds to the pool when they join.
   // Once joined, totalPrize already includes their stake, so the win amount is just totalPrize.
@@ -16,30 +16,34 @@ export const useChallengeDescription = (challenge: ChallengeView): string => {
   const stakeAmountNum = Number(challenge.stakeAmount)
   const prizeAfterIJoin = isStake ? totalPrizeNum + stakeAmountNum : totalPrizeNum
 
-  // For Sponsored Split quests, prize is divided across qualified winners.
-  // Pre-finalization we estimate using participantCount; +1 if the user would be a new participant.
-  const splitDivisor = Math.max(challenge.participantCount + (challenge.isJoined ? 0 : 1), 1)
-  const perWinnerCurrent = Math.floor(totalPrizeNum / Math.max(challenge.participantCount, 1))
-  const perWinnerAfterIJoin = Math.floor(prizeAfterIJoin / splitDivisor)
-
   const prizeLabel = humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")
   const potentialLabel = humanNumber(prizeAfterIJoin, prizeAfterIJoin, "B3TR")
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
-  const perWinnerCurrentLabel = humanNumber(perWinnerCurrent, perWinnerCurrent, "B3TR")
-  const perWinnerAfterIJoinLabel = humanNumber(perWinnerAfterIJoin, perWinnerAfterIJoin, "B3TR")
+  const perWinnerLabel = isSplitWin
+    ? humanNumber(challenge.prizePerWinner, challenge.prizePerWinner, "B3TR")
+    : prizeLabel
   const maxLabel = humanNumber(challenge.maxParticipants)
+  const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
 
   if (challenge.canClaim) return t("You won! {{prize}} is yours — claim your prize now.", { prize: prizeLabel })
+  if (challenge.canClaimSplitWin)
+    return t("You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.", {
+      prize: perWinnerLabel,
+      slots: slotsLeft,
+    })
   if (challenge.canRefund)
     return t("Quest ended — your {{stake}} stake is ready to be refunded.", { stake: stakeLabel })
-  if (challenge.status === ChallengeStatus.Finalized)
+  if (challenge.canClaimCreatorSplitWinRefund)
+    return t("{{slots}} slots went unclaimed — refund the unused pool.", { slots: slotsLeft })
+  if (challenge.status === ChallengeStatus.Completed)
     return t("Quest complete — {{prize}} has been distributed to the winners.", { prize: prizeLabel })
   if (challenge.status === ChallengeStatus.Cancelled) return t("This quest was cancelled. Stakes have been refunded.")
   if (challenge.isJoined) {
-    if (isSplit)
-      return t("You're in! Compete for up to {{prize}} per winner — {{duration}} rounds to prove yourself.", {
-        prize: perWinnerCurrentLabel,
-        duration: challenge.duration,
+    if (isSplitWin)
+      return t("You're in! Reach {{threshold}} actions to claim {{prize}} — {{slots}} slots remaining.", {
+        threshold: challenge.threshold,
+        prize: perWinnerLabel,
+        slots: slotsLeft,
       })
     if (isSponsored)
       return t("You're in! Compete for {{prize}} — {{duration}} rounds to prove yourself.", {
@@ -53,9 +57,10 @@ export const useChallengeDescription = (challenge: ChallengeView): string => {
     })
   }
   if (challenge.canAccept) {
-    if (isSplit)
-      return t("You've been invited! Up to {{prize}} per winner — accept and join the action.", {
-        prize: perWinnerAfterIJoinLabel,
+    if (isSplitWin)
+      return t("You've been invited! Reach {{threshold}} actions to claim {{prize}}.", {
+        threshold: challenge.threshold,
+        prize: perWinnerLabel,
       })
     if (isSponsored)
       return t("You've been invited! {{prize}} up for grabs — accept and join the action.", { prize: prizeLabel })
@@ -64,11 +69,12 @@ export const useChallengeDescription = (challenge: ChallengeView): string => {
       prize: potentialLabel,
     })
   }
-  if (isSplit)
-    return t(
-      "Up to {{prize}} per winner — {{max}} slots, {{duration}} rounds. No stake needed, just bring your A-game.",
-      { prize: perWinnerAfterIJoinLabel, max: maxLabel, duration: challenge.duration },
-    )
+  if (isSplitWin)
+    return t("{{prize}} per winner — {{winners}} slots, reach {{threshold}} actions to claim. No stake needed.", {
+      prize: perWinnerLabel,
+      winners: challenge.numWinners,
+      threshold: challenge.threshold,
+    })
   if (isSponsored)
     return t("{{prize}} up for grabs — {{max}} slots, {{duration}} rounds. No stake needed, just bring your A-game.", {
       prize: prizeLabel,

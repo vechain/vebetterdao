@@ -16,8 +16,8 @@ const PRIMARY_WINNER_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68"
 const SECONDARY_WINNER_ADDRESS = "0x0F872421Dc479F3c11eDd89512731814D0598dB5"
 
 const ChallengeKind = { Sponsored: 1 } as const
-const ChallengeVisibility = { Public: 0 } as const
-const ThresholdMode = { None: 0, SplitAboveThreshold: 1 } as const
+const ChallengeVisibility = { Public: 0, Private: 1 } as const
+const ChallengeType = { MaxActions: 0, SplitWin: 1 } as const
 
 type WinnerMode = "max" | "split"
 
@@ -26,8 +26,10 @@ type ChallengePlan = {
   startRound: number
   endRound: number
   appIds: string[]
-  thresholdMode: number
+  visibility: number
+  challengeType: number
   threshold: number
+  numWinners: number
   winnerMode: WinnerMode
 }
 
@@ -255,15 +257,18 @@ async function main() {
 
   const selectedAppIds = allAppIds.slice(0, SELECTED_APP_COUNT)
 
-  // All challenges start next round; keep only the original duration differences.
+  // Sponsored Public is restricted to Split Win; Sponsored Private supports both. Use Private + MaxActions
+  // for the Max Actions plans and Public + SplitWin for the Split Win plans.
   const challengePlans: ChallengePlan[] = [
     {
       label: "MaxActions/1Round/5Apps",
       startRound: baseStartRound,
       endRound: baseStartRound,
       appIds: selectedAppIds,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       threshold: 0,
+      numWinners: 0,
       winnerMode: "max",
     },
     {
@@ -271,8 +276,10 @@ async function main() {
       startRound: baseStartRound,
       endRound: baseStartRound + 3,
       appIds: selectedAppIds,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       threshold: 0,
+      numWinners: 0,
       winnerMode: "max",
     },
     {
@@ -280,26 +287,32 @@ async function main() {
       startRound: baseStartRound,
       endRound: baseStartRound + 3,
       appIds: [],
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       threshold: 0,
+      numWinners: 0,
       winnerMode: "max",
     },
     {
-      label: "SplitPrize/4Rounds/AllApps",
+      label: "SplitWin/4Rounds/AllApps",
       startRound: baseStartRound,
       endRound: baseStartRound + 3,
       appIds: [],
-      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
       threshold: SPLIT_THRESHOLD,
+      numWinners: 2,
       winnerMode: "split",
     },
     {
-      label: "SplitPrize/4Rounds/5Apps",
+      label: "SplitWin/4Rounds/5Apps",
       startRound: baseStartRound,
       endRound: baseStartRound + 3,
       appIds: selectedAppIds,
-      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
       threshold: SPLIT_THRESHOLD,
+      numWinners: 2,
       winnerMode: "split",
     },
   ]
@@ -336,16 +349,20 @@ async function main() {
   )
 
   for (const plan of challengePlans) {
+    // Private MaxActions plans need explicit invitees; Public SplitWin plans accept anyone.
+    const planInvitees = plan.visibility === ChallengeVisibility.Private ? joiners.map(j => j.address) : []
+
     const tx = await challenges.createChallenge({
       kind: ChallengeKind.Sponsored,
-      visibility: ChallengeVisibility.Public,
-      thresholdMode: plan.thresholdMode,
+      visibility: plan.visibility,
+      challengeType: plan.challengeType,
       stakeAmount: SPONSORED_AMOUNT,
       startRound: plan.startRound,
       endRound: plan.endRound,
       threshold: plan.threshold,
+      numWinners: plan.numWinners,
       appIds: plan.appIds,
-      invitees: [],
+      invitees: planInvitees,
       title: "",
       description: "",
       imageURI: "",
@@ -409,11 +426,12 @@ async function main() {
     const tx = await extraChallenges.createChallenge({
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Public,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.SplitWin,
       stakeAmount: SPONSORED_AMOUNT,
       startRound: baseStartRound,
       endRound: baseStartRound,
-      threshold: 0,
+      threshold: 1,
+      numWinners: 1,
       appIds: [],
       invitees: [],
       title: "",

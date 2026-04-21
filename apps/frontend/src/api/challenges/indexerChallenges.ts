@@ -6,11 +6,11 @@ import {
   ChallengeKind,
   ChallengeSection,
   ChallengeStatus,
+  ChallengeType,
   ChallengeView,
   ChallengeVisibility,
   ParticipantStatus,
   SettlementMode,
-  ThresholdMode,
 } from "./types"
 
 type Pagination = {
@@ -26,7 +26,7 @@ type PaginatedResponse<T> = {
 type ChallengeUiEnum =
   | keyof typeof ChallengeKind
   | keyof typeof ChallengeVisibility
-  | keyof typeof ThresholdMode
+  | keyof typeof ChallengeType
   | keyof typeof ChallengeStatus
   | keyof typeof SettlementMode
   | keyof typeof ParticipantStatus
@@ -36,7 +36,7 @@ type RawChallengeView = {
   createdAt: number
   kind: ChallengeUiEnum | number
   visibility: ChallengeUiEnum | number
-  thresholdMode: ChallengeUiEnum | number
+  challengeType: ChallengeUiEnum | number
   status: ChallengeUiEnum | number
   settlementMode: ChallengeUiEnum | number
   creator: string
@@ -50,16 +50,21 @@ type RawChallengeView = {
   endRound: number
   duration: number
   threshold: string
+  numWinners: number
+  winnersClaimed: number
+  prizePerWinner: string
   allApps: boolean
   participantCount: number
   maxParticipants: number
   invitedCount: number
   declinedCount: number
   selectedAppsCount: number
+  winnersCount: number
   viewerStatus: ChallengeUiEnum | number
   isCreator: boolean
   isJoined: boolean
   isInvitationPending: boolean
+  isSplitWinWinner: boolean
   canJoin: boolean
   canLeave: boolean
   canAccept: boolean
@@ -68,7 +73,9 @@ type RawChallengeView = {
   canAddInvites: boolean
   canClaim: boolean
   canRefund: boolean
-  canFinalize: boolean
+  canComplete: boolean
+  canClaimSplitWin: boolean
+  canClaimCreatorSplitWinRefund: boolean
 }
 
 const SECTION_PAGE_SIZE: Record<ChallengeSection, number> = {
@@ -89,16 +96,15 @@ const challengeVisibilityMap = {
   Private: ChallengeVisibility.Private,
 } as const
 
-const thresholdModeMap = {
-  None: ThresholdMode.None,
-  SplitAboveThreshold: ThresholdMode.SplitAboveThreshold,
-  TopAboveThreshold: ThresholdMode.TopAboveThreshold,
+const challengeTypeMap = {
+  MaxActions: ChallengeType.MaxActions,
+  SplitWin: ChallengeType.SplitWin,
 } as const
 
 const challengeStatusMap = {
   Pending: ChallengeStatus.Pending,
   Active: ChallengeStatus.Active,
-  Finalized: ChallengeStatus.Finalized,
+  Completed: ChallengeStatus.Completed,
   Cancelled: ChallengeStatus.Cancelled,
   Invalid: ChallengeStatus.Invalid,
 } as const
@@ -106,8 +112,8 @@ const challengeStatusMap = {
 const settlementModeMap = {
   None: SettlementMode.None,
   TopWinners: SettlementMode.TopWinners,
-  QualifiedSplit: SettlementMode.QualifiedSplit,
   CreatorRefund: SettlementMode.CreatorRefund,
+  SplitWinCompleted: SettlementMode.SplitWinCompleted,
 } as const
 
 const participantStatusMap = {
@@ -127,7 +133,7 @@ export const mapIndexerChallengeView = (challenge: RawChallengeView): ChallengeV
   createdAt: challenge.createdAt,
   kind: normalizeEnum(challenge.kind, challengeKindMap, ChallengeKind.Stake),
   visibility: normalizeEnum(challenge.visibility, challengeVisibilityMap, ChallengeVisibility.Public),
-  thresholdMode: normalizeEnum(challenge.thresholdMode, thresholdModeMap, ThresholdMode.None),
+  challengeType: normalizeEnum(challenge.challengeType, challengeTypeMap, ChallengeType.MaxActions),
   status: normalizeEnum(challenge.status, challengeStatusMap, ChallengeStatus.Pending),
   settlementMode: normalizeEnum(challenge.settlementMode, settlementModeMap, SettlementMode.None),
   creator: challenge.creator,
@@ -141,16 +147,21 @@ export const mapIndexerChallengeView = (challenge: RawChallengeView): ChallengeV
   endRound: challenge.endRound,
   duration: challenge.duration,
   threshold: challenge.threshold,
+  numWinners: challenge.numWinners,
+  winnersClaimed: challenge.winnersClaimed,
+  prizePerWinner: challenge.prizePerWinner,
   allApps: challenge.allApps,
   participantCount: challenge.participantCount,
   maxParticipants: challenge.maxParticipants,
   invitedCount: challenge.invitedCount,
   declinedCount: challenge.declinedCount,
   selectedAppsCount: challenge.selectedAppsCount,
+  winnersCount: challenge.winnersCount,
   viewerStatus: normalizeEnum(challenge.viewerStatus, participantStatusMap, ParticipantStatus.None),
   isCreator: challenge.isCreator,
   isJoined: challenge.isJoined,
   isInvitationPending: challenge.isInvitationPending,
+  isSplitWinWinner: challenge.isSplitWinWinner,
   canJoin: challenge.canJoin,
   canLeave: challenge.canLeave,
   canAccept: challenge.canAccept,
@@ -159,7 +170,9 @@ export const mapIndexerChallengeView = (challenge: RawChallengeView): ChallengeV
   canAddInvites: challenge.canAddInvites,
   canClaim: challenge.canClaim,
   canRefund: challenge.canRefund,
-  canFinalize: challenge.canFinalize,
+  canComplete: challenge.canComplete,
+  canClaimSplitWin: challenge.canClaimSplitWin,
+  canClaimCreatorSplitWinRefund: challenge.canClaimCreatorSplitWinRefund,
 })
 
 const fetchChallengeSection = async (

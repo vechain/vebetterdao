@@ -6,7 +6,7 @@ import { Group } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { type ChallengeDetail, ChallengeKind, ChallengeStatus, ThresholdMode } from "@/api/challenges/types"
+import { type ChallengeDetail, ChallengeKind, ChallengeStatus, ChallengeType } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 
 import { AddChallengeInvitesModal } from "../../shared/AddChallengeInvitesModal"
@@ -37,21 +37,17 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
 
   const isPending = challenge.status === ChallengeStatus.Pending
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const threshold = Number(challenge.threshold)
-  const hasThreshold = isSponsored && challenge.thresholdMode !== ThresholdMode.None && threshold > 0
   const showTrophy = !isPending
 
   const winCondition = useMemo(() => {
+    if (isSplitWin) return t("Reach {{threshold}} actions and claim a slot before they run out", { threshold })
+
     if (!isSponsored) return t("Top scorer wins the entire prize pool")
 
-    if (hasThreshold && challenge.thresholdMode === ThresholdMode.SplitAboveThreshold)
-      return t("Complete {{count}} actions to qualify and split the prize", { count: threshold })
-
-    if (hasThreshold && challenge.thresholdMode === ThresholdMode.TopAboveThreshold)
-      return t("Top scorer among those with {{count}}+ actions wins", { count: threshold })
-
     return t("Top scorer wins the prize")
-  }, [isSponsored, hasThreshold, challenge.thresholdMode, threshold, t])
+  }, [isSponsored, isSplitWin, threshold, t])
 
   const { data, isLoading } = useChallengeParticipantActions(challenge.challengeId, challenge.participants)
 

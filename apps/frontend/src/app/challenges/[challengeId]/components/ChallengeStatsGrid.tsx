@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { FiInfo } from "react-icons/fi"
 import { LuChevronRight, LuClock, LuLayoutGrid, LuScale } from "react-icons/lu"
 
-import { ChallengeDetail, ChallengeKind, ThresholdMode } from "@/api/challenges/types"
+import { ChallengeDetail, ChallengeKind, ChallengeType } from "@/api/challenges/types"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AppImage } from "@/components/AppImage/AppImage"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
@@ -27,10 +27,11 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
     [appsData?.allApps],
   )
 
-  const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isStake = challenge.kind === ChallengeKind.Stake
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const threshold = Number(challenge.threshold)
-  const hasThreshold = isSponsored && challenge.thresholdMode !== ThresholdMode.None && threshold > 0
+  const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
+  const perWinnerLabel = humanNumber(challenge.prizePerWinner, challenge.prizePerWinner, "B3TR")
 
   const { ruleLabel, ruleDetail, ruleTooltip } = useMemo(() => {
     if (isStake)
@@ -40,18 +41,14 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
         ruleTooltip: t("Each participant bets the same amount. Top scorer wins the entire prize pool."),
       }
 
-    if (hasThreshold && challenge.thresholdMode === ThresholdMode.SplitAboveThreshold)
+    if (isSplitWin)
       return {
-        ruleLabel: t("Prize split"),
-        ruleDetail: t("{{count}}+ actions to qualify", { count: threshold }),
-        ruleTooltip: t("Split above threshold description"),
-      }
-
-    if (hasThreshold && challenge.thresholdMode === ThresholdMode.TopAboveThreshold)
-      return {
-        ruleLabel: t("Top scorer wins"),
-        ruleDetail: t("{{count}}+ actions required", { count: threshold }),
-        ruleTooltip: t("Top above threshold description"),
+        ruleLabel: t("Split win"),
+        ruleDetail: t("{{prize}} per winner — {{count}}+ actions to claim", {
+          prize: perWinnerLabel,
+          count: threshold,
+        }),
+        ruleTooltip: t("Split win description"),
       }
 
     return {
@@ -59,7 +56,7 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
       ruleDetail: t("No entry fee"),
       ruleTooltip: t("Top scorer wins the entire prize pool"),
     }
-  }, [isStake, hasThreshold, challenge.thresholdMode, challenge.stakeAmount, threshold, t])
+  }, [isStake, isSplitWin, challenge.stakeAmount, perWinnerLabel, threshold, t])
 
   const roundsLabel =
     challenge.duration === 1
@@ -75,7 +72,7 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
   return (
     <>
       <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }} gap={{ base: 2, md: 3 }} w="full">
-        {/* Prize — full width on mobile */}
+        {/* Prize Pool */}
         <GridItem>
           <Card.Root variant="outline" p={{ base: 2, md: 4 }} h="full">
             <Card.Body>
@@ -95,14 +92,43 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
                     flexShrink={0}>
                     <Icon as={B3trSvg} boxSize={{ base: 4, md: 5 }} />
                   </HStack>
-                  <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold" color="brand.primary">
-                    {humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
-                  </Text>
+                  <Flex direction="column">
+                    <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold" color="brand.primary">
+                      {humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
+                    </Text>
+                    {isSplitWin && (
+                      <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
+                        {t("split across {{count}} winners", { count: challenge.numWinners })}
+                      </Text>
+                    )}
+                  </Flex>
                 </HStack>
               </Flex>
             </Card.Body>
           </Card.Root>
         </GridItem>
+
+        {isSplitWin && (
+          <GridItem>
+            <Card.Root variant="outline" p={{ base: 2, md: 4 }} h="full">
+              <Card.Body>
+                <Flex direction="column" justify="space-between" h={{ base: "full", md: "auto" }} flex={1}>
+                  <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={2}>
+                    {t("Winners")}
+                  </Text>
+                  <Flex direction="column">
+                    <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
+                      {humanNumber(challenge.winnersClaimed)} {"/"} {humanNumber(challenge.numWinners)}
+                    </Text>
+                    <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
+                      {t("{{remaining}} slots left", { remaining: slotsLeft })}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Card.Body>
+            </Card.Root>
+          </GridItem>
+        )}
 
         {/* Rule */}
         <GridItem>

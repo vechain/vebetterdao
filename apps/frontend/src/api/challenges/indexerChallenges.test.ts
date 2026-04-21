@@ -2,10 +2,10 @@ import { mapIndexerChallengeView } from "./indexerChallenges"
 import {
   ChallengeKind,
   ChallengeStatus,
+  ChallengeType,
   ChallengeVisibility,
   ParticipantStatus,
   SettlementMode,
-  ThresholdMode,
 } from "./types"
 
 describe("mapIndexerChallengeView", () => {
@@ -14,10 +14,10 @@ describe("mapIndexerChallengeView", () => {
       challengeId: 1,
       createdAt: 123,
       kind: "Sponsored",
-      visibility: "Private",
-      thresholdMode: "SplitAboveThreshold",
-      status: "Finalized",
-      settlementMode: "QualifiedSplit",
+      visibility: "Public",
+      challengeType: "SplitWin",
+      status: "Completed",
+      settlementMode: "SplitWinCompleted",
       creator: "0xabc",
       title: "Spring sprint",
       description: "",
@@ -29,34 +29,45 @@ describe("mapIndexerChallengeView", () => {
       endRound: 5,
       duration: 4,
       threshold: "3",
+      numWinners: 5,
+      winnersClaimed: 5,
+      prizePerWinner: "200",
       allApps: false,
       participantCount: 10,
       maxParticipants: 100,
-      invitedCount: 2,
-      declinedCount: 1,
+      invitedCount: 0,
+      declinedCount: 0,
       selectedAppsCount: 5,
-      viewerStatus: "Declined",
+      winnersCount: 5,
+      viewerStatus: "Joined",
       isCreator: false,
-      isJoined: false,
-      isInvitationPending: true,
+      isJoined: true,
+      isInvitationPending: false,
+      isSplitWinWinner: true,
       canJoin: false,
       canLeave: false,
-      canAccept: true,
+      canAccept: false,
       canDecline: false,
       canCancel: false,
       canAddInvites: false,
       canClaim: false,
       canRefund: false,
-      canFinalize: false,
+      canComplete: false,
+      canClaimSplitWin: false,
+      canClaimCreatorSplitWinRefund: false,
     })
 
     expect(view.kind).toBe(ChallengeKind.Sponsored)
-    expect(view.visibility).toBe(ChallengeVisibility.Private)
-    expect(view.thresholdMode).toBe(ThresholdMode.SplitAboveThreshold)
-    expect(view.status).toBe(ChallengeStatus.Finalized)
-    expect(view.settlementMode).toBe(SettlementMode.QualifiedSplit)
-    expect(view.viewerStatus).toBe(ParticipantStatus.Declined)
+    expect(view.visibility).toBe(ChallengeVisibility.Public)
+    expect(view.challengeType).toBe(ChallengeType.SplitWin)
+    expect(view.status).toBe(ChallengeStatus.Completed)
+    expect(view.settlementMode).toBe(SettlementMode.SplitWinCompleted)
+    expect(view.viewerStatus).toBe(ParticipantStatus.Joined)
     expect(view.title).toBe("Spring sprint")
+    expect(view.numWinners).toBe(5)
+    expect(view.winnersClaimed).toBe(5)
+    expect(view.prizePerWinner).toBe("200")
+    expect(view.isSplitWinWinner).toBe(true)
   })
 
   it("keeps numeric enum payloads unchanged", () => {
@@ -64,8 +75,8 @@ describe("mapIndexerChallengeView", () => {
       challengeId: 2,
       createdAt: 456,
       kind: ChallengeKind.Stake,
-      visibility: ChallengeVisibility.Public,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       status: ChallengeStatus.Pending,
       settlementMode: SettlementMode.None,
       creator: "0xdef",
@@ -79,16 +90,21 @@ describe("mapIndexerChallengeView", () => {
       endRound: 2,
       duration: 2,
       threshold: "0",
+      numWinners: 0,
+      winnersClaimed: 0,
+      prizePerWinner: "0",
       allApps: true,
       participantCount: 1,
       maxParticipants: 100,
       invitedCount: 0,
       declinedCount: 0,
       selectedAppsCount: 0,
+      winnersCount: 0,
       viewerStatus: ParticipantStatus.None,
       isCreator: true,
       isJoined: false,
       isInvitationPending: false,
+      isSplitWinWinner: false,
       canJoin: false,
       canLeave: false,
       canAccept: false,
@@ -97,11 +113,14 @@ describe("mapIndexerChallengeView", () => {
       canAddInvites: false,
       canClaim: false,
       canRefund: false,
-      canFinalize: false,
+      canComplete: false,
+      canClaimSplitWin: false,
+      canClaimCreatorSplitWinRefund: false,
     })
 
     expect(view.kind).toBe(ChallengeKind.Stake)
     expect(view.status).toBe(ChallengeStatus.Pending)
     expect(view.viewerStatus).toBe(ParticipantStatus.None)
+    expect(view.challengeType).toBe(ChallengeType.MaxActions)
   })
 })

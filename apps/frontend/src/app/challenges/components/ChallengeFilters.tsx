@@ -17,7 +17,7 @@ const STATUS_OPTIONS = [
   { value: "all" as const, labelKey: "All" as const },
   { value: ChallengeStatus.Pending, labelKey: "Pending" as const },
   { value: ChallengeStatus.Active, labelKey: "Active" as const },
-  { value: ChallengeStatus.Finalized, labelKey: "Finalized" as const },
+  { value: ChallengeStatus.Completed, labelKey: "Completed" as const },
   { value: ChallengeStatus.Cancelled, labelKey: "Cancelled" as const },
 ]
 

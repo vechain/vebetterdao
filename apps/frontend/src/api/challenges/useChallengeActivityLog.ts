@@ -22,8 +22,10 @@ export type ActivityEntryType =
   | "cancelled"
   | "activated"
   | "invalidated"
-  | "finalized"
+  | "completed"
   | "payoutClaimed"
+  | "splitWinPrizeClaimed"
+  | "splitWinCreatorRefunded"
   | "refundClaimed"
 
 export interface ChallengeActivityEntry {
@@ -35,7 +37,6 @@ export interface ChallengeActivityEntry {
   amount?: string
   settlementMode?: SettlementMode
   bestCount?: number
-  qualifiedCount?: number
 }
 
 const useEventForChallenge = <K extends ContractEventName<ChallengesAbi>>(
@@ -65,8 +66,10 @@ export const useChallengeActivityLog = (challenge: ChallengeDetail) => {
   const cancelled = useEventForChallenge("ChallengeCancelled", challengeId, enabled)
   const activated = useEventForChallenge("ChallengeActivated", challengeId, enabled)
   const invalidated = useEventForChallenge("ChallengeInvalidated", challengeId, enabled)
-  const finalized = useEventForChallenge("ChallengeFinalized", challengeId, enabled)
+  const completed = useEventForChallenge("ChallengeCompleted", challengeId, enabled)
   const payoutClaimed = useEventForChallenge("ChallengePayoutClaimed", challengeId, enabled)
+  const splitWinPrizeClaimed = useEventForChallenge("SplitWinPrizeClaimed", challengeId, enabled)
+  const splitWinCreatorRefunded = useEventForChallenge("SplitWinCreatorRefunded", challengeId, enabled)
   const refundClaimed = useEventForChallenge("ChallengeRefundClaimed", challengeId, enabled)
 
   const allQueries = [
@@ -78,8 +81,10 @@ export const useChallengeActivityLog = (challenge: ChallengeDetail) => {
     cancelled,
     activated,
     invalidated,
-    finalized,
+    completed,
     payoutClaimed,
+    splitWinPrizeClaimed,
+    splitWinCreatorRefunded,
     refundClaimed,
   ]
 
@@ -190,20 +195,18 @@ export const useChallengeActivityLog = (challenge: ChallengeDetail) => {
       })
     }
 
-    for (const e of finalized.data ?? []) {
+    for (const e of completed.data ?? []) {
       const args = e.decodedData.args as {
         settlementMode: number
         bestCount: bigint
-        qualifiedCount: bigint
       }
       items.push({
-        id: `${e.meta.txID}-finalized`,
-        type: "finalized",
+        id: `${e.meta.txID}-completed`,
+        type: "completed",
         blockNumber: e.meta.blockNumber,
         timestamp: e.meta.blockTimestamp,
         settlementMode: args.settlementMode as SettlementMode,
         bestCount: Number(args.bestCount),
-        qualifiedCount: Number(args.qualifiedCount),
       })
     }
 
@@ -215,6 +218,30 @@ export const useChallengeActivityLog = (challenge: ChallengeDetail) => {
         blockNumber: e.meta.blockNumber,
         timestamp: e.meta.blockTimestamp,
         address: args.account,
+        amount: formatEther(args.amount),
+      })
+    }
+
+    for (const e of splitWinPrizeClaimed.data ?? []) {
+      const args = e.decodedData.args as { winner: string; prize: bigint }
+      items.push({
+        id: `${e.meta.txID}-splitwin-prize-${args.winner}`,
+        type: "splitWinPrizeClaimed",
+        blockNumber: e.meta.blockNumber,
+        timestamp: e.meta.blockTimestamp,
+        address: args.winner,
+        amount: formatEther(args.prize),
+      })
+    }
+
+    for (const e of splitWinCreatorRefunded.data ?? []) {
+      const args = e.decodedData.args as { creator: string; amount: bigint }
+      items.push({
+        id: `${e.meta.txID}-splitwin-refund-${args.creator}`,
+        type: "splitWinCreatorRefunded",
+        blockNumber: e.meta.blockNumber,
+        timestamp: e.meta.blockTimestamp,
+        address: args.creator,
         amount: formatEther(args.amount),
       })
     }
@@ -244,8 +271,10 @@ export const useChallengeActivityLog = (challenge: ChallengeDetail) => {
     cancelled.data,
     activated.data,
     invalidated.data,
-    finalized.data,
+    completed.data,
     payoutClaimed.data,
+    splitWinPrizeClaimed.data,
+    splitWinCreatorRefunded.data,
     refundClaimed.data,
     stakeDisplay,
     challenge.status,

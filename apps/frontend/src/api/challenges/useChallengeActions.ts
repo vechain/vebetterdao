@@ -18,11 +18,12 @@ const B3TRInterface = B3TR__factory.createInterface()
 export interface CreateChallengeFormData {
   kind: number
   visibility: number
-  thresholdMode: number
+  challengeType: number
   stakeAmount: string
   startRound: number
   endRound: number
   threshold: string
+  numWinners: string
   appIds: string[]
   invitees: string[]
   title: string
@@ -38,8 +39,10 @@ type ActionParams =
   | { type: "cancel"; challengeId: number }
   | { type: "addInvites"; challengeId: number; invitees: string[] }
   | { type: "claimPayout"; challengeId: number }
+  | { type: "claimSplitWin"; challengeId: number }
+  | { type: "claimCreatorSplitWinRefund"; challengeId: number }
   | { type: "claimRefund"; challengeId: number }
-  | { type: "finalize"; challengeId: number }
+  | { type: "complete"; challengeId: number }
   | { type: "create"; form: CreateChallengeFormData }
 
 export const useChallengeActions = () => {
@@ -106,11 +109,12 @@ export const useChallengeActions = () => {
                 {
                   kind: form.kind,
                   visibility: form.visibility,
-                  thresholdMode: form.thresholdMode,
+                  challengeType: form.challengeType,
                   stakeAmount: weiAmount,
                   startRound: form.startRound,
                   endRound: form.endRound,
                   threshold: BigInt(form.threshold || "0"),
+                  numWinners: BigInt(form.numWinners || "0"),
                   appIds: form.appIds,
                   invitees: form.invitees,
                   title: form.title,
@@ -209,6 +213,28 @@ export const useChallengeActions = () => {
             }),
           ]
 
+        case "claimSplitWin":
+          return [
+            buildClause({
+              contractInterface: ChallengesInterface,
+              to: challengesAddr,
+              method: "claimSplitWinPrize",
+              args: [params.challengeId],
+              comment: `Claim Split Win slot for challenge #${params.challengeId}`,
+            }),
+          ]
+
+        case "claimCreatorSplitWinRefund":
+          return [
+            buildClause({
+              contractInterface: ChallengesInterface,
+              to: challengesAddr,
+              method: "claimCreatorSplitWinRefund",
+              args: [params.challengeId],
+              comment: `Refund unclaimed Split Win slots for challenge #${params.challengeId}`,
+            }),
+          ]
+
         case "claimRefund":
           return [
             buildClause({
@@ -220,14 +246,14 @@ export const useChallengeActions = () => {
             }),
           ]
 
-        case "finalize":
+        case "complete":
           return [
             buildClause({
               contractInterface: ChallengesInterface,
               to: challengesAddr,
-              method: "finalizeChallenge",
+              method: "completeChallenge",
               args: [params.challengeId],
-              comment: `Finalize challenge #${params.challengeId}`,
+              comment: `Complete challenge #${params.challengeId}`,
             }),
           ]
       }
@@ -255,8 +281,11 @@ export const useChallengeActions = () => {
     addInvites: (id: number, invitees: string[]) =>
       tx.sendTransaction({ type: "addInvites", challengeId: id, invitees }),
     claimChallenge: (id: number) => tx.sendTransaction({ type: "claimPayout", challengeId: id }),
+    claimSplitWinPrize: (id: number) => tx.sendTransaction({ type: "claimSplitWin", challengeId: id }),
+    claimCreatorSplitWinRefund: (id: number) =>
+      tx.sendTransaction({ type: "claimCreatorSplitWinRefund", challengeId: id }),
     refundChallenge: (id: number) => tx.sendTransaction({ type: "claimRefund", challengeId: id }),
-    finalizeChallenge: (id: number) => tx.sendTransaction({ type: "finalize", challengeId: id }),
+    completeChallenge: (id: number) => tx.sendTransaction({ type: "complete", challengeId: id }),
 
     status: tx.status,
     txReceipt: tx.txReceipt,

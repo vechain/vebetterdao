@@ -6,10 +6,10 @@ import {
 import {
   ChallengeKind,
   ChallengeStatus,
+  ChallengeType,
   ChallengeVisibility,
   ParticipantStatus,
   SettlementMode,
-  ThresholdMode,
 } from "./types"
 
 const CREATOR = "0x0000000000000000000000000000000000000001"
@@ -20,7 +20,7 @@ const createChallenge = (overrides: Partial<ChallengeDetailResolverInput> = {}):
   createdAt: 0,
   kind: ChallengeKind.Sponsored,
   visibility: ChallengeVisibility.Public,
-  thresholdMode: ThresholdMode.None,
+  challengeType: ChallengeType.SplitWin,
   status: ChallengeStatus.Pending,
   settlementMode: SettlementMode.None,
   creator: CREATOR,
@@ -33,27 +33,32 @@ const createChallenge = (overrides: Partial<ChallengeDetailResolverInput> = {}):
   startRound: 5,
   endRound: 7,
   duration: 3,
-  threshold: "0",
+  threshold: "5",
+  numWinners: 2,
+  winnersClaimed: 0,
+  prizePerWinner: "50",
   allApps: true,
   participantCount: 0,
   invitedCount: 0,
   declinedCount: 0,
   selectedAppsCount: 0,
+  winnersCount: 0,
   bestScore: "0",
   bestCount: 0,
-  qualifiedCount: 0,
   payoutsClaimed: 0,
   participants: [],
   invited: [],
   declined: [],
   selectedApps: [],
+  winners: [],
   viewerStatus: ParticipantStatus.None,
   isInvitationEligible: false,
+  isSplitWinWinner: false,
   ...overrides,
 })
 
 describe("resolveChallengeDetail", () => {
-  it("allows joining a public pending challenge when the viewer is eligible", () => {
+  it("allows joining a public pending Split Win challenge when the viewer is eligible", () => {
     const detail = resolveChallengeDetail({
       challenge: createChallenge(),
       viewerAddress: VIEWER,
@@ -65,7 +70,7 @@ describe("resolveChallengeDetail", () => {
 
     expect(detail.canJoin).toBe(true)
     expect(detail.canAccept).toBe(false)
-    expect(detail.canFinalize).toBe(false)
+    expect(detail.canComplete).toBe(false)
   })
 
   it("allows re-accepting a declined private invite", () => {
@@ -87,9 +92,13 @@ describe("resolveChallengeDetail", () => {
     expect(detail.canDecline).toBe(false)
   })
 
-  it("allows finalization after the end round for a participant", () => {
+  it("allows completion after the end round for a participant of a Max Actions challenge", () => {
     const detail = resolveChallengeDetail({
       challenge: createChallenge({
+        challengeType: ChallengeType.MaxActions,
+        threshold: "0",
+        numWinners: 0,
+        prizePerWinner: "0",
         status: ChallengeStatus.Active,
         viewerStatus: ParticipantStatus.Joined,
         participantCount: 1,
@@ -103,15 +112,31 @@ describe("resolveChallengeDetail", () => {
       hasRefunded: false,
     })
 
-    expect(detail.canFinalize).toBe(true)
+    expect(detail.canComplete).toBe(true)
   })
 
-  it("claims qualified split rewards only when the threshold is reached", () => {
+  it("does not enforce the participant cap on Split Win challenges", () => {
+    const detail = resolveChallengeDetail({
+      challenge: createChallenge({
+        participantCount: 999,
+      }),
+      viewerAddress: VIEWER,
+      currentRound: 4,
+      maxParticipants: 10,
+      hasClaimed: false,
+      hasRefunded: false,
+    })
+
+    expect(detail.canJoin).toBe(true)
+  })
+
+  it("allows Split Win claim when the viewer reaches the threshold within the active window", () => {
     const challenge = createChallenge({
-      status: ChallengeStatus.Finalized,
-      settlementMode: SettlementMode.QualifiedSplit,
-      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      status: ChallengeStatus.Active,
+      challengeType: ChallengeType.SplitWin,
       threshold: "5",
+      numWinners: 2,
+      winnersClaimed: 0,
       viewerStatus: ParticipantStatus.Joined,
       participantCount: 1,
       participants: [VIEWER],
@@ -121,30 +146,77 @@ describe("resolveChallengeDetail", () => {
       resolveChallengeDetail({
         challenge,
         viewerAddress: VIEWER,
-        currentRound: 8,
+        currentRound: 6,
         maxParticipants: 10,
         hasClaimed: false,
         hasRefunded: false,
         participantActions: 5n,
-      }).canClaim,
+      }).canClaimSplitWin,
     ).toBe(true)
 
     expect(
       resolveChallengeDetail({
         challenge,
         viewerAddress: VIEWER,
-        currentRound: 8,
+        currentRound: 6,
         maxParticipants: 10,
         hasClaimed: false,
         hasRefunded: false,
         participantActions: 4n,
-      }).canClaim,
+      }).canClaimSplitWin,
     ).toBe(false)
   })
 
-  it("claims top winner rewards only for the best score", () => {
+  it("blocks Split Win claim once all slots are taken", () => {
+    expect(
+      resolveChallengeDetail({
+        challenge: createChallenge({
+          status: ChallengeStatus.Active,
+          challengeType: ChallengeType.SplitWin,
+          threshold: "1",
+          numWinners: 1,
+          winnersClaimed: 1,
+          viewerStatus: ParticipantStatus.Joined,
+          participantCount: 1,
+          participants: [VIEWER],
+        }),
+        viewerAddress: VIEWER,
+        currentRound: 6,
+        maxParticipants: 10,
+        hasClaimed: false,
+        hasRefunded: false,
+        participantActions: 5n,
+      }).canClaimSplitWin,
+    ).toBe(false)
+  })
+
+  it("allows the Split Win creator to refund unclaimed slots after endRound", () => {
+    const detail = resolveChallengeDetail({
+      challenge: createChallenge({
+        status: ChallengeStatus.Active,
+        challengeType: ChallengeType.SplitWin,
+        threshold: "1",
+        numWinners: 3,
+        winnersClaimed: 1,
+        endRound: 7,
+      }),
+      viewerAddress: CREATOR,
+      currentRound: 9,
+      maxParticipants: 10,
+      hasClaimed: false,
+      hasRefunded: false,
+    })
+
+    expect(detail.canClaimCreatorSplitWinRefund).toBe(true)
+  })
+
+  it("claims top winner rewards only for the best score on Max Actions completed", () => {
     const challenge = createChallenge({
-      status: ChallengeStatus.Finalized,
+      challengeType: ChallengeType.MaxActions,
+      threshold: "0",
+      numWinners: 0,
+      prizePerWinner: "0",
+      status: ChallengeStatus.Completed,
       settlementMode: SettlementMode.TopWinners,
       viewerStatus: ParticipantStatus.Joined,
       participantCount: 1,
@@ -181,6 +253,11 @@ describe("resolveChallengeDetail", () => {
     const detail = resolveChallengeDetail({
       challenge: createChallenge({
         kind: ChallengeKind.Stake,
+        visibility: ChallengeVisibility.Private,
+        challengeType: ChallengeType.MaxActions,
+        threshold: "0",
+        numWinners: 0,
+        prizePerWinner: "0",
         status: ChallengeStatus.Cancelled,
         viewerStatus: ParticipantStatus.Joined,
         participantCount: 2,
@@ -214,11 +291,12 @@ describe("resolveChallengeDetail", () => {
 })
 
 describe("needsChallengeParticipantActions", () => {
-  it("requires participant actions for joined finalists that have not claimed yet", () => {
+  it("requires participant actions for joined Max Actions completed challenges that have not claimed yet", () => {
     expect(
       needsChallengeParticipantActions(
         {
-          status: ChallengeStatus.Finalized,
+          challengeType: ChallengeType.MaxActions,
+          status: ChallengeStatus.Completed,
           settlementMode: SettlementMode.TopWinners,
           viewerStatus: ParticipantStatus.Joined,
         },
@@ -231,12 +309,27 @@ describe("needsChallengeParticipantActions", () => {
     expect(
       needsChallengeParticipantActions(
         {
-          status: ChallengeStatus.Finalized,
+          challengeType: ChallengeType.MaxActions,
+          status: ChallengeStatus.Completed,
           settlementMode: SettlementMode.CreatorRefund,
           viewerStatus: ParticipantStatus.Joined,
         },
         false,
       ),
     ).toBe(false)
+  })
+
+  it("requires live participant actions for Split Win during Active so the user knows their progress", () => {
+    expect(
+      needsChallengeParticipantActions(
+        {
+          challengeType: ChallengeType.SplitWin,
+          status: ChallengeStatus.Active,
+          settlementMode: SettlementMode.None,
+          viewerStatus: ParticipantStatus.Joined,
+        },
+        false,
+      ),
+    ).toBe(true)
   })
 })

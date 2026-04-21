@@ -6,9 +6,9 @@ import { decodeEventLog, toEventSelector } from "viem"
 
 import {
   ChallengeKind,
+  ChallengeType,
   ChallengeVisibility,
   getChallengeMetadataLengthError,
-  ThresholdMode,
 } from "@/api/challenges/types"
 import { CreateChallengeFormData, useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { defaultMinBetAmount, useMinBetAmount } from "@/api/challenges/useMinBetAmount"
@@ -43,15 +43,16 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<CreateChallengeFormData>(initialForm(defaultKind, currentRound))
   const [kindChosen, setKindChosen] = useState(false)
+  const [visibilityChosen, setVisibilityChosen] = useState(false)
+  const [challengeTypeChosen, setChallengeTypeChosen] = useState(false)
+  const [typeExplainerSeen, setTypeExplainerSeen] = useState(false)
+  const [splitWinConfigConfirmed, setSplitWinConfigConfirmed] = useState(false)
   const [titleConfirmed, setTitleConfirmed] = useState(false)
   const [amountConfirmed, setAmountConfirmed] = useState(false)
   const [startRoundChosen, setStartRoundChosen] = useState(false)
   const [durationChosen, setDurationChosen] = useState(false)
-  const [winnerChosen, setWinnerChosen] = useState(false)
-  const [thresholdConfirmed, setThresholdConfirmed] = useState(false)
   const [appScope, setAppScope] = useState<AppScope | null>(null)
   const [appsConfirmed, setAppsConfirmed] = useState(false)
-  const [visibilityChosen, setVisibilityChosen] = useState(false)
   const [inviteesConfirmed, setInviteesConfirmed] = useState(false)
   const [appSearch, setAppSearch] = useState("")
   const [appResultsPage, setAppResultsPage] = useState(0)
@@ -108,15 +109,16 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const resetFlow = () => {
     setForm(initialForm(defaultKind, currentRound))
     setKindChosen(false)
+    setVisibilityChosen(false)
+    setChallengeTypeChosen(false)
+    setTypeExplainerSeen(false)
+    setSplitWinConfigConfirmed(false)
     setTitleConfirmed(false)
     setAmountConfirmed(false)
     setStartRoundChosen(false)
     setDurationChosen(false)
-    setWinnerChosen(false)
-    setThresholdConfirmed(false)
     setAppScope(null)
     setAppsConfirmed(false)
-    setVisibilityChosen(false)
     setInviteesConfirmed(false)
     setAppSearch("")
     setAppResultsPage(0)
@@ -149,10 +151,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     stakeAmountWei > BigInt(b3trBalance?.original ?? "0")
 
   const thresholdValue = Number(form.threshold || "0")
-  const hasInvalidThresholdConfiguration =
-    form.kind === ChallengeKind.Sponsored &&
-    ((thresholdValue > 0 && form.thresholdMode === ThresholdMode.None) ||
-      (form.thresholdMode === ThresholdMode.SplitAboveThreshold && thresholdValue === 0))
+  const numWinnersValue = Number(form.numWinners || "0")
 
   const minStartRound = currentRound + 1
   const hasInvalidStartRound = form.startRound <= currentRound
@@ -161,7 +160,23 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const isSponsored = form.kind === ChallengeKind.Sponsored
   const hasBelowMinimumBetAmount = stakeAmountWei > 0n && stakeAmountWei < minBetAmountWei
   const isPrivate = form.visibility === ChallengeVisibility.Private
-  const isSplitPrize = form.thresholdMode === ThresholdMode.SplitAboveThreshold
+  const isSplitWin = form.challengeType === ChallengeType.SplitWin
+
+  // The matrix forces the visibility step away on Bet (always Private) and the type step away on Bet (always
+  // MaxActions) and on Sponsored Public (always SplitWin). We keep separate "needsXxx" flags so the steps render
+  // only when the user actually has a choice to make.
+  const needsVisibilityChoice = isSponsored
+  const needsChallengeTypeChoice = isSponsored && form.visibility === ChallengeVisibility.Private
+
+  const splitWinPrizePerWinner = useMemo(() => {
+    if (!isSplitWin || numWinnersValue <= 0 || stakeAmountWei <= 0n) return 0n
+    return stakeAmountWei / BigInt(numWinnersValue)
+  }, [isSplitWin, numWinnersValue, stakeAmountWei])
+
+  const hasInvalidSplitWinConfiguration =
+    isSplitWin &&
+    (numWinnersValue <= 0 || thresholdValue <= 0 || (stakeAmountWei > 0n && stakeAmountWei < BigInt(numWinnersValue)))
+
   const metadataLengthError = useMemo(
     () =>
       getChallengeMetadataLengthError({
@@ -209,32 +224,84 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     setForm(prev => ({
       ...prev,
       kind,
-      ...(kind === ChallengeKind.Stake ? { threshold: "0", thresholdMode: ThresholdMode.None } : {}),
+      // Bet is locked to Private + MaxActions per the matrix.
+      ...(kind === ChallengeKind.Stake
+        ? {
+            visibility: ChallengeVisibility.Private,
+            challengeType: ChallengeType.MaxActions,
+            threshold: "0",
+            numWinners: "0",
+          }
+        : {
+            // Sponsored defaults to Public + SplitWin (the only Sponsored Public option).
+            visibility: ChallengeVisibility.Public,
+            challengeType: ChallengeType.SplitWin,
+          }),
     }))
     withTyping(() => {
       setKindChosen(true)
-      if (kind === ChallengeKind.Stake) {
-        setWinnerChosen(false)
-        setThresholdConfirmed(false)
-      }
+      setVisibilityChosen(false)
+      setChallengeTypeChosen(false)
+      setTypeExplainerSeen(false)
+      setSplitWinConfigConfirmed(false)
     })
   }
 
-  const setWinnerMode = (splitPrize: boolean) => {
+  const chooseVisibility = (value: ChallengeVisibility) => {
     setForm(prev => ({
       ...prev,
-      thresholdMode: splitPrize ? ThresholdMode.SplitAboveThreshold : ThresholdMode.None,
-      threshold: splitPrize ? (prev.threshold === "0" ? "1" : prev.threshold) : "0",
+      visibility: value,
+      // Sponsored Public must be SplitWin; Private resets to MaxActions and clears any previous splitwin choice.
+      ...(value === ChallengeVisibility.Public
+        ? { challengeType: ChallengeType.SplitWin }
+        : { challengeType: ChallengeType.MaxActions, threshold: "0", numWinners: "0" }),
+      ...(value === ChallengeVisibility.Public ? { invitees: [] } : {}),
     }))
     withTyping(() => {
-      setWinnerChosen(true)
-      if (!splitPrize) setThresholdConfirmed(false)
+      setVisibilityChosen(true)
+      setChallengeTypeChosen(false)
+      setTypeExplainerSeen(false)
+      setSplitWinConfigConfirmed(false)
+      if (value === ChallengeVisibility.Public) setInviteesConfirmed(false)
     })
+  }
+
+  const setChallengeTypeChoice = (challengeType: number) => {
+    setForm(prev => ({
+      ...prev,
+      challengeType,
+      // Switching to MaxActions clears SplitWin-only fields; SplitWin defaults the threshold to 1.
+      ...(challengeType === ChallengeType.MaxActions
+        ? { threshold: "0", numWinners: "0" }
+        : {
+            threshold: prev.threshold === "0" ? "1" : prev.threshold,
+            numWinners: prev.numWinners === "0" ? "1" : prev.numWinners,
+          }),
+    }))
+    withTyping(() => {
+      setChallengeTypeChosen(true)
+      setTypeExplainerSeen(false)
+      setSplitWinConfigConfirmed(false)
+    })
+  }
+
+  const acknowledgeTypeExplainer = () => {
+    withTyping(() => setTypeExplainerSeen(true))
   }
 
   const updateThreshold = (value: string) => {
     update("threshold", normalizeInteger(value))
-    setThresholdConfirmed(false)
+    setSplitWinConfigConfirmed(false)
+  }
+
+  const updateNumWinners = (value: string) => {
+    update("numWinners", normalizeInteger(value))
+    setSplitWinConfigConfirmed(false)
+  }
+
+  const confirmSplitWinConfig = () => {
+    if (hasInvalidSplitWinConfiguration) return
+    withTyping(() => setSplitWinConfigConfirmed(true))
   }
 
   const updateTitle = (value: string) => {
@@ -309,17 +376,6 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     }
   }
 
-  const chooseVisibility = (value: ChallengeVisibility) => {
-    update("visibility", value)
-    withTyping(() => {
-      setVisibilityChosen(true)
-      if (value === ChallengeVisibility.Public) {
-        update("invitees", [])
-        setInviteesConfirmed(false)
-      }
-    })
-  }
-
   const confirmAmount = () => {
     if (stakeAmountWei === 0n || hasInsufficientB3tr || hasBelowMinimumBetAmount) return
     withTyping(() => setAmountConfirmed(true))
@@ -333,11 +389,6 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const confirmStartRound = () => {
     if (hasInvalidStartRound) return
     withTyping(() => setStartRoundChosen(true))
-  }
-
-  const confirmThreshold = () => {
-    if (thresholdValue === 0) return
-    withTyping(() => setThresholdConfirmed(true))
   }
 
   const confirmSelectedApps = () => {
@@ -368,21 +419,19 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const resetFrom = (stepKey: Exclude<ChallengeFlowStep, "review">) => {
     const index = STEP_ORDER.indexOf(stepKey)
     if (index <= STEP_ORDER.indexOf("kind")) setKindChosen(false)
+    if (index <= STEP_ORDER.indexOf("visibility")) setVisibilityChosen(false)
+    if (index <= STEP_ORDER.indexOf("challengeType")) setChallengeTypeChosen(false)
+    if (index <= STEP_ORDER.indexOf("typeExplainer")) setTypeExplainerSeen(false)
+    if (index <= STEP_ORDER.indexOf("splitWinConfig")) setSplitWinConfigConfirmed(false)
     if (index <= STEP_ORDER.indexOf("title")) setTitleConfirmed(false)
     if (index <= STEP_ORDER.indexOf("amount")) setAmountConfirmed(false)
     if (index <= STEP_ORDER.indexOf("startRound")) setStartRoundChosen(false)
     if (index <= STEP_ORDER.indexOf("duration")) setDurationChosen(false)
-    if (index <= STEP_ORDER.indexOf("winner")) setWinnerChosen(false)
-    if (index <= STEP_ORDER.indexOf("threshold")) setThresholdConfirmed(false)
     if (index <= STEP_ORDER.indexOf("appScope")) {
       setAppScope(null)
       setAppsConfirmed(false)
     }
     if (index <= STEP_ORDER.indexOf("selectedApps")) setAppsConfirmed(false)
-    if (index <= STEP_ORDER.indexOf("visibility")) {
-      setVisibilityChosen(false)
-      setInviteesConfirmed(false)
-    }
     if (index <= STEP_ORDER.indexOf("invitees")) setInviteesConfirmed(false)
   }
 
@@ -399,7 +448,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     !hasInvalidEndRound &&
     !hasInsufficientB3tr &&
     !hasBelowMinimumBetAmount &&
-    !hasInvalidThresholdConfiguration &&
+    !hasInvalidSplitWinConfiguration &&
     !hasMetadataLengthError &&
     !isResolvingInvitees &&
     !hasInviteeErrors
@@ -435,12 +484,17 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     hasBelowMinimumBetAmount,
     hasTitleTooLong,
     thresholdValue,
+    numWinnersValue,
+    splitWinPrizePerWinner,
+    hasInvalidSplitWinConfiguration,
     minStartRound,
     hasInvalidStartRound,
     duration,
     isSponsored,
     isPrivate,
-    isSplitPrize,
+    isSplitWin,
+    needsVisibilityChoice,
+    needsChallengeTypeChoice,
     hasReachedSelectedAppsLimit,
     canSubmit,
     filteredApps,
@@ -455,14 +509,15 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
 
     // step flags
     kindChosen,
+    visibilityChosen,
+    challengeTypeChosen,
+    typeExplainerSeen,
+    splitWinConfigConfirmed,
     titleConfirmed,
     amountConfirmed,
     startRoundChosen,
     durationChosen,
-    winnerChosen,
-    thresholdConfirmed,
     appsConfirmed,
-    visibilityChosen,
     inviteesConfirmed,
 
     // actions
@@ -470,18 +525,20 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     handleSubmit,
     resetFrom,
     updateKind,
+    chooseVisibility,
+    setChallengeType: setChallengeTypeChoice,
+    acknowledgeTypeExplainer,
     updateTitle,
     confirmTitle,
     confirmAmount,
     chooseStartRound,
     confirmStartRound,
     chooseDuration,
-    setWinnerMode,
     updateThreshold,
-    confirmThreshold,
+    updateNumWinners,
+    confirmSplitWinConfig,
     chooseAppScope,
     confirmSelectedApps,
-    chooseVisibility,
     confirmInvitees,
     addApp,
     removeApp,

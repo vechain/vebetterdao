@@ -16,13 +16,15 @@ library ChallengeCoreLogic {
   uint256 private constant METADATA_URI_MAX_BYTES = 512;
 
   /// @notice Emitted when a challenge is created and initially funded.
+  /// @dev Split Win-specific configuration (numWinners, prizePerWinner) is emitted right after via
+  /// `SplitWinConfigured` to keep this event signature within Solidity stack limits.
   event ChallengeCreated(
     uint256 indexed challengeId,
     address indexed creator,
     uint256 indexed endRound,
     ChallengeTypes.ChallengeKind kind,
     ChallengeTypes.ChallengeVisibility visibility,
-    ChallengeTypes.ThresholdMode thresholdMode,
+    ChallengeTypes.ChallengeType challengeType,
     uint256 stakeAmount,
     uint256 startRound,
     uint256 threshold,
@@ -33,6 +35,9 @@ library ChallengeCoreLogic {
     string imageURI,
     string metadataURI
   );
+
+  /// @notice Emitted immediately after `ChallengeCreated` for Split Win challenges only.
+  event SplitWinConfigured(uint256 indexed challengeId, uint256 numWinners, uint256 prizePerWinner);
 
   /// @notice Emitted when a new invitee is added to a challenge.
   event ChallengeInviteAdded(uint256 indexed challengeId, address indexed invitee);
@@ -87,7 +92,7 @@ library ChallengeCoreLogic {
       _validateApps(params.appIds);
     }
 
-    _validateThresholdConfiguration(params);
+    _validateTypeConfiguration(params);
     _validateMetadataLengths(params);
 
     challengeId = ++$.challengeCount;
@@ -95,7 +100,7 @@ library ChallengeCoreLogic {
 
     challenge.kind = params.kind;
     challenge.visibility = params.visibility;
-    challenge.thresholdMode = params.thresholdMode;
+    challenge.challengeType = params.challengeType;
     challenge.status = ChallengeTypes.ChallengeStatus.Pending;
     challenge.settlementMode = ChallengeTypes.SettlementMode.None;
     challenge.creator = msg.sender;
@@ -103,12 +108,19 @@ library ChallengeCoreLogic {
     challenge.startRound = startRound;
     challenge.endRound = params.endRound;
     challenge.threshold = params.threshold;
+    challenge.numWinners = params.numWinners;
     challenge.allApps = allApps;
     challenge.totalPrize = params.stakeAmount;
     challenge.title = params.title;
     challenge.description = params.description;
     challenge.imageURI = params.imageURI;
     challenge.metadataURI = params.metadataURI;
+
+    // For Split Win the per-winner prize is locked at creation: any integer division remainder
+    // becomes part of the creator post-endRound refund instead of being paid to a winner.
+    if (params.challengeType == ChallengeTypes.ChallengeType.SplitWin) {
+      challenge.prizePerWinner = params.stakeAmount / params.numWinners;
+    }
 
     for (uint256 i; i < params.appIds.length; i++) {
       challenge.appIds.push(params.appIds[i]);
@@ -161,7 +173,11 @@ library ChallengeCoreLogic {
       revert IChallenges.AlreadyParticipating(challengeId, msg.sender);
     }
 
-    if (challenge.participants.length >= $.maxParticipants) {
+    // Split Win has no participant cap by design — the cap only applies to Max Actions challenges.
+    if (
+      challenge.challengeType == ChallengeTypes.ChallengeType.MaxActions &&
+      challenge.participants.length >= $.maxParticipants
+    ) {
       revert IChallenges.MaxParticipantsExceeded(challenge.participants.length + 1, $.maxParticipants);
     }
 
@@ -292,21 +308,40 @@ library ChallengeCoreLogic {
     return uint8(_isChallengeValid(challenge) ? ChallengeTypes.ChallengeStatus.Active : ChallengeTypes.ChallengeStatus.Invalid);
   }
 
-  function _validateThresholdConfiguration(ChallengeTypes.CreateChallengeParams memory params) private pure {
+  /// @dev Enforces the allowed (kind, visibility, challengeType) matrix and per-type field constraints.
+  /// Allowed combinations:
+  /// - Stake + Private + MaxActions (no threshold, no numWinners)
+  /// - Sponsored + Public + SplitWin (threshold > 0, numWinners > 0, stakeAmount >= numWinners)
+  /// - Sponsored + Private + MaxActions (no threshold, no numWinners)
+  /// - Sponsored + Private + SplitWin (threshold > 0, numWinners > 0, stakeAmount >= numWinners)
+  function _validateTypeConfiguration(ChallengeTypes.CreateChallengeParams memory params) private pure {
     if (params.kind == ChallengeTypes.ChallengeKind.Stake) {
-      if (params.threshold != 0 || params.thresholdMode != ChallengeTypes.ThresholdMode.None) {
-        revert IChallenges.InvalidThresholdConfiguration();
+      // Bet challenges are always private Max Actions: no public Bet, no Split Win Bet.
+      if (
+        params.visibility != ChallengeTypes.ChallengeVisibility.Private ||
+        params.challengeType != ChallengeTypes.ChallengeType.MaxActions
+      ) {
+        revert IChallenges.InvalidChallengeTypeForCombo();
       }
+    } else {
+      // Sponsored Public is reserved for Split Win; Sponsored Private may pick either type.
+      if (
+        params.visibility == ChallengeTypes.ChallengeVisibility.Public &&
+        params.challengeType != ChallengeTypes.ChallengeType.SplitWin
+      ) {
+        revert IChallenges.InvalidChallengeTypeForCombo();
+      }
+    }
+
+    if (params.challengeType == ChallengeTypes.ChallengeType.MaxActions) {
+      if (params.threshold != 0 || params.numWinners != 0) revert IChallenges.InvalidTypeConfiguration();
       return;
     }
 
-    if (params.threshold == 0 && params.thresholdMode != ChallengeTypes.ThresholdMode.None) {
-      revert IChallenges.InvalidThresholdConfiguration();
-    }
-
-    if (params.threshold > 0 && params.thresholdMode == ChallengeTypes.ThresholdMode.None) {
-      revert IChallenges.InvalidThresholdConfiguration();
-    }
+    // Split Win configuration validation.
+    if (params.threshold == 0 || params.numWinners == 0) revert IChallenges.InvalidTypeConfiguration();
+    // Ensure at least 1 wei per winner so prizePerWinner > 0.
+    if (params.stakeAmount < params.numWinners) revert IChallenges.InvalidTypeConfiguration();
   }
 
   function _validateMetadataLengths(ChallengeTypes.CreateChallengeParams memory params) private pure {
@@ -359,7 +394,7 @@ library ChallengeCoreLogic {
       challenge.endRound,
       challenge.kind,
       challenge.visibility,
-      challenge.thresholdMode,
+      challenge.challengeType,
       challenge.stakeAmount,
       challenge.startRound,
       challenge.threshold,
@@ -370,6 +405,10 @@ library ChallengeCoreLogic {
       challenge.imageURI,
       challenge.metadataURI
     );
+
+    if (challenge.challengeType == ChallengeTypes.ChallengeType.SplitWin) {
+      emit SplitWinConfigured(challengeId, challenge.numWinners, challenge.prizePerWinner);
+    }
   }
 
   function _addInvite(uint256 challengeId, address invitee) private {

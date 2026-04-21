@@ -1,11 +1,12 @@
 import { formatEther, parseEther } from "ethers"
 
-import { ChallengeVisibility, ThresholdMode } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeType, ChallengeVisibility } from "@/api/challenges/types"
 import { CreateChallengeFormData } from "@/api/challenges/useChallengeActions"
 
 export const MAX_SELECTED_APPS = 5
 export const QUICK_AMOUNTS = ["50", "100", "250"] as const
 export const QUICK_THRESHOLDS = ["1", "5", "10"] as const
+export const QUICK_NUM_WINNERS = ["1", "3", "5"] as const
 
 const formatTokenAmount = (value: bigint): string => {
   const formatted = formatEther(value)
@@ -22,15 +23,16 @@ export const getMinimumBetQuickAmounts = (minBetAmount: bigint): string[] => {
 
 export const STEP_ORDER = [
   "kind",
+  "visibility",
+  "challengeType",
+  "typeExplainer",
+  "splitWinConfig",
   "title",
   "amount",
   "startRound",
   "duration",
-  "winner",
-  "threshold",
   "appScope",
   "selectedApps",
-  "visibility",
   "invitees",
   "review",
 ] as const
@@ -38,14 +40,18 @@ export const STEP_ORDER = [
 export type ChallengeFlowStep = (typeof STEP_ORDER)[number]
 export type AppScope = "all" | "selected"
 
+/**
+ * Default new-form values: matrix dictates Bet => Private + MaxActions, so initial values for kind=Stake start there.
+ */
 export const initialForm = (kind: number, currentRound: number): CreateChallengeFormData => ({
   kind,
-  visibility: ChallengeVisibility.Public,
-  thresholdMode: ThresholdMode.None,
+  visibility: kind === ChallengeKind.Stake ? ChallengeVisibility.Private : ChallengeVisibility.Public,
+  challengeType: ChallengeType.MaxActions,
   stakeAmount: "",
   startRound: currentRound + 1,
   endRound: currentRound + 1,
   threshold: "0",
+  numWinners: "0",
   appIds: [],
   invitees: [],
   title: "",

@@ -19,7 +19,9 @@ export const hasChallengeActions = (challenge: ChallengeView) =>
   challenge.canCancel ||
   challenge.canClaim ||
   challenge.canRefund ||
-  challenge.canFinalize
+  challenge.canComplete ||
+  challenge.canClaimSplitWin ||
+  challenge.canClaimCreatorSplitWinRefund
 
 export const ChallengeActions = ({
   challenge,
@@ -32,7 +34,9 @@ export const ChallengeActions = ({
   onRefundClick,
   onJoinClick,
   onLeaveClick,
-  onFinalizeClick,
+  onCompleteClick,
+  onClaimSplitWinClick,
+  onClaimCreatorSplitWinRefundClick,
 }: {
   challenge: ChallengeView
   layout?: ChallengeActionsLayout
@@ -44,7 +48,9 @@ export const ChallengeActions = ({
   onRefundClick?: () => void
   onJoinClick?: () => void
   onLeaveClick?: () => void
-  onFinalizeClick?: () => void
+  onCompleteClick?: () => void
+  onClaimSplitWinClick?: () => void
+  onClaimCreatorSplitWinRefundClick?: () => void
 }) => {
   const { account } = useWallet()
   const actions = useChallengeActions()
@@ -80,7 +86,9 @@ export const ChallengeActions = ({
     challenge.canCancel,
     challenge.canClaim,
     challenge.canRefund,
-    challenge.canFinalize,
+    challenge.canComplete,
+    challenge.canClaimSplitWin,
+    challenge.canClaimCreatorSplitWinRefund,
   ].filter(Boolean).length
 
   if (!hasChallengeActions(challenge)) {
@@ -94,7 +102,10 @@ export const ChallengeActions = ({
   const handleRefund = onRefundClick ?? (() => actions.refundChallenge(id))
   const handleJoin = onJoinClick ?? (() => actions.joinChallenge(challenge))
   const handleLeave = onLeaveClick ?? (() => actions.leaveChallenge(id))
-  const handleFinalize = onFinalizeClick ?? (() => actions.finalizeChallenge(id))
+  const handleComplete = onCompleteClick ?? (() => actions.completeChallenge(id))
+  const handleClaimSplitWin = onClaimSplitWinClick ?? (() => actions.claimSplitWinPrize(id))
+  const handleClaimCreatorSplitWinRefund =
+    onClaimCreatorSplitWinRefundClick ?? (() => actions.claimCreatorSplitWinRefund(id))
 
   const actionButtons = (
     <>
@@ -167,14 +178,29 @@ export const ChallengeActions = ({
           {t("Claim prize")}
         </Button>
       )}
+      {challenge.canClaimSplitWin && (
+        <Button size={resolvedButtonSize} variant="primary" onClick={handleClaimSplitWin} gap="2" {...cardButtonProps}>
+          <Icon as={LuTrophy} boxSize="4" />
+          {t("Claim your slot")}
+        </Button>
+      )}
       {challenge.canRefund && (
         <Button size={resolvedButtonSize} variant="primary" onClick={handleRefund} {...cardButtonProps}>
           {t("Claim refund")}
         </Button>
       )}
-      {challenge.canFinalize && (
-        <Button size={resolvedButtonSize} variant="primary" onClick={handleFinalize} {...cardButtonProps}>
-          {t("Finalize")}
+      {challenge.canClaimCreatorSplitWinRefund && (
+        <Button
+          size={resolvedButtonSize}
+          variant="primary"
+          onClick={handleClaimCreatorSplitWinRefund}
+          {...cardButtonProps}>
+          {t("Refund unclaimed slots")}
+        </Button>
+      )}
+      {challenge.canComplete && (
+        <Button size={resolvedButtonSize} variant="primary" onClick={handleComplete} {...cardButtonProps}>
+          {t("Complete")}
         </Button>
       )}
     </>

@@ -3,7 +3,13 @@ import { UilShareAlt } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-import { ChallengeDetail, ChallengeKind, ChallengeStatus, challengeStatusLabel } from "@/api/challenges/types"
+import {
+  ChallengeDetail,
+  ChallengeKind,
+  ChallengeStatus,
+  challengeStatusLabel,
+  ChallengeType,
+} from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
 
@@ -17,12 +23,14 @@ import { useChallengeDescription } from "../../shared/useChallengeDescription"
 import { ChallengeAcceptModal } from "./ChallengeAcceptModal"
 import { ChallengeCancelModal } from "./ChallengeCancelModal"
 import { ChallengeClaimModal } from "./ChallengeClaimModal"
+import { ChallengeCompleteModal } from "./ChallengeCompleteModal"
 import { ChallengeDeclineModal } from "./ChallengeDeclineModal"
-import { ChallengeFinalizeModal } from "./ChallengeFinalizeModal"
 import { ChallengeJoinModal } from "./ChallengeJoinModal"
 import { ChallengeLeaveModal } from "./ChallengeLeaveModal"
 import { ChallengeRefundModal } from "./ChallengeRefundModal"
 import { ChallengeShareModal } from "./ChallengeShareModal"
+import { ChallengeSplitWinClaimModal } from "./ChallengeSplitWinClaimModal"
+import { ChallengeSplitWinCreatorRefundModal } from "./ChallengeSplitWinCreatorRefundModal"
 
 interface ChallengeHeaderCardProps {
   challenge: ChallengeDetail
@@ -40,7 +48,9 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
   const { onOpen: onRefundOpen, onClose: onRefundClose, open: isRefundOpen } = useDisclosure()
   const { onOpen: onJoinOpen, onClose: onJoinClose, open: isJoinOpen } = useDisclosure()
   const { onOpen: onLeaveOpen, onClose: onLeaveClose, open: isLeaveOpen } = useDisclosure()
-  const { onOpen: onFinalizeOpen, onClose: onFinalizeClose, open: isFinalizeOpen } = useDisclosure()
+  const { onOpen: onCompleteOpen, onClose: onCompleteClose, open: isCompleteOpen } = useDisclosure()
+  const { onOpen: onSplitWinClaimOpen, onClose: onSplitWinClaimClose, open: isSplitWinClaimOpen } = useDisclosure()
+  const { onOpen: onSplitWinRefundOpen, onClose: onSplitWinRefundClose, open: isSplitWinRefundOpen } = useDisclosure()
 
   const challengeDescription = useChallengeDescription(challenge)
 
@@ -53,16 +63,24 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
         return t("Starts {{time}}", opts)
       case ChallengeStatus.Active:
         return t("Ends {{time}}", opts)
-      case ChallengeStatus.Finalized:
+      case ChallengeStatus.Completed:
         return t("Ended {{time}}", opts)
       default:
         return null
     }
   })()
 
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
+  const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
   const challengeTitle = challenge.title || t("Quest #{{id}}", { id: challenge.challengeId })
   const prizeLabel = humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
+  const perWinnerLabel = humanNumber(challenge.prizePerWinner, challenge.prizePerWinner, "B3TR")
+  const splitWinRefundLabel = humanNumber(
+    String(slotsLeft * Number(challenge.prizePerWinner)),
+    String(slotsLeft * Number(challenge.prizePerWinner)),
+    "B3TR",
+  )
 
   return (
     <>
@@ -87,7 +105,11 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
                     onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
                     onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
                     onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
-                    onFinalizeClick={challenge.canFinalize ? onFinalizeOpen : undefined}
+                    onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
+                    onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
+                    onClaimCreatorSplitWinRefundClick={
+                      challenge.canClaimCreatorSplitWinRefund ? onSplitWinRefundOpen : undefined
+                    }
                   />
                 </Box>
               )}
@@ -104,6 +126,17 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
             overflowWrap="anywhere">
             {challengeTitle}
           </Heading>
+
+          {isSplitWin && (
+            <HStack gap="3" wrap="wrap">
+              <Text textStyle="md" fontWeight="bold" color="brand.primary">
+                {perWinnerLabel} {t("per winner")}
+              </Text>
+              <Text textStyle="sm" color="text.subtle">
+                {t("{{remaining}} slots left", { remaining: slotsLeft })}
+              </Text>
+            </HStack>
+          )}
 
           <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
             {challengeDescription}
@@ -131,7 +164,11 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
                 onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
                 onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
                 onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
-                onFinalizeClick={challenge.canFinalize ? onFinalizeOpen : undefined}
+                onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
+                onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
+                onClaimCreatorSplitWinRefundClick={
+                  challenge.canClaimCreatorSplitWinRefund ? onSplitWinRefundOpen : undefined
+                }
               />
             </Box>
           )}
@@ -178,10 +215,24 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
         onClose={onLeaveClose}
         onLeave={() => actions.leaveChallenge(challenge.challengeId)}
       />
-      <ChallengeFinalizeModal
-        isOpen={isFinalizeOpen}
-        onClose={onFinalizeClose}
-        onFinalize={() => actions.finalizeChallenge(challenge.challengeId)}
+      <ChallengeCompleteModal
+        isOpen={isCompleteOpen}
+        onClose={onCompleteClose}
+        onComplete={() => actions.completeChallenge(challenge.challengeId)}
+      />
+      <ChallengeSplitWinClaimModal
+        isOpen={isSplitWinClaimOpen}
+        onClose={onSplitWinClaimClose}
+        prizeLabel={perWinnerLabel}
+        slotsRemaining={slotsLeft}
+        onClaim={() => actions.claimSplitWinPrize(challenge.challengeId)}
+      />
+      <ChallengeSplitWinCreatorRefundModal
+        isOpen={isSplitWinRefundOpen}
+        onClose={onSplitWinRefundClose}
+        refundLabel={splitWinRefundLabel}
+        unclaimedSlots={slotsLeft}
+        onRefund={() => actions.claimCreatorSplitWinRefund(challenge.challengeId)}
       />
     </>
   )

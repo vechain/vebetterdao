@@ -7,15 +7,17 @@ import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 type Props = {
   isOpen: boolean
   onClose: () => void
-  onFinalize: () => void
+  onClaim: () => void
+  prizeLabel: string
+  slotsRemaining: number
 }
 
-export const ChallengeFinalizeModal = ({ isOpen, onClose, onFinalize }: Props) => {
+export const ChallengeSplitWinClaimModal = ({ isOpen, onClose, onClaim, prizeLabel, slotsRemaining }: Props) => {
   const { t } = useTranslation()
 
-  const handleFinalize = () => {
+  const handleClaim = () => {
     onClose()
-    onFinalize()
+    onClaim()
   }
 
   return (
@@ -30,15 +32,20 @@ export const ChallengeFinalizeModal = ({ isOpen, onClose, onFinalize }: Props) =
 
             <VStack gap={1}>
               <Heading size="xl" fontWeight="bold" textAlign="center">
-                {t("Finalize quest")}
+                {t("Claim your slot")}
               </Heading>
               <Text textStyle="md" color="text.subtle" textAlign="center">
-                {t("Finalize this quest to lock in the results and let winners claim their prize.")}
+                {t("You hit the threshold! Claim {{prize}} now before all slots run out.", { prize: prizeLabel })}
+              </Text>
+              <Text textStyle="sm" color="text.subtle" textAlign="center">
+                {t("Slots remaining")}
+                {": "}
+                {slotsRemaining}
               </Text>
             </VStack>
 
-            <Button variant="primary" w="full" size="lg" onClick={handleFinalize}>
-              {t("Finalize")}
+            <Button variant="primary" w="full" size="lg" onClick={handleClaim}>
+              {t("Claim")}
             </Button>
           </VStack>
         </ModalAnimation>

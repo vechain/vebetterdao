@@ -14,7 +14,8 @@ interface IChallenges {
   error BetAmountBelowMinimum(uint256 provided, uint256 minimum);
   error InvalidStartRound(uint256 startRound, uint256 currentRound);
   error InvalidEndRound(uint256 startRound, uint256 endRound);
-  error InvalidThresholdConfiguration();
+  error InvalidChallengeTypeForCombo();
+  error InvalidTypeConfiguration();
   error TitleTooLong(uint256 provided, uint256 maximum);
   error DescriptionTooLong(uint256 provided, uint256 maximum);
   error ImageURITooLong(uint256 provided, uint256 maximum);
@@ -27,7 +28,8 @@ interface IChallenges {
   error DuplicateApp(bytes32 appId);
   error ChallengeNotPending(uint256 challengeId);
   error ChallengeNotEnded(uint256 challengeId, uint256 endRound, uint256 currentRound);
-  error ChallengeAlreadyFinalized(uint256 challengeId);
+  error ChallengeEnded(uint256 challengeId, uint256 endRound, uint256 currentRound);
+  error ChallengeAlreadyCompleted(uint256 challengeId);
   error ChallengeInvalidStatus(uint256 challengeId, ChallengeTypes.ChallengeStatus status);
   error CreatorCannotJoin(uint256 challengeId);
   error CreatorCannotLeave(uint256 challengeId);
@@ -42,6 +44,10 @@ interface IChallenges {
   error TransferFailed();
   error InsufficientWithdrawableFunds(uint256 available, uint256 requested);
   error ChallengesUnauthorizedUser(address user);
+  error SplitWinCannotComplete(uint256 challengeId);
+  error SplitWinSlotsExhausted(uint256 challengeId);
+  error NotEligibleForSplitWin(uint256 challengeId, address account, uint256 actions, uint256 threshold);
+  error NotASplitWinChallenge(uint256 challengeId);
 
   // ---------- Events ---------- //
 
@@ -75,7 +81,7 @@ interface IChallenges {
   /// @param newValue New maximum app count.
   event MaxSelectedAppsUpdated(uint256 oldValue, uint256 newValue);
 
-  /// @notice Emitted when the maximum number of participants per challenge is updated.
+  /// @notice Emitted when the maximum number of participants per Max Actions challenge is updated.
   /// @param oldValue Previous maximum participant count.
   /// @param newValue New maximum participant count.
   event MaxParticipantsUpdated(uint256 oldValue, uint256 newValue);
@@ -92,15 +98,17 @@ interface IChallenges {
   event AdminWithdrawal(address indexed admin, address indexed recipient, uint256 amount);
 
   /// @notice Emitted when a challenge is created and funded.
+  /// @dev Split Win-specific configuration (numWinners, prizePerWinner) is emitted right after via
+  /// `SplitWinConfigured` to keep this event signature within Solidity stack limits.
   /// @param challengeId Newly created challenge identifier.
   /// @param creator Address that created the challenge.
   /// @param endRound Last round whose actions count toward the challenge.
   /// @param kind Challenge funding model.
   /// @param visibility Challenge participation mode.
-  /// @param thresholdMode Threshold evaluation mode for sponsored challenges.
+  /// @param challengeType Challenge mechanic (Max Actions or Split Win).
   /// @param stakeAmount Amount locked at creation and required from each joining participant in stake challenges.
   /// @param startRound First round whose actions count toward the challenge.
-  /// @param threshold Minimum action threshold when threshold-based settlement is enabled.
+  /// @param threshold Minimum action threshold required to claim a Split Win slot (0 for Max Actions).
   /// @param allApps True when actions from all apps count, false when only `selectedApps` count.
   /// @param selectedApps Explicit app allowlist when `allApps` is false.
   /// @param title Human-readable challenge title.
@@ -113,7 +121,7 @@ interface IChallenges {
     uint256 indexed endRound,
     ChallengeTypes.ChallengeKind kind,
     ChallengeTypes.ChallengeVisibility visibility,
-    ChallengeTypes.ThresholdMode thresholdMode,
+    ChallengeTypes.ChallengeType challengeType,
     uint256 stakeAmount,
     uint256 startRound,
     uint256 threshold,
@@ -124,6 +132,12 @@ interface IChallenges {
     string imageURI,
     string metadataURI
   );
+
+  /// @notice Emitted immediately after `ChallengeCreated` for Split Win challenges only.
+  /// @param challengeId Newly created challenge identifier.
+  /// @param numWinners Number of Split Win slots (creator-defined).
+  /// @param prizePerWinner Locked-at-creation per-slot prize (`stakeAmount / numWinners`).
+  event SplitWinConfigured(uint256 indexed challengeId, uint256 numWinners, uint256 prizePerWinner);
 
   /// @notice Emitted when an invitee is added to a challenge.
   /// @param challengeId Challenge identifier.
@@ -157,21 +171,20 @@ interface IChallenges {
   /// @param challengeId Challenge identifier.
   event ChallengeInvalidated(uint256 indexed challengeId);
 
-  /// @notice Emitted when challenge settlement is finalized.
+  /// @notice Emitted when a challenge transitions to Completed status.
+  /// @dev For Split Win the `bestScore` and `bestCount` fields are 0 and `settlementMode` is `SplitWinCompleted`.
   /// @param challengeId Challenge identifier.
   /// @param settlementMode Settlement mode selected for payout or refund.
-  /// @param bestScore Highest participant action score recorded.
-  /// @param bestCount Number of participants tied for `bestScore`.
-  /// @param qualifiedCount Number of participants above threshold in split settlement mode.
-  event ChallengeFinalized(
+  /// @param bestScore Highest participant action score recorded (Max Actions only).
+  /// @param bestCount Number of participants tied for `bestScore` (Max Actions only).
+  event ChallengeCompleted(
     uint256 indexed challengeId,
     ChallengeTypes.SettlementMode settlementMode,
     uint256 bestScore,
-    uint256 bestCount,
-    uint256 qualifiedCount
+    uint256 bestCount
   );
 
-  /// @notice Emitted when a payout is claimed from a finalized challenge.
+  /// @notice Emitted when a payout is claimed from a completed Max Actions challenge.
   /// @param challengeId Challenge identifier.
   /// @param account Recipient of the payout.
   /// @param amount Amount transferred.
@@ -182,6 +195,26 @@ interface IChallenges {
   /// @param account Recipient of the refund.
   /// @param amount Amount transferred.
   event ChallengeRefundClaimed(uint256 indexed challengeId, address indexed account, uint256 amount);
+
+  /// @notice Emitted when a participant claims a Split Win slot.
+  /// @param challengeId Challenge identifier.
+  /// @param winner Address that secured the slot.
+  /// @param prize Locked per-winner prize transferred.
+  /// @param actions Action count recorded at claim time.
+  /// @param winnersClaimed Cumulative number of slots claimed including this one.
+  event SplitWinPrizeClaimed(
+    uint256 indexed challengeId,
+    address indexed winner,
+    uint256 prize,
+    uint256 actions,
+    uint256 winnersClaimed
+  );
+
+  /// @notice Emitted when the creator reclaims unclaimed Split Win slots after the end round.
+  /// @param challengeId Challenge identifier.
+  /// @param creator Challenge creator.
+  /// @param amount Amount transferred (unclaimed slots * prizePerWinner + integer-division remainder).
+  event SplitWinCreatorRefunded(uint256 indexed challengeId, address indexed creator, uint256 amount);
 
   // ---------- Functions ---------- //
 
@@ -209,7 +242,7 @@ interface IChallenges {
   /// @return Maximum selected app count.
   function maxSelectedApps() external view returns (uint256);
 
-  /// @notice Returns the maximum number of participants allowed in a challenge.
+  /// @notice Returns the maximum number of participants allowed in a Max Actions challenge.
   /// @return Maximum participant count.
   function maxParticipants() external view returns (uint256);
 
@@ -247,6 +280,11 @@ interface IChallenges {
   /// @return Explicit app ids used by the challenge.
   function getChallengeSelectedApps(uint256 challengeId) external view returns (bytes32[] memory);
 
+  /// @notice Returns the ordered list of Split Win winners (claim order).
+  /// @param challengeId Challenge identifier.
+  /// @return Winner addresses in claim order; empty for Max Actions challenges.
+  function getChallengeWinners(uint256 challengeId) external view returns (address[] memory);
+
   /// @notice Returns the current participant status for an account.
   /// @param challengeId Challenge identifier.
   /// @param account Account to query.
@@ -261,6 +299,12 @@ interface IChallenges {
   /// @param account Account to query.
   /// @return True if the account is marked as invitation-eligible.
   function isInvitationEligible(uint256 challengeId, address account) external view returns (bool);
+
+  /// @notice Returns whether an account has already claimed a Split Win slot.
+  /// @param challengeId Challenge identifier.
+  /// @param account Account to query.
+  /// @return True if the account is in the winners list.
+  function isSplitWinWinner(uint256 challengeId, address account) external view returns (bool);
 
   /// @notice Returns the total counted actions for a participant across the challenge scope.
   /// @param challengeId Challenge identifier.
@@ -300,14 +344,24 @@ interface IChallenges {
   /// @return Status after syncing.
   function syncChallenge(uint256 challengeId) external returns (ChallengeTypes.ChallengeStatus);
 
-  /// @notice Finalizes a challenge after its end round has passed.
+  /// @notice Completes a Max Actions challenge after its end round has passed.
   /// @param challengeId Challenge identifier.
-  function finalizeChallenge(uint256 challengeId) external;
+  function completeChallenge(uint256 challengeId) external;
 
-  /// @notice Claims the caller's payout from a finalized challenge.
+  /// @notice Claims the caller's payout from a completed Max Actions challenge.
   /// @param challengeId Challenge identifier.
   /// @return Amount transferred to the caller.
   function claimChallengePayout(uint256 challengeId) external returns (uint256);
+
+  /// @notice Claims a Split Win slot during the active window.
+  /// @param challengeId Challenge identifier.
+  /// @return Amount transferred to the caller.
+  function claimSplitWinPrize(uint256 challengeId) external returns (uint256);
+
+  /// @notice Reclaims unclaimed Split Win slots after the end round (creator only).
+  /// @param challengeId Challenge identifier.
+  /// @return Amount transferred to the creator.
+  function claimCreatorSplitWinRefund(uint256 challengeId) external returns (uint256);
 
   /// @notice Claims the caller's refund from a cancelled or invalid challenge.
   /// @param challengeId Challenge identifier.
@@ -344,7 +398,7 @@ interface IChallenges {
   /// @param newValue New maximum selected app count.
   function setMaxSelectedApps(uint256 newValue) external;
 
-  /// @notice Updates the maximum number of participants allowed for new challenges.
+  /// @notice Updates the maximum number of participants allowed for new Max Actions challenges.
   /// @param newValue New maximum participant count.
   function setMaxParticipants(uint256 newValue) external;
 

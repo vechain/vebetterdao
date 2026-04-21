@@ -40,7 +40,7 @@ export const ChallengeRoleBanner = ({ challenge }: ChallengeRoleBannerProps) => 
             description: t("The competition is live — watch your participants battle it out."),
             status: "success" as const,
           }
-        case ChallengeStatus.Finalized:
+        case ChallengeStatus.Completed:
           return {
             title: t("You sponsored this quest"),
             description: t("The quest is over — thanks for fueling the competition!"),
@@ -68,7 +68,7 @@ export const ChallengeRoleBanner = ({ challenge }: ChallengeRoleBannerProps) => 
           description: t("The clock is ticking — don't lose time, every round counts!"),
           status: "success" as const,
         }
-      case ChallengeStatus.Finalized:
+      case ChallengeStatus.Completed:
         return {
           title: t("You participated in this quest"),
           description: t("Well played — check the results and see how you did!"),

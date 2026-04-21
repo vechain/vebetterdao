@@ -70,7 +70,7 @@ export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }
         return t("Starts {{time}}", opts)
       case ChallengeStatus.Active:
         return t("Ends {{time}}", opts)
-      case ChallengeStatus.Finalized:
+      case ChallengeStatus.Completed:
         return t("Ended {{time}}", opts)
       default:
         return null

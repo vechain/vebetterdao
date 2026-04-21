@@ -11,11 +11,12 @@ import {
   VStack,
   Wrap,
 } from "@chakra-ui/react"
+import { formatEther } from "ethers"
 import { TFunction } from "i18next"
 import { ReactNode, useState } from "react"
 import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from "react-icons/lu"
 
-import { challengeMetadataByteLimits, ChallengeKind, ChallengeVisibility } from "@/api/challenges/types"
+import { challengeMetadataByteLimits, ChallengeKind, ChallengeType, ChallengeVisibility } from "@/api/challenges/types"
 import { AppImage } from "@/components/AppImage/AppImage"
 
 import { getInviteeValidationMessage, InviteeValidationError } from "../../shared/inviteeValidation"
@@ -25,6 +26,7 @@ import {
   getChoiceVariant,
   getMinimumBetQuickAmounts,
   primaryVariant,
+  QUICK_NUM_WINNERS,
   QUICK_THRESHOLDS,
   tertiaryVariant,
   type ChallengeFlowStep,
@@ -42,15 +44,37 @@ export interface StepDefinition {
 
 const APP_RESULTS_PAGE_SIZE = 8
 
+const formatWei = (value: bigint) => {
+  const formatted = formatEther(value)
+  const [whole = formatted, decimal] = formatted.split(".")
+  if (!decimal) return whole
+  const trimmedDecimal = decimal.replace(/0+$/, "")
+  return trimmedDecimal ? `${whole}.${trimmedDecimal}` : whole
+}
+
+/**
+ * Returns the i18n key of the explainer message that matches the locked-in (kind, visibility, type) combination.
+ */
+const getTypeExplainerKey = (kind: number, visibility: number, challengeType: number): string => {
+  if (kind === ChallengeKind.Stake) return "challengeType.bet.maxActions.explainer"
+  if (visibility === ChallengeVisibility.Public) return "challengeType.sponsored.splitWin.explainer"
+  return challengeType === ChallengeType.SplitWin
+    ? "challengeType.sponsored.splitWin.explainer"
+    : "challengeType.sponsored.maxActions.explainer"
+}
+
 export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinition[] => {
   const {
     form,
     isSponsored,
-    isSplitPrize,
+    isSplitWin,
     isPrivate,
     appScope,
     duration,
     thresholdValue,
+    numWinnersValue,
+    splitWinPrizePerWinner,
+    hasInvalidSplitWinConfiguration,
     minStartRound,
     hasInsufficientB3tr,
     hasInvalidStartRound,
@@ -69,16 +93,19 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     canConfirmInvitees,
     hasBelowMinimumBetAmount,
     hasTitleTooLong,
+    needsVisibilityChoice,
+    needsChallengeTypeChoice,
 
     kindChosen,
+    visibilityChosen,
+    challengeTypeChosen,
+    typeExplainerSeen,
+    splitWinConfigConfirmed,
     titleConfirmed,
     amountConfirmed,
     startRoundChosen,
     durationChosen,
-    winnerChosen,
-    thresholdConfirmed,
     appsConfirmed,
-    visibilityChosen,
     inviteesConfirmed,
   } = flow
 
@@ -106,6 +133,10 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     flow.setAppsConfirmed(false)
   }
   const clearAppFilter = () => updateAppFilter("")
+
+  // Whether the (kind, visibility, type) selection is finalized (all forced or chosen). Drives the explainer step.
+  const typeFinalized =
+    kindChosen && (!needsVisibilityChoice || visibilityChosen) && (!needsChallengeTypeChoice || challengeTypeChosen)
 
   return [
     {
@@ -171,6 +202,220 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("The creator funds the prize. Winners are chosen from participant actions.")}
             </Text>
           </Box>
+        </VStack>
+      ),
+    },
+    {
+      key: "visibility",
+      isRelevant: needsVisibilityChoice,
+      isComplete: visibilityChosen,
+      prompt: (
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("Who can join?")}
+        </Text>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit">
+          {t(form.visibility === ChallengeVisibility.Public ? "Public" : "Private")}
+        </Text>
+      ),
+      controls: (
+        <HStack gap="2" flexWrap="wrap">
+          <Button
+            size="sm"
+            variant={getExplicitChoiceVariant(visibilityChosen, form.visibility === ChallengeVisibility.Public)}
+            onClick={() => flow.chooseVisibility(ChallengeVisibility.Public)}>
+            {t("Public")}
+          </Button>
+          <Button
+            size="sm"
+            variant={getExplicitChoiceVariant(visibilityChosen, form.visibility === ChallengeVisibility.Private)}
+            onClick={() => flow.chooseVisibility(ChallengeVisibility.Private)}>
+            {t("Private")}
+          </Button>
+        </HStack>
+      ),
+    },
+    {
+      key: "challengeType",
+      isRelevant: needsChallengeTypeChoice,
+      isComplete: challengeTypeChosen,
+      prompt: (
+        <VStack align="stretch" gap="2">
+          <Text textStyle="sm" fontWeight="semibold">
+            {t("Pick the quest mechanic")}
+          </Text>
+        </VStack>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit">
+          {t(form.challengeType === ChallengeType.SplitWin ? "Split win" : "Max actions")}
+        </Text>
+      ),
+      controls: (
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap="2" w="full">
+          <Button
+            size="sm"
+            h="auto"
+            minH="unset"
+            w="full"
+            borderRadius="xl"
+            px="4"
+            py="3"
+            justifyContent="flex-start"
+            textAlign="left"
+            whiteSpace="normal"
+            variant={getExplicitChoiceVariant(challengeTypeChosen, form.challengeType === ChallengeType.MaxActions)}
+            onClick={() => flow.setChallengeType(ChallengeType.MaxActions)}>
+            <VStack align="start" gap="1" w="full">
+              <Text textStyle="sm" fontWeight="semibold" color="inherit">
+                {t("Max actions")}
+              </Text>
+              <Text textStyle="xs" color="inherit" opacity={0.8}>
+                {t("Max actions description")}
+              </Text>
+            </VStack>
+          </Button>
+          <Button
+            size="sm"
+            h="auto"
+            minH="unset"
+            w="full"
+            borderRadius="xl"
+            px="4"
+            py="3"
+            justifyContent="flex-start"
+            textAlign="left"
+            whiteSpace="normal"
+            variant={getExplicitChoiceVariant(challengeTypeChosen, form.challengeType === ChallengeType.SplitWin)}
+            onClick={() => flow.setChallengeType(ChallengeType.SplitWin)}>
+            <VStack align="start" gap="1" w="full">
+              <Text textStyle="sm" fontWeight="semibold" color="inherit">
+                {t("Split win")}
+              </Text>
+              <Text textStyle="xs" color="inherit" opacity={0.8}>
+                {t("Split win description")}
+              </Text>
+            </VStack>
+          </Button>
+        </SimpleGrid>
+      ),
+    },
+    {
+      key: "typeExplainer",
+      isRelevant: typeFinalized,
+      isComplete: typeExplainerSeen,
+      prompt: (
+        <VStack align="stretch" gap="2">
+          <Text textStyle="sm" fontWeight="semibold">
+            {t("Quest type")}
+          </Text>
+          <Text textStyle="sm" color="inherit">
+            {t(getTypeExplainerKey(form.kind, form.visibility, form.challengeType) as never)}
+          </Text>
+        </VStack>
+      ),
+      controls: (
+        <HStack justify="flex-end">
+          <Button size="sm" variant={primaryVariant} onClick={flow.acknowledgeTypeExplainer}>
+            {t("Got it")}
+          </Button>
+        </HStack>
+      ),
+    },
+    {
+      key: "splitWinConfig",
+      isRelevant: isSplitWin,
+      isComplete: splitWinConfigConfirmed && !hasInvalidSplitWinConfiguration,
+      prompt: (
+        <VStack align="stretch" gap="2">
+          <Text textStyle="sm" fontWeight="semibold">
+            {t("Split Win setup")}
+          </Text>
+          <Text textStyle="xs" color="text.subtle">
+            {t("Pick how many winners and how many actions each must complete.")}
+          </Text>
+        </VStack>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit">
+          {t("{{winners}} winners · {{threshold}} actions", { winners: form.numWinners, threshold: form.threshold })}
+        </Text>
+      ),
+      controls: (
+        <VStack align="stretch" gap="4">
+          <VStack align="stretch" gap="2">
+            <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+              {t("Number of winners")}
+            </Text>
+            <HStack gap="2" flexWrap="wrap">
+              {QUICK_NUM_WINNERS.map(value => (
+                <Button
+                  key={value}
+                  size="sm"
+                  variant={getChoiceVariant(form.numWinners === value)}
+                  onClick={() => flow.updateNumWinners(value)}>
+                  {value}
+                </Button>
+              ))}
+            </HStack>
+            <Field.Root invalid={numWinnersValue <= 0}>
+              <Input
+                type="number"
+                min="1"
+                step="1"
+                value={form.numWinners}
+                onChange={e => flow.updateNumWinners(e.target.value)}
+              />
+              {numWinnersValue <= 0 && (
+                <Field.ErrorText>{t("Number of winners must be greater than 0")}</Field.ErrorText>
+              )}
+            </Field.Root>
+          </VStack>
+          <VStack align="stretch" gap="2">
+            <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+              {t("Actions to claim a slot")}
+            </Text>
+            <HStack gap="2" flexWrap="wrap">
+              {QUICK_THRESHOLDS.map(value => (
+                <Button
+                  key={value}
+                  size="sm"
+                  variant={getChoiceVariant(form.threshold === value)}
+                  onClick={() => flow.updateThreshold(value)}>
+                  {value}
+                </Button>
+              ))}
+            </HStack>
+            <Field.Root invalid={thresholdValue <= 0}>
+              <Input
+                type="number"
+                min="1"
+                step="1"
+                value={form.threshold}
+                onChange={e => flow.updateThreshold(e.target.value)}
+              />
+              {thresholdValue <= 0 && (
+                <Field.ErrorText>{t("Actions per winner must be greater than 0")}</Field.ErrorText>
+              )}
+            </Field.Root>
+          </VStack>
+          {stakeAmountWei > 0n && numWinnersValue > 0 && (
+            <Text textStyle="xs" color="text.subtle">
+              {t("Prize per winner")}
+              {": "}
+              {formatWei(splitWinPrizePerWinner)} {"B3TR"}
+            </Text>
+          )}
+          <HStack justify="flex-end">
+            <Button
+              size="sm"
+              variant={primaryVariant}
+              disabled={hasInvalidSplitWinConfiguration}
+              onClick={flow.confirmSplitWinConfig}>
+              {t("Continue")}
+            </Button>
+          </HStack>
         </VStack>
       ),
     },
@@ -353,124 +598,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
             </Button>
           ))}
         </HStack>
-      ),
-    },
-    {
-      key: "winner",
-      isRelevant: isSponsored,
-      isComplete: winnerChosen,
-      prompt: (
-        <VStack align="stretch" gap="2">
-          <Text textStyle="sm" fontWeight="semibold">
-            {t("Winner")}
-          </Text>
-          <Text textStyle="xs" color="text.subtle">
-            {t(isSplitPrize ? "Split prize description" : "Max actions description")}
-          </Text>
-        </VStack>
-      ),
-      answer: (
-        <Text textStyle="sm" color="inherit">
-          {t(isSplitPrize ? "Split prize" : "Max actions")}
-        </Text>
-      ),
-      controls: (
-        <SimpleGrid columns={{ base: 1, md: 2 }} gap="2" w="full">
-          <Button
-            size="sm"
-            h="auto"
-            minH="unset"
-            w="full"
-            borderRadius="xl"
-            px="4"
-            py="3"
-            justifyContent="flex-start"
-            textAlign="left"
-            whiteSpace="normal"
-            variant={getExplicitChoiceVariant(winnerChosen, !isSplitPrize)}
-            onClick={() => flow.setWinnerMode(false)}>
-            <VStack align="start" gap="1" w="full">
-              <Text textStyle="sm" fontWeight="semibold" color="inherit">
-                {t("Max actions")}
-              </Text>
-              <Text textStyle="xs" color="inherit" opacity={0.8}>
-                {t("Max actions description")}
-              </Text>
-            </VStack>
-          </Button>
-          <Button
-            size="sm"
-            h="auto"
-            minH="unset"
-            w="full"
-            borderRadius="xl"
-            px="4"
-            py="3"
-            justifyContent="flex-start"
-            textAlign="left"
-            whiteSpace="normal"
-            variant={getExplicitChoiceVariant(winnerChosen, isSplitPrize)}
-            onClick={() => flow.setWinnerMode(true)}>
-            <VStack align="start" gap="1" w="full">
-              <Text textStyle="sm" fontWeight="semibold" color="inherit">
-                {t("Split prize")}
-              </Text>
-              <Text textStyle="xs" color="inherit" opacity={0.8}>
-                {t("Split prize description")}
-              </Text>
-            </VStack>
-          </Button>
-        </SimpleGrid>
-      ),
-    },
-    {
-      key: "threshold",
-      isRelevant: isSponsored && isSplitPrize,
-      isComplete: thresholdConfirmed && thresholdValue > 0,
-      prompt: (
-        <Text textStyle="sm" fontWeight="semibold">
-          {t("Minimum actions")}
-        </Text>
-      ),
-      answer: (
-        <Text textStyle="sm" color="inherit">
-          {form.threshold}
-        </Text>
-      ),
-      controls: (
-        <VStack align="stretch" gap="3">
-          <HStack gap="2" flexWrap="wrap">
-            {QUICK_THRESHOLDS.map(value => (
-              <Button
-                key={value}
-                size="sm"
-                variant={getExplicitChoiceVariant(thresholdConfirmed, form.threshold === value)}
-                onClick={() => {
-                  flow.update("threshold", value)
-                  flow.withTyping(() => flow.confirmThreshold())
-                }}>
-                {value}
-              </Button>
-            ))}
-          </HStack>
-          <Field.Root invalid={thresholdValue === 0}>
-            <Field.Label>{t("Minimum actions")}</Field.Label>
-            <Input
-              type="number"
-              min="1"
-              step="1"
-              placeholder="1"
-              value={form.threshold}
-              onChange={e => flow.updateThreshold(e.target.value)}
-            />
-            {thresholdValue === 0 && <Field.ErrorText>{t("Minimum actions must be greater than 0")}</Field.ErrorText>}
-          </Field.Root>
-          <HStack justify="flex-end">
-            <Button size="sm" variant={primaryVariant} disabled={thresholdValue === 0} onClick={flow.confirmThreshold}>
-              {t("Continue")}
-            </Button>
-          </HStack>
-        </VStack>
       ),
     },
     {
@@ -677,39 +804,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       ),
     },
     {
-      key: "visibility",
-      isRelevant: true,
-      isComplete: visibilityChosen,
-      prompt: (
-        <VStack align="stretch" gap="2">
-          <Text textStyle="sm" fontWeight="semibold">
-            {t("Who can join?")}
-          </Text>
-        </VStack>
-      ),
-      answer: (
-        <Text textStyle="sm" color="inherit">
-          {t(form.visibility === ChallengeVisibility.Public ? "Public" : "Private")}
-        </Text>
-      ),
-      controls: (
-        <HStack gap="2" flexWrap="wrap">
-          <Button
-            size="sm"
-            variant={getExplicitChoiceVariant(visibilityChosen, form.visibility === ChallengeVisibility.Public)}
-            onClick={() => flow.chooseVisibility(ChallengeVisibility.Public)}>
-            {t("Public")}
-          </Button>
-          <Button
-            size="sm"
-            variant={getExplicitChoiceVariant(visibilityChosen, form.visibility === ChallengeVisibility.Private)}
-            onClick={() => flow.chooseVisibility(ChallengeVisibility.Private)}>
-            {t("Private")}
-          </Button>
-        </HStack>
-      ),
-    },
-    {
       key: "invitees",
       isRelevant: isPrivate,
       isComplete: inviteesConfirmed,
@@ -790,14 +884,19 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
                 label={t("Choose quest type")}
                 value={t(form.kind === ChallengeKind.Stake ? "Bet" : "Sponsored")}
               />
+              <SummaryItem
+                label={t("Quest type")}
+                value={t(form.challengeType === ChallengeType.SplitWin ? "Split win" : "Max actions")}
+              />
+              {isSplitWin && <SummaryItem label={t("Number of winners")} value={form.numWinners} />}
+              {isSplitWin && <SummaryItem label={t("Actions to claim a slot")} value={form.threshold} />}
+              {isSplitWin && stakeAmountWei > 0n && numWinnersValue > 0 && (
+                <SummaryItem label={t("Prize per winner")} value={`${formatWei(splitWinPrizePerWinner)} B3TR`} />
+              )}
               <SummaryItem label={t("Title (optional)")} value={form.title || t("Skip")} />
               <SummaryItem label={t(amountLabelKey)} value={`${form.stakeAmount} B3TR`} />
               <SummaryItem label={t("Start round")} value={form.startRound} />
               <SummaryItem label={t("Duration")} value={`${duration} ${duration === 1 ? t("round") : t("rounds")}`} />
-              {isSponsored && (
-                <SummaryItem label={t("Winner")} value={t(isSplitPrize ? "Split prize" : "Max actions")} />
-              )}
-              {isSponsored && isSplitPrize && <SummaryItem label={t("Minimum actions")} value={form.threshold} />}
               <SummaryItem
                 label={t("Apps (leave empty for all)")}
                 value={appScope === "selected" ? selectedAppNames.join(", ") : t("All apps")}
@@ -834,8 +933,6 @@ interface InviteeRowProps {
   t: TFunction
 }
 
-// Validation errors are only revealed after the field is blurred so the user can finish
-// typing a domain or address without being interrupted by mid-typing errors.
 const InviteeRow = ({ value, error, onChange, onRemove, t }: InviteeRowProps) => {
   const [touched, setTouched] = useState(false)
   const visibleError = touched ? error : null

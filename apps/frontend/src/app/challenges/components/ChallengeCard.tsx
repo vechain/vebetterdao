@@ -16,20 +16,22 @@ import {
 import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuUsers } from "react-icons/lu"
+import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeView, ParticipantStatus, ThresholdMode } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeType, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 
 import { ChallengeAcceptModal } from "../[challengeId]/components/ChallengeAcceptModal"
 import { ChallengeCancelModal } from "../[challengeId]/components/ChallengeCancelModal"
 import { ChallengeClaimModal } from "../[challengeId]/components/ChallengeClaimModal"
+import { ChallengeCompleteModal } from "../[challengeId]/components/ChallengeCompleteModal"
 import { ChallengeDeclineModal } from "../[challengeId]/components/ChallengeDeclineModal"
-import { ChallengeFinalizeModal } from "../[challengeId]/components/ChallengeFinalizeModal"
 import { ChallengeJoinModal } from "../[challengeId]/components/ChallengeJoinModal"
 import { ChallengeLeaveModal } from "../[challengeId]/components/ChallengeLeaveModal"
 import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefundModal"
+import { ChallengeSplitWinClaimModal } from "../[challengeId]/components/ChallengeSplitWinClaimModal"
+import { ChallengeSplitWinCreatorRefundModal } from "../[challengeId]/components/ChallengeSplitWinCreatorRefundModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
 import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
 import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "../shared/ChallengeStatusBadges"
@@ -50,18 +52,27 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const { onOpen: onRefundOpen, onClose: onRefundClose, open: isRefundOpen } = useDisclosure()
   const { onOpen: onJoinOpen, onClose: onJoinClose, open: isJoinOpen } = useDisclosure()
   const { onOpen: onLeaveOpen, onClose: onLeaveClose, open: isLeaveOpen } = useDisclosure()
-  const { onOpen: onFinalizeOpen, onClose: onFinalizeClose, open: isFinalizeOpen } = useDisclosure()
+  const { onOpen: onCompleteOpen, onClose: onCompleteClose, open: isCompleteOpen } = useDisclosure()
+  const { onOpen: onSplitWinClaimOpen, onClose: onSplitWinClaimClose, open: isSplitWinClaimOpen } = useDisclosure()
+  const { onOpen: onSplitWinRefundOpen, onClose: onSplitWinRefundClose, open: isSplitWinRefundOpen } = useDisclosure()
 
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
-  const winnerTypeLabel = t(
-    challenge.thresholdMode === ThresholdMode.SplitAboveThreshold ? "Split prize" : "Max actions",
-  )
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
+  const winnerTypeLabel = t(isSplitWin ? "Split win" : "Max actions")
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
 
   const prizeLabel = `${getCompactFormatter(2).format(Number(challenge.totalPrize))} B3TR`
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
+  const perWinnerLabel = humanNumber(challenge.prizePerWinner, challenge.prizePerWinner, "B3TR")
+  const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
+  const allSlotsClaimed = isSplitWin && challenge.winnersClaimed >= challenge.numWinners
+  const splitWinRefundLabel = humanNumber(
+    String(slotsLeft * Number(challenge.prizePerWinner)),
+    String(slotsLeft * Number(challenge.prizePerWinner)),
+    "B3TR",
+  )
 
   return (
     <>
@@ -77,6 +88,11 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeStatusBadge challenge={challenge} />
+                  {allSlotsClaimed && (
+                    <Badge variant="neutral" size="sm">
+                      {t("All slots claimed")}
+                    </Badge>
+                  )}
                 </Wrap>
                 <Heading
                   textStyle={{ base: "lg", md: "xl" }}
@@ -98,7 +114,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
               <SimpleGrid columns={{ base: 2, md: 2 }} gap="3" py="2" px="3" w="full">
                 <VStack gap="1" align="start">
                   <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                    {t("Prize")}
+                    {isSplitWin ? t("Prize per winner") : t("Prize")}
                   </Text>
                   <HStack gap="2">
                     <HStack
@@ -113,37 +129,67 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                       <Icon as={B3trSvg} boxSize={4} />
                     </HStack>
                     <Text textStyle="md" fontWeight="bold" color="brand.primary">
-                      {prizeLabel}
+                      {isSplitWin ? perWinnerLabel : prizeLabel}
                     </Text>
                   </HStack>
                 </VStack>
-                <VStack gap="1" align="start">
-                  <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                    {t("Participants")}
-                  </Text>
-                  <HStack gap="2">
-                    <HStack
-                      justify="center"
-                      align="center"
-                      w="7"
-                      h="7"
-                      rounded="full"
-                      bg="status.info.subtle"
-                      color="status.info.primary"
-                      flexShrink={0}>
-                      <Icon boxSize={4}>
-                        <LuUsers />
-                      </Icon>
-                    </HStack>
-                    <Text textStyle="md" fontWeight="bold">
-                      {humanNumber(challenge.participantCount)}
-                      <Text as="span" color="text.subtle" fontWeight="semibold">
-                        {" / "}
-                        {humanNumber(challenge.maxParticipants)}
+                {isSplitWin ? (
+                  <VStack gap="1" align="start">
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {t("Winners")}
+                    </Text>
+                    <HStack gap="2">
+                      <HStack
+                        justify="center"
+                        align="center"
+                        w="7"
+                        h="7"
+                        rounded="full"
+                        bg="status.info.subtle"
+                        color="status.info.primary"
+                        flexShrink={0}>
+                        <Icon boxSize={4}>
+                          <LuTrophy />
+                        </Icon>
+                      </HStack>
+                      <Text textStyle="md" fontWeight="bold">
+                        {humanNumber(challenge.winnersClaimed)}
+                        <Text as="span" color="text.subtle" fontWeight="semibold">
+                          {" / "}
+                          {humanNumber(challenge.numWinners)}
+                        </Text>
                       </Text>
+                    </HStack>
+                  </VStack>
+                ) : (
+                  <VStack gap="1" align="start">
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {t("Participants")}
                     </Text>
-                  </HStack>
-                </VStack>
+                    <HStack gap="2">
+                      <HStack
+                        justify="center"
+                        align="center"
+                        w="7"
+                        h="7"
+                        rounded="full"
+                        bg="status.info.subtle"
+                        color="status.info.primary"
+                        flexShrink={0}>
+                        <Icon boxSize={4}>
+                          <LuUsers />
+                        </Icon>
+                      </HStack>
+                      <Text textStyle="md" fontWeight="bold">
+                        {humanNumber(challenge.participantCount)}
+                        <Text as="span" color="text.subtle" fontWeight="semibold">
+                          {" / "}
+                          {humanNumber(challenge.maxParticipants)}
+                        </Text>
+                      </Text>
+                    </HStack>
+                  </VStack>
+                )}
               </SimpleGrid>
             </VStack>
 
@@ -175,7 +221,15 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 </Icon>
                 {t("Winner")} {winnerTypeLabel}
               </Badge>
-              {challenge.threshold !== "0" && (
+              {isSplitWin && (
+                <Badge variant="neutral" size="sm">
+                  <Icon boxSize={3}>
+                    <LuTarget />
+                  </Icon>
+                  {t("Reach {{actions}} actions to claim", { actions: humanNumber(challenge.threshold) })}
+                </Badge>
+              )}
+              {!isSplitWin && challenge.threshold !== "0" && (
                 <Badge variant="neutral" size="sm">
                   <Icon boxSize={3}>
                     <LuTarget />
@@ -201,7 +255,11 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                   onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
                   onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
                   onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
-                  onFinalizeClick={challenge.canFinalize ? onFinalizeOpen : undefined}
+                  onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
+                  onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
+                  onClaimCreatorSplitWinRefundClick={
+                    challenge.canClaimCreatorSplitWinRefund ? onSplitWinRefundOpen : undefined
+                  }
                 />
               </Box>
             )}
@@ -256,10 +314,24 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
         onClose={onLeaveClose}
         onLeave={() => actions.leaveChallenge(challenge.challengeId)}
       />
-      <ChallengeFinalizeModal
-        isOpen={isFinalizeOpen}
-        onClose={onFinalizeClose}
-        onFinalize={() => actions.finalizeChallenge(challenge.challengeId)}
+      <ChallengeCompleteModal
+        isOpen={isCompleteOpen}
+        onClose={onCompleteClose}
+        onComplete={() => actions.completeChallenge(challenge.challengeId)}
+      />
+      <ChallengeSplitWinClaimModal
+        isOpen={isSplitWinClaimOpen}
+        onClose={onSplitWinClaimClose}
+        prizeLabel={perWinnerLabel}
+        slotsRemaining={slotsLeft}
+        onClaim={() => actions.claimSplitWinPrize(challenge.challengeId)}
+      />
+      <ChallengeSplitWinCreatorRefundModal
+        isOpen={isSplitWinRefundOpen}
+        onClose={onSplitWinRefundClose}
+        refundLabel={splitWinRefundLabel}
+        unclaimedSlots={slotsLeft}
+        onRefund={() => actions.claimCreatorSplitWinRefund(challenge.challengeId)}
       />
     </>
   )

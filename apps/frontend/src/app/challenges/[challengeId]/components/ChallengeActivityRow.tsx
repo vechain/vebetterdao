@@ -20,8 +20,10 @@ const textColor: Record<ActivityEntryType, string> = {
   cancelled: "red.500",
   activated: "green.500",
   invalidated: "red.500",
-  finalized: "yellow.500",
+  completed: "yellow.500",
   payoutClaimed: "green.500",
+  splitWinPrizeClaimed: "green.500",
+  splitWinCreatorRefunded: "text.subtle",
   refundClaimed: "text.subtle",
 }
 
@@ -47,7 +49,7 @@ export const ChallengeActivityRow = ({ entry, challenge }: ChallengeActivityRowP
   const formattedAmount = entry.amount ? humanNumber(entry.amount) : undefined
 
   const label = getActivityLabel(entry.type, formattedAmount, t as (key: string, opts?: object) => string)
-  const finalizedLabel = getFinalizedLabel(entry, t as (key: string, opts?: object) => string)
+  const completedLabel = getCompletedLabel(entry, t as (key: string, opts?: object) => string)
   const invalidReason = entry.type === "invalidated" && challenge ? getChallengeInvalidReason(challenge, t) : null
   const relativeTime = dayjs.unix(entry.timestamp).fromNow()
   const color = textColor[entry.type]
@@ -64,9 +66,9 @@ export const ChallengeActivityRow = ({ entry, challenge }: ChallengeActivityRowP
             label
           )}
         </Text>
-        {finalizedLabel && (
+        {completedLabel && (
           <Text textStyle="xs" color="text.subtle">
-            {finalizedLabel}
+            {completedLabel}
           </Text>
         )}
         {invalidReason && (
@@ -110,21 +112,24 @@ const getActivityLabel = (type: ActivityEntryType, formattedAmount: string | und
       return t("Quest started")
     case "invalidated":
       return t("Quest could not start")
-    case "finalized":
+    case "completed":
       return t("Quest ended")
     case "payoutClaimed":
       return t("claimed prize of {{amount}} B3TR", { amount: formattedAmount ?? "0", ...noEscape })
+    case "splitWinPrizeClaimed":
+      return t("claimed Split Win slot of {{amount}} B3TR", { amount: formattedAmount ?? "0", ...noEscape })
+    case "splitWinCreatorRefunded":
+      return t("refunded {{amount}} B3TR from unclaimed slots", { amount: formattedAmount ?? "0", ...noEscape })
     case "refundClaimed":
       return t("claimed refund of {{amount}} B3TR", { amount: formattedAmount ?? "0", ...noEscape })
   }
 }
 
-const getFinalizedLabel = (entry: ChallengeActivityEntry, t: TFn): string | null => {
-  if (entry.type !== "finalized") return null
+const getCompletedLabel = (entry: ChallengeActivityEntry, t: TFn): string | null => {
+  if (entry.type !== "completed") return null
 
   if (entry.settlementMode === SettlementMode.CreatorRefund) return t("No winner — refunded to creator")
-  if (entry.settlementMode === SettlementMode.QualifiedSplit)
-    return t("{{count}} participants qualified", { count: entry.qualifiedCount ?? 0 })
+  if (entry.settlementMode === SettlementMode.SplitWinCompleted) return t("Split Win quest completed")
 
   const count = entry.bestCount ?? 0
   return count === 1 ? t("1 winner selected") : t("{{count}} winners selected", { count })

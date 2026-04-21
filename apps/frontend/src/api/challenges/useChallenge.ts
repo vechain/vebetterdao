@@ -26,7 +26,7 @@ type RawContractChallengeTuple = [
   challengeId: ContractValue,
   kind: ContractValue,
   visibility: ContractValue,
-  thresholdMode: ContractValue,
+  challengeType: ContractValue,
   status: ContractValue,
   settlementMode: ContractValue,
   creator: string,
@@ -35,15 +35,18 @@ type RawContractChallengeTuple = [
   endRound: ContractValue,
   duration: ContractValue,
   threshold: ContractValue,
+  numWinners: ContractValue,
+  winnersClaimed: ContractValue,
+  prizePerWinner: ContractValue,
   allApps: boolean,
   totalPrize: ContractValue,
   participantCount: ContractValue,
   invitedCount: ContractValue,
   declinedCount: ContractValue,
   selectedAppsCount: ContractValue,
+  winnersCount: ContractValue,
   bestScore: ContractValue,
   bestCount: ContractValue,
-  qualifiedCount: ContractValue,
   payoutsClaimed: ContractValue,
   title: string,
   description: string,
@@ -79,53 +82,62 @@ const mapContractChallengeDetail = ({
   invited,
   declined,
   selectedApps,
+  winners,
   viewerStatus,
   isInvitationEligible,
+  isSplitWinWinner,
 }: {
   challenge: RawContractChallengeTuple
   participants: unknown
   invited: unknown
   declined: unknown
   selectedApps: unknown
+  winners: unknown
   viewerStatus?: bigint | number | string
   isInvitationEligible?: boolean
+  isSplitWinWinner?: boolean
 }): ChallengeDetailResolverInput => ({
   challengeId: toNumber(challenge[0]),
   createdAt: 0,
   kind: toNumber(challenge[1]) as ChallengeDetailResolverInput["kind"],
   visibility: toNumber(challenge[2]) as ChallengeDetailResolverInput["visibility"],
-  thresholdMode: toNumber(challenge[3]) as ChallengeDetailResolverInput["thresholdMode"],
+  challengeType: toNumber(challenge[3]) as ChallengeDetailResolverInput["challengeType"],
   status: toNumber(challenge[4]) as ChallengeDetailResolverInput["status"],
   settlementMode: toNumber(challenge[5]) as ChallengeDetailResolverInput["settlementMode"],
   creator: challenge[6],
-  title: challenge[22],
-  description: challenge[23],
-  imageURI: challenge[24],
-  metadataURI: challenge[25],
+  title: challenge[25],
+  description: challenge[26],
+  imageURI: challenge[27],
+  metadataURI: challenge[28],
   stakeAmount: formatTokenAmount(challenge[7]),
-  totalPrize: formatTokenAmount(challenge[13]),
+  totalPrize: formatTokenAmount(challenge[16]),
   startRound: toNumber(challenge[8]),
   endRound: toNumber(challenge[9]),
   duration: toNumber(challenge[10]),
   threshold: toBigInt(challenge[11]).toString(),
-  allApps: challenge[12],
-  participantCount: toNumber(challenge[14]),
-  invitedCount: toNumber(challenge[15]),
-  declinedCount: toNumber(challenge[16]),
-  selectedAppsCount: toNumber(challenge[17]),
-  bestScore: toBigInt(challenge[18]).toString(),
-  bestCount: toNumber(challenge[19]),
-  qualifiedCount: toNumber(challenge[20]),
-  payoutsClaimed: toNumber(challenge[21]),
+  numWinners: toNumber(challenge[12]),
+  winnersClaimed: toNumber(challenge[13]),
+  prizePerWinner: formatTokenAmount(challenge[14]),
+  allApps: challenge[15],
+  participantCount: toNumber(challenge[17]),
+  invitedCount: toNumber(challenge[18]),
+  declinedCount: toNumber(challenge[19]),
+  selectedAppsCount: toNumber(challenge[20]),
+  winnersCount: toNumber(challenge[21]),
+  bestScore: toBigInt(challenge[22]).toString(),
+  bestCount: toNumber(challenge[23]),
+  payoutsClaimed: toNumber(challenge[24]),
   participants: normalizeStringArray(participants),
   invited: normalizeStringArray(invited),
   declined: normalizeStringArray(declined),
   selectedApps: normalizeStringArray(selectedApps),
+  winners: normalizeStringArray(winners),
   viewerStatus:
     viewerStatus !== undefined
       ? (toNumber(unwrapValue(viewerStatus) as ContractValue) as ChallengeDetailResolverInput["viewerStatus"])
       : ParticipantStatus.None,
   isInvitationEligible: Boolean(unwrapValue(isInvitationEligible)),
+  isSplitWinWinner: Boolean(unwrapValue(isSplitWinWinner)),
 })
 
 export const getChallengeQueryKey = (challengeId: string, viewerAddress?: string) => [
@@ -186,20 +198,33 @@ export const useChallenge = (challengeId: string, viewerAddress?: string, option
         return null
       }
 
-      const [rawChallenge, participants, invited, declined, selectedApps, rawViewerStatus, rawInvitationEligible] =
-        await Promise.all([
-          contract.read.getChallenge!(BigInt(parsedChallengeId)),
-          contract.read.getChallengeParticipants!(BigInt(parsedChallengeId)),
-          contract.read.getChallengeInvited!(BigInt(parsedChallengeId)),
-          contract.read.getChallengeDeclined!(BigInt(parsedChallengeId)),
-          contract.read.getChallengeSelectedApps!(BigInt(parsedChallengeId)),
-          viewerAddress
-            ? contract.read.getParticipantStatus!(BigInt(parsedChallengeId), viewerAddress as `0x${string}`)
-            : Promise.resolve(undefined),
-          viewerAddress
-            ? contract.read.isInvitationEligible!(BigInt(parsedChallengeId), viewerAddress as `0x${string}`)
-            : Promise.resolve(undefined),
-        ])
+      const [
+        rawChallenge,
+        participants,
+        invited,
+        declined,
+        selectedApps,
+        winners,
+        rawViewerStatus,
+        rawInvitationEligible,
+        rawIsSplitWinWinner,
+      ] = await Promise.all([
+        contract.read.getChallenge!(BigInt(parsedChallengeId)),
+        contract.read.getChallengeParticipants!(BigInt(parsedChallengeId)),
+        contract.read.getChallengeInvited!(BigInt(parsedChallengeId)),
+        contract.read.getChallengeDeclined!(BigInt(parsedChallengeId)),
+        contract.read.getChallengeSelectedApps!(BigInt(parsedChallengeId)),
+        contract.read.getChallengeWinners!(BigInt(parsedChallengeId)),
+        viewerAddress
+          ? contract.read.getParticipantStatus!(BigInt(parsedChallengeId), viewerAddress as `0x${string}`)
+          : Promise.resolve(undefined),
+        viewerAddress
+          ? contract.read.isInvitationEligible!(BigInt(parsedChallengeId), viewerAddress as `0x${string}`)
+          : Promise.resolve(undefined),
+        viewerAddress
+          ? contract.read.isSplitWinWinner!(BigInt(parsedChallengeId), viewerAddress as `0x${string}`)
+          : Promise.resolve(undefined),
+      ])
 
       return mapContractChallengeDetail({
         challenge: unwrapValue(rawChallenge) as RawContractChallengeTuple,
@@ -207,8 +232,10 @@ export const useChallenge = (challengeId: string, viewerAddress?: string, option
         invited,
         declined,
         selectedApps,
+        winners,
         viewerStatus: rawViewerStatus as bigint | number | string | undefined,
         isInvitationEligible: rawInvitationEligible as boolean | undefined,
+        isSplitWinWinner: rawIsSplitWinWinner as boolean | undefined,
       })
     },
     enabled:

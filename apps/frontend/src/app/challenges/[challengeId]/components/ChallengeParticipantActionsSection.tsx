@@ -22,7 +22,13 @@ import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
-import { ChallengeDetail, ChallengeStatus, ChallengeVisibility, SettlementMode } from "@/api/challenges/types"
+import {
+  ChallengeDetail,
+  ChallengeStatus,
+  ChallengeType,
+  ChallengeVisibility,
+  SettlementMode,
+} from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -193,26 +199,26 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
     return blockNumberToDate(BigInt(deadlineBlock), bestBlock)
   }, [isPending, deadlineBlock, bestBlock])
 
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const winnerAddresses = useMemo(() => {
-    if (challenge.status !== ChallengeStatus.Finalized || challenge.settlementMode === SettlementMode.CreatorRefund)
-      return []
+    // Split Win winners come straight from the contract list (claim order).
+    if (isSplitWin) return challenge.winners
 
-    if (challenge.settlementMode === SettlementMode.QualifiedSplit) {
-      return leaderboard.filter(entry => entry.actions >= Number(challenge.threshold)).map(entry => entry.participant)
-    }
+    if (challenge.status !== ChallengeStatus.Completed || challenge.settlementMode === SettlementMode.CreatorRefund)
+      return []
 
     const bestScore = leaderboard[0]?.actions
     return typeof bestScore === "number"
       ? leaderboard.filter(entry => entry.actions === bestScore).map(entry => entry.participant)
       : []
-  }, [challenge.settlementMode, challenge.status, challenge.threshold, leaderboard])
+  }, [isSplitWin, challenge.winners, challenge.settlementMode, challenge.status, leaderboard])
 
   const chartData = useMemo<ChartEntry[]>(() => {
     const bestScore = leaderboard[0]?.actions ?? 0
 
     return leaderboard.map(entry => {
       const isWinner =
-        challenge.status === ChallengeStatus.Finalized
+        challenge.status === ChallengeStatus.Completed || isSplitWin
           ? winnerAddresses.some(address => compareAddresses(address, entry.participant))
           : leaderboard.length > 0 && entry.actions === bestScore
 
@@ -223,10 +229,20 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
         fill: isWinner ? leaderColor : trailingColor,
       }
     })
-  }, [challenge.status, leaderColor, leaderboard, trailingColor, winnerAddresses])
+  }, [challenge.status, isSplitWin, leaderColor, leaderboard, trailingColor, winnerAddresses])
 
   const outcome = useMemo(() => {
-    if (challenge.status !== ChallengeStatus.Finalized) return null
+    // Split Win surfaces winners as soon as anyone claims (live, even while Active).
+    if (isSplitWin) {
+      if (winnerAddresses.length === 0) return null
+      return {
+        kind: "winner" as const,
+        addresses: winnerAddresses,
+        isViewerWinner: !!viewerAddress && winnerAddresses.some(address => compareAddresses(address, viewerAddress)),
+      }
+    }
+
+    if (challenge.status !== ChallengeStatus.Completed) return null
 
     if (challenge.settlementMode === SettlementMode.CreatorRefund) {
       return {
@@ -241,7 +257,7 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
       addresses: winnerAddresses,
       isViewerWinner: !!viewerAddress && winnerAddresses.some(address => compareAddresses(address, viewerAddress)),
     }
-  }, [challenge.creator, challenge.settlementMode, challenge.status, viewerAddress, winnerAddresses])
+  }, [isSplitWin, challenge.creator, challenge.settlementMode, challenge.status, viewerAddress, winnerAddresses])
 
   const chartHeight = Math.max(220, chartData.length * 44)
 

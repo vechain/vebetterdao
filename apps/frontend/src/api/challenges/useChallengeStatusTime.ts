@@ -14,7 +14,7 @@ const blockTime = getConfig().network.blockTime
  * Estimates a relevant timestamp for the challenge based on its status:
  * - Pending → estimated start time (from startRound voteStart block)
  * - Active → estimated end time (from endRound voteEnd block)
- * - Finalized → estimated end time (from endRound voteEnd block)
+ * - Completed → estimated end time (from endRound voteEnd block)
  * - Cancelled/Invalid → null
  *
  * Uses known round events when available; extrapolates from the current
@@ -50,7 +50,7 @@ export const useChallengeStatusTime = (challenge: ChallengeView): dayjs.Dayjs | 
       case ChallengeStatus.Pending:
         return toTime(estimateBlock(challenge.startRound, "start"))
       case ChallengeStatus.Active:
-      case ChallengeStatus.Finalized:
+      case ChallengeStatus.Completed:
         return toTime(estimateBlock(challenge.endRound, "end"))
       default:
         return null
