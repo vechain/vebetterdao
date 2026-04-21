@@ -1,7 +1,7 @@
 # B3TR Monorepo
 
-![Scorecard Badge](https://github.com/vechain/b3tr/blob/feature/scorecard-action/.assets/scorecard-badge.svg)
 ![Security Checks Badge](https://github.com/vechain/b3tr/actions/workflows/security-checks.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ```
                                       #######
@@ -26,34 +26,51 @@
                                    #########
 ```
 
-B3TR monorepo intended to contain everything around apps, contracts, utils and in general everything needed to setup and deploy the B3TR ecosystem
+B3TR is the monorepo behind the [VeBetterDAO](https://governance.vebetterdao.org) ecosystem — frontend, smart contracts, indexer setup, and serverless backend, all in one place.
 
-## Why a monorepo ?
+## What's in here
 
-Although this architecture may not be definitive and may change in the future if deemed inappropriate, monorepo is a great way to **organize everything in the same place** and at the same time, **reducing code duplication** and **simplify local development**.
+| Path | What it is |
+| --- | --- |
+| `apps/frontend` | Next.js 14 governance dApp |
+| `packages/contracts` | VeBetterDAO Solidity smart contracts (Hardhat) |
+| `packages/indexer` | Docker-compose for the [VeChain indexer](https://github.com/vechain/vechain-indexer) + MongoDB + block explorer |
+| `packages/lambda` | AWS Lambda functions (round automation, relayer, NFT minting, etc.) |
+| `packages/config` | Per-environment configuration and contract addresses |
+| `packages/constants` | Shared constants |
+| `packages/utils` | Shared utilities |
 
-Having said so, without considering the better DX, we can use it to share utils, contracts, linter and typescript configuration and more between our apps or services.
+**Related repos:**
 
-## Monorepo architecture
+- [vechain-kit](https://github.com/vechain/vechain-kit) — React hooks & components for VeChain dApps
+- [vechain-indexer](https://github.com/vechain/vechain-indexer) — blockchain indexer used by this project
+- [vebetterdao-relayers-dashboard](https://github.com/vechain/vebetterdao-relayers-dashboard) — relayer analytics dashboard
+- [vebetterdao-relayer-node](https://github.com/vechain/vebetterdao-relayer-node) — relayer node for auto-voting and reward claiming
+- [vechain-ai-skills](https://github.com/vechain/vechain-ai-skills) — AI-ready context for VeChain development
 
-We're using [turbo](https://www.npmjs.com/package/turbo) and yarn to manage the monorepo. The architecture and file structure it's turbo's standard one:
+## Why a monorepo?
 
-- apps: Contains apps or backends and in general application layer services;
-- packages: reusable and sharable code, libraries, configurations;
+Using [Turborepo](https://turbo.build/repo) + Yarn keeps everything in one place, reduces code duplication, and simplifies local development. Shared packages (config, constants, utils, linting, TypeScript config) are reused across apps and services.
 
 ## Developing with monorepo
 
-I suggest installing [this](https://marketplace.visualstudio.com/items?itemName=folke.vscode-monorepo-workspace) extension for a better DX. Not sure what's the IntelliJ's equivalent
+We recommend installing the [Monorepo Workspace](https://marketplace.visualstudio.com/items?itemName=folke.vscode-monorepo-workspace) VS Code extension for a better DX.
 
 ## Setting up the dev environment
+
+### Prerequisites
+
+| Tool | Version / Notes |
+| --- | --- |
+| **Node.js** | See `.nvmrc` (currently v20.19.0) — use `nvm use` |
+| **Yarn** | 1.x (classic) |
+| **Docker** | With the Compose plugin (`docker compose`) |
+| **Make** | Pre-installed on macOS/Linux |
 
 ### Install packages
 
 ```
 nvm use
-```
-
-```
 yarn install
 ```
 
@@ -63,8 +80,6 @@ yarn install
 cp .env.example .env
 ```
 
-> docker and the compose plugin (prev docker-compose) are required in order to run the project
-
 ```
 make solo-up
 ```
@@ -73,12 +88,14 @@ make solo-up
 yarn dev
 ```
 
-If contracts are not deployed, the script will deploy them automatically. In order to this to work, the `MNEMONIC` variable need to be set in the `.env` file.
+If contracts are not deployed, the script will deploy them automatically. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
+
+> **First run note:** the script compiles and deploys ~30 contracts to thor-solo. **This can take up to 5 minutes.** Log lines will appear continuously — do not Ctrl-C.
 
 This command relies on a turbo pipeline which:
 
-- check if the contracts specified under `./packages/config/local` have been deployed, possibly deploying them if they weren't (config is updated automatically);
-- run the frontend using the updated config;
+- checks if the contracts specified under `./packages/config/local` have been deployed, deploying them if they weren't (config is updated automatically);
+- runs the frontend using the updated config;
 
 If you need to start again you can stop the frontend from running and restart thor solo by running:
 
@@ -86,7 +103,7 @@ If you need to start again you can stop the frontend from running and restart th
 make solo-down
 ```
 
-Thor solo will persist it's state to a volume. To clear this state run:
+Thor solo will persist its state to a volume. To clear this state run:
 
 ```
 make solo-clean
@@ -96,9 +113,9 @@ make solo-clean
 make solo-up
 ```
 
-### Block Explorer & Indexer (Local)
+### Block Explorer & Indexer (Local) — Optional
 
-The local setup includes a block explorer and indexer running against the solo network.
+The block explorer and indexer stack is **optional** — only needed when working on pages that read from the indexer API. The local setup runs them against the solo network.
 
 #### Workflow
 
@@ -153,136 +170,21 @@ make indexer-clean   # Stop + remove indexer volumes
 yarn dev:staging
 ```
 
-If contracts are not deployed, the script will deploy them automatically. In order to this to work, the `MNEMONIC` variable need to be set in the `.env` file.
-Ensure that the urls in `./packages/config/testnet-staging.ts` are pointing to the correct solo node.
-
-This command relies on a turbo pipeline which:
-
-- check if the contracts specified under `./packages/config/testnet-staging` have been deployed, possibly deploying them if they weren't (config is updated automatically);
-- run the frontend using the updated config;
+The `MNEMONIC` variable must be set in the `.env` file. Ensure the URLs in `./packages/config/testnet-staging.ts` point to the correct node.
 
 We are using the testnet network for our staging environment.
-
-If you need to redeploy the contracts, you will first need to change the `b3trContractAddress` in `./packages/config/testnet-staging.ts` to `0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc`, stop the frontend from running and then run again the command above.
 
 ### Spin up the project pointing to the testnet environment
 
 ```
-
 yarn dev:testnet
-
 ```
 
-If contracts are not deployed, the script will deploy them automatically. In order to this to work, the `MNEMONIC` variable need to be set in the `.env` file.
+The `MNEMONIC` variable must be set in the `.env` file. This does not require the solo node to be running locally.
 
-This command relies on a turbo pipeline which:
+## Frontend Deployment
 
-- check if the contracts specified under `./packages/config/local` have been deployed, possibly deploying them if they weren't (config is updated automatically);
-- run the frontend using the updated config;
-
-It also does not require the solo node to be running locally, as it will point to the staging environment.
-
-## Dev Testnet environment
-
-The dev testnet environment is a testnet that is used for testing purposes by developers that want to join VeBetter.
-It is not the "testnet" environment used the first time we deployed, but a new one that is used for testing purposes.
-This environment is more focused on developer ux and needs (eg: faster voting rounds, a B3TR faucet, all can see settings, priority is given to the developer's needs).
-
-To deploy changes to this environment, merge your PR to `main`. This will automatically trigger a deployment to dev.testnet.governance.vebetterdao.org.
-
-## Frontend App Deployment
-
-### Environments
-
-| Environment        | How to Deploy                                 |
-| ------------------ | --------------------------------------------- |
-| **Dev**            | Merge PR to `main` with version label         |
-| **Staging & Beta** | Merge PR to `main` with version label         |
-| **Production**     | Manual deploy from Github Actions (see below) |
-| **Preview**        | Automatic for every PR                        |
-
-### Versioning
-
-All PRs require a version label:
-
-- `increment:patch` - Bug fixes
-- `increment:minor` - New features, backwards compatible
-- `increment:major` - New features/changes, backwards incompatible
-
-There is no longer any need to manually update the version field in package.json. Versioning is managed entirely by the git tags - all you need to do is select the appropriate label for your PR, depending on the type of changes it contains. Versions are reflected in the UI Footer as follows:
-
-- Production:
-  Version tag deployed eg `Version 1.40.2`
-- Staging & Beta:
-  Version tag prefixed with env eg `Version beta-v.1.40.2`
-- Dev-testnet:
-  Short git SHA prefixed with env eg `Version dev-2190d5e`
-- Previews:
-  <pull request number>-<commit sha>-<flavor> eg `Version `pr-2930-29f07d1-staging`
-
-### Deploying to Production
-
-There is no need to manually create Releases or tags. Releases with changelogs will be automatically generated by a successful production deployment.
-
-1. Merge your PR to `main` with the appropriate version label
-2. Verify staging and beta environments are behaving as expected with the new changes
-3. Go to **Actions → Deploy Frontend - Production → Run workflow**
-4. Select the version tag you want to deploy (e.g., `v.1.5.0`) from the dropdown
-5. Choose `deploy` to apply
-
-### Preview Environments
-
-Preview environments are automatically created for every PR and posted as a comment. They are destroyed when the PR is closed.
-
-- **PRs to `main`** → dev + staging + beta previews
-
-### Adding Environment Variables
-
-There are two types of environment variables:
-
-#### Build-time Variables (non-sensitive only)
-
-These are baked into the Docker image at build time. They must be non-sensitive as they're visible in the build logs.
-
-To add a new build-time variable:
-
-1. Add it to the GitHub Environment **`AWS <env> governance build-time`** for each environment (dev, staging, beta, prod)
-2. Add the `ARG` and `ENV` lines to `Dockerfile`
-3. Add it to the `build-args` section in `.github/workflows/build-push-ecr.yml`
-
-Example:
-
-```dockerfile
-# Dockerfile
-ARG NEXT_PUBLIC_MY_NEW_VAR
-ENV NEXT_PUBLIC_MY_NEW_VAR=${NEXT_PUBLIC_MY_NEW_VAR}
-```
-
-```yaml
-# build-push-ecr.yml (in build-args section)
-NEXT_PUBLIC_MY_NEW_VAR=${{ vars.NEXT_PUBLIC_MY_NEW_VAR || ''}}
-```
-
-#### Runtime Variables (sensitive or non-sensitive)
-
-These are injected at runtime from AWS SSM Parameter Store. Use these for secrets or values that differ per environment.
-
-To add a new runtime variable:
-
-1. Add the value to **AWS SSM Parameter Store** under the environment's prefix (e.g., `/governance/beta/MY_SECRET`)
-2. Add the variable name to the environment's Terraform config:
-   - Non-sensitive: add to `runtime_env_var_names` in `terraform/frontend/environments/env/<env>/<env>.yaml`
-   - Sensitive: add to `runtime_env_secret_names` in the same file
-
-Example in `beta.yaml`:
-
-```yaml
-runtime_env_var_names:
-  - MY_NEW_VAR
-
-runtime_env_secret_names:
-  - MY_NEW_SECRET
-```
+For deployment details (environments, versioning, CI/CD, environment variables, AWS/Terraform config), see [docs/maintainers.md](docs/maintainers.md).
 
 ## Smart contracts
 
@@ -300,28 +202,22 @@ You can set these variables in the `.env` file.
 Run this command to install the dependencies:
 
 ```
-
 yarn install
-
 ```
 
 If you want to test/deploy contracts against vechain thor solo, you need to have the solo node running. You can start the solo node by running:
 
 ```
-
 make solo-up
-
 ```
 
 Stop it by running:
 
 ```
-
 make solo-down
-
 ```
 
-Thor solo will persist it's state to a volume. To clear this state run:
+Thor solo will persist its state to a volume. To clear this state run:
 
 ```
 make solo-clean
@@ -338,9 +234,7 @@ Each environment has its own configuration file under `./packages/config/contrac
 To compile the contracts run from root folder:
 
 ```
-
 yarn contracts:compile
-
 ```
 
 ### Publish
@@ -351,8 +245,6 @@ To publish contracts package to the npm `@vechain/vebetterdao-contracts`, run fr
 yarn contracts:publish
 ```
 
-After publishing make sure to push your commit with latest version of contracts package and sync changes with the public repo `@vechain/vebetterdao-contracts`
-
 ### Test
 
 Since we are using a monorepo structure, we can run the tests only from the root folder.
@@ -360,9 +252,7 @@ Since we are using a monorepo structure, we can run the tests only from the root
 To run the tests run from root folder:
 
 ```
-
 yarn contracts:test
-
 ```
 
 This will run tests against the hardhat local network.
@@ -370,17 +260,13 @@ This will run tests against the hardhat local network.
 If you want to run tests against vechain thor solo, you need to have the solo node running. You can start the solo node by running:
 
 ```
-
 make solo-up
-
 ```
 
 Then run the tests with:
 
 ```
-
 yarn contracts:test:thor-solo
-
 ```
 
 ### Test coverage
@@ -389,9 +275,7 @@ This project uses `solidity-coverage` to generate test coverage reports.
 You can view the coverage report by running:
 
 ```
-
 yarn test:coverage:solidity
-
 ```
 
 This will generate a folder `coverage` in `packages/contracts` with the coverage report. Open the `index.html` file in the browser to view it.
@@ -409,15 +293,11 @@ The governance contracts are forked from the `openzeppelin-contracts` library. A
 #### Deploy to local thor solo
 
 ```
-
 make solo-up
-
 ```
 
 ```
-
 yarn contracts:deploy
-
 ```
 
 The addresses will be outputted in the console. If you want the frontend to use those addresses then copy them in the `local.ts` file inside `./packages/config/`.
@@ -428,9 +308,7 @@ First browse to `./packages/config/testnet-staging.ts` and set the url of your s
 Then run the following command:
 
 ```
-
 yarn contracts:deploy:testnet-staging
-
 ```
 
 #### Deploy to testnet
@@ -438,9 +316,7 @@ yarn contracts:deploy:testnet-staging
 Run the following command:
 
 ```
-
 yarn contracts:deploy:testnet
-
 ```
 
 Addresses will be outputted in the console. If you want the frontend to use those addresses then copy them in the `testnet.ts` file inside `./packages/config/`.
@@ -451,8 +327,6 @@ Slither is running in a gha workflow every time there is any changes in the cont
 It will report any issues found in the contracts.
 
 It is possible to mark false positives by updating the `slither.config.json` file. Eg:
-
-````json
 
 ```json
 {
@@ -465,7 +339,7 @@ It is possible to mark false positives by updating the `slither.config.json` fil
     }
   ]
 }
-````
+```
 
 It is possible to:
 
@@ -518,3 +392,15 @@ The documentation will be generated in the `docs` folder inside `./packages/cont
 ## Generate i18n files
 
 To regenerate the i18n translation files run the claude skill `translate`.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on branching, PR labels, testing, and code style.
+
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
