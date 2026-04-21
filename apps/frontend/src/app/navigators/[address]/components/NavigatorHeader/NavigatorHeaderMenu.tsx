@@ -1,11 +1,13 @@
 import { IconButton, Menu, Portal } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { FaEllipsisVertical } from "react-icons/fa6"
-import { LuDoorOpen, LuLogOut, LuPencil, LuShare2 } from "react-icons/lu"
+import { LuDoorOpen, LuLogOut, LuPencil, LuShare2, LuUser } from "react-icons/lu"
 
 import { type NavigatorStatusValue } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 
 type Props = {
+  address: string
   isDelegatedHere: boolean
   isOwnPage: boolean
   status: NavigatorStatusValue
@@ -16,6 +18,7 @@ type Props = {
 }
 
 export const NavigatorHeaderMenu = ({
+  address,
   isDelegatedHere,
   isOwnPage,
   status,
@@ -25,6 +28,7 @@ export const NavigatorHeaderMenu = ({
   onAnnounceExit,
 }: Props) => {
   const { t } = useTranslation()
+  const router = useRouter()
 
   return (
     <Menu.Root>
@@ -36,6 +40,10 @@ export const NavigatorHeaderMenu = ({
       <Portal>
         <Menu.Positioner>
           <Menu.Content bg={{ base: "white", _dark: "#2D3748" }}>
+            <Menu.Item value="go-to-profile" cursor="pointer" onClick={() => router.push(`/profile/${address}`)}>
+              <LuUser />
+              {t("Go to Profile")}
+            </Menu.Item>
             <Menu.Item value="share" cursor="pointer" onClick={onShareClick}>
               <LuShare2 />
               {t("Share")}

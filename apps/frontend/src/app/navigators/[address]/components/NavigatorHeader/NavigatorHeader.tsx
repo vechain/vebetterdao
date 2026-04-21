@@ -84,8 +84,6 @@ export const NavigatorHeader = ({
     hasStake,
     isNavigator: !!isNavigator,
   })
-  const showMenu = isOwnPage || mainAction !== "share"
-
   const handleShare = () => setIsShareOpen(true)
 
   const mainButtonConfig: Record<MainAction, { label: string; onClick: () => void; variant: "primary" | "secondary" }> =
@@ -125,17 +123,16 @@ export const NavigatorHeader = ({
                 {mainAction === "share" && <LuShare2 />}
                 {label}
               </Button>
-              {showMenu && (
-                <NavigatorHeaderMenu
-                  isDelegatedHere={isDelegatedHere}
-                  isOwnPage={isOwnPage}
-                  status={status}
-                  onExitDelegation={onExitDelegation}
-                  onShareClick={handleShare}
-                  onEditProfile={onEditProfile}
-                  onAnnounceExit={onAnnounceExit}
-                />
-              )}
+              <NavigatorHeaderMenu
+                address={address}
+                isDelegatedHere={isDelegatedHere}
+                isOwnPage={isOwnPage}
+                status={status}
+                onExitDelegation={onExitDelegation}
+                onShareClick={handleShare}
+                onEditProfile={onEditProfile}
+                onAnnounceExit={onAnnounceExit}
+              />
             </HStack>
           </HStack>
 
