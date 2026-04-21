@@ -122,7 +122,9 @@ export const resolveChallengeDetail = ({
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const hasClaimed = includesAddress(challenge.claimedBy, viewerAddress)
   const hasRefunded = includesAddress(challenge.refundedBy, viewerAddress)
-  const isSplitWinWinner = includesAddress(challenge.winners, viewerAddress)
+  // MaxActions challenges with TopWinners settlement also populate `winners`,
+  // so gate this strictly on Split Win to avoid mislabelling MaxActions top-winners.
+  const isSplitWinWinner = isSplitWin && includesAddress(challenge.winners, viewerAddress)
   // Split Win challenges have no participant cap by design.
   const hasReachedParticipantLimit = !isSplitWin && challenge.participantCount >= challenge.maxParticipants
   const canJoin =

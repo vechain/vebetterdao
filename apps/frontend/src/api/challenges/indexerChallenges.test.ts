@@ -177,6 +177,27 @@ describe("mapIndexerChallengeDetail", () => {
     expect(detail.participants).toEqual(["0xdef"])
   })
 
+  it("does not flag MaxActions top-winners as split-win winners", () => {
+    const detail = mapIndexerChallengeDetail(
+      createChallengeDetail({
+        lifecycleStatus: "Completed",
+        phase: "Ended",
+        challengeType: "MaxActions",
+        settlementMode: "TopWinners",
+        winners: ["0xdef"],
+        participants: ["0xdef"],
+      }),
+      "0xdef",
+      {
+        currentRound: 6,
+      },
+    )
+
+    expect(detail.challengeType).toBe(ChallengeType.MaxActions)
+    expect(detail.viewerStatus).toBe(ParticipantStatus.Joined)
+    expect(detail.isSplitWinWinner).toBe(false)
+  })
+
   it("derives split-win creator refund state from raw detail flags", () => {
     const detail = mapIndexerChallengeDetail(
       createChallengeDetail({
