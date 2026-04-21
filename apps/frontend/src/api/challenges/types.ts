@@ -58,13 +58,6 @@ export const ChallengeAction = {
 } as const
 export type ChallengeAction = (typeof ChallengeAction)[keyof typeof ChallengeAction]
 
-export const UserChallengeListType = {
-  actionable: "actionable",
-  participating: "participating",
-  history: "history",
-} as const
-export type UserChallengeListType = (typeof UserChallengeListType)[keyof typeof UserChallengeListType]
-
 export const challengeMetadataByteLimits = {
   title: 120,
   description: 500,
@@ -131,6 +124,9 @@ export interface ChallengeView {
   canComplete: boolean
   canClaimSplitWin: boolean
   canClaimCreatorSplitWinRefund: boolean
+  isActionable: boolean
+  isParticipating: boolean
+  isHistorical: boolean
 }
 
 export interface ChallengeDetail extends ChallengeView {
@@ -141,15 +137,9 @@ export interface ChallengeDetail extends ChallengeView {
   winners: string[]
 }
 
-export interface ChallengeUserState {
+export interface WalletChallengeRef {
   challengeId: number
   createdAt: number
-  viewerRelation: ChallengeViewerRelation
-  availableActions: ChallengeAction[]
-  participantActions: string
-  isActionable: boolean
-  isParticipating: boolean
-  isHistorical: boolean
 }
 
 export interface PaginatedChallengeSection {

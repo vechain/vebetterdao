@@ -39,6 +39,7 @@ const createChallenge = (overrides: Partial<ChallengeDetailResolverInput> = {}):
   prizePerWinner: "50",
   allApps: true,
   participantCount: 0,
+  maxParticipants: 10,
   invitedCount: 0,
   declinedCount: 0,
   selectedAppsCount: 0,
@@ -51,9 +52,10 @@ const createChallenge = (overrides: Partial<ChallengeDetailResolverInput> = {}):
   declined: [],
   selectedApps: [],
   winners: [],
-  viewerStatus: ParticipantStatus.None,
-  isInvitationEligible: false,
-  isSplitWinWinner: false,
+  eligibleInvitees: [],
+  claimedBy: [],
+  refundedBy: [],
+  creatorRefunded: false,
   ...overrides,
 })
 
@@ -63,9 +65,6 @@ describe("resolveChallengeDetail", () => {
       challenge: createChallenge(),
       viewerAddress: VIEWER,
       currentRound: 4,
-      maxParticipants: 10,
-      hasClaimed: false,
-      hasRefunded: false,
     })
 
     expect(detail.canJoin).toBe(true)
@@ -77,19 +76,32 @@ describe("resolveChallengeDetail", () => {
     const detail = resolveChallengeDetail({
       challenge: createChallenge({
         visibility: ChallengeVisibility.Private,
-        viewerStatus: ParticipantStatus.Declined,
-        isInvitationEligible: true,
+        declined: [VIEWER],
+        eligibleInvitees: [VIEWER],
       }),
       viewerAddress: VIEWER,
       currentRound: 4,
-      maxParticipants: 10,
-      hasClaimed: false,
-      hasRefunded: false,
     })
 
+    expect(detail.viewerStatus).toBe(ParticipantStatus.Declined)
     expect(detail.isInvitationPending).toBe(true)
     expect(detail.canAccept).toBe(true)
     expect(detail.canDecline).toBe(false)
+  })
+
+  it("derives cancel and add-invites for a pending private creator challenge", () => {
+    const detail = resolveChallengeDetail({
+      challenge: createChallenge({
+        visibility: ChallengeVisibility.Private,
+        creator: CREATOR,
+        startRound: 6,
+      }),
+      viewerAddress: CREATOR,
+      currentRound: 4,
+    })
+
+    expect(detail.canCancel).toBe(true)
+    expect(detail.canAddInvites).toBe(true)
   })
 
   it("allows completion after the end round for a participant of a Max Actions challenge", () => {
@@ -100,16 +112,12 @@ describe("resolveChallengeDetail", () => {
         numWinners: 0,
         prizePerWinner: "0",
         status: ChallengeStatus.Active,
-        viewerStatus: ParticipantStatus.Joined,
-        participantCount: 1,
         participants: [VIEWER],
+        participantCount: 1,
         endRound: 7,
       }),
       viewerAddress: VIEWER,
       currentRound: 8,
-      maxParticipants: 10,
-      hasClaimed: false,
-      hasRefunded: false,
     })
 
     expect(detail.canComplete).toBe(true)
@@ -122,9 +130,6 @@ describe("resolveChallengeDetail", () => {
       }),
       viewerAddress: VIEWER,
       currentRound: 4,
-      maxParticipants: 10,
-      hasClaimed: false,
-      hasRefunded: false,
     })
 
     expect(detail.canJoin).toBe(true)
@@ -137,9 +142,8 @@ describe("resolveChallengeDetail", () => {
       threshold: "5",
       numWinners: 2,
       winnersClaimed: 0,
-      viewerStatus: ParticipantStatus.Joined,
-      participantCount: 1,
       participants: [VIEWER],
+      participantCount: 1,
     })
 
     expect(
@@ -147,9 +151,6 @@ describe("resolveChallengeDetail", () => {
         challenge,
         viewerAddress: VIEWER,
         currentRound: 6,
-        maxParticipants: 10,
-        hasClaimed: false,
-        hasRefunded: false,
         participantActions: 5n,
       }).canClaimSplitWin,
     ).toBe(true)
@@ -159,9 +160,6 @@ describe("resolveChallengeDetail", () => {
         challenge,
         viewerAddress: VIEWER,
         currentRound: 6,
-        maxParticipants: 10,
-        hasClaimed: false,
-        hasRefunded: false,
         participantActions: 4n,
       }).canClaimSplitWin,
     ).toBe(false)
@@ -176,15 +174,11 @@ describe("resolveChallengeDetail", () => {
           threshold: "1",
           numWinners: 1,
           winnersClaimed: 1,
-          viewerStatus: ParticipantStatus.Joined,
-          participantCount: 1,
           participants: [VIEWER],
+          participantCount: 1,
         }),
         viewerAddress: VIEWER,
         currentRound: 6,
-        maxParticipants: 10,
-        hasClaimed: false,
-        hasRefunded: false,
         participantActions: 5n,
       }).canClaimSplitWin,
     ).toBe(false)
@@ -202,9 +196,6 @@ describe("resolveChallengeDetail", () => {
       }),
       viewerAddress: CREATOR,
       currentRound: 9,
-      maxParticipants: 10,
-      hasClaimed: false,
-      hasRefunded: false,
     })
 
     expect(detail.canClaimCreatorSplitWinRefund).toBe(true)
@@ -218,9 +209,8 @@ describe("resolveChallengeDetail", () => {
       prizePerWinner: "0",
       status: ChallengeStatus.Completed,
       settlementMode: SettlementMode.TopWinners,
-      viewerStatus: ParticipantStatus.Joined,
-      participantCount: 1,
       participants: [VIEWER],
+      participantCount: 1,
       bestScore: "7",
     })
 
@@ -229,9 +219,6 @@ describe("resolveChallengeDetail", () => {
         challenge,
         viewerAddress: VIEWER,
         currentRound: 8,
-        maxParticipants: 10,
-        hasClaimed: false,
-        hasRefunded: false,
         participantActions: 7n,
       }).canClaim,
     ).toBe(true)
@@ -241,9 +228,6 @@ describe("resolveChallengeDetail", () => {
         challenge,
         viewerAddress: VIEWER,
         currentRound: 8,
-        maxParticipants: 10,
-        hasClaimed: false,
-        hasRefunded: false,
         participantActions: 6n,
       }).canClaim,
     ).toBe(false)
@@ -259,16 +243,12 @@ describe("resolveChallengeDetail", () => {
         numWinners: 0,
         prizePerWinner: "0",
         status: ChallengeStatus.Cancelled,
-        viewerStatus: ParticipantStatus.Joined,
-        participantCount: 2,
         participants: [CREATOR, VIEWER],
+        participantCount: 2,
         stakeAmount: "50",
       }),
       viewerAddress: VIEWER,
       currentRound: 8,
-      maxParticipants: 10,
-      hasClaimed: false,
-      hasRefunded: false,
     })
 
     expect(detail.canRefund).toBe(true)
@@ -281,12 +261,47 @@ describe("resolveChallengeDetail", () => {
       }),
       viewerAddress: CREATOR,
       currentRound: 8,
-      maxParticipants: 10,
-      hasClaimed: false,
-      hasRefunded: false,
     })
 
     expect(detail.canRefund).toBe(true)
+  })
+
+  it("derives section membership from the resolved challenge state", () => {
+    const actionable = resolveChallengeDetail({
+      challenge: createChallenge({
+        visibility: ChallengeVisibility.Private,
+        invited: [VIEWER],
+        eligibleInvitees: [VIEWER],
+      }),
+      viewerAddress: VIEWER,
+      currentRound: 4,
+    })
+    const participating = resolveChallengeDetail({
+      challenge: createChallenge({
+        challengeType: ChallengeType.MaxActions,
+        participants: [VIEWER],
+        participantCount: 1,
+        status: ChallengeStatus.Active,
+      }),
+      viewerAddress: VIEWER,
+      currentRound: 6,
+    })
+    const history = resolveChallengeDetail({
+      challenge: createChallenge({
+        challengeType: ChallengeType.MaxActions,
+        participants: [VIEWER],
+        participantCount: 1,
+        status: ChallengeStatus.Completed,
+        settlementMode: SettlementMode.CreatorRefund,
+        claimedBy: [VIEWER],
+      }),
+      viewerAddress: VIEWER,
+      currentRound: 8,
+    })
+
+    expect(actionable.isActionable).toBe(true)
+    expect(participating.isParticipating).toBe(true)
+    expect(history.isHistorical).toBe(true)
   })
 })
 
@@ -298,9 +313,13 @@ describe("needsChallengeParticipantActions", () => {
           challengeType: ChallengeType.MaxActions,
           status: ChallengeStatus.Completed,
           settlementMode: SettlementMode.TopWinners,
-          viewerStatus: ParticipantStatus.Joined,
+          creator: CREATOR,
+          participants: [VIEWER],
+          invited: [],
+          declined: [],
+          claimedBy: [],
         },
-        false,
+        VIEWER,
       ),
     ).toBe(true)
   })
@@ -312,9 +331,13 @@ describe("needsChallengeParticipantActions", () => {
           challengeType: ChallengeType.MaxActions,
           status: ChallengeStatus.Completed,
           settlementMode: SettlementMode.CreatorRefund,
-          viewerStatus: ParticipantStatus.Joined,
+          creator: CREATOR,
+          participants: [VIEWER],
+          invited: [],
+          declined: [],
+          claimedBy: [],
         },
-        false,
+        VIEWER,
       ),
     ).toBe(false)
   })
@@ -326,9 +349,13 @@ describe("needsChallengeParticipantActions", () => {
           challengeType: ChallengeType.SplitWin,
           status: ChallengeStatus.Active,
           settlementMode: SettlementMode.None,
-          viewerStatus: ParticipantStatus.Joined,
+          creator: CREATOR,
+          participants: [VIEWER],
+          invited: [],
+          declined: [],
+          claimedBy: [],
         },
-        false,
+        VIEWER,
       ),
     ).toBe(true)
   })

@@ -1,21 +1,27 @@
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query"
+import { useMemo } from "react"
 
-import { indexerFetch } from "@/api/indexer/api"
+import { useCurrentAllocationsRoundId } from "../contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { indexerFetch } from "../indexer/api"
 
+import { needsChallengeParticipantActions, resolveChallengeDetail } from "./resolveChallengeDetail"
 import {
-  ChallengeAction,
+  ChallengeDetail,
   ChallengeKind,
   ChallengePhase,
   ChallengeStatus,
   ChallengeType,
-  ChallengeUserState,
   ChallengeView,
-  ChallengeViewerRelation,
   ChallengeVisibility,
   ParticipantStatus,
   SettlementMode,
-  UserChallengeListType,
+  WalletChallengeRef,
 } from "./types"
+import {
+  getChallengeParticipantActionRequestKey,
+  useChallengeParticipantActionsBatch,
+  type ChallengeParticipantActionRequest,
+} from "./useChallengeParticipantActions"
 
 type Pagination = {
   hasNext: boolean
@@ -34,9 +40,6 @@ type ChallengeUiEnum =
   | keyof typeof ChallengeStatus
   | keyof typeof ChallengePhase
   | keyof typeof SettlementMode
-  | keyof typeof ParticipantStatus
-  | keyof typeof ChallengeViewerRelation
-  | keyof typeof ChallengeAction
 
 export interface RawChallengeSummaryResponse {
   challengeId: number
@@ -71,23 +74,21 @@ export interface RawChallengeSummaryResponse {
 }
 
 export interface RawChallengeDetailResponse extends RawChallengeSummaryResponse {
+  bestScore: string
+  bestCount: number
+  payoutsClaimed: number
   participants: string[]
   invited: string[]
   declined: string[]
   selectedApps: string[]
   winners: string[]
+  eligibleInvitees: string[]
+  claimedBy: string[]
+  refundedBy: string[]
+  creatorRefunded: boolean
 }
 
-type RawUserChallengeStateResponse = {
-  challengeId: number
-  createdAt: number
-  viewerRelation: ChallengeUiEnum | ChallengeViewerRelation
-  availableActions: Array<ChallengeUiEnum | ChallengeAction>
-  participantActions: string
-  isActionable: boolean
-  isParticipating: boolean
-  isHistorical: boolean
-}
+type RawWalletChallengeRefResponse = WalletChallengeRef
 
 type ChallengeBase = {
   challengeId: number
@@ -122,11 +123,7 @@ type ChallengeBase = {
 }
 
 const PUBLIC_PAGE_SIZE = 12
-const USER_PAGE_SIZE: Record<UserChallengeListType, number> = {
-  actionable: 12,
-  participating: 6,
-  history: 12,
-}
+const WALLET_PAGE_SIZE = 30
 
 const challengeKindMap = {
   Stake: ChallengeKind.Stake,
@@ -164,28 +161,6 @@ const settlementModeMap = {
   SplitWinCompleted: SettlementMode.SplitWinCompleted,
 } as const
 
-const viewerRelationMap = {
-  Creator: ChallengeViewerRelation.Creator,
-  Joined: ChallengeViewerRelation.Joined,
-  Invited: ChallengeViewerRelation.Invited,
-  Declined: ChallengeViewerRelation.Declined,
-  None: ChallengeViewerRelation.None,
-} as const
-
-const challengeActionMap = {
-  Join: ChallengeAction.Join,
-  Leave: ChallengeAction.Leave,
-  AcceptInvite: ChallengeAction.AcceptInvite,
-  DeclineInvite: ChallengeAction.DeclineInvite,
-  Cancel: ChallengeAction.Cancel,
-  AddInvites: ChallengeAction.AddInvites,
-  Claim: ChallengeAction.Claim,
-  Refund: ChallengeAction.Refund,
-  Complete: ChallengeAction.Complete,
-  ClaimSplitWin: ChallengeAction.ClaimSplitWin,
-  ClaimCreatorSplitWinRefund: ChallengeAction.ClaimCreatorSplitWinRefund,
-} as const
-
 const normalizeEnum = <T extends number | string>(value: string | number, map: Record<string, T>, fallback: T): T => {
   if (typeof value === "number") return value as T
   return map[value] ?? fallback
@@ -194,95 +169,12 @@ const normalizeEnum = <T extends number | string>(value: string | number, map: R
 const compareAddresses = (left?: string, right?: string) =>
   !!left && !!right && left.toLowerCase() === right.toLowerCase()
 
-const mapViewerRelationToStatus = (viewerRelation: ChallengeViewerRelation): ParticipantStatus => {
-  switch (viewerRelation) {
-    case ChallengeViewerRelation.Joined:
-      return ParticipantStatus.Joined
-    case ChallengeViewerRelation.Invited:
-      return ParticipantStatus.Invited
-    case ChallengeViewerRelation.Declined:
-      return ParticipantStatus.Declined
-    default:
-      return ParticipantStatus.None
-  }
-}
-
-const hasAction = (userState: ChallengeUserState | null | undefined, action: ChallengeAction) =>
-  userState?.availableActions.includes(action) ?? false
-
 const isSplitWinChallenge = (challenge: Pick<ChallengeBase, "challengeType">) =>
   challenge.challengeType === ChallengeType.SplitWin
 
 const hasReachedParticipantLimit = (
   challenge: Pick<ChallengeBase, "challengeType" | "participantCount" | "maxParticipants">,
 ) => !isSplitWinChallenge(challenge) && challenge.participantCount >= challenge.maxParticipants
-
-const deriveDefaultUserState = (challenge: ChallengeBase, viewerAddress?: string): ChallengeUserState | null => {
-  if (!viewerAddress) return null
-
-  const viewerRelation = compareAddresses(challenge.creator, viewerAddress)
-    ? ChallengeViewerRelation.Creator
-    : ChallengeViewerRelation.None
-
-  const canJoin =
-    challenge.status === ChallengeStatus.Pending &&
-    challenge.visibility === ChallengeVisibility.Public &&
-    !compareAddresses(challenge.creator, viewerAddress) &&
-    !hasReachedParticipantLimit(challenge)
-
-  return {
-    challengeId: challenge.challengeId,
-    createdAt: challenge.createdAt,
-    viewerRelation,
-    availableActions: canJoin ? [ChallengeAction.Join] : [],
-    participantActions: "0",
-    isActionable: false,
-    isParticipating: false,
-    isHistorical: false,
-  }
-}
-
-const normalizeUserChallengeState = (challenge: RawUserChallengeStateResponse): ChallengeUserState => ({
-  challengeId: challenge.challengeId,
-  createdAt: challenge.createdAt,
-  viewerRelation: normalizeEnum(challenge.viewerRelation, viewerRelationMap, ChallengeViewerRelation.None),
-  availableActions: challenge.availableActions.map(action =>
-    normalizeEnum(action, challengeActionMap, ChallengeAction.Join),
-  ),
-  participantActions: challenge.participantActions,
-  isActionable: challenge.isActionable,
-  isParticipating: challenge.isParticipating,
-  isHistorical: challenge.isHistorical,
-})
-
-const mergeUserChallengeStates = (left: ChallengeUserState, right: ChallengeUserState): ChallengeUserState => {
-  const relationPriority: Record<ChallengeUserState["viewerRelation"], number> = {
-    [ChallengeViewerRelation.None]: 0,
-    [ChallengeViewerRelation.Declined]: 1,
-    [ChallengeViewerRelation.Invited]: 2,
-    [ChallengeViewerRelation.Joined]: 3,
-    [ChallengeViewerRelation.Creator]: 4,
-  }
-
-  const participantActions =
-    BigInt(left.participantActions || "0") >= BigInt(right.participantActions || "0")
-      ? left.participantActions
-      : right.participantActions
-
-  return {
-    challengeId: left.challengeId,
-    createdAt: Math.max(left.createdAt, right.createdAt),
-    viewerRelation:
-      relationPriority[left.viewerRelation] >= relationPriority[right.viewerRelation]
-        ? left.viewerRelation
-        : right.viewerRelation,
-    availableActions: Array.from(new Set([...left.availableActions, ...right.availableActions])),
-    participantActions,
-    isActionable: left.isActionable || right.isActionable,
-    isParticipating: left.isParticipating || right.isParticipating,
-    isHistorical: left.isHistorical || right.isHistorical,
-  }
-}
 
 const mapRawChallengeBase = (challenge: RawChallengeSummaryResponse | RawChallengeDetailResponse): ChallengeBase => ({
   challengeId: challenge.challengeId,
@@ -316,61 +208,74 @@ const mapRawChallengeBase = (challenge: RawChallengeSummaryResponse | RawChallen
   winnersCount: challenge.winnersCount,
 })
 
+export const mapRawChallengeDetail = (challenge: RawChallengeDetailResponse) => ({
+  ...mapRawChallengeBase(challenge),
+  bestScore: challenge.bestScore,
+  bestCount: challenge.bestCount,
+  payoutsClaimed: challenge.payoutsClaimed,
+  participants: challenge.participants,
+  invited: challenge.invited,
+  declined: challenge.declined,
+  selectedApps: challenge.selectedApps,
+  winners: challenge.winners,
+  eligibleInvitees: challenge.eligibleInvitees,
+  claimedBy: challenge.claimedBy,
+  refundedBy: challenge.refundedBy,
+  creatorRefunded: challenge.creatorRefunded,
+})
+
 export const mapIndexerChallengeView = (
   challenge: RawChallengeSummaryResponse,
   viewerAddress?: string,
-  userState?: ChallengeUserState | null,
 ): ChallengeView => {
   const base = mapRawChallengeBase(challenge)
-  const resolvedState = userState ?? deriveDefaultUserState(base, viewerAddress)
-  const viewerRelation = resolvedState?.viewerRelation ?? ChallengeViewerRelation.None
-  const viewerStatus = mapViewerRelationToStatus(viewerRelation)
-  const canAccept = hasAction(resolvedState, ChallengeAction.AcceptInvite)
-  const canDecline = hasAction(resolvedState, ChallengeAction.DeclineInvite)
+  const isCreator = compareAddresses(base.creator, viewerAddress)
+  const canJoin =
+    !!viewerAddress &&
+    base.status === ChallengeStatus.Pending &&
+    base.visibility === ChallengeVisibility.Public &&
+    !isCreator &&
+    !hasReachedParticipantLimit(base)
 
   return {
     ...base,
-    viewerStatus,
-    isCreator: viewerRelation === ChallengeViewerRelation.Creator || compareAddresses(base.creator, viewerAddress),
-    isJoined: viewerRelation === ChallengeViewerRelation.Joined,
-    isInvitationPending:
-      base.status === ChallengeStatus.Pending &&
-      viewerRelation !== ChallengeViewerRelation.None &&
-      viewerRelation !== ChallengeViewerRelation.Creator &&
-      viewerRelation !== ChallengeViewerRelation.Joined &&
-      (canAccept || canDecline),
+    viewerStatus: ParticipantStatus.None,
+    isCreator,
+    isJoined: false,
+    isInvitationPending: false,
     isSplitWinWinner: false,
-    canJoin: hasAction(resolvedState, ChallengeAction.Join),
-    canLeave: hasAction(resolvedState, ChallengeAction.Leave),
-    canAccept,
-    canDecline,
-    canCancel: hasAction(resolvedState, ChallengeAction.Cancel),
-    canAddInvites: hasAction(resolvedState, ChallengeAction.AddInvites),
-    canClaim: hasAction(resolvedState, ChallengeAction.Claim),
-    canRefund: hasAction(resolvedState, ChallengeAction.Refund),
-    canComplete: hasAction(resolvedState, ChallengeAction.Complete),
-    canClaimSplitWin: hasAction(resolvedState, ChallengeAction.ClaimSplitWin),
-    canClaimCreatorSplitWinRefund: hasAction(resolvedState, ChallengeAction.ClaimCreatorSplitWinRefund),
+    canJoin,
+    canLeave: false,
+    canAccept: false,
+    canDecline: false,
+    canCancel: false,
+    canAddInvites: false,
+    canClaim: false,
+    canRefund: false,
+    canComplete: false,
+    canClaimSplitWin: false,
+    canClaimCreatorSplitWinRefund: false,
+    isActionable: false,
+    isParticipating: false,
+    isHistorical: false,
   }
 }
 
 export const mapIndexerChallengeDetail = (
   challenge: RawChallengeDetailResponse,
   viewerAddress?: string,
-  userState?: ChallengeUserState | null,
-): ChallengeView &
-  Pick<RawChallengeDetailResponse, "participants" | "invited" | "declined" | "selectedApps" | "winners"> => {
-  const view = mapIndexerChallengeView(challenge, viewerAddress, userState)
-
-  return {
-    ...view,
-    isSplitWinWinner: !!viewerAddress && challenge.winners.some(winner => compareAddresses(winner, viewerAddress)),
-    participants: challenge.participants,
-    invited: challenge.invited,
-    declined: challenge.declined,
-    selectedApps: challenge.selectedApps,
-    winners: challenge.winners,
-  }
+  options?: {
+    currentRound?: number
+    participantActions?: bigint
+  },
+): ChallengeDetail => {
+  const { currentRound = 0, participantActions = 0n } = options ?? {}
+  return resolveChallengeDetail({
+    challenge: mapRawChallengeDetail(challenge),
+    viewerAddress,
+    currentRound,
+    participantActions,
+  })
 }
 
 const fetchPublicChallengeSection = async (
@@ -391,25 +296,23 @@ const fetchPublicChallengeSection = async (
   return (await response.json()) as PaginatedResponse<RawChallengeSummaryResponse>
 }
 
-const fetchUserChallengeSection = async (
-  type: UserChallengeListType,
+const fetchWalletChallengeRefs = async (
   wallet: string,
   page: number,
-): Promise<PaginatedResponse<ChallengeUserState>> => {
+): Promise<PaginatedResponse<WalletChallengeRef>> => {
   const params = new URLSearchParams({
-    type,
     page: String(page),
-    size: String(USER_PAGE_SIZE[type]),
+    size: String(WALLET_PAGE_SIZE),
   })
 
   const response = await indexerFetch(`/api/v1/b3tr/users/${wallet}/challenges?${params.toString()}`)
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${type} challenges`)
+    throw new Error("Failed to fetch wallet challenges")
   }
 
-  const payload = (await response.json()) as PaginatedResponse<RawUserChallengeStateResponse>
+  const payload = (await response.json()) as PaginatedResponse<RawWalletChallengeRefResponse>
   return {
-    data: payload.data.map(normalizeUserChallengeState),
+    data: payload.data,
     pagination: payload.pagination,
   }
 }
@@ -426,40 +329,16 @@ const fetchPublicChallengeDetail = async (challengeId: number): Promise<RawChall
   return (await response.json()) as RawChallengeDetailResponse
 }
 
-const fetchUserChallengeStateDetail = async (
-  wallet: string,
-  challengeId: number,
-): Promise<ChallengeUserState | null> => {
-  const response = await indexerFetch(`/api/v1/b3tr/users/${wallet}/challenges/${challengeId}`)
-  if (response.status === 404) {
-    return null
-  }
-  if (!response.ok) {
-    throw new Error(`Failed to fetch challenge state ${challengeId}`)
-  }
-
-  return normalizeUserChallengeState((await response.json()) as RawUserChallengeStateResponse)
-}
-
 export const getPublicChallengeSectionQueryKey = (phase: ChallengePhase) => ["challenges", "public", "list", phase]
 
-export const getUserChallengeSectionQueryKey = (type: UserChallengeListType, viewerAddress?: string) => [
+export const getWalletChallengeRefsQueryKey = (viewerAddress?: string) => [
   "challenges",
-  "user-state",
+  "wallet-ref",
   "list",
-  type,
   viewerAddress ?? "guest",
 ]
 
 export const getPublicChallengeDetailQueryKey = (challengeId: number) => ["challenges", "public", "detail", challengeId]
-
-export const getUserChallengeDetailQueryKey = (challengeId: number, viewerAddress?: string) => [
-  "challenges",
-  "user-state",
-  "detail",
-  challengeId,
-  viewerAddress ?? "guest",
-]
 
 export const usePublicChallengeSection = (phase: ChallengePhase) => {
   return useInfiniteQuery({
@@ -472,10 +351,10 @@ export const usePublicChallengeSection = (phase: ChallengePhase) => {
   })
 }
 
-export const useUserChallengeStateSection = (type: UserChallengeListType, viewerAddress?: string) => {
+export const useWalletChallengeRefs = (viewerAddress?: string) => {
   return useInfiniteQuery({
-    queryKey: getUserChallengeSectionQueryKey(type, viewerAddress),
-    queryFn: ({ pageParam }) => fetchUserChallengeSection(type, viewerAddress!, pageParam as number),
+    queryKey: getWalletChallengeRefsQueryKey(viewerAddress),
+    queryFn: ({ pageParam }) => fetchWalletChallengeRefs(viewerAddress!, pageParam as number),
     enabled: !!viewerAddress,
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
@@ -512,21 +391,88 @@ export const usePublicChallengeDetail = (
   })
 }
 
-export const useUserChallengeStateDetail = (challengeId: number, viewerAddress?: string, enabled = true) => {
-  return useQuery({
-    queryKey: getUserChallengeDetailQueryKey(challengeId, viewerAddress),
-    queryFn: () => fetchUserChallengeStateDetail(viewerAddress!, challengeId),
-    enabled: !!viewerAddress && enabled,
-  })
-}
+export const useWalletChallenges = (viewerAddress?: string) => {
+  const refsQuery = useWalletChallengeRefs(viewerAddress)
+  const currentRoundQuery = useCurrentAllocationsRoundId()
 
-export const mergeChallengeStatesById = (states: ChallengeUserState[]): Map<number, ChallengeUserState> => {
-  const stateById = new Map<number, ChallengeUserState>()
+  const refs = useMemo(() => refsQuery.data?.pages.flatMap(page => page.data) ?? [], [refsQuery.data])
+  const challengeIds = useMemo(() => refs.map(ref => ref.challengeId), [refs])
+  const detailQueries = usePublicChallengeDetails(challengeIds)
 
-  for (const state of states) {
-    const existing = stateById.get(state.challengeId)
-    stateById.set(state.challengeId, existing ? mergeUserChallengeStates(existing, state) : state)
+  const detailById = useMemo(() => {
+    const mapped = new Map<number, RawChallengeDetailResponse>()
+
+    detailQueries.forEach((query, index) => {
+      if (!query.data) return
+      const challengeId = challengeIds[index]
+      if (challengeId === undefined) return
+      mapped.set(challengeId, query.data)
+    })
+
+    return mapped
+  }, [challengeIds, detailQueries])
+
+  const participantActionRequests = useMemo<ChallengeParticipantActionRequest[]>(() => {
+    if (!viewerAddress) return []
+
+    return refs.flatMap(ref => {
+      const challenge = detailById.get(ref.challengeId)
+      if (!challenge) return []
+      return needsChallengeParticipantActions(mapRawChallengeDetail(challenge), viewerAddress)
+        ? [{ challengeId: ref.challengeId, participant: viewerAddress }]
+        : []
+    })
+  }, [detailById, refs, viewerAddress])
+
+  const participantActionsQuery = useChallengeParticipantActionsBatch(participantActionRequests)
+  const participantActionsByKey = participantActionsQuery.data ?? {}
+
+  const items = useMemo<ChallengeDetail[]>(() => {
+    if (!viewerAddress || currentRoundQuery.data === undefined) return []
+
+    const currentRound = Number(currentRoundQuery.data ?? 0)
+
+    return refs
+      .map(ref => {
+        const challenge = detailById.get(ref.challengeId)
+        if (!challenge) return null
+
+        const key = getChallengeParticipantActionRequestKey({
+          challengeId: ref.challengeId,
+          participant: viewerAddress,
+        })
+        const participantActions = BigInt(participantActionsByKey[key] ?? "0")
+
+        return mapIndexerChallengeDetail(challenge, viewerAddress, {
+          currentRound,
+          participantActions,
+        })
+      })
+      .filter((item): item is ChallengeDetail => item !== null)
+  }, [currentRoundQuery.data, detailById, participantActionsByKey, refs, viewerAddress])
+
+  const detailError = detailQueries.find(query => query.error)?.error ?? null
+
+  return {
+    refs,
+    items,
+    hasNextPage: !!refsQuery.hasNextPage,
+    fetchNextPage: refsQuery.fetchNextPage,
+    isLoading:
+      !!viewerAddress &&
+      (refsQuery.isLoading ||
+        currentRoundQuery.isLoading ||
+        detailQueries.some(query => query.isLoading) ||
+        participantActionsQuery.isLoading),
+    isFetchingNextPage:
+      refsQuery.isFetchingNextPage ||
+      detailQueries.some(query => query.isFetching) ||
+      participantActionsQuery.isFetching,
+    isError:
+      refsQuery.isError ||
+      currentRoundQuery.isError ||
+      detailQueries.some(query => query.isError) ||
+      participantActionsQuery.isError,
+    error: refsQuery.error ?? currentRoundQuery.error ?? detailError ?? participantActionsQuery.error ?? null,
   }
-
-  return stateById
 }

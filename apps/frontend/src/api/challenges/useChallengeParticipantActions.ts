@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -18,6 +18,11 @@ export type ChallengeParticipantActionsEntry = {
   position: number
 }
 
+export type ChallengeParticipantActionRequest = {
+  challengeId: number
+  participant: string
+}
+
 type Page = {
   items: { participant: string; actions: number }[]
   nextOffset: number | undefined
@@ -29,6 +34,24 @@ export const getChallengeParticipantActionsQueryKey = (challengeId: number, tota
   challengeId,
   totalParticipants,
 ]
+
+export const getChallengeParticipantActionRequestKey = ({
+  challengeId,
+  participant,
+}: ChallengeParticipantActionRequest) => `${challengeId}:${participant.toLowerCase()}`
+
+export const getChallengeParticipantActionsBatchQueryKey = (entries: ChallengeParticipantActionRequest[]) => [
+  "challenges",
+  "participant-actions",
+  "batch",
+  ...entries.map(getChallengeParticipantActionRequestKey),
+]
+
+const toBigIntValue = (value: unknown) => {
+  if (typeof value === "bigint") return value
+  if (typeof value === "number" || typeof value === "string") return BigInt(value)
+  return 0n
+}
 
 export const useChallengeParticipantActions = (challengeId: number, participants: string[]) => {
   const thor = useThor()
@@ -92,4 +115,56 @@ export const useChallengeParticipantActions = (challengeId: number, participants
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
   }
+}
+
+export const useChallengeParticipantActionsBatch = (entries: ChallengeParticipantActionRequest[]) => {
+  const thor = useThor()
+  const contractOk = !!address && address.toLowerCase() !== ZERO_ADDR
+  const normalizedEntries = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          entries
+            .filter(entry => entry.challengeId > 0 && !!entry.participant)
+            .map(entry => [
+              getChallengeParticipantActionRequestKey(entry),
+              {
+                challengeId: entry.challengeId,
+                participant: entry.participant.toLowerCase(),
+              },
+            ]),
+        ).values(),
+      ).sort((left, right) =>
+        left.challengeId === right.challengeId
+          ? left.participant.localeCompare(right.participant)
+          : left.challengeId - right.challengeId,
+      ),
+    [entries],
+  )
+
+  return useQuery({
+    queryKey: getChallengeParticipantActionsBatchQueryKey(normalizedEntries),
+    queryFn: async () => {
+      if (normalizedEntries.length === 0) return {} as Record<string, string>
+
+      const results = await executeMultipleClausesCall({
+        thor,
+        calls: normalizedEntries.map(entry => ({
+          abi,
+          address,
+          functionName: "getParticipantActions",
+          args: [BigInt(entry.challengeId), entry.participant],
+        })),
+      })
+
+      return Object.fromEntries(
+        normalizedEntries.map((entry, index) => {
+          const value = toBigIntValue(results[index])
+          return [getChallengeParticipantActionRequestKey(entry), value.toString()]
+        }),
+      )
+    },
+    enabled: !!thor && contractOk && normalizedEntries.length > 0,
+    staleTime: 0,
+  })
 }

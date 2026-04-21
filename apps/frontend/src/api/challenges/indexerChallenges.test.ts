@@ -1,14 +1,45 @@
+import { vi } from "vitest"
+
+vi.mock("../contracts/xAllocations/hooks/useCurrentAllocationsRoundId", () => ({
+  useCurrentAllocationsRoundId: () => ({
+    data: "4",
+    isLoading: false,
+    isError: false,
+    error: null,
+  }),
+}))
+
+vi.mock("../indexer/api", () => ({
+  indexerFetch: vi.fn(),
+}))
+
+vi.mock("./useChallengeParticipantActions", () => ({
+  getChallengeParticipantActionRequestKey: ({
+    challengeId,
+    participant,
+  }: {
+    challengeId: number
+    participant: string
+  }) => `${challengeId}:${participant.toLowerCase()}`,
+  useChallengeParticipantActionsBatch: () => ({
+    data: {},
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+    error: null,
+  }),
+}))
+
 import {
   mapIndexerChallengeDetail,
   mapIndexerChallengeView,
+  type RawChallengeDetailResponse,
   type RawChallengeSummaryResponse,
 } from "./indexerChallenges"
 import {
-  ChallengeAction,
   ChallengeKind,
   ChallengeStatus,
   ChallengeType,
-  ChallengeViewerRelation,
   ChallengeVisibility,
   ParticipantStatus,
   SettlementMode,
@@ -44,6 +75,27 @@ const createPublicChallenge = (): RawChallengeSummaryResponse => ({
   declinedCount: 0,
   selectedAppsCount: 5,
   winnersCount: 5,
+})
+
+const createChallengeDetail = (overrides: Partial<RawChallengeDetailResponse> = {}): RawChallengeDetailResponse => ({
+  ...createPublicChallenge(),
+  lifecycleStatus: "Pending",
+  phase: "Upcoming",
+  settlementMode: "None",
+  challengeType: "MaxActions",
+  bestScore: "0",
+  bestCount: 0,
+  payoutsClaimed: 0,
+  participants: [],
+  invited: [],
+  declined: [],
+  selectedApps: [],
+  winners: [],
+  eligibleInvitees: [],
+  claimedBy: [],
+  refundedBy: [],
+  creatorRefunded: false,
+  ...overrides,
 })
 
 describe("mapIndexerChallengeView", () => {
@@ -82,55 +134,67 @@ describe("mapIndexerChallengeView", () => {
     expect(view.isCreator).toBe(false)
     expect(view.viewerStatus).toBe(ParticipantStatus.None)
   })
-
-  it("applies wallet state actions and viewer relation", () => {
-    const view = mapIndexerChallengeView(createPublicChallenge(), "0xdef", {
-      challengeId: 1,
-      createdAt: 123,
-      viewerRelation: ChallengeViewerRelation.Declined,
-      availableActions: [ChallengeAction.AcceptInvite, ChallengeAction.DeclineInvite],
-      participantActions: "7",
-      isActionable: true,
-      isParticipating: false,
-      isHistorical: false,
-    })
-
-    expect(view.viewerStatus).toBe(ParticipantStatus.Declined)
-    expect(view.isInvitationPending).toBe(false)
-    expect(view.canAccept).toBe(true)
-    expect(view.canDecline).toBe(true)
-    expect(view.canJoin).toBe(false)
-  })
 })
 
 describe("mapIndexerChallengeDetail", () => {
-  it("marks split-win winners from the public detail payload", () => {
+  it("derives an invited private challenge from raw arrays", () => {
     const detail = mapIndexerChallengeDetail(
-      {
-        ...createPublicChallenge(),
-        lifecycleStatus: "Active",
-        phase: "Live",
-        winners: ["0xdef"],
-        participants: ["0xdef"],
-        invited: [],
-        declined: [],
-        selectedApps: [],
-      },
+      createChallengeDetail({
+        visibility: "Private",
+        invited: ["0xdef"],
+        eligibleInvitees: ["0xdef"],
+      }),
       "0xdef",
       {
-        challengeId: 1,
-        createdAt: 123,
-        viewerRelation: ChallengeViewerRelation.Joined,
-        availableActions: [],
-        participantActions: "4",
-        isActionable: false,
-        isParticipating: true,
-        isHistorical: false,
+        currentRound: 4,
+      },
+    )
+
+    expect(detail.viewerStatus).toBe(ParticipantStatus.Invited)
+    expect(detail.isInvitationPending).toBe(true)
+    expect(detail.canAccept).toBe(true)
+    expect(detail.canDecline).toBe(true)
+  })
+
+  it("marks split-win winners from the raw detail payload", () => {
+    const detail = mapIndexerChallengeDetail(
+      createChallengeDetail({
+        lifecycleStatus: "Active",
+        phase: "Live",
+        challengeType: "SplitWin",
+        winners: ["0xdef"],
+        participants: ["0xdef"],
+      }),
+      "0xdef",
+      {
+        currentRound: 4,
+        participantActions: 4n,
       },
     )
 
     expect(detail.viewerStatus).toBe(ParticipantStatus.Joined)
     expect(detail.isSplitWinWinner).toBe(true)
     expect(detail.participants).toEqual(["0xdef"])
+  })
+
+  it("derives split-win creator refund state from raw detail flags", () => {
+    const detail = mapIndexerChallengeDetail(
+      createChallengeDetail({
+        lifecycleStatus: "Active",
+        phase: "Ended",
+        challengeType: "SplitWin",
+        settlementMode: "SplitWinCompleted",
+        creator: "0xabc",
+        numWinners: 3,
+        winnersClaimed: 1,
+      }),
+      "0xabc",
+      {
+        currentRound: 8,
+      },
+    )
+
+    expect(detail.isCreator).toBe(true)
+    expect(detail.canClaimCreatorSplitWinRefund).toBe(true)
   })
 })
