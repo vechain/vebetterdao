@@ -3,13 +3,7 @@ import { UilShareAlt } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-import {
-  ChallengeDetail,
-  ChallengeKind,
-  ChallengeStatus,
-  challengeStatusLabel,
-  ChallengeType,
-} from "@/api/challenges/types"
+import { ChallengeDetail, ChallengeKind, ChallengeStatus, challengeStatusLabel } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
 
@@ -70,7 +64,6 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
     }
   })()
 
-  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
   const challengeTitle = challenge.title || t("Quest #{{id}}", { id: challenge.challengeId })
   const prizeLabel = humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")
@@ -126,17 +119,6 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
             overflowWrap="anywhere">
             {challengeTitle}
           </Heading>
-
-          {isSplitWin && (
-            <HStack gap="3" wrap="wrap">
-              <Text textStyle="md" fontWeight="bold" color="brand.primary">
-                {perWinnerLabel} {t("per winner")}
-              </Text>
-              <Text textStyle="sm" color="text.subtle">
-                {t("{{remaining}} slots left", { remaining: slotsLeft })}
-              </Text>
-            </HStack>
-          )}
 
           <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
             {challengeDescription}

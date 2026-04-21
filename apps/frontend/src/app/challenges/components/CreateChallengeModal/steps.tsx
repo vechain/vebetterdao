@@ -60,9 +60,9 @@ const getTypeExplainerKey = (kind: number, visibility: number, challengeType: nu
   if (kind === ChallengeKind.Stake)
     return "Each participant stakes the same amount; the participant with the most actions wins the pool. Up to 100 participants."
   if (visibility === ChallengeVisibility.Public)
-    return "Split Win — choose how many winners and how many actions each must complete to become a winner. The prize is split equally among the winners. The first to complete the required number of actions and claim the prize win, until all winner slots are filled."
+    return "Let's set up your quest. Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize, win."
   return challengeType === ChallengeType.SplitWin
-    ? "Split Win — choose how many winners and how many actions each must complete to become a winner. The prize is split equally among the winners. The first to complete the required number of actions and claim the prize win, until all winner slots are filled."
+    ? "Let's set up your quest. Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize, win."
     : "Max Actions — invitees compete; the one with the most actions wins the sponsor pool. Up to 100 participants."
 }
 
