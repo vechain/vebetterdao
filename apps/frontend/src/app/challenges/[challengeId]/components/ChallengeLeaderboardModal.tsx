@@ -1,5 +1,6 @@
-import { Heading, Icon, Separator, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, Icon, Separator, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
+import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Group, SendDiagonal } from "iconoir-react"
 import { useMemo, useState } from "react"
@@ -19,6 +20,11 @@ interface ChallengeLeaderboardModalProps {
   leaderboard: ChallengeParticipantActionsEntry[]
   isLoading: boolean
   pendingInvitees: string[]
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  fetchNextPage: () => void
+  loadedCount: number
+  totalCount: number
 }
 
 const SKELETON_COUNT = 5
@@ -30,6 +36,11 @@ export const ChallengeLeaderboardModal = ({
   leaderboard,
   isLoading,
   pendingInvitees,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+  loadedCount,
+  totalCount,
 }: ChallengeLeaderboardModalProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -68,6 +79,9 @@ export const ChallengeLeaderboardModal = ({
             />
           ))}
 
+      {isFetchingNextPage &&
+        Array.from({ length: SKELETON_COUNT }, (_, i) => <Skeleton key={`next-${i}`} borderRadius="lg" h="72px" />)}
+
       {!isLoading && viewerIndex === -1 && account?.address && (
         <>
           <Separator w="full" h={1} color="border.secondary" />
@@ -83,10 +97,26 @@ export const ChallengeLeaderboardModal = ({
         </>
       )}
 
-      {!isLoading && rankings.length === 0 && (
+      {!isLoading && rankings.length === 0 && !isFetchingNextPage && (
         <Text textStyle="sm" color="text.subtle" textAlign="center" py={4}>
           {t("No participant joined this quest yet")}
         </Text>
+      )}
+
+      {!isLoading && (hasNextPage || totalCount > loadedCount) && (
+        <VStack gap={2} pt={2}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => fetchNextPage()}
+            disabled={!hasNextPage || isFetchingNextPage}
+            loading={isFetchingNextPage}>
+            {t("Load more")}
+          </Button>
+          <Text textStyle="xs" color="text.subtle">
+            {humanNumber(loadedCount)} {"/"} {humanNumber(totalCount)}
+          </Text>
+        </VStack>
       )}
     </>
   )
@@ -132,7 +162,7 @@ export const ChallengeLeaderboardModal = ({
               <Tabs.List>
                 <Tabs.Trigger value="joined">
                   <Icon as={Group} boxSize="4" />
-                  {t("Joined")} {`(${rankings.length})`}
+                  {t("Joined")} {`(${humanNumber(totalCount)})`}
                 </Tabs.Trigger>
                 <Tabs.Trigger value="pending">
                   <Icon as={SendDiagonal} boxSize="4" />

@@ -1,11 +1,16 @@
 import { getConfig } from "@repo/config"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+import { useMemo } from "react"
 
 const abi = B3TRChallenges__factory.abi as any
 const address = getConfig().challengesContractAddress as `0x${string}`
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000"
+
+// Kept small to stay well below the Thor node request-body size limit even when
+// each call's ABI payload is wide; the UI surfaces it as "Load more" pages.
+export const PARTICIPANT_ACTIONS_PAGE_SIZE = 50
 
 export type ChallengeParticipantActionsEntry = {
   participant: string
@@ -13,31 +18,33 @@ export type ChallengeParticipantActionsEntry = {
   position: number
 }
 
-export type ChallengeParticipantActionsData = {
-  totalActions: number
-  leaderboard: ChallengeParticipantActionsEntry[]
+type Page = {
+  items: { participant: string; actions: number }[]
+  nextOffset: number | undefined
 }
 
-export const getChallengeParticipantActionsQueryKey = (challengeId: number, participants: string[]) => [
+export const getChallengeParticipantActionsQueryKey = (challengeId: number, totalParticipants: number) => [
   "challenges",
   "participant-actions",
   challengeId,
-  participants.join(","),
+  totalParticipants,
 ]
 
 export const useChallengeParticipantActions = (challengeId: number, participants: string[]) => {
   const thor = useThor()
+  const total = participants.length
+  const contractOk = !!address && address.toLowerCase() !== ZERO_ADDR
 
-  return useQuery({
-    queryKey: getChallengeParticipantActionsQueryKey(challengeId, participants),
-    queryFn: async (): Promise<ChallengeParticipantActionsData> => {
-      if (!participants.length || !address || address.toLowerCase() === ZERO_ADDR) {
-        return { totalActions: 0, leaderboard: [] }
-      }
+  const query = useInfiniteQuery({
+    queryKey: getChallengeParticipantActionsQueryKey(challengeId, total),
+    queryFn: async ({ pageParam }): Promise<Page> => {
+      const offset = pageParam as number
+      const slice = participants.slice(offset, offset + PARTICIPANT_ACTIONS_PAGE_SIZE)
+      if (slice.length === 0) return { items: [], nextOffset: undefined }
 
       const results = await executeMultipleClausesCall({
         thor,
-        calls: participants.map(participant => ({
+        calls: slice.map(participant => ({
           abi,
           address,
           functionName: "getParticipantActions",
@@ -45,25 +52,44 @@ export const useChallengeParticipantActions = (challengeId: number, participants
         })),
       })
 
-      const sorted = participants
-        .map((participant, index) => ({
-          participant,
-          actions: Number(results[index] ?? 0),
-        }))
-        .sort((a, b) => b.actions - a.actions)
-
-      // Competition ranking: tied scores share the same rank (e.g. 1, 1, 3)
-      // so all top-scorers are surfaced as winners by downstream UI.
-      const leaderboard: ChallengeParticipantActionsEntry[] = sorted.map(entry => ({
-        ...entry,
-        position: sorted.findIndex(e => e.actions === entry.actions) + 1,
+      const items = slice.map((participant, index) => ({
+        participant,
+        actions: Number(results[index] ?? 0),
       }))
 
-      return {
-        totalActions: leaderboard.reduce((sum, entry) => sum + entry.actions, 0),
-        leaderboard,
-      }
+      const next = offset + PARTICIPANT_ACTIONS_PAGE_SIZE
+      return { items, nextOffset: next < total ? next : undefined }
     },
-    enabled: !!thor && !!challengeId && participants.length > 0,
+    initialPageParam: 0,
+    getNextPageParam: last => last.nextOffset,
+    enabled: !!thor && !!challengeId && total > 0 && contractOk,
   })
+
+  const loadedItems = useMemo(() => query.data?.pages.flatMap(p => p.items) ?? [], [query.data])
+
+  // Competition ranking: tied scores share the same rank (e.g. 1, 1, 3) so all
+  // top-scorers are surfaced as winners by downstream UI. Sort is computed on
+  // currently-loaded pages only — in active challenges the leaderboard grows
+  // as the user loads more pages.
+  const leaderboard = useMemo<ChallengeParticipantActionsEntry[]>(() => {
+    const sorted = [...loadedItems].sort((a, b) => b.actions - a.actions)
+    return sorted.map(entry => ({
+      ...entry,
+      position: sorted.findIndex(e => e.actions === entry.actions) + 1,
+    }))
+  }, [loadedItems])
+
+  const totalActions = useMemo(() => leaderboard.reduce((sum, entry) => sum + entry.actions, 0), [leaderboard])
+
+  return {
+    leaderboard,
+    totalActions,
+    loadedCount: loadedItems.length,
+    totalCount: total,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    isFetchingNextPage: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+  }
 }

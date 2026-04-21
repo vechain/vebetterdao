@@ -147,7 +147,10 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
   const router = useRouter()
   const openProfile = useCallback((address: string) => router.push(`/profile/${address}`), [router])
   const viewerAddress = account?.address
-  const { data, isLoading, isError } = useChallengeParticipantActions(challenge.challengeId, challenge.participants)
+  const { leaderboard, totalActions, isLoading, isError } = useChallengeParticipantActions(
+    challenge.challengeId,
+    challenge.participants,
+  )
   const [leaderColorToken, trailingColorToken, gridColorToken, axisColorToken] = useToken("colors", [
     "blue.600",
     "blue.200",
@@ -173,7 +176,6 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
   const { data: vetDomains } = useGetVetDomains(
     uniqueChallengeAddresses.length > 0 ? uniqueChallengeAddresses : undefined,
   )
-  const leaderboard = data?.leaderboard ?? []
   const isPending = challenge.status === ChallengeStatus.Pending
   const domainMap = useMemo(() => {
     const map: Record<string, string> = {}
@@ -312,7 +314,7 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
             value={
               isPending
                 ? `${humanNumber(challenge.startRound)} → ${humanNumber(challenge.endRound)}`
-                : compactFormatter.format(data?.totalActions ?? 0)
+                : compactFormatter.format(totalActions)
             }
           />
         </SimpleGrid>

@@ -16,8 +16,8 @@ import { ChallengeLeaderboardModal } from "./ChallengeLeaderboardModal"
 import { ChallengeShareButton } from "./ChallengeShareButton"
 import { ChallengeUserActionsModal, type ChallengeUserActionsParticipant } from "./ChallengeUserActionsModal"
 
-const LEADERBOARD_SIZE = 3
-const PENDING_SIZE = 3
+const LEADERBOARD_SIZE = 4
+const PENDING_SIZE = 4
 
 const MOCK_ROWS = Array.from({ length: LEADERBOARD_SIZE }, (_, i) => ({
   position: i + 1,
@@ -49,9 +49,8 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
     return t("Top scorer wins the prize")
   }, [isSponsored, isSplitWin, threshold, t])
 
-  const { data, isLoading } = useChallengeParticipantActions(challenge.challengeId, challenge.participants)
-
-  const leaderboard = useMemo(() => data?.leaderboard ?? [], [data?.leaderboard])
+  const { leaderboard, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage, loadedCount, totalCount } =
+    useChallengeParticipantActions(challenge.challengeId, challenge.participants)
 
   const rankings = useMemo(
     () =>
@@ -106,7 +105,7 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
       />
     ))
 
-  const hasOverflow = leaderboard.length > LEADERBOARD_SIZE || allPendingInvitees.length > PENDING_SIZE
+  const hasOverflow = totalCount > LEADERBOARD_SIZE || allPendingInvitees.length > PENDING_SIZE
 
   const hasNoUsers = challenge.participants.length === 0 && allPendingInvitees.length === 0
 
@@ -238,6 +237,11 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
         leaderboard={leaderboard}
         isLoading={isLoading}
         pendingInvitees={allPendingInvitees}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage}
+        loadedCount={loadedCount}
+        totalCount={totalCount}
       />
 
       <ChallengeUserActionsModal

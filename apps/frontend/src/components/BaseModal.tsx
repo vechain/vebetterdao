@@ -45,7 +45,13 @@ export const BaseModal = ({
             <Dialog.Content rounded={"2xl"} {...modalContentProps}>
               {isCloseable && showCloseButton ? (
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton size="md" />
+                  <CloseButton
+                    size="md"
+                    bg="bg.secondary"
+                    _hover={{ bg: "bg.tertiary" }}
+                    borderRadius="full"
+                    zIndex="docked"
+                  />
                 </Dialog.CloseTrigger>
               ) : null}
               <Dialog.Body p={10} rounded={"2xl"} {...modalBodyProps}>
