@@ -4,6 +4,8 @@ import { ChallengeKind, ChallengeType, ChallengeVisibility } from "@/api/challen
 import { CreateChallengeFormData } from "@/api/challenges/useChallengeActions"
 
 export const MAX_SELECTED_APPS = 5
+export const MAX_THRESHOLD = 1_000_000
+export const MIN_PRIZE_PER_WINNER_WEI = parseEther("1")
 export const QUICK_AMOUNTS = ["50", "100", "250"] as const
 export const QUICK_THRESHOLDS = ["1", "5", "10"] as const
 export const QUICK_NUM_WINNERS = ["1", "3", "5"] as const

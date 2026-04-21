@@ -56,7 +56,10 @@ const SettlementMode = {
   SplitWinCompleted: 3,
 } as const
 
-async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: number } = {}) {
+async function deployFixture({
+  maxParticipants = 100,
+  minBetAmount = MIN_BET_AMOUNT,
+}: { maxParticipants?: number; minBetAmount?: bigint } = {}) {
   const [admin, alice, bob, carol] = await ethers.getSigners()
 
   const b3tr = (await (
@@ -91,7 +94,7 @@ async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: numb
         maxChallengeDuration: 4,
         maxSelectedApps: 5,
         maxParticipants,
-        minBetAmount: MIN_BET_AMOUNT,
+        minBetAmount,
       },
       {
         admin: admin.address,
@@ -319,7 +322,7 @@ describe("B3TRChallenges - @shard9a", function () {
     ).to.be.revertedWithCustomError(challenges, "InvalidTypeConfiguration")
   })
 
-  it("rejects SplitWin when stakeAmount < numWinners (would yield 0 prize per winner)", async function () {
+  it("rejects SplitWin when stakeAmount < numWinners * 1 B3TR (InsufficientPrizePerWinner)", async function () {
     const { roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
@@ -330,9 +333,78 @@ describe("B3TRChallenges - @shard9a", function () {
         challengeType: ChallengeType.SplitWin,
         stakeAmount: ethers.parseEther("100"),
         threshold: 5,
-        numWinners: ethers.parseEther("100") + 1n,
+        numWinners: 101,
+        appIds: [],
       }),
-    ).to.be.revertedWithCustomError(challenges, "InvalidTypeConfiguration")
+    ).to.be.revertedWithCustomError(challenges, "InsufficientPrizePerWinner")
+
+    const { roundGovernor: rg2, challenges: ch2 } = await deployFixture({ minBetAmount: ethers.parseEther("1") })
+    await rg2.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(ch2, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.SplitWin,
+        stakeAmount: ethers.parseEther("10"),
+        threshold: 5,
+        numWinners: 11,
+        appIds: [],
+      }),
+    ).to.be.revertedWithCustomError(ch2, "InsufficientPrizePerWinner")
+  })
+
+  it("accepts SplitWin when stakeAmount == numWinners * 1 B3TR (exactly 1 B3TR per winner)", async function () {
+    const { roundGovernor, challenges } = await deployFixture({ minBetAmount: ethers.parseEther("1") })
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("5"),
+      threshold: 1,
+      numWinners: 5,
+      appIds: [],
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.prizePerWinner).to.equal(ethers.parseEther("1"))
+  })
+
+  it("rejects SplitWin when threshold > 1_000_000 (ThresholdTooHigh)", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.SplitWin,
+        stakeAmount: ethers.parseEther("100"),
+        threshold: 1_000_001,
+        numWinners: 3,
+        appIds: [],
+      }),
+    ).to.be.revertedWithCustomError(challenges, "ThresholdTooHigh")
+  })
+
+  it("accepts SplitWin when threshold == 1_000_000", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1_000_000,
+      numWinners: 3,
+      appIds: [],
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.threshold).to.equal(1_000_000n)
   })
 
   // ──── Metadata ────
