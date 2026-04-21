@@ -179,9 +179,37 @@ export const ChallengeActions = ({
         </Button>
       )}
       {challenge.canClaimSplitWin && (
-        <Button size={resolvedButtonSize} variant="primary" onClick={handleClaimSplitWin} gap="2" {...cardButtonProps}>
+        <Button
+          size={resolvedButtonSize}
+          variant="primary"
+          onClick={handleClaimSplitWin}
+          gap="2"
+          bg="status.yellow.primary"
+          color="yellow.900"
+          borderWidth="1px"
+          borderColor="status.yellow.secondary"
+          boxShadow="sm"
+          transition="all 0.2s ease"
+          _hover={{
+            bg: "yellow.400",
+            borderColor: "yellow.500",
+            boxShadow: "md",
+            transform: "translateY(-1px)",
+          }}
+          _active={{
+            bg: "status.yellow.primary",
+            transform: "translateY(0)",
+          }}
+          _disabled={{
+            bg: "actions.disabled.disabled",
+            color: "actions.disabled.text",
+            borderColor: "transparent",
+            boxShadow: "none",
+            transform: "none",
+          }}
+          {...cardButtonProps}>
           <Icon as={LuTrophy} boxSize="4" />
-          {t("Claim your slot")}
+          {t("Claim prize")}
         </Button>
       )}
       {challenge.canRefund && (
