@@ -43,7 +43,7 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
       {
         key: "what",
         title: t("Navigators"),
-        image: "/assets/3d-illustrations/badge.webp",
+        image: "/assets/mascot/navigator-b3mo.png",
         heading: t("1. What are Navigators?"),
         listItems: [
           t(
