@@ -1,7 +1,20 @@
-import { Box, Button, Card, Flex, Heading, HStack, Icon, List, Steps, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  BoxProps,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  HStack,
+  Icon,
+  Image,
+  List,
+  Steps,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
 import { motion, AnimatePresence, useAnimate } from "framer-motion"
-import Image from "next/image"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
@@ -13,9 +26,17 @@ type Step = {
   key: string
   title: string
   image: string
+  imageDimensions?: {
+    width?: BoxProps["width"]
+    height?: BoxProps["height"]
+  }
   heading: string
   listItems: string[]
 }
+
+const DEFAULT_MOBILE_IMAGE_SIZE = "150px"
+const DEFAULT_DESKTOP_IMAGE_WIDTH = "220px"
+const DEFAULT_DESKTOP_IMAGE_HEIGHT = "320px"
 
 const StepIndicator = ({ activeStep, count }: { activeStep: number; count: number }) => (
   <HStack gap={2} w="full" justify="center">
@@ -44,6 +65,10 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
         key: "what",
         title: t("Navigators"),
         image: "/assets/mascot/navigator-b3mo.png",
+        imageDimensions: {
+          width: { base: "180px", md: "280px" },
+          height: { base: "180px", md: "280px" },
+        },
         heading: t("1. What are Navigators?"),
         listItems: [
           t(
@@ -143,14 +168,19 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
           <Box pt={5}>
             <VStack w="full" textAlign="center" gap={4}>
               <Heading size="md">{currentStep.title}</Heading>
-              <Image
-                src={currentStep.image}
-                alt={`Step ${currentStepIndex + 1}`}
-                objectFit="contain"
-                width={150}
-                height={150}
-                unoptimized
-              />
+              <Flex
+                w={currentStep.imageDimensions?.width ?? DEFAULT_MOBILE_IMAGE_SIZE}
+                h={currentStep.imageDimensions?.height ?? DEFAULT_MOBILE_IMAGE_SIZE}
+                alignItems="center"
+                justifyContent="center">
+                <Image
+                  src={currentStep.image}
+                  alt={`Step ${currentStepIndex + 1}`}
+                  w="full"
+                  h="full"
+                  objectFit="contain"
+                />
+              </Flex>
               <Heading size="sm">{currentStep.heading}</Heading>
               <List.Root variant="plain" pl={5} textStyle="sm" gap={2} textAlign="left">
                 {currentStep.listItems.map((item, index) => (
@@ -250,14 +280,19 @@ export const NavigatorStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
               key={currentStep.key}>
-              <Image
-                src={currentStep.image}
-                alt={`Step ${currentStepIndex + 1}`}
-                objectFit="contain"
-                width={220}
-                height={320}
-                unoptimized
-              />
+              <Flex
+                w={currentStep.imageDimensions?.width ?? DEFAULT_DESKTOP_IMAGE_WIDTH}
+                h={currentStep.imageDimensions?.height ?? DEFAULT_DESKTOP_IMAGE_HEIGHT}
+                alignItems="center"
+                justifyContent="center">
+                <Image
+                  src={currentStep.image}
+                  alt={`Step ${currentStepIndex + 1}`}
+                  w="full"
+                  h="full"
+                  objectFit="contain"
+                />
+              </Flex>
             </motion.div>
           </Box>
         </Flex>
