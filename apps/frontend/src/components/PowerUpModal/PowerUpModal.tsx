@@ -2,13 +2,14 @@
 
 import { Button, Card, Checkbox, Field, Heading, HStack, Icon, Link, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
-import { useUpgradeSmartAccountModal, useWallet, useThor } from "@vechain/vechain-kit"
+import { useUpgradeSmartAccountModal, useVechainDomain, useWallet, useThor } from "@vechain/vechain-kit"
 import { Clock, NavArrowRight, WarningTriangle } from "iconoir-react"
 import NextLink from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { LuUsers } from "react-icons/lu"
 import { parseEther } from "viem"
 
 import { getB3TrTokenDetailsQueryKey } from "@/api/contracts/b3tr/hooks/useB3trTokenDetails"
@@ -23,6 +24,7 @@ import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDel
 import { buildConvertB3trTx } from "@/api/contracts/vot3/utils/buildConvertB3trTx"
 import { buildDelegateVot3Tx } from "@/api/contracts/vot3/utils/buildDelegateVot3Tx"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
@@ -61,6 +63,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
   const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
   const { data: currentDelegation } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
+  const { data: domainData } = useVechainDomain(navigatorAddress ?? "")
   const requiresSelfDelegation = useVot3RequireSelfDelegation()
   const availableBalance = b3trBalance?.scaled ?? "0"
 
@@ -75,6 +78,12 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const freeCapacity = Math.max(0, remainingCapacity - currentDelegatedNum)
   const amountNum = Number(amount) || 0
   const exceedsCapacity = isDelegated && includeDelegation && amountNum > freeCapacity
+  const navigatorDisplayName =
+    navigatorAddress && domainData?.domain
+      ? humanDomain(domainData.domain, 15, 10)
+      : navigatorAddress
+        ? humanAddress(navigatorAddress, 6, 4)
+        : ""
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
   const { open: openUpgradeModal } = useUpgradeSmartAccountModal({ accentColor: "#004CFC" })
@@ -166,32 +175,14 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
       modalProps={{ closeOnInteractOutside: true }}>
       <VStack gap={5} w="full" align="stretch">
         <Heading size="xl" fontWeight="bold" data-testid={"tx-modal-title"}>
-          {t("Increase your Voting Power")}
+          {isDelegated && !includeDelegation ? t("Convert to VOT3") : t("Increase your Voting Power")}
         </Heading>
 
-        <Text mt={2} textStyle="xs" color="text.subtle">
-          {t("1 B3TR = 1 Voting Power. You can redeem your B3TR back at any time.")}
+        <Text textStyle="xs" color="text.subtle">
+          {isDelegated && !includeDelegation
+            ? t("1 B3TR = 1 VOT3. You can redeem your B3TR back at any time.")
+            : t("1 B3TR = 1 Voting Power. You can redeem your B3TR back at any time.")}
         </Text>
-
-        {isDelegated && (
-          <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
-            <Checkbox.Root
-              checked={includeDelegation}
-              onCheckedChange={e => setIncludeDelegation(!!e.checked)}
-              gap={3}
-              alignItems="flex-start">
-              <Checkbox.HiddenInput />
-              <Checkbox.Control mt="0.5" />
-              <Checkbox.Label>
-                <Text textStyle="xs" color="text.subtle">
-                  {t(
-                    "Also increase my navigator delegation with the converted VOT3. This will increase your voting power.",
-                  )}
-                </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
-          </Card.Root>
-        )}
 
         <VStack
           bg="card.default"
@@ -199,7 +190,6 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           borderColor="border.secondary"
           borderRadius="2xl"
           p={4}
-          mt={2}
           gap={2}
           align="start"
           w="full">
@@ -276,15 +266,67 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                     "Your navigator has reached its delegation capacity and cannot receive this amount. You can uncheck the delegation option or reduce the amount.",
                   )}
                 </Text>
-                <Link asChild variant="underline" textStyle="xs" color="status.negative.strong">
-                  <NextLink href={`/navigators/${navigatorAddress}`} onClick={onClose}>
-                    {t("View navigator")}
-                    <Icon as={NavArrowRight} boxSize="3" />
-                  </NextLink>
-                </Link>
+                {freeCapacity > 0 && (
+                  <Link
+                    as="button"
+                    variant="underline"
+                    textStyle="xs"
+                    color="status.negative.strong"
+                    onClick={() => setAmount(handleAmountInput(String(freeCapacity)))}>
+                    {t("Use max allowed")}
+                  </Link>
+                )}
               </VStack>
             </HStack>
           </Card.Root>
+        )}
+
+        {isDelegated && (
+          <VStack gap={1} w="full">
+            <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+              <Checkbox.Root
+                checked={includeDelegation}
+                onCheckedChange={e => setIncludeDelegation(!!e.checked)}
+                gap={3}
+                alignItems="center">
+                <Checkbox.HiddenInput />
+                <Checkbox.Control mt="0.5" />
+                <Checkbox.Label>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("Also delegate to my navigator for extra voting power")}
+                  </Text>
+                </Checkbox.Label>
+              </Checkbox.Root>
+            </Card.Root>
+
+            {includeDelegation && navigatorAddress && navigatorData && (
+              <NextLink href={`/navigators/${navigatorAddress}`} onClick={onClose} style={{ width: "100%" }}>
+                <HStack
+                  gap={3}
+                  w="full"
+                  bg="card.default"
+                  border="1px solid"
+                  borderColor="border.secondary"
+                  borderRadius="2xl"
+                  p={4}
+                  cursor="pointer">
+                  <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
+                  <VStack gap={0} align="start" flex={1}>
+                    <Text textStyle="sm" fontWeight="semibold">
+                      {navigatorDisplayName}
+                    </Text>
+                    <HStack gap={2}>
+                      <LuUsers size={12} />
+                      <Text textStyle="xs" color="fg.muted">
+                        {t("{{count}} citizens", { count: navigatorData.citizenCount })}
+                      </Text>
+                    </HStack>
+                  </VStack>
+                  <Icon as={NavArrowRight} boxSize="5" color="fg.muted" />
+                </HStack>
+              </NextLink>
+            )}
+          </VStack>
         )}
 
         <PowerUpSummary

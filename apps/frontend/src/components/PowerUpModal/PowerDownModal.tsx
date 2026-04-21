@@ -2,18 +2,23 @@
 
 import { Button, Card, Checkbox, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
-import { useWallet, useThor } from "@vechain/vechain-kit"
-import { InfoCircle, WarningTriangle } from "iconoir-react"
+import { useVechainDomain, useWallet, useThor } from "@vechain/vechain-kit"
+import { InfoCircle, NavArrowRight, WarningTriangle } from "iconoir-react"
+import NextLink from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { LuUsers } from "react-icons/lu"
 import { parseEther } from "viem"
 
 import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { buildConvertVot3Tx } from "@/api/contracts/vot3/utils/buildConvertVot3Tx"
+import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
@@ -62,6 +67,16 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   )
 
   const delegatedLocked = delegatedAmount?.raw ?? 0n
+  const isDelegated = delegatedLocked > 0n
+  const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
+  const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
+  const { data: domainData } = useVechainDomain(navigatorAddress ?? "")
+  const navigatorDisplayName =
+    navigatorAddress && domainData?.domain
+      ? humanDomain(domainData.domain, 15, 10)
+      : navigatorAddress
+        ? humanAddress(navigatorAddress, 6, 4)
+        : ""
   const unlockedOriginal = BigInt(unlockedVot3Balance?.original || "0")
   const swappableOriginal = BigInt(swappableVot3Balance?.original || "0")
 
@@ -85,6 +100,19 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
 
   const showTransferredVOT3Warning = walletOriginal > swappableOriginal
   const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
+
+  const amountWei = useMemo(() => {
+    const trimmed = removingExcessDecimals(amount)
+    if (!trimmed || trimmed === "0" || trimmed === ".") return 0n
+    try {
+      return parseEther(trimmed)
+    } catch {
+      return 0n
+    }
+  }, [amount])
+  const fromNavigatorWei = includeDelegated && amountWei > unlockedOriginal ? amountWei - unlockedOriginal : 0n
+  const fromBalanceWei = amountWei - fromNavigatorWei
+  const isFullyExitingDelegation = includeDelegated && isDelegated && fromNavigatorWei >= delegatedLocked
 
   const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress
 
@@ -157,28 +185,55 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
       modalProps={{ closeOnInteractOutside: true }}>
       <VStack gap={5} w="full" align="stretch">
         <Heading size="xl" fontWeight="bold" data-testid={"tx-modal-title"}>
-          {t("Reduce your Voting Power")}
+          {isDelegated && !includeDelegated ? t("Convert to B3TR") : t("Reduce your Voting Power")}
         </Heading>
 
-        {delegatedLocked > 0n && (
-          <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
-            <Checkbox.Root
-              checked={includeDelegated}
-              onCheckedChange={e => setIncludeDelegated(!!e.checked)}
-              gap={3}
-              alignItems="flex-start">
-              <Checkbox.HiddenInput />
-              <Checkbox.Control mt="0.5" />
-              <Checkbox.Label>
-                <Text textStyle="xs" color="text.subtle">
-                  {t(
-                    "Include {{amount}} VOT3 locked in navigator delegation. This will automatically reduce or exit your delegation.",
-                    { amount: compactFormatter.format(Number(delegatedAmount?.scaled ?? "0")) },
-                  )}
-                </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
-          </Card.Root>
+        {isDelegated && (
+          <VStack gap={1} w="full">
+            <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+              <Checkbox.Root
+                checked={includeDelegated}
+                onCheckedChange={e => setIncludeDelegated(!!e.checked)}
+                gap={3}
+                alignItems="center">
+                <Checkbox.HiddenInput />
+                <Checkbox.Control mt="0.5" />
+                <Checkbox.Label>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("Also withdraw from my navigator delegation")}
+                  </Text>
+                </Checkbox.Label>
+              </Checkbox.Root>
+            </Card.Root>
+
+            {includeDelegated && navigatorAddress && navigatorData && (
+              <NextLink href={`/navigators/${navigatorAddress}`} onClick={onClose} style={{ width: "100%" }}>
+                <HStack
+                  gap={3}
+                  w="full"
+                  bg="card.default"
+                  border="1px solid"
+                  borderColor="border.secondary"
+                  borderRadius="2xl"
+                  p={4}
+                  cursor="pointer">
+                  <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
+                  <VStack gap={0} align="start" flex={1}>
+                    <Text textStyle="sm" fontWeight="semibold">
+                      {navigatorDisplayName}
+                    </Text>
+                    <HStack gap={2}>
+                      <LuUsers size={12} />
+                      <Text textStyle="xs" color="fg.muted">
+                        {t("{{count}} citizens", { count: navigatorData.citizenCount })}
+                      </Text>
+                    </HStack>
+                  </VStack>
+                  <Icon as={NavArrowRight} boxSize="5" color="fg.muted" />
+                </HStack>
+              </NextLink>
+            )}
+          </VStack>
         )}
 
         <VStack
@@ -245,7 +300,13 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
           </Field.Root>
         </VStack>
 
-        <PowerDownB3trSummary amount={amount} isHighlighted />
+        <PowerDownB3trSummary
+          amount={amount}
+          isHighlighted
+          fromBalanceWei={fromBalanceWei}
+          fromNavigatorWei={fromNavigatorWei}
+          isFullyExitingDelegation={isFullyExitingDelegation}
+        />
 
         {showTransferredVOT3Warning && (
           <Text textStyle="xs" color="text.subtle">

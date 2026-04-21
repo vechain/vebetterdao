@@ -218,6 +218,8 @@ const VotingPowerContent = ({
     return currentVot3Balance.formatted
   }, [currentVot3Balance])
 
+  const vot3BalanceScaled = currentVot3Balance?.scaled ?? "0"
+
   const delegatedFormatted = useMemo(() => {
     if (!currentDelegated?.raw || currentDelegated.raw === 0n) return null
     return FormattingUtils.humanNumber(currentDelegated.scaled)
@@ -283,16 +285,16 @@ const VotingPowerContent = ({
           borderTopWidth="1px"
           borderColor="border.secondary"
           w="full">
-          <CompositionLine label={t("Balance")} value={`${vot3BalanceOnly} VOT3`} />
           {isDelegated && delegatedFormatted && (
             <CompositionLine label={t("Delegated")} value={`${delegatedFormatted} VOT3`} />
           )}
+          <CompositionLine label={t("Balance")} value={`${vot3BalanceOnly} VOT3`} />
           {depositsFormatted && (
             <CompositionLine label={t("Deposited for proposal support")} value={`${depositsFormatted} VOT3`} />
           )}
         </VStack>
 
-        {isDelegated && Number(vot3BalanceOnly) > 0 && (
+        {isDelegated && Number(vot3BalanceScaled) > 0 && (
           <HStack
             gap="2"
             justify="space-between"
@@ -312,7 +314,7 @@ const VotingPowerContent = ({
               </Icon>
               <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
                 {t("You have {{amount}} undelegated VOT3 — delegate to increase voting power", {
-                  amount: FormattingUtils.humanNumber(vot3BalanceOnly),
+                  amount: FormattingUtils.humanNumber(vot3BalanceScaled),
                 })}
               </Text>
             </HStack>

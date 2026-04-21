@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuExternalLink, LuShare2 } from "react-icons/lu"
 
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { type NavigatorStatusValue } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -25,6 +26,7 @@ type Props = {
   isConnected: boolean
   isOwnPage: boolean
   hasStake: boolean
+  isAtCapacity: boolean
   onDelegationClick: () => void
   onManageStakeClick: () => void
   onWithdrawStakeClick: () => void
@@ -39,13 +41,14 @@ type MainActionInput = {
   isOwnPage: boolean
   isConnected: boolean
   hasStake: boolean
+  isNavigator: boolean
 }
 
 const getMainAction = (input: MainActionInput): MainAction => {
   if (input.isOwnPage && input.status === "DEACTIVATED" && input.hasStake) return "withdraw-stake"
   if (input.isDelegatedHere) return "manage-delegation"
   if (input.isOwnPage && input.status === "ACTIVE") return "manage-stake"
-  if (input.isConnected && input.status === "ACTIVE") return "delegate"
+  if (input.isConnected && input.status === "ACTIVE" && !input.isNavigator) return "delegate"
   return "share"
 }
 
@@ -61,6 +64,7 @@ export const NavigatorHeader = ({
   isConnected,
   isOwnPage,
   hasStake,
+  isAtCapacity,
   onDelegationClick,
   onManageStakeClick,
   onWithdrawStakeClick,
@@ -70,6 +74,7 @@ export const NavigatorHeader = ({
 }: Props) => {
   const { t } = useTranslation()
   const [isShareOpen, setIsShareOpen] = useState(false)
+  const { data: isNavigator } = useIsNavigator()
 
   const mainAction = getMainAction({
     status,
@@ -77,6 +82,7 @@ export const NavigatorHeader = ({
     isOwnPage,
     isConnected,
     hasStake,
+    isNavigator: !!isNavigator,
   })
   const showMenu = isOwnPage || mainAction !== "share"
 
@@ -111,7 +117,11 @@ export const NavigatorHeader = ({
             </Skeleton>
 
             <HStack flex={1} justify="end" gap={2}>
-              <Button variant={variant} size="sm" onClick={onClick}>
+              <Button
+                variant={variant}
+                size="sm"
+                onClick={onClick}
+                disabled={mainAction === "delegate" && isAtCapacity}>
                 {mainAction === "share" && <LuShare2 />}
                 {label}
               </Button>

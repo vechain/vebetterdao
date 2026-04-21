@@ -7,6 +7,7 @@ import {
   HStack,
   Icon,
   NumberInput,
+  Separator,
   Skeleton,
   Text,
   VStack,
@@ -229,7 +230,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const inputLabel = mode === "manage" ? t("New delegation amount") : t("VOT3 to delegate")
   const navInfoValue =
     mode === "manage"
-      ? { label: t("VOT3 delegated"), value: formatter.format(currentDelegatedNum) }
+      ? { label: t("Your delegated VOT3"), value: formatter.format(currentDelegatedNum) }
       : { label: t("B3TR staked"), value: formatter.format(Number(nav.stakeFormatted)) }
 
   return (
@@ -524,30 +525,31 @@ const NewDelegationSummary = ({
           {" VOT3"}
         </Text>
 
-        <VStack align="start" gap={0.5}>
-          <HStack gap={1}>
-            <Text textStyle="sm" color="text.subtle">
-              {t("Currently delegated to navigator:")}
+        <Separator w="full" borderColor="status.positive.strong/30" />
+        <VStack align="start" gap={1} w="full">
+          <HStack w="full" justifyContent="space-between">
+            <Text textStyle="xs" color="text.subtle">
+              {t("Currently delegated to navigator")}
             </Text>
-            <Text textStyle="sm" fontWeight="semibold">
+            <Text textStyle="xs" fontWeight="semibold">
               {formatter.format(totalDelegatedToNav)} {"VOT3"}
             </Text>
           </HStack>
           {isSwitch && currentDelegationNum > 0 && (
-            <HStack gap={1}>
-              <Text textStyle="sm" color="text.subtle">
-                {t("Your current delegation (will be moved):")}
+            <HStack w="full" justifyContent="space-between">
+              <Text textStyle="xs" color="text.subtle">
+                {t("Your current delegation (will be moved)")}
               </Text>
-              <Text textStyle="sm" fontWeight="semibold">
+              <Text textStyle="xs" fontWeight="semibold">
                 {formatter.format(currentDelegationNum)} {"VOT3"}
               </Text>
             </HStack>
           )}
-          <HStack gap={1}>
-            <Text textStyle="sm" color="text.subtle">
-              {t("Navigator capacity remaining:")}
+          <HStack w="full" justifyContent="space-between">
+            <Text textStyle="xs" color="text.subtle">
+              {t("Navigator capacity remaining")}
             </Text>
-            <Text textStyle="sm" fontWeight="semibold">
+            <Text textStyle="xs" fontWeight="semibold">
               {formatter.format(remainingCapacity)} {"VOT3"}
             </Text>
           </HStack>
@@ -605,20 +607,21 @@ const ManageSummary = ({
               {" VOT3"}
             </Text>
 
-            <VStack align="start" gap={0.5}>
-              <HStack gap={1}>
-                <Text textStyle="sm" color="text.subtle">
-                  {t("Your current delegation:")}
+            <Separator w="full" borderColor={`${summaryColor}.strong/30`} />
+            <VStack align="start" gap={1} w="full">
+              <HStack w="full" justifyContent="space-between">
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Your current delegation")}
                 </Text>
-                <Text textStyle="sm" fontWeight="semibold">
-                  {formatter.format(currentDelegatedNum)} {"VOT3"}
+                <Text textStyle="xs" fontWeight="semibold">
+                  {formatter.format(currentDelegatedNum)} {"→"} {formatter.format(newAmountNum)} {"VOT3"}
                 </Text>
               </HStack>
-              <HStack gap={1}>
-                <Text textStyle="sm" color="text.subtle">
-                  {t("Navigator capacity remaining:")}
+              <HStack w="full" justifyContent="space-between">
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Navigator capacity remaining")}
                 </Text>
-                <Text textStyle="sm" fontWeight="semibold">
+                <Text textStyle="xs" fontWeight="semibold">
                   {formatter.format(Math.max(0, maxCapacity - newAmountNum))} {"VOT3"}
                 </Text>
               </HStack>

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuSettings, LuUsers } from "react-icons/lu"
 
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
@@ -25,11 +26,14 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
   const router = useRouter()
   const { account } = useWallet()
   const { data: isNavigator } = useIsNavigator()
+  const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(nav.address)
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
   const { data: metadata } = useNavigatorMetadata(nav.metadataURI)
   const isActive = nav.status === "ACTIVE"
   const isOwnCard = account?.address?.toLowerCase() === nav.address.toLowerCase()
+  const isDelegatedHere = currentNavigator?.toLowerCase() === nav.address.toLowerCase()
+  const isAtCapacity = Number(nav.stakeFormatted ?? 0) * 10 <= Number(nav.totalDelegatedFormatted ?? 0)
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 8, 6)
   const twitterHandle = textRecords?.["com.x"]
@@ -85,10 +89,8 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
                     <LuSettings />
                     {t("Manage")}
                   </Button>
-                ) : (
-                  !isNavigator &&
-                  isActive &&
-                  onDelegate && (
+                ) : !isNavigator && isActive && onDelegate ? (
+                  isDelegatedHere ? (
                     <Button
                       variant="primary"
                       size="xs"
@@ -96,10 +98,21 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
                         e.stopPropagation()
                         onDelegate(nav)
                       }}>
+                      {t("Manage Delegation")}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      size="xs"
+                      disabled={isAtCapacity}
+                      onClick={e => {
+                        e.stopPropagation()
+                        onDelegate(nav)
+                      }}>
                       {t("Delegate")}
                     </Button>
                   )
-                )}
+                ) : null}
               </HStack>
             </HStack>
 

@@ -1,12 +1,12 @@
-import { Alert, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCompass, LuDoorOpen, LuUserCheck } from "react-icons/lu"
+import { LuCompass } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
@@ -34,9 +34,8 @@ import { NavigatorHeader } from "./NavigatorHeader/NavigatorHeader"
 import { NavigatorRewardsCard } from "./NavigatorRewardsCard"
 import { NavigatorRoundHistory } from "./NavigatorRoundHistory"
 import { NavigatorStatsGrid } from "./NavigatorStatsGrid"
+import { NavigatorStatusAlerts } from "./NavigatorStatusAlerts"
 import { NavigatorTaskList } from "./NavigatorTaskList"
-
-const formatter = getCompactFormatter(2)
 
 export const NavigatorDetailContent = () => {
   const { t } = useTranslation()
@@ -114,6 +113,7 @@ export const NavigatorDetailContent = () => {
   const isOwnPage = !!account?.address && account.address.toLowerCase() === address.toLowerCase()
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = currentNavigator?.toLowerCase() === address.toLowerCase() && currentDelegatedNum > 0
+  const isAtCapacity = Number(nav.stakeFormatted ?? 0) * 10 <= Number(nav.totalDelegatedFormatted ?? 0)
 
   return (
     <VStack w="full" gap={6} align="stretch">
@@ -124,53 +124,15 @@ export const NavigatorDetailContent = () => {
         ]}
       />
 
-      {status === "EXITING" && (
-        <Alert.Root status="warning" borderRadius="xl">
-          <Alert.Indicator>
-            <LuDoorOpen />
-          </Alert.Indicator>
-          <Alert.Title textStyle="sm">
-            {isOwnPage
-              ? t("You have announced your exit. Continue voting during the notice period.")
-              : t("This navigator is exiting. Delegations will become void after the notice period.")}
-          </Alert.Title>
-        </Alert.Root>
-      )}
-
-      {status === "DEACTIVATED" && (
-        <Alert.Root status="error" borderRadius="xl">
-          <Alert.Indicator>
-            <LuDoorOpen />
-          </Alert.Indicator>
-          <Alert.Title textStyle="sm">
-            {isOwnPage
-              ? t("You have been deactivated. You can still withdraw your remaining stake.")
-              : t("This navigator has been deactivated.")}
-          </Alert.Title>
-        </Alert.Root>
-      )}
-
-      {isDelegatedHere && (
-        <Alert.Root status="info" borderRadius="xl">
-          <Alert.Indicator>
-            <LuUserCheck />
-          </Alert.Indicator>
-          <Alert.Title textStyle="sm">
-            {t("You are delegating {{amount}} VOT3 to {{name}}", {
-              amount: formatter.format(currentDelegatedNum),
-              name: displayName,
-            })}
-            {delegationInfo?.delegatedAt &&
-              ` ${t("since {{date}}", {
-                date: new Date(delegationInfo.delegatedAt * 1000).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                }),
-              })}`}
-          </Alert.Title>
-        </Alert.Root>
-      )}
+      <NavigatorStatusAlerts
+        status={status ?? "NONE"}
+        isOwnPage={isOwnPage}
+        isDelegatedHere={isDelegatedHere}
+        isAtCapacity={isAtCapacity}
+        currentDelegatedNum={currentDelegatedNum}
+        displayName={displayName}
+        delegationInfo={delegationInfo}
+      />
 
       <NavigatorHeader
         address={address}
@@ -183,6 +145,7 @@ export const NavigatorDetailContent = () => {
         isConnected={!!account?.address}
         isOwnPage={isOwnPage}
         hasStake={Number(nav.stakeFormatted ?? 0) > 0}
+        isAtCapacity={isAtCapacity}
         onDelegationClick={() => {
           setIsExitMode(false)
           setIsDelegationOpen(true)

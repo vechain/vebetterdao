@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, HStack, Icon, IconButton, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Card, HStack, Icon, IconButton, Separator, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { InfoCircle } from "iconoir-react"
@@ -81,19 +81,34 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false, includeDel
           {" VOT3"}
         </Text>
 
-        <Skeleton loading={isVot3Loading || isCurrentVotingPowerLoading}>
-          <VStack align="start" gap={0.5}>
+        <Skeleton loading={isVot3Loading || isCurrentVotingPowerLoading} w="full">
+          <VStack align="start" gap={2} w="full">
             {isDelegated && !includeDelegation && mode === "power-up" ? (
               <Text textStyle="xs" color="text.subtle">
                 {t("To increase voting power, delegate the converted VOT3 to your navigator.")}
               </Text>
             ) : (
               <>
-                <HStack gap={1}>
-                  <Text textStyle="sm" color="text.subtle">
-                    {t("Next round voting power:")}
+                {isDelegated && includeDelegation && mode === "power-up" && numericAmount > 0 && (
+                  <>
+                    <Separator w="full" borderColor="status.positive.strong/30" />
+                    <HStack w="full" justifyContent="space-between">
+                      <Text textStyle="xs" color="text.subtle">
+                        {t("Delegated to navigator")}
+                      </Text>
+                      <Text textStyle="xs" fontWeight="semibold">
+                        {formatter.format(currentDelegatedNum)} {"→"}{" "}
+                        {formatter.format(currentDelegatedNum + numericAmount)} {"VOT3"}
+                      </Text>
+                    </HStack>
+                  </>
+                )}
+                <Separator w="full" borderColor="status.positive.strong/30" />
+                <HStack w="full" justifyContent="space-between">
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("Next round voting power")}
                   </Text>
-                  <Text textStyle="sm" fontWeight="semibold">
+                  <Text textStyle="xs" fontWeight="semibold">
                     {formatter.format(nextRoundVotingPower)} {"VOT3"}
                   </Text>
                 </HStack>
@@ -112,17 +127,27 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false, includeDel
         </Skeleton>
 
         {showsVotingPowerIncrease && (
-          <Skeleton loading={isRoundLoading}>
-            <HStack gap={1}>
-              <Text textStyle="sm" color="text.subtle">
-                {t("Snapshot in:")}
-              </Text>
+          <Skeleton loading={isRoundLoading} w="full">
+            <HStack w="full" justifyContent="space-between">
+              <HStack gap={1}>
+                <Text textStyle="xs" color="text.subtle">
+                  {t("Snapshot in")}
+                </Text>
+                <IconButton
+                  variant="ghost"
+                  size="2xs"
+                  rounded="full"
+                  aria-label={t("Learn more about snapshot")}
+                  onClick={onOpenSnapshot}>
+                  <Icon as={InfoCircle} boxSize="3.5" color="text.subtle" />
+                </IconButton>
+              </HStack>
               {allocationRound?.voteEndTimestamp && (
                 <Countdown
                   date={allocationRound.voteEndTimestamp.toDate()}
                   now={() => Date.now()}
                   renderer={({ days, hours, minutes }) => (
-                    <Text textStyle="sm" fontWeight="semibold">
+                    <Text textStyle="xs" fontWeight="semibold">
                       {days}
                       {"d "}
                       {hours}
@@ -133,14 +158,6 @@ export const PowerUpSummary = ({ mode, amount, isHighlighted = false, includeDel
                   )}
                 />
               )}
-              <IconButton
-                variant="ghost"
-                size="2xs"
-                rounded="full"
-                aria-label={t("Learn more about snapshot")}
-                onClick={onOpenSnapshot}>
-                <Icon as={InfoCircle} boxSize="4" color="text.subtle" />
-              </IconButton>
               <SnapshotExplanationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
             </HStack>
           </Skeleton>

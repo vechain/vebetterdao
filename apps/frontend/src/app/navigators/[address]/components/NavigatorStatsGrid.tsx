@@ -1,4 +1,4 @@
-import { Card, Flex, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react"
+import { Badge, Card, Flex, HStack, Icon, SimpleGrid, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -19,6 +19,8 @@ type Props = {
 
 export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedClick, onDelegatedClick }: Props) => {
   const { t } = useTranslation()
+
+  const isAtCapacity = Number(nav.stakeFormatted ?? 0) * 10 <= Number(nav.totalDelegatedFormatted ?? 0)
 
   const stats = useMemo(
     () => [
@@ -51,11 +53,11 @@ export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedCl
         label: t("Delegation Capacity"),
         value: `${formatter.format(Number(nav.stakeFormatted ?? 0) * 10)} VOT3`,
         icon: LuGauge,
-        bg: "status.neutral.subtle",
-        color: "status.neutral.primary",
+        bg: isAtCapacity ? "status.negative.subtle" : "status.neutral.subtle",
+        color: isAtCapacity ? "status.negative.primary" : "status.neutral.primary",
       },
     ],
-    [nav, t],
+    [nav, t, isAtCapacity],
   )
 
   const clickHandlers: Record<string, () => void> = {
@@ -83,7 +85,13 @@ export const NavigatorStatsGrid = ({ navigator: nav, onCitizensClick, onStakedCl
               <Flex direction="column" justify="space-between" h={{ base: "full", md: "auto" }} flex={1}>
                 <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle" mb={2}>
                   {label}
+                  {id === "capacity" && isAtCapacity && (
+                    <Badge ml={2} colorPalette="red" size="sm" borderRadius="md">
+                      {t("FULL")}
+                    </Badge>
+                  )}
                 </Text>
+
                 <HStack gap={{ base: 2, md: 3 }}>
                   <HStack
                     justify="center"

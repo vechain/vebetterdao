@@ -1,4 +1,16 @@
-import { Button, Card, Field, Heading, HStack, Icon, NumberInput, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  Field,
+  Heading,
+  HStack,
+  Icon,
+  NumberInput,
+  Separator,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { InfoCircle, WarningTriangle } from "iconoir-react"
@@ -229,28 +241,21 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
                 {" B3TR"}
               </Text>
 
-              <VStack align="start" gap={0.5}>
-                <HStack gap={1}>
-                  <Text textStyle="sm" color="text.subtle">
-                    {t("Current stake:")}
+              <Separator w="full" borderColor={`${summaryColor}.strong/30`} />
+              <VStack align="start" gap={1} w="full">
+                <HStack w="full" justifyContent="space-between">
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("Stake")}
                   </Text>
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {formatter.format(currentStake)} {"B3TR"}
-                  </Text>
-                </HStack>
-                <HStack gap={1}>
-                  <Text textStyle="sm" color="text.subtle">
-                    {t("New stake:")}
-                  </Text>
-                  <Text textStyle="sm" fontWeight="semibold">
-                    {formatter.format(amountNum)} {"B3TR"}
+                  <Text textStyle="xs" fontWeight="semibold">
+                    {formatter.format(currentStake)} {"→"} {formatter.format(amountNum)} {"B3TR"}
                   </Text>
                 </HStack>
-                <HStack gap={1}>
-                  <Text textStyle="sm" color="text.subtle">
-                    {t("New delegation capacity:")}
+                <HStack w="full" justifyContent="space-between">
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("New delegation capacity")}
                   </Text>
-                  <Text textStyle="sm" fontWeight="semibold">
+                  <Text textStyle="xs" fontWeight="semibold">
                     {formatter.format(amountNum * 10)} {"VOT3"}
                   </Text>
                 </HStack>
