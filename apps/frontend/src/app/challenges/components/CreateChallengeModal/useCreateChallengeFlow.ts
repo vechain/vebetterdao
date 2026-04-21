@@ -46,7 +46,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const [visibilityChosen, setVisibilityChosen] = useState(false)
   const [challengeTypeChosen, setChallengeTypeChosen] = useState(false)
   const [typeExplainerSeen, setTypeExplainerSeen] = useState(false)
-  const [splitWinConfigConfirmed, setSplitWinConfigConfirmed] = useState(false)
+  const [splitWinNumWinnersConfirmed, setSplitWinNumWinnersConfirmed] = useState(false)
+  const [splitWinThresholdConfirmed, setSplitWinThresholdConfirmed] = useState(false)
   const [titleConfirmed, setTitleConfirmed] = useState(false)
   const [amountConfirmed, setAmountConfirmed] = useState(false)
   const [startRoundChosen, setStartRoundChosen] = useState(false)
@@ -112,7 +113,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     setVisibilityChosen(false)
     setChallengeTypeChosen(false)
     setTypeExplainerSeen(false)
-    setSplitWinConfigConfirmed(false)
+    setSplitWinNumWinnersConfirmed(false)
+    setSplitWinThresholdConfirmed(false)
     setTitleConfirmed(false)
     setAmountConfirmed(false)
     setStartRoundChosen(false)
@@ -243,7 +245,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       setVisibilityChosen(false)
       setChallengeTypeChosen(false)
       setTypeExplainerSeen(false)
-      setSplitWinConfigConfirmed(false)
+      setSplitWinNumWinnersConfirmed(false)
+      setSplitWinThresholdConfirmed(false)
     })
   }
 
@@ -261,7 +264,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       setVisibilityChosen(true)
       setChallengeTypeChosen(false)
       setTypeExplainerSeen(false)
-      setSplitWinConfigConfirmed(false)
+      setSplitWinNumWinnersConfirmed(false)
+      setSplitWinThresholdConfirmed(false)
       if (value === ChallengeVisibility.Public) setInviteesConfirmed(false)
     })
   }
@@ -281,7 +285,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     withTyping(() => {
       setChallengeTypeChosen(true)
       setTypeExplainerSeen(false)
-      setSplitWinConfigConfirmed(false)
+      setSplitWinNumWinnersConfirmed(false)
+      setSplitWinThresholdConfirmed(false)
     })
   }
 
@@ -291,17 +296,22 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
 
   const updateThreshold = (value: string) => {
     update("threshold", normalizeInteger(value))
-    setSplitWinConfigConfirmed(false)
+    setSplitWinThresholdConfirmed(false)
   }
 
   const updateNumWinners = (value: string) => {
     update("numWinners", normalizeInteger(value))
-    setSplitWinConfigConfirmed(false)
+    setSplitWinNumWinnersConfirmed(false)
   }
 
-  const confirmSplitWinConfig = () => {
+  const confirmSplitWinNumWinners = () => {
+    if (numWinnersValue <= 0) return
+    withTyping(() => setSplitWinNumWinnersConfirmed(true))
+  }
+
+  const confirmSplitWinThreshold = () => {
     if (hasInvalidSplitWinConfiguration) return
-    withTyping(() => setSplitWinConfigConfirmed(true))
+    withTyping(() => setSplitWinThresholdConfirmed(true))
   }
 
   const updateTitle = (value: string) => {
@@ -422,7 +432,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     if (index <= STEP_ORDER.indexOf("visibility")) setVisibilityChosen(false)
     if (index <= STEP_ORDER.indexOf("challengeType")) setChallengeTypeChosen(false)
     if (index <= STEP_ORDER.indexOf("typeExplainer")) setTypeExplainerSeen(false)
-    if (index <= STEP_ORDER.indexOf("splitWinConfig")) setSplitWinConfigConfirmed(false)
+    if (index <= STEP_ORDER.indexOf("splitWinNumWinners")) setSplitWinNumWinnersConfirmed(false)
+    if (index <= STEP_ORDER.indexOf("splitWinThreshold")) setSplitWinThresholdConfirmed(false)
     if (index <= STEP_ORDER.indexOf("title")) setTitleConfirmed(false)
     if (index <= STEP_ORDER.indexOf("amount")) setAmountConfirmed(false)
     if (index <= STEP_ORDER.indexOf("startRound")) setStartRoundChosen(false)
@@ -512,7 +523,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     visibilityChosen,
     challengeTypeChosen,
     typeExplainerSeen,
-    splitWinConfigConfirmed,
+    splitWinNumWinnersConfirmed,
+    splitWinThresholdConfirmed,
     titleConfirmed,
     amountConfirmed,
     startRoundChosen,
@@ -536,7 +548,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     chooseDuration,
     updateThreshold,
     updateNumWinners,
-    confirmSplitWinConfig,
+    confirmSplitWinNumWinners,
+    confirmSplitWinThreshold,
     chooseAppScope,
     confirmSelectedApps,
     confirmInvitees,

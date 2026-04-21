@@ -56,11 +56,13 @@ const formatWei = (value: bigint) => {
  * Returns the i18n key of the explainer message that matches the locked-in (kind, visibility, type) combination.
  */
 const getTypeExplainerKey = (kind: number, visibility: number, challengeType: number): string => {
-  if (kind === ChallengeKind.Stake) return "challengeType.bet.maxActions.explainer"
-  if (visibility === ChallengeVisibility.Public) return "challengeType.sponsored.splitWin.explainer"
+  if (kind === ChallengeKind.Stake)
+    return "Each participant stakes the same amount; the participant with the most actions wins the pool. Up to 100 participants."
+  if (visibility === ChallengeVisibility.Public)
+    return "Split Win — choose how many winners and how many actions each must complete to become a winner. The prize is split equally among the winners. The first to complete the required number of actions and claim the prize win, until all winner slots are filled."
   return challengeType === ChallengeType.SplitWin
-    ? "challengeType.sponsored.splitWin.explainer"
-    : "challengeType.sponsored.maxActions.explainer"
+    ? "Split Win — choose how many winners and how many actions each must complete to become a winner. The prize is split equally among the winners. The first to complete the required number of actions and claim the prize win, until all winner slots are filled."
+    : "Max Actions — invitees compete; the one with the most actions wins the sponsor pool. Up to 100 participants."
 }
 
 export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinition[] => {
@@ -71,7 +73,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     isPrivate,
     appScope,
     duration,
-    thresholdValue,
     numWinnersValue,
     splitWinPrizePerWinner,
     hasInvalidSplitWinConfiguration,
@@ -100,7 +101,8 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     visibilityChosen,
     challengeTypeChosen,
     typeExplainerSeen,
-    splitWinConfigConfirmed,
+    splitWinNumWinnersConfirmed,
+    splitWinThresholdConfirmed,
     titleConfirmed,
     amountConfirmed,
     startRoundChosen,
@@ -177,7 +179,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("Bet")}
             </Text>
             <Text textStyle="xs" mt="1" opacity={0.85}>
-              {t("Each participant bets the same amount. Winners split the prize pool.")}
+              {t("Private challenge. Each participant bets the same amount. Winners split the prize pool.")}
             </Text>
           </Box>
           <Box
@@ -324,100 +326,40 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       ),
     },
     {
-      key: "splitWinConfig",
+      key: "splitWinNumWinners",
       isRelevant: isSplitWin,
-      isComplete: splitWinConfigConfirmed && !hasInvalidSplitWinConfiguration,
+      isComplete: splitWinNumWinnersConfirmed,
       prompt: (
-        <VStack align="stretch" gap="2">
-          <Text textStyle="sm" fontWeight="semibold">
-            {t("Split Win setup")}
-          </Text>
-          <Text textStyle="xs" color="text.subtle">
-            {t("Pick how many winners and how many actions each must complete.")}
-          </Text>
-        </VStack>
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("How many winners?")}
+        </Text>
       ),
       answer: (
         <Text textStyle="sm" color="inherit">
-          {t("{{winners}} winners · {{threshold}} actions", { winners: form.numWinners, threshold: form.threshold })}
+          {t("Number of winners")}
+          {": "}
+          {form.numWinners}
         </Text>
       ),
-      controls: (
-        <VStack align="stretch" gap="4">
-          <VStack align="stretch" gap="2">
-            <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-              {t("Number of winners")}
-            </Text>
-            <HStack gap="2" flexWrap="wrap">
-              {QUICK_NUM_WINNERS.map(value => (
-                <Button
-                  key={value}
-                  size="sm"
-                  variant={getChoiceVariant(form.numWinners === value)}
-                  onClick={() => flow.updateNumWinners(value)}>
-                  {value}
-                </Button>
-              ))}
-            </HStack>
-            <Field.Root invalid={numWinnersValue <= 0}>
-              <Input
-                type="number"
-                min="1"
-                step="1"
-                value={form.numWinners}
-                onChange={e => flow.updateNumWinners(e.target.value)}
-              />
-              {numWinnersValue <= 0 && (
-                <Field.ErrorText>{t("Number of winners must be greater than 0")}</Field.ErrorText>
-              )}
-            </Field.Root>
-          </VStack>
-          <VStack align="stretch" gap="2">
-            <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-              {t("Actions to claim a slot")}
-            </Text>
-            <HStack gap="2" flexWrap="wrap">
-              {QUICK_THRESHOLDS.map(value => (
-                <Button
-                  key={value}
-                  size="sm"
-                  variant={getChoiceVariant(form.threshold === value)}
-                  onClick={() => flow.updateThreshold(value)}>
-                  {value}
-                </Button>
-              ))}
-            </HStack>
-            <Field.Root invalid={thresholdValue <= 0}>
-              <Input
-                type="number"
-                min="1"
-                step="1"
-                value={form.threshold}
-                onChange={e => flow.updateThreshold(e.target.value)}
-              />
-              {thresholdValue <= 0 && (
-                <Field.ErrorText>{t("Actions per winner must be greater than 0")}</Field.ErrorText>
-              )}
-            </Field.Root>
-          </VStack>
-          {stakeAmountWei > 0n && numWinnersValue > 0 && (
-            <Text textStyle="xs" color="text.subtle">
-              {t("Prize per winner")}
-              {": "}
-              {formatWei(splitWinPrizePerWinner)} {"B3TR"}
-            </Text>
-          )}
-          <HStack justify="flex-end">
-            <Button
-              size="sm"
-              variant={primaryVariant}
-              disabled={hasInvalidSplitWinConfiguration}
-              onClick={flow.confirmSplitWinConfig}>
-              {t("Continue")}
-            </Button>
-          </HStack>
-        </VStack>
+      controls: <NumWinnersControls flow={flow} t={t} />,
+    },
+    {
+      key: "splitWinThreshold",
+      isRelevant: isSplitWin,
+      isComplete: splitWinThresholdConfirmed && !hasInvalidSplitWinConfiguration,
+      prompt: (
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("How many actions to claim a slot?")}
+        </Text>
       ),
+      answer: (
+        <Text textStyle="sm" color="inherit">
+          {t("Actions to claim a slot")}
+          {": "}
+          {form.threshold}
+        </Text>
+      ),
+      controls: <ThresholdControls flow={flow} t={t} />,
     },
     {
       key: "title",
@@ -923,6 +865,112 @@ function getCompactListLabel(items: string[]) {
   if (items.length === 0) return ""
   if (items.length <= 2) return items.join(", ")
   return `${items.slice(0, 2).join(", ")}, +${items.length - 2}`
+}
+
+interface SplitWinControlsProps {
+  flow: CreateChallengeFlow
+  t: TFunction
+}
+
+const NumWinnersControls = ({ flow, t }: SplitWinControlsProps) => {
+  const [touched, setTouched] = useState(false)
+  const invalid = touched && flow.numWinnersValue <= 0
+  const markTouched = () => setTouched(true)
+
+  return (
+    <VStack align="stretch" gap="3">
+      <HStack gap="2" flexWrap="wrap">
+        {QUICK_NUM_WINNERS.map(value => (
+          <Button
+            key={value}
+            size="sm"
+            variant={getChoiceVariant(flow.form.numWinners === value)}
+            onClick={() => {
+              markTouched()
+              flow.updateNumWinners(value)
+            }}>
+            {value}
+          </Button>
+        ))}
+      </HStack>
+      <Field.Root invalid={invalid}>
+        <Input
+          type="number"
+          min="1"
+          step="1"
+          value={flow.form.numWinners}
+          onChange={e => {
+            markTouched()
+            flow.updateNumWinners(e.target.value)
+          }}
+        />
+        {invalid && <Field.ErrorText>{t("Number of winners must be greater than 0")}</Field.ErrorText>}
+      </Field.Root>
+      <HStack justify="flex-end">
+        <Button
+          size="sm"
+          variant={primaryVariant}
+          disabled={flow.numWinnersValue <= 0}
+          onClick={flow.confirmSplitWinNumWinners}>
+          {t("Continue")}
+        </Button>
+      </HStack>
+    </VStack>
+  )
+}
+
+const ThresholdControls = ({ flow, t }: SplitWinControlsProps) => {
+  const [touched, setTouched] = useState(false)
+  const invalid = touched && flow.thresholdValue <= 0
+  const markTouched = () => setTouched(true)
+
+  return (
+    <VStack align="stretch" gap="3">
+      <HStack gap="2" flexWrap="wrap">
+        {QUICK_THRESHOLDS.map(value => (
+          <Button
+            key={value}
+            size="sm"
+            variant={getChoiceVariant(flow.form.threshold === value)}
+            onClick={() => {
+              markTouched()
+              flow.updateThreshold(value)
+            }}>
+            {value}
+          </Button>
+        ))}
+      </HStack>
+      <Field.Root invalid={invalid}>
+        <Input
+          type="number"
+          min="1"
+          step="1"
+          value={flow.form.threshold}
+          onChange={e => {
+            markTouched()
+            flow.updateThreshold(e.target.value)
+          }}
+        />
+        {invalid && <Field.ErrorText>{t("Actions per winner must be greater than 0")}</Field.ErrorText>}
+      </Field.Root>
+      {flow.stakeAmountWei > 0n && flow.numWinnersValue > 0 && (
+        <Text textStyle="xs" color="text.subtle">
+          {t("Prize per winner")}
+          {": "}
+          {formatWei(flow.splitWinPrizePerWinner)} {"B3TR"}
+        </Text>
+      )}
+      <HStack justify="flex-end">
+        <Button
+          size="sm"
+          variant={primaryVariant}
+          disabled={flow.thresholdValue <= 0}
+          onClick={flow.confirmSplitWinThreshold}>
+          {t("Continue")}
+        </Button>
+      </HStack>
+    </VStack>
+  )
 }
 
 interface InviteeRowProps {
