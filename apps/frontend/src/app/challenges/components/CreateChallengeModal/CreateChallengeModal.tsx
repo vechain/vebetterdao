@@ -28,7 +28,10 @@ export const CreateChallengeModal = ({ defaultKind, currentRound, children }: Cr
   const currentStep = (steps.find(step => step.isRelevant && !step.isComplete) ?? steps[steps.length - 1])!
   const currentStepIndex = steps.findIndex(step => step.key === currentStep.key)
   const visibleSteps = steps.filter((step, index) => step.isRelevant && index <= currentStepIndex)
-  const previousStep = [...steps.slice(0, currentStepIndex)].reverse().find(step => step.isRelevant)
+  // Skip typeExplainer when going Back: it auto-advances, so landing on it would bounce the user forward.
+  const previousStep = [...steps.slice(0, currentStepIndex)]
+    .reverse()
+    .find(step => step.isRelevant && step.key !== "typeExplainer")
   const showFooter = (!!previousStep && previousStep.key !== "review") || currentStep.key === "review"
 
   useEffect(() => {

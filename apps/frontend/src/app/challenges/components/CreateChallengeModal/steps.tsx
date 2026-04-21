@@ -109,6 +109,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     durationChosen,
     appsConfirmed,
     inviteesConfirmed,
+    typeFinalized,
   } = flow
 
   const amountLabelKey = isSponsored ? "Prize amount (B3TR)" : "Bet amount (B3TR)"
@@ -135,10 +136,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     flow.setAppsConfirmed(false)
   }
   const clearAppFilter = () => updateAppFilter("")
-
-  // Whether the (kind, visibility, type) selection is finalized (all forced or chosen). Drives the explainer step.
-  const typeFinalized =
-    kindChosen && (!needsVisibilityChoice || visibilityChosen) && (!needsChallengeTypeChoice || challengeTypeChosen)
 
   return [
     {
@@ -317,13 +314,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
           </Text>
         </VStack>
       ),
-      controls: (
-        <HStack justify="flex-end">
-          <Button size="sm" variant={primaryVariant} onClick={flow.acknowledgeTypeExplainer}>
-            {t("Got it")}
-          </Button>
-        </HStack>
-      ),
+      controls: null,
     },
     {
       key: "title",

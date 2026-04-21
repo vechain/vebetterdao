@@ -290,9 +290,17 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     })
   }
 
-  const acknowledgeTypeExplainer = () => {
-    withTyping(() => setTypeExplainerSeen(true))
-  }
+  // The (kind, visibility, type) selection is finalized once every relevant choice has been made.
+  const typeFinalized =
+    kindChosen && (!needsVisibilityChoice || visibilityChosen) && (!needsChallengeTypeChoice || challengeTypeChosen)
+
+  // Auto-advance past the explainer after a brief reading pause so the user doesn't need a "Got it" confirmation.
+  useEffect(() => {
+    if (!open) return
+    if (!typeFinalized || typeExplainerSeen || isTyping) return
+    const timer = setTimeout(() => withTyping(() => setTypeExplainerSeen(true)), 500)
+    return () => clearTimeout(timer)
+  }, [open, typeFinalized, typeExplainerSeen, isTyping, withTyping])
 
   const updateThreshold = (value: string) => {
     update("threshold", normalizeInteger(value))
@@ -506,6 +514,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     isSplitWin,
     needsVisibilityChoice,
     needsChallengeTypeChoice,
+    typeFinalized,
     hasReachedSelectedAppsLimit,
     canSubmit,
     filteredApps,
@@ -539,7 +548,6 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     updateKind,
     chooseVisibility,
     setChallengeType: setChallengeTypeChoice,
-    acknowledgeTypeExplainer,
     updateTitle,
     confirmTitle,
     confirmAmount,
