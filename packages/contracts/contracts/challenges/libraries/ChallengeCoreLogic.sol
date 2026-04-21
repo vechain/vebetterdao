@@ -14,6 +14,8 @@ library ChallengeCoreLogic {
   uint256 private constant DESCRIPTION_MAX_BYTES = 500;
   uint256 private constant IMAGE_URI_MAX_BYTES = 512;
   uint256 private constant METADATA_URI_MAX_BYTES = 512;
+  uint256 private constant MIN_PRIZE_PER_WINNER = 1 ether;
+  uint256 private constant MAX_THRESHOLD = 1_000_000;
 
   /// @notice Emitted when a challenge is created and initially funded.
   /// @dev Split Win-specific configuration (numWinners, prizePerWinner) is emitted right after via
@@ -311,9 +313,9 @@ library ChallengeCoreLogic {
   /// @dev Enforces the allowed (kind, visibility, challengeType) matrix and per-type field constraints.
   /// Allowed combinations:
   /// - Stake + Private + MaxActions (no threshold, no numWinners)
-  /// - Sponsored + Public + SplitWin (threshold > 0, numWinners > 0, stakeAmount >= numWinners)
+  /// - Sponsored + Public + SplitWin (0 < threshold <= MAX_THRESHOLD, numWinners > 0, stakeAmount >= numWinners * 1 ether)
   /// - Sponsored + Private + MaxActions (no threshold, no numWinners)
-  /// - Sponsored + Private + SplitWin (threshold > 0, numWinners > 0, stakeAmount >= numWinners)
+  /// - Sponsored + Private + SplitWin (0 < threshold <= MAX_THRESHOLD, numWinners > 0, stakeAmount >= numWinners * 1 ether)
   function _validateTypeConfiguration(ChallengeTypes.CreateChallengeParams memory params) private pure {
     if (params.kind == ChallengeTypes.ChallengeKind.Stake) {
       // Bet challenges are always private Max Actions: no public Bet, no Split Win Bet.
@@ -340,8 +342,14 @@ library ChallengeCoreLogic {
 
     // Split Win configuration validation.
     if (params.threshold == 0 || params.numWinners == 0) revert IChallenges.InvalidTypeConfiguration();
-    // Ensure at least 1 wei per winner so prizePerWinner > 0.
-    if (params.stakeAmount < params.numWinners) revert IChallenges.InvalidTypeConfiguration();
+    if (params.threshold > MAX_THRESHOLD) {
+      revert IChallenges.ThresholdTooHigh(params.threshold, MAX_THRESHOLD);
+    }
+
+    uint256 minStake = params.numWinners * MIN_PRIZE_PER_WINNER;
+    if (params.stakeAmount < minStake) {
+      revert IChallenges.InsufficientPrizePerWinner(params.stakeAmount, params.numWinners, MIN_PRIZE_PER_WINNER);
+    }
   }
 
   function _validateMetadataLengths(ChallengeTypes.CreateChallengeParams memory params) private pure {

@@ -56,11 +56,13 @@ export const ChallengesPageContent = () => {
     }
   }, [isMobile])
 
-  const [tab, setTab] = useState<TabId>("explore")
+  const [tab, setTab] = useState<TabId | null>(null)
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
 
-  const tabSection = useMemo(() => mergeSectionsForTab(tab, grouped), [tab, grouped])
+  const currentTab: TabId = tab ?? (viewerAddress ? "active" : "explore")
+
+  const tabSection = useMemo(() => mergeSectionsForTab(currentTab, grouped), [currentTab, grouped])
 
   const visibleItems = useMemo(
     () =>
@@ -103,14 +105,14 @@ export const ChallengesPageContent = () => {
 
       {/* Tabs + Filters */}
       <Tabs.Root
-        value={tab}
+        value={currentTab}
         onValueChange={d => setTab(d.value as TabId)}
         variant="line"
         size={{ base: "md", md: "lg" }}>
         <Stack direction={{ base: "column", md: "row" }} justify="space-between" align={{ md: "center" }} gap="3">
           <Tabs.List overflowX="auto" overflowY="hidden">
-            <Tabs.Trigger value="explore">{t("Explore")}</Tabs.Trigger>
             {viewerAddress && <Tabs.Trigger value="active">{t("My Active Quests")}</Tabs.Trigger>}
+            <Tabs.Trigger value="explore">{t("Explore")}</Tabs.Trigger>
             {viewerAddress && <Tabs.Trigger value="history">{t("History")}</Tabs.Trigger>}
           </Tabs.List>
           <ChallengeFilters

@@ -25,6 +25,7 @@ import { SummaryItem } from "./ChatBubbles"
 import {
   getChoiceVariant,
   getMinimumBetQuickAmounts,
+  MAX_THRESHOLD,
   primaryVariant,
   QUICK_NUM_WINNERS,
   QUICK_THRESHOLDS,
@@ -59,9 +60,9 @@ const getTypeExplainerKey = (kind: number, visibility: number, challengeType: nu
   if (kind === ChallengeKind.Stake)
     return "Each participant stakes the same amount; the participant with the most actions wins the pool. Up to 100 participants."
   if (visibility === ChallengeVisibility.Public)
-    return "Split Win — choose how many winners and how many actions each must complete to become a winner. The prize is split equally among the winners. The first to complete the required number of actions and claim the prize win, until all winner slots are filled."
+    return "Let's set up your quest. Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize, win."
   return challengeType === ChallengeType.SplitWin
-    ? "Split Win — choose how many winners and how many actions each must complete to become a winner. The prize is split equally among the winners. The first to complete the required number of actions and claim the prize win, until all winner slots are filled."
+    ? "Let's set up your quest. Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize, win."
     : "Max Actions — invitees compete; the one with the most actions wins the sponsor pool. Up to 100 participants."
 }
 
@@ -865,7 +866,8 @@ interface SplitWinControlsProps {
 
 const NumWinnersControls = ({ flow, t }: SplitWinControlsProps) => {
   const [touched, setTouched] = useState(false)
-  const invalid = touched && flow.numWinnersValue <= 0
+  const invalid = touched && flow.hasInvalidNumWinners
+  const invalidPrize = touched && flow.hasInsufficientPrizePerWinner
   const markTouched = () => setTouched(true)
 
   return (
@@ -884,7 +886,7 @@ const NumWinnersControls = ({ flow, t }: SplitWinControlsProps) => {
           </Button>
         ))}
       </HStack>
-      <Field.Root invalid={invalid}>
+      <Field.Root invalid={invalid || invalidPrize}>
         <Input
           type="number"
           min="1"
@@ -896,6 +898,9 @@ const NumWinnersControls = ({ flow, t }: SplitWinControlsProps) => {
           }}
         />
         {invalid && <Field.ErrorText>{t("Number of winners must be greater than 0")}</Field.ErrorText>}
+        {invalidPrize && (
+          <Field.ErrorText>{t("Each winner must receive at least {{min}} B3TR", { min: "1" })}</Field.ErrorText>
+        )}
       </Field.Root>
       {flow.stakeAmountWei > 0n && flow.numWinnersValue > 0 && (
         <Text textStyle="xs" color="text.subtle">
@@ -908,7 +913,7 @@ const NumWinnersControls = ({ flow, t }: SplitWinControlsProps) => {
         <Button
           size="sm"
           variant={primaryVariant}
-          disabled={flow.numWinnersValue <= 0}
+          disabled={flow.hasInvalidNumWinners || flow.hasInsufficientPrizePerWinner}
           onClick={flow.confirmSplitWinNumWinners}>
           {t("Continue")}
         </Button>
@@ -919,7 +924,8 @@ const NumWinnersControls = ({ flow, t }: SplitWinControlsProps) => {
 
 const ThresholdControls = ({ flow, t }: SplitWinControlsProps) => {
   const [touched, setTouched] = useState(false)
-  const invalid = touched && flow.thresholdValue <= 0
+  const invalidLow = touched && flow.thresholdValue <= 0
+  const invalidHigh = touched && flow.thresholdValue > MAX_THRESHOLD
   const markTouched = () => setTouched(true)
 
   return (
@@ -938,10 +944,11 @@ const ThresholdControls = ({ flow, t }: SplitWinControlsProps) => {
           </Button>
         ))}
       </HStack>
-      <Field.Root invalid={invalid}>
+      <Field.Root invalid={invalidLow || invalidHigh}>
         <Input
           type="number"
           min="1"
+          max={MAX_THRESHOLD}
           step="1"
           value={flow.form.threshold}
           onChange={e => {
@@ -949,13 +956,14 @@ const ThresholdControls = ({ flow, t }: SplitWinControlsProps) => {
             flow.updateThreshold(e.target.value)
           }}
         />
-        {invalid && <Field.ErrorText>{t("Actions per winner must be greater than 0")}</Field.ErrorText>}
+        {invalidLow && <Field.ErrorText>{t("Actions per winner must be greater than 0")}</Field.ErrorText>}
+        {invalidHigh && <Field.ErrorText>{t("Maximum actions is {{max}}", { max: MAX_THRESHOLD })}</Field.ErrorText>}
       </Field.Root>
       <HStack justify="flex-end">
         <Button
           size="sm"
           variant={primaryVariant}
-          disabled={flow.thresholdValue <= 0}
+          disabled={flow.hasInvalidThreshold}
           onClick={flow.confirmSplitWinThreshold}>
           {t("Continue")}
         </Button>

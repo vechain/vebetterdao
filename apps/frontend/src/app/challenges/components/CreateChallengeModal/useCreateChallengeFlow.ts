@@ -28,6 +28,8 @@ import {
   AppScope,
   initialForm,
   MAX_SELECTED_APPS,
+  MAX_THRESHOLD,
+  MIN_PRIZE_PER_WINNER_WEI,
   normalizeInteger,
   parseAmount,
   STEP_ORDER,
@@ -175,9 +177,15 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     return stakeAmountWei / BigInt(numWinnersValue)
   }, [isSplitWin, numWinnersValue, stakeAmountWei])
 
-  const hasInvalidSplitWinConfiguration =
+  const hasInvalidNumWinners = isSplitWin && numWinnersValue <= 0
+  const hasInvalidThreshold = isSplitWin && (thresholdValue <= 0 || thresholdValue > MAX_THRESHOLD)
+  const hasInsufficientPrizePerWinner =
     isSplitWin &&
-    (numWinnersValue <= 0 || thresholdValue <= 0 || (stakeAmountWei > 0n && stakeAmountWei < BigInt(numWinnersValue)))
+    numWinnersValue > 0 &&
+    stakeAmountWei > 0n &&
+    stakeAmountWei < BigInt(numWinnersValue) * MIN_PRIZE_PER_WINNER_WEI
+
+  const hasInvalidSplitWinConfiguration = hasInvalidNumWinners || hasInvalidThreshold || hasInsufficientPrizePerWinner
 
   const metadataLengthError = useMemo(
     () =>
@@ -313,7 +321,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   }
 
   const confirmSplitWinNumWinners = () => {
-    if (numWinnersValue <= 0) return
+    if (numWinnersValue <= 0 || hasInsufficientPrizePerWinner) return
     withTyping(() => setSplitWinNumWinnersConfirmed(true))
   }
 
@@ -506,6 +514,9 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     numWinnersValue,
     splitWinPrizePerWinner,
     hasInvalidSplitWinConfiguration,
+    hasInvalidNumWinners,
+    hasInvalidThreshold,
+    hasInsufficientPrizePerWinner,
     minStartRound,
     hasInvalidStartRound,
     duration,

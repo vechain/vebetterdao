@@ -16,6 +16,8 @@ interface IChallenges {
   error InvalidEndRound(uint256 startRound, uint256 endRound);
   error InvalidChallengeTypeForCombo();
   error InvalidTypeConfiguration();
+  error InsufficientPrizePerWinner(uint256 stakeAmount, uint256 numWinners, uint256 minPrizePerWinner);
+  error ThresholdTooHigh(uint256 provided, uint256 maximum);
   error TitleTooLong(uint256 provided, uint256 maximum);
   error DescriptionTooLong(uint256 provided, uint256 maximum);
   error ImageURITooLong(uint256 provided, uint256 maximum);
