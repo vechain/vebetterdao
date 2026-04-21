@@ -48,7 +48,7 @@ test: #@ Test the app.
 # example: make up ENV=e2e
 up:
 	make solo-down
-	@if ![ -e ./.env ]; then cp .env.example .env; fi
+	@if [ ! -e ./.env ]; then cp .env.example .env; fi
 	# if exists - remove the old thor image and its data volume
 	@if [ -n "$$(docker images -q vechain/thor)" ]; then docker rmi $$(docker images -q vechain/thor); fi
 	@if [ -n "$$(docker volume ls -q -f name=thor-data)" ]; then docker volume rm thor-data; fi
