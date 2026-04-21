@@ -44,10 +44,7 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
     if (isSplitWin)
       return {
         ruleLabel: t("Split win"),
-        ruleDetail: t("{{prize}} per winner — {{count}}+ actions to claim", {
-          prize: perWinnerLabel,
-          count: threshold,
-        }),
+        ruleDetail: t("{{count}}+ actions to claim", { count: threshold }),
         ruleTooltip: t("Split win description"),
       }
 
@@ -71,7 +68,10 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
 
   return (
     <>
-      <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }} gap={{ base: 2, md: 3 }} w="full">
+      <Grid
+        templateColumns={{ base: "repeat(2, 1fr)", md: isSplitWin ? "repeat(5, 1fr)" : "repeat(4, 1fr)" }}
+        gap={{ base: 2, md: 3 }}
+        w="full">
         {/* Prize Pool */}
         <GridItem>
           <Card.Root variant="outline" p={{ base: 2, md: 4 }} h="full">
@@ -98,7 +98,7 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
                     </Text>
                     {isSplitWin && (
                       <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
-                        {t("split across {{count}} winners", { count: challenge.numWinners })}
+                        {perWinnerLabel} {t("per winner")}
                       </Text>
                     )}
                   </Flex>

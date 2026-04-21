@@ -187,7 +187,8 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
                 {t("Participants")}
               </Heading>
               <Badge variant="neutral" size="sm" rounded="sm">
-                {humanNumber(challenge.participantCount)} {" / "} {humanNumber(challenge.maxParticipants)}
+                {humanNumber(challenge.participantCount)}
+                {!isSplitWin && ` / ${humanNumber(challenge.maxParticipants)}`}
               </Badge>
             </HStack>
             {inviteButton}
