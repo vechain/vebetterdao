@@ -1,5 +1,5 @@
 import { Grid, GridItem, Text, VStack } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { Fragment, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { BudgetLineItem, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
@@ -54,7 +54,7 @@ export const CostBreakdownView = ({ proposal }: CostBreakdownViewProps) => {
             </GridItem>
             {costBreakdown.map((item: BudgetLineItem, index: number) => (
               // eslint-disable-next-line react/no-array-index-key
-              <Grid key={`row-${index}`} templateColumns="2fr 2fr 1fr" gap={2} w="full" px={2}>
+              <Fragment key={index}>
                 <GridItem>
                   <Text textStyle="sm">{item.category}</Text>
                 </GridItem>
@@ -69,7 +69,7 @@ export const CostBreakdownView = ({ proposal }: CostBreakdownViewProps) => {
                     {Number(item.amount).toLocaleString()}
                   </Text>
                 </GridItem>
-              </Grid>
+              </Fragment>
             ))}
           </Grid>
           <VStack align="flex-end" w="full" px={2} pt={2} borderTopWidth="1px" borderColor="border.primary">
