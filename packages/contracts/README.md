@@ -2,7 +2,7 @@
 
 Open-source repository that houses the smart contracts powering the decentralized VeBetterDAO on the VeChain Thor blockchain.
 
-The complete documentation for the VeBetterDAO and the contracts can be found [on the official documentation website](https://docs.vebetterdao.org) and [here](https://vechain.github.io/vebetterdao-contracts) for the latest documentation extracted from the contracts source code.
+The complete documentation for the VeBetterDAO and the contracts can be found [on the official documentation website](https://docs.vebetterdao.org).
 
 ## Changelog
 
