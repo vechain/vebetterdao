@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
-import { useChallengeSection } from "@/api/challenges/indexerChallenges"
+import { useWalletChallenges } from "@/api/challenges/indexerChallenges"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
@@ -80,7 +80,7 @@ export const ActionBanner = () => {
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
-  const neededActionsQuery = useChallengeSection("needed-actions", account?.address)
+  const walletChallengesQuery = useWalletChallenges(account?.address)
 
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
@@ -152,7 +152,7 @@ export const ActionBanner = () => {
     useProposalClaimableUserDeposits(account?.address ?? "")
   const showClaimTokensBanner = totalClaimableDeposits > 0 && claimableDeposits.length > 0 && !!account?.address
   const showChallengesNeededActionsBanner =
-    !!account?.address && (neededActionsQuery.data?.pages[0]?.data.length ?? 0) > 0
+    !!account?.address && walletChallengesQuery.items.some(challenge => challenge.isActionable)
 
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled

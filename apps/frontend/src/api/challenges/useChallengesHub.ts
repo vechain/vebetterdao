@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 
-import { useChallengeSection } from "./indexerChallenges"
-import { ChallengesHubData, PaginatedChallengeSection } from "./types"
+import { mapIndexerChallengeView, usePublicChallengeSection, useWalletChallenges } from "./indexerChallenges"
+import { ChallengePhase, ChallengesHubData, PaginatedChallengeSection } from "./types"
 
 const EMPTY_SECTION: PaginatedChallengeSection = {
   items: [],
@@ -11,82 +11,67 @@ const EMPTY_SECTION: PaginatedChallengeSection = {
   fetchNextPage: async () => undefined,
 }
 
-const GUEST_WALLET = "0xdead000000000000000000000000000000000001"
+const buildChallengeSection = ({
+  items,
+  hasNextPage,
+  isLoading,
+  isFetchingNextPage,
+  fetchNextPage,
+}: PaginatedChallengeSection): PaginatedChallengeSection => ({
+  items,
+  hasNextPage,
+  isLoading,
+  isFetchingNextPage,
+  fetchNextPage,
+})
 
 export const useChallengesHub = (viewerAddress?: string) => {
-  const exploreAddress = viewerAddress ?? GUEST_WALLET
+  const upcomingQuery = usePublicChallengeSection(ChallengePhase.Upcoming)
+  const liveQuery = usePublicChallengeSection(ChallengePhase.Live)
+  const walletChallengesQuery = useWalletChallenges(viewerAddress)
 
-  const neededActionsQuery = useChallengeSection("needed-actions", viewerAddress)
-  const activeQuery = useChallengeSection("active", viewerAddress)
-  const openQuery = useChallengeSection("open", viewerAddress)
-  const exploreQuery = useChallengeSection("explore", exploreAddress)
-  const historyQuery = useChallengeSection("history", viewerAddress)
+  const buildWalletSection = (
+    predicate: (item: (typeof walletChallengesQuery.items)[number]) => boolean,
+  ): PaginatedChallengeSection => {
+    const items = walletChallengesQuery.items.filter(predicate)
+
+    return buildChallengeSection({
+      items,
+      hasNextPage: walletChallengesQuery.hasNextPage,
+      isLoading: walletChallengesQuery.isLoading,
+      isFetchingNextPage: walletChallengesQuery.isFetchingNextPage,
+      fetchNextPage: walletChallengesQuery.fetchNextPage,
+    })
+  }
+
+  const buildPublicSection = (query: typeof upcomingQuery | typeof liveQuery): PaginatedChallengeSection => {
+    const items =
+      query.data?.pages
+        .flatMap(page => page.data)
+        .filter(
+          challenge =>
+            !viewerAddress || !walletChallengesQuery.refs.some(ref => ref.challengeId === challenge.challengeId),
+        )
+        .map(challenge => mapIndexerChallengeView(challenge, viewerAddress)) ?? []
+
+    return buildChallengeSection({
+      items,
+      hasNextPage: !!query.hasNextPage,
+      isLoading: query.isLoading || (!!viewerAddress && walletChallengesQuery.isLoading),
+      isFetchingNextPage: query.isFetchingNextPage,
+      fetchNextPage: query.fetchNextPage,
+    })
+  }
 
   const data = useMemo<ChallengesHubData>(
     () => ({
-      neededActions: {
-        items: neededActionsQuery.data?.pages.flatMap(page => page.data) ?? [],
-        hasNextPage: !!neededActionsQuery.hasNextPage,
-        isLoading: neededActionsQuery.isLoading,
-        isFetchingNextPage: neededActionsQuery.isFetchingNextPage,
-        fetchNextPage: neededActionsQuery.fetchNextPage,
-      },
-      active: {
-        items: activeQuery.data?.pages.flatMap(page => page.data) ?? [],
-        hasNextPage: !!activeQuery.hasNextPage,
-        isLoading: activeQuery.isLoading,
-        isFetchingNextPage: activeQuery.isFetchingNextPage,
-        fetchNextPage: activeQuery.fetchNextPage,
-      },
-      open: {
-        items: openQuery.data?.pages.flatMap(page => page.data) ?? [],
-        hasNextPage: !!openQuery.hasNextPage,
-        isLoading: openQuery.isLoading,
-        isFetchingNextPage: openQuery.isFetchingNextPage,
-        fetchNextPage: openQuery.fetchNextPage,
-      },
-      explore: {
-        items: exploreQuery.data?.pages.flatMap(page => page.data) ?? [],
-        hasNextPage: !!exploreQuery.hasNextPage,
-        isLoading: exploreQuery.isLoading,
-        isFetchingNextPage: exploreQuery.isFetchingNextPage,
-        fetchNextPage: exploreQuery.fetchNextPage,
-      },
-      history: {
-        items: historyQuery.data?.pages.flatMap(page => page.data) ?? [],
-        hasNextPage: !!historyQuery.hasNextPage,
-        isLoading: historyQuery.isLoading,
-        isFetchingNextPage: historyQuery.isFetchingNextPage,
-        fetchNextPage: historyQuery.fetchNextPage,
-      },
+      neededActions: buildWalletSection(item => item.isActionable),
+      active: buildWalletSection(item => item.isParticipating),
+      open: buildPublicSection(upcomingQuery),
+      explore: buildPublicSection(liveQuery),
+      history: buildWalletSection(item => item.isHistorical),
     }),
-    [
-      activeQuery.data,
-      activeQuery.fetchNextPage,
-      activeQuery.hasNextPage,
-      activeQuery.isFetchingNextPage,
-      activeQuery.isLoading,
-      exploreQuery.data,
-      exploreQuery.fetchNextPage,
-      exploreQuery.hasNextPage,
-      exploreQuery.isFetchingNextPage,
-      exploreQuery.isLoading,
-      historyQuery.data,
-      historyQuery.fetchNextPage,
-      historyQuery.hasNextPage,
-      historyQuery.isFetchingNextPage,
-      historyQuery.isLoading,
-      neededActionsQuery.data,
-      neededActionsQuery.fetchNextPage,
-      neededActionsQuery.hasNextPage,
-      neededActionsQuery.isFetchingNextPage,
-      neededActionsQuery.isLoading,
-      openQuery.data,
-      openQuery.fetchNextPage,
-      openQuery.hasNextPage,
-      openQuery.isFetchingNextPage,
-      openQuery.isLoading,
-    ],
+    [liveQuery, upcomingQuery, viewerAddress, walletChallengesQuery],
   )
 
   return {
@@ -95,21 +80,14 @@ export const useChallengesHub = (viewerAddress?: string) => {
       : {
           neededActions: EMPTY_SECTION,
           active: EMPTY_SECTION,
-          open: EMPTY_SECTION,
+          open: data.open,
           explore: data.explore,
           history: EMPTY_SECTION,
         },
-    isLoading: viewerAddress ? Object.values(data).some(section => section.isLoading) : exploreQuery.isLoading,
-    isError:
-      exploreQuery.isError ||
-      (viewerAddress
-        ? neededActionsQuery.isError || activeQuery.isError || openQuery.isError || historyQuery.isError
-        : false),
-    error:
-      exploreQuery.error ??
-      (viewerAddress
-        ? (neededActionsQuery.error ?? activeQuery.error ?? openQuery.error ?? historyQuery.error)
-        : null) ??
-      null,
+    isLoading: viewerAddress
+      ? Object.values(data).some(section => section.isLoading)
+      : data.open.isLoading || data.explore.isLoading,
+    isError: upcomingQuery.isError || liveQuery.isError || (viewerAddress ? walletChallengesQuery.isError : false),
+    error: upcomingQuery.error ?? liveQuery.error ?? (viewerAddress ? walletChallengesQuery.error : null) ?? null,
   }
 }

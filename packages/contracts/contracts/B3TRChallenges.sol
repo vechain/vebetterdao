@@ -62,6 +62,11 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     $.maxParticipants = data.maxParticipants;
     _setMinBetAmount(data.minBetAmount);
 
+    // Emit updates so event-driven indexers can capture initial settings without extra contract calls.
+    emit MaxChallengeDurationUpdated(0, data.maxChallengeDuration);
+    emit MaxSelectedAppsUpdated(0, data.maxSelectedApps);
+    emit MaxParticipantsUpdated(0, data.maxParticipants);
+
     _initializeAddresses(
       data.b3trAddress,
       data.veBetterPassportAddress,

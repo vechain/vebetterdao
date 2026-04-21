@@ -13,6 +13,13 @@ export const ChallengeStatus = {
 } as const
 export type ChallengeStatus = (typeof ChallengeStatus)[keyof typeof ChallengeStatus]
 
+export const ChallengePhase = {
+  Upcoming: "Upcoming",
+  Live: "Live",
+  Ended: "Ended",
+} as const
+export type ChallengePhase = (typeof ChallengePhase)[keyof typeof ChallengePhase]
+
 export const ChallengeType = { MaxActions: 0, SplitWin: 1 } as const
 export type ChallengeType = (typeof ChallengeType)[keyof typeof ChallengeType]
 
@@ -26,6 +33,30 @@ export const SettlementMode = {
   SplitWinCompleted: 3,
 } as const
 export type SettlementMode = (typeof SettlementMode)[keyof typeof SettlementMode]
+
+export const ChallengeViewerRelation = {
+  Creator: "Creator",
+  Joined: "Joined",
+  Invited: "Invited",
+  Declined: "Declined",
+  None: "None",
+} as const
+export type ChallengeViewerRelation = (typeof ChallengeViewerRelation)[keyof typeof ChallengeViewerRelation]
+
+export const ChallengeAction = {
+  Join: "Join",
+  Leave: "Leave",
+  AcceptInvite: "AcceptInvite",
+  DeclineInvite: "DeclineInvite",
+  Cancel: "Cancel",
+  AddInvites: "AddInvites",
+  Claim: "Claim",
+  Refund: "Refund",
+  Complete: "Complete",
+  ClaimSplitWin: "ClaimSplitWin",
+  ClaimCreatorSplitWinRefund: "ClaimCreatorSplitWinRefund",
+} as const
+export type ChallengeAction = (typeof ChallengeAction)[keyof typeof ChallengeAction]
 
 export const challengeMetadataByteLimits = {
   title: 120,
@@ -93,6 +124,9 @@ export interface ChallengeView {
   canComplete: boolean
   canClaimSplitWin: boolean
   canClaimCreatorSplitWinRefund: boolean
+  isActionable: boolean
+  isParticipating: boolean
+  isHistorical: boolean
 }
 
 export interface ChallengeDetail extends ChallengeView {
@@ -103,7 +137,10 @@ export interface ChallengeDetail extends ChallengeView {
   winners: string[]
 }
 
-export type ChallengeSection = "needed-actions" | "active" | "open" | "explore" | "history"
+export interface WalletChallengeRef {
+  challengeId: number
+  createdAt: number
+}
 
 export interface PaginatedChallengeSection {
   items: ChallengeView[]

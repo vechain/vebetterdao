@@ -32,6 +32,7 @@ export type ChallengeDetailResolverInput = {
   prizePerWinner: string
   allApps: boolean
   participantCount: number
+  maxParticipants: number
   invitedCount: number
   declinedCount: number
   selectedAppsCount: number
@@ -44,23 +45,40 @@ export type ChallengeDetailResolverInput = {
   declined: string[]
   selectedApps: string[]
   winners: string[]
-  viewerStatus: ParticipantStatus
-  isInvitationEligible: boolean
-  isSplitWinWinner: boolean
+  eligibleInvitees: string[]
+  claimedBy: string[]
+  refundedBy: string[]
+  creatorRefunded: boolean
 }
 
 type ResolveChallengeDetailParams = {
   challenge: ChallengeDetailResolverInput
   viewerAddress?: string
   currentRound: number
-  maxParticipants: number
-  hasClaimed: boolean
-  hasRefunded: boolean
   participantActions?: bigint
 }
 
 const compareAddresses = (left?: string, right?: string) =>
   !!left && !!right && left.toLowerCase() === right.toLowerCase()
+
+const includesAddress = (addresses: string[], viewerAddress?: string) =>
+  !!viewerAddress && addresses.some(address => compareAddresses(address, viewerAddress))
+
+const resolveViewerStatus = (
+  {
+    creator,
+    participants,
+    invited,
+    declined,
+  }: Pick<ChallengeDetailResolverInput, "creator" | "participants" | "invited" | "declined">,
+  viewerAddress?: string,
+) => {
+  if (compareAddresses(creator, viewerAddress)) return ParticipantStatus.None
+  if (includesAddress(participants, viewerAddress)) return ParticipantStatus.Joined
+  if (includesAddress(invited, viewerAddress)) return ParticipantStatus.Invited
+  if (includesAddress(declined, viewerAddress)) return ParticipantStatus.Declined
+  return ParticipantStatus.None
+}
 
 /**
  * Whether the viewer's live action count is needed to compute claim eligibility.
@@ -68,10 +86,15 @@ const compareAddresses = (left?: string, right?: string) =>
  * Split Win: needed while Active so the user can see whether they meet the threshold.
  */
 export const needsChallengeParticipantActions = (
-  challenge: Pick<ChallengeDetailResolverInput, "challengeType" | "settlementMode" | "status" | "viewerStatus">,
-  hasClaimed: boolean,
+  challenge: Pick<
+    ChallengeDetailResolverInput,
+    "challengeType" | "settlementMode" | "status" | "creator" | "participants" | "invited" | "declined" | "claimedBy"
+  >,
+  viewerAddress?: string,
 ) => {
-  if (challenge.viewerStatus !== ParticipantStatus.Joined) return false
+  const viewerStatus = resolveViewerStatus(challenge, viewerAddress)
+  if (viewerStatus !== ParticipantStatus.Joined) return false
+  const hasClaimed = includesAddress(challenge.claimedBy, viewerAddress)
 
   if (challenge.challengeType === ChallengeType.SplitWin) {
     return challenge.status === ChallengeStatus.Active && !hasClaimed
@@ -88,18 +111,22 @@ export const resolveChallengeDetail = ({
   challenge,
   viewerAddress,
   currentRound,
-  maxParticipants,
-  hasClaimed,
-  hasRefunded,
   participantActions = 0n,
 }: ResolveChallengeDetailParams): ChallengeDetail => {
   const isCreator = compareAddresses(challenge.creator, viewerAddress)
-  const isJoined = challenge.viewerStatus === ParticipantStatus.Joined
-  const isInvited = challenge.viewerStatus === ParticipantStatus.Invited || challenge.isInvitationEligible
+  const viewerStatus = resolveViewerStatus(challenge, viewerAddress)
+  const isJoined = viewerStatus === ParticipantStatus.Joined
+  const isInvitationEligible = includesAddress(challenge.eligibleInvitees, viewerAddress)
+  const isInvited = viewerStatus === ParticipantStatus.Invited || isInvitationEligible
   const isInvitationPending = challenge.status === ChallengeStatus.Pending && isInvited && !isJoined
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
+  const hasClaimed = includesAddress(challenge.claimedBy, viewerAddress)
+  const hasRefunded = includesAddress(challenge.refundedBy, viewerAddress)
+  // MaxActions challenges with TopWinners settlement also populate `winners`,
+  // so gate this strictly on Split Win to avoid mislabelling MaxActions top-winners.
+  const isSplitWinWinner = isSplitWin && includesAddress(challenge.winners, viewerAddress)
   // Split Win challenges have no participant cap by design.
-  const hasReachedParticipantLimit = !isSplitWin && challenge.participantCount >= maxParticipants
+  const hasReachedParticipantLimit = !isSplitWin && challenge.participantCount >= challenge.maxParticipants
   const canJoin =
     challenge.status === ChallengeStatus.Pending &&
     challenge.visibility === ChallengeVisibility.Public &&
@@ -107,7 +134,7 @@ export const resolveChallengeDetail = ({
     !isCreator &&
     !hasReachedParticipantLimit
   const canAccept = isInvitationPending && !hasReachedParticipantLimit
-  const canDecline = isInvitationPending && challenge.viewerStatus !== ParticipantStatus.Declined
+  const canDecline = isInvitationPending && viewerStatus !== ParticipantStatus.Declined
   const canLeave = challenge.status === ChallengeStatus.Pending && isJoined && !isCreator
   const canCancel = challenge.status === ChallengeStatus.Pending && isCreator
   const canAddInvites =
@@ -132,7 +159,7 @@ export const resolveChallengeDetail = ({
 
   const canClaimSplitWin =
     isSplitWin &&
-    !challenge.isSplitWinWinner &&
+    !isSplitWinWinner &&
     challenge.status === ChallengeStatus.Active &&
     isJoined &&
     inSplitWinWindow &&
@@ -142,7 +169,7 @@ export const resolveChallengeDetail = ({
   const canClaimCreatorSplitWinRefund =
     isSplitWin &&
     isCreator &&
-    !hasRefunded &&
+    !challenge.creatorRefunded &&
     currentRound > challenge.endRound &&
     slotsLeft > 0 &&
     (challenge.status === ChallengeStatus.Active || challenge.status === ChallengeStatus.Completed)
@@ -156,6 +183,17 @@ export const resolveChallengeDetail = ({
   const isAwaitingCompletion =
     !isSplitWin && challenge.status === ChallengeStatus.Active && challenge.endRound < currentRound
   const canComplete = isAwaitingCompletion && (isCreator || isJoined)
+  const needsPastAction = canClaim || canRefund || canComplete || canClaimSplitWin || canClaimCreatorSplitWinRefund
+  const isLive = challenge.status === ChallengeStatus.Pending || challenge.status === ChallengeStatus.Active
+  const isDone =
+    challenge.status === ChallengeStatus.Completed ||
+    challenge.status === ChallengeStatus.Cancelled ||
+    challenge.status === ChallengeStatus.Invalid
+  const isParticipating = isLive && !isAwaitingCompletion && (isCreator || isJoined)
+  const isActionable = needsPastAction || ((canAccept || canDecline) && viewerStatus !== ParticipantStatus.Declined)
+  const isHistorical =
+    (viewerStatus === ParticipantStatus.Declined && canAccept) ||
+    (isDone && (isCreator || isJoined) && !needsPastAction)
 
   return {
     challengeId: challenge.challengeId,
@@ -181,16 +219,16 @@ export const resolveChallengeDetail = ({
     prizePerWinner: challenge.prizePerWinner,
     allApps: challenge.allApps,
     participantCount: challenge.participantCount,
-    maxParticipants,
+    maxParticipants: challenge.maxParticipants,
     invitedCount: challenge.invitedCount,
     declinedCount: challenge.declinedCount,
     selectedAppsCount: challenge.selectedAppsCount,
     winnersCount: challenge.winnersCount,
-    viewerStatus: challenge.viewerStatus,
+    viewerStatus,
     isCreator,
     isJoined,
     isInvitationPending,
-    isSplitWinWinner: challenge.isSplitWinWinner,
+    isSplitWinWinner,
     canJoin,
     canLeave,
     canAccept,
@@ -207,5 +245,8 @@ export const resolveChallengeDetail = ({
     declined: challenge.declined,
     selectedApps: challenge.selectedApps,
     winners: challenge.winners,
+    isActionable,
+    isParticipating,
+    isHistorical,
   }
 }
