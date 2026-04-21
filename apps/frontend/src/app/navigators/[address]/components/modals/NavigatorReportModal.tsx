@@ -57,11 +57,11 @@ export const NavigatorReportModal = ({ isOpen, onClose }: Props) => {
       <VStack w="full" align="stretch" gap={4}>
         <Heading size="lg">{t("Submit Report")}</Heading>
         <Text textStyle="sm" color="text.subtle">
-          {t("navigatorReportExplainer", { interval: reportInterval ?? 2 })}
+          {t("Required each {{interval}} rounds, otherwise optional.", { interval: reportInterval ?? 2 })}
         </Text>
 
         <Textarea
-          placeholder={t("Write your report for this period")}
+          placeholder={t("Share a link (X, PDF, etc.) or write your report")}
           value={reportText}
           onChange={e => setReportText(e.target.value)}
           resize="none"
