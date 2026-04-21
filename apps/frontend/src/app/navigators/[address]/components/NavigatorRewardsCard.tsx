@@ -27,7 +27,7 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
   const [isInfoOpen, setIsInfoOpen] = useState(false)
   const [claimedAmount, setClaimedAmount] = useState(0)
 
-  const { totalEarned, totalClaimable, totalLocked, claimableRoundIds, nextUnlock, isLoading } =
+  const { totalEarned, totalClaimed, totalClaimable, totalLocked, claimableRoundIds, nextUnlock, isLoading } =
     useNavigatorFeeStatus(address)
   const { sendTransaction, isPending } = useClaimNavigatorFees({
     onSuccess: () => setClaimedAmount(totalClaimable),
@@ -109,7 +109,7 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
                     </Text>
                     <HStack gap={2} align="baseline">
                       <Text textStyle="sm" fontWeight="semibold">
-                        {formatter.format(totalEarned)}
+                        {formatter.format(totalClaimed)}
                         {" B3TR"}
                       </Text>
                       {/* TODO: Hiding chart view until we will aggregate data and have it available */}
