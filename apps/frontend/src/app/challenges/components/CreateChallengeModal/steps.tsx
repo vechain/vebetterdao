@@ -48,7 +48,7 @@ const formatWei = (value: bigint) => {
   const formatted = formatEther(value)
   const [whole = formatted, decimal] = formatted.split(".")
   if (!decimal) return whole
-  const trimmedDecimal = decimal.replace(/0+$/, "")
+  const trimmedDecimal = decimal.replace(/0+$/, "").slice(0, 4)
   return trimmedDecimal ? `${whole}.${trimmedDecimal}` : whole
 }
 
@@ -326,42 +326,6 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       ),
     },
     {
-      key: "splitWinNumWinners",
-      isRelevant: isSplitWin,
-      isComplete: splitWinNumWinnersConfirmed,
-      prompt: (
-        <Text textStyle="sm" fontWeight="semibold">
-          {t("How many winners?")}
-        </Text>
-      ),
-      answer: (
-        <Text textStyle="sm" color="inherit">
-          {t("Number of winners")}
-          {": "}
-          {form.numWinners}
-        </Text>
-      ),
-      controls: <NumWinnersControls flow={flow} t={t} />,
-    },
-    {
-      key: "splitWinThreshold",
-      isRelevant: isSplitWin,
-      isComplete: splitWinThresholdConfirmed && !hasInvalidSplitWinConfiguration,
-      prompt: (
-        <Text textStyle="sm" fontWeight="semibold">
-          {t("How many actions to claim a slot?")}
-        </Text>
-      ),
-      answer: (
-        <Text textStyle="sm" color="inherit">
-          {t("Actions to claim a slot")}
-          {": "}
-          {form.threshold}
-        </Text>
-      ),
-      controls: <ThresholdControls flow={flow} t={t} />,
-    },
-    {
       key: "title",
       isRelevant: true,
       isComplete: titleConfirmed,
@@ -462,6 +426,42 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
           </HStack>
         </VStack>
       ),
+    },
+    {
+      key: "splitWinNumWinners",
+      isRelevant: isSplitWin,
+      isComplete: splitWinNumWinnersConfirmed,
+      prompt: (
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("How many winners?")}
+        </Text>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit">
+          {t("Number of winners")}
+          {": "}
+          {form.numWinners}
+        </Text>
+      ),
+      controls: <NumWinnersControls flow={flow} t={t} />,
+    },
+    {
+      key: "splitWinThreshold",
+      isRelevant: isSplitWin,
+      isComplete: splitWinThresholdConfirmed && !hasInvalidSplitWinConfiguration,
+      prompt: (
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("How many actions are needed to win?")}
+        </Text>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit">
+          {t("Actions to claim a slot")}
+          {": "}
+          {form.threshold}
+        </Text>
+      ),
+      controls: <ThresholdControls flow={flow} t={t} />,
     },
     {
       key: "startRound",
@@ -906,6 +906,13 @@ const NumWinnersControls = ({ flow, t }: SplitWinControlsProps) => {
         />
         {invalid && <Field.ErrorText>{t("Number of winners must be greater than 0")}</Field.ErrorText>}
       </Field.Root>
+      {flow.stakeAmountWei > 0n && flow.numWinnersValue > 0 && (
+        <Text textStyle="xs" color="text.subtle">
+          {t("Prize per winner")}
+          {": "}
+          {formatWei(flow.splitWinPrizePerWinner)} {"B3TR"}
+        </Text>
+      )}
       <HStack justify="flex-end">
         <Button
           size="sm"
@@ -953,13 +960,6 @@ const ThresholdControls = ({ flow, t }: SplitWinControlsProps) => {
         />
         {invalid && <Field.ErrorText>{t("Actions per winner must be greater than 0")}</Field.ErrorText>}
       </Field.Root>
-      {flow.stakeAmountWei > 0n && flow.numWinnersValue > 0 && (
-        <Text textStyle="xs" color="text.subtle">
-          {t("Prize per winner")}
-          {": "}
-          {formatWei(flow.splitWinPrizePerWinner)} {"B3TR"}
-        </Text>
-      )}
       <HStack justify="flex-end">
         <Button
           size="sm"
