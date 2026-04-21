@@ -4,7 +4,8 @@ import { useMemo, useState } from "react"
 import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
-import { useChallengeSection } from "@/api/challenges/indexerChallenges"
+import { useUserChallengeStateSection } from "@/api/challenges/indexerChallenges"
+import { UserChallengeListType } from "@/api/challenges/types"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
@@ -80,7 +81,7 @@ export const ActionBanner = () => {
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
-  const neededActionsQuery = useChallengeSection("needed-actions", account?.address)
+  const neededActionsQuery = useUserChallengeStateSection(UserChallengeListType.actionable, account?.address)
 
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(

@@ -13,6 +13,13 @@ export const ChallengeStatus = {
 } as const
 export type ChallengeStatus = (typeof ChallengeStatus)[keyof typeof ChallengeStatus]
 
+export const ChallengePhase = {
+  Upcoming: "Upcoming",
+  Live: "Live",
+  Ended: "Ended",
+} as const
+export type ChallengePhase = (typeof ChallengePhase)[keyof typeof ChallengePhase]
+
 export const ChallengeType = { MaxActions: 0, SplitWin: 1 } as const
 export type ChallengeType = (typeof ChallengeType)[keyof typeof ChallengeType]
 
@@ -26,6 +33,37 @@ export const SettlementMode = {
   SplitWinCompleted: 3,
 } as const
 export type SettlementMode = (typeof SettlementMode)[keyof typeof SettlementMode]
+
+export const ChallengeViewerRelation = {
+  Creator: "Creator",
+  Joined: "Joined",
+  Invited: "Invited",
+  Declined: "Declined",
+  None: "None",
+} as const
+export type ChallengeViewerRelation = (typeof ChallengeViewerRelation)[keyof typeof ChallengeViewerRelation]
+
+export const ChallengeAction = {
+  Join: "Join",
+  Leave: "Leave",
+  AcceptInvite: "AcceptInvite",
+  DeclineInvite: "DeclineInvite",
+  Cancel: "Cancel",
+  AddInvites: "AddInvites",
+  Claim: "Claim",
+  Refund: "Refund",
+  Complete: "Complete",
+  ClaimSplitWin: "ClaimSplitWin",
+  ClaimCreatorSplitWinRefund: "ClaimCreatorSplitWinRefund",
+} as const
+export type ChallengeAction = (typeof ChallengeAction)[keyof typeof ChallengeAction]
+
+export const UserChallengeListType = {
+  actionable: "actionable",
+  participating: "participating",
+  history: "history",
+} as const
+export type UserChallengeListType = (typeof UserChallengeListType)[keyof typeof UserChallengeListType]
 
 export const challengeMetadataByteLimits = {
   title: 120,
@@ -103,7 +141,16 @@ export interface ChallengeDetail extends ChallengeView {
   winners: string[]
 }
 
-export type ChallengeSection = "needed-actions" | "active" | "open" | "explore" | "history"
+export interface ChallengeUserState {
+  challengeId: number
+  createdAt: number
+  viewerRelation: ChallengeViewerRelation
+  availableActions: ChallengeAction[]
+  participantActions: string
+  isActionable: boolean
+  isParticipating: boolean
+  isHistorical: boolean
+}
 
 export interface PaginatedChallengeSection {
   items: ChallengeView[]
