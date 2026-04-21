@@ -1,9 +1,9 @@
-import { Badge, Card, Heading, HStack, Icon, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Badge, Button, Card, Heading, HStack, Icon, IconButton, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
-import { LuCheck, LuCircle, LuClock, LuFileText, LuGavel, LuInfo, LuTriangleAlert, LuVote } from "react-icons/lu"
+import { LuCheck, LuCircle, LuClock, LuEye, LuFileText, LuGavel, LuInfo, LuTriangleAlert, LuVote } from "react-icons/lu"
 
 import { useGetLastReportRound } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
 import { useGetPreferenceCutoffPeriod } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferenceCutoffPeriod"
@@ -11,6 +11,7 @@ import { useGetPreferencesSetBlock } from "@/api/contracts/navigatorRegistry/hoo
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
 import { useHasSetDecisions } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecisions"
 import { useHasSetPreferences } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
+import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useIsNavigatorRegistrationRound } from "@/hooks/navigator/useIsNavigatorRegistrationRound"
@@ -19,6 +20,7 @@ import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriche
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
 import { NavigatorTasksInfoModal } from "./modals/NavigatorTasksInfoModal"
+import { ViewReportModal } from "./modals/ViewReportModal"
 
 type Props = {
   address: string
@@ -29,6 +31,7 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const [isInfoOpen, setIsInfoOpen] = useState(false)
+  const [viewReportURI, setViewReportURI] = useState<string | null>(null)
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: hasSetPrefs } = useHasSetPreferences(roundId)
   const { data: prefsSetBlock } = useGetPreferencesSetBlock(roundId)
@@ -36,6 +39,7 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
   const { data: preferenceCutoffPeriod } = useGetPreferenceCutoffPeriod()
   const { data: lastReportRound } = useGetLastReportRound()
   const { data: reportInterval } = useGetReportInterval()
+  const { data: reportEvents } = useNavigatorReportEvents(address)
   const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
   const isRegistrationRound = useIsNavigatorRegistrationRound(address)
 
@@ -69,6 +73,11 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
 
   const hasUnvotedProposals = activeProposals.some(p => !decisionsMap?.[p.id])
   const hasPendingTasks = !hasSetPrefs || (isReportMandatory && !hasReportThisRound) || hasUnvotedProposals
+
+  const currentRoundReportURI = useMemo(() => {
+    if (!roundId) return undefined
+    return reportEvents?.find(ev => ev.roundId === roundId)?.reportURI
+  }, [reportEvents, roundId])
 
   if (!roundId) return null
 
@@ -184,12 +193,21 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
               doneLabel={t("Report Submitted")}
               pendingLabel={t("Report Due")}
               onClick={onSubmitReport}
+              doneAction={
+                hasReportThisRound && currentRoundReportURI ? (
+                  <Button variant="ghost" size="xs" onClick={() => setViewReportURI(currentRoundReportURI)}>
+                    <LuEye />
+                    {t("View")}
+                  </Button>
+                ) : undefined
+              }
             />
           </VStack>
         </VStack>
       </Card.Body>
 
       <NavigatorTasksInfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
+      <ViewReportModal isOpen={!!viewReportURI} onClose={() => setViewReportURI(null)} reportURI={viewReportURI} />
     </Card.Root>
   )
 }
@@ -206,6 +224,8 @@ type TaskItemProps = {
   doneLabel: string
   pendingLabel: string
   onClick: () => void
+  /** Optional action shown instead of the done badge (e.g. View report) */
+  doneAction?: React.ReactNode
 }
 
 const TaskItem = ({
@@ -218,10 +238,12 @@ const TaskItem = ({
   doneLabel,
   pendingLabel,
   onClick,
+  doneAction,
 }: TaskItemProps) => {
   const { t } = useTranslation()
   const palette = done ? "green" : softPending ? "gray" : overdue ? "red" : "orange"
   const pendingBadgeLabel = softPending ? t("Optional") : pendingLabel
+  const showDoneAction = done && !!doneAction
 
   return (
     <HStack
@@ -241,9 +263,13 @@ const TaskItem = ({
         </Text>
       </HStack>
       <HStack gap={1} flexShrink={0}>
-        <Badge colorPalette={palette} size="sm">
-          {done ? doneLabel : pendingBadgeLabel}
-        </Badge>
+        {showDoneAction ? (
+          doneAction
+        ) : (
+          <Badge colorPalette={palette} size="sm">
+            {done ? doneLabel : pendingBadgeLabel}
+          </Badge>
+        )}
         {done && showOverdueWhenDone && (
           <Badge colorPalette="orange" size="sm">
             {t("Overdue")}

@@ -5,7 +5,7 @@ import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useCurrentBlock } from "@vechain/vechain-kit"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   LuCheck,
@@ -77,7 +77,8 @@ type Props = {
 export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   const { t } = useTranslation()
   const [visibleCount, setVisibleCount] = useState(PREVIEW_ROUNDS)
-  const [expandedRound, setExpandedRound] = useState<string | null>(null)
+  const [expandedRounds, setExpandedRounds] = useState<Set<string>>(new Set())
+  const [hasInitializedExpansion, setHasInitializedExpansion] = useState(false)
   const [viewReportURI, setViewReportURI] = useState<string | null>(null)
   const [isReportOpen, setIsReportOpen] = useState(false)
   const [isTasksHistoryInfoOpen, setIsTasksHistoryInfoOpen] = useState(false)
@@ -250,6 +251,12 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   const visibleRounds = rounds.slice(0, visibleCount)
   const hasMore = visibleCount < rounds.length
 
+  useEffect(() => {
+    if (hasInitializedExpansion || rounds.length === 0) return
+    setExpandedRounds(new Set([rounds[0].roundId]))
+    setHasInitializedExpansion(true)
+  }, [rounds, hasInitializedExpansion])
+
   if (rounds.length === 0) return null
 
   return (
@@ -282,8 +289,15 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
                 <RoundCard
                   key={round.roundId}
                   round={round}
-                  isExpanded={expandedRound === round.roundId}
-                  onToggle={() => setExpandedRound(prev => (prev === round.roundId ? null : round.roundId))}
+                  isExpanded={expandedRounds.has(round.roundId)}
+                  onToggle={() =>
+                    setExpandedRounds(prev => {
+                      const next = new Set(prev)
+                      if (next.has(round.roundId)) next.delete(round.roundId)
+                      else next.add(round.roundId)
+                      return next
+                    })
+                  }
                   onViewReport={setViewReportURI}
                   slashed={slashedByRound?.get(round.roundId)?.slashed ?? false}
                   penaltyAmount={penaltyAmount}
