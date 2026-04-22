@@ -1,6 +1,7 @@
-import { Box, Heading, HStack, VStack } from "@chakra-ui/react"
-import { useCallback } from "react"
-import { A11y } from "swiper/modules"
+import { Box, Heading, HStack, IconButton, VStack } from "@chakra-ui/react"
+import { useCallback, useId } from "react"
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
+import { A11y, Navigation } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import { ChallengeView } from "@/api/challenges/types"
@@ -8,6 +9,7 @@ import { ChallengeSectionResult } from "@/api/challenges/useChallengeSections"
 
 import "@/app/theme/swiper-custom.css"
 import "swiper/css"
+import "swiper/css/navigation"
 
 import { ChallengeCard } from "./ChallengeCard"
 import { CompactSkeleton } from "./CompactSkeleton"
@@ -32,6 +34,9 @@ const INITIAL_SKELETON_SLIDES = 3
 
 export const SectionCarousel = ({ title, section, items, hideWhenEmpty = true }: SectionCarouselProps) => {
   const displayItems = items ?? section.items
+  const uid = useId().replace(/:/g, "")
+  const prevClass = `swiper-prev-${uid}`
+  const nextClass = `swiper-next-${uid}`
 
   const handleReachEnd = useCallback(() => {
     if (section.hasNextPage && !section.isFetchingNextPage) {
@@ -65,23 +70,59 @@ export const SectionCarousel = ({ title, section, items, hideWhenEmpty = true }:
       <HStack justify="space-between" align="center">
         <Heading textStyle={{ base: "lg", md: "xl" }}>{title}</Heading>
       </HStack>
-      <Swiper modules={[A11y]} breakpoints={BREAKPOINTS} onReachEnd={handleReachEnd} style={{ width: "100%" }}>
-        {displayItems.map(challenge => (
-          <SwiperSlide key={challenge.challengeId} style={{ height: "auto" }}>
-            <Box h="full">
-              <ChallengeCard challenge={challenge} />
-            </Box>
-          </SwiperSlide>
-        ))}
-        {section.isFetchingNextPage &&
-          Array.from({ length: SKELETON_SLIDES }).map((_, i) => (
-            <SwiperSlide key={`skel-${i}`} style={{ height: "auto" }}>
+      <Box position="relative" w="full">
+        <Swiper
+          modules={[A11y, Navigation]}
+          breakpoints={BREAKPOINTS}
+          onReachEnd={handleReachEnd}
+          navigation={{ prevEl: `.${prevClass}`, nextEl: `.${nextClass}` }}
+          style={{ width: "100%" }}>
+          {displayItems.map(challenge => (
+            <SwiperSlide key={challenge.challengeId} style={{ height: "auto" }}>
               <Box h="full">
-                <CompactSkeleton />
+                <ChallengeCard challenge={challenge} />
               </Box>
             </SwiperSlide>
           ))}
-      </Swiper>
+          {section.isFetchingNextPage &&
+            Array.from({ length: SKELETON_SLIDES }).map((_, i) => (
+              <SwiperSlide key={`skel-${i}`} style={{ height: "auto" }}>
+                <Box h="full">
+                  <CompactSkeleton />
+                </Box>
+              </SwiperSlide>
+            ))}
+        </Swiper>
+
+        <IconButton
+          hideBelow="md"
+          className={prevClass}
+          aria-label="Previous"
+          rounded="full"
+          size="md"
+          position="absolute"
+          zIndex={2}
+          top="50%"
+          left={{ md: "-70px" }}
+          transform="translateY(-50%)"
+          _disabled={{ opacity: 0.4, cursor: "not-allowed" }}>
+          <FaArrowLeft />
+        </IconButton>
+        <IconButton
+          hideBelow="md"
+          className={nextClass}
+          aria-label="Next"
+          rounded="full"
+          size="md"
+          position="absolute"
+          zIndex={2}
+          top="50%"
+          right={{ md: "-70px" }}
+          transform="translateY(-50%)"
+          _disabled={{ opacity: 0.4, cursor: "not-allowed" }}>
+          <FaArrowRight />
+        </IconButton>
+      </Box>
     </VStack>
   )
 }
