@@ -1,7 +1,7 @@
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-import { ChallengeKind, ChallengeStatus, ChallengeType, ChallengeView } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeStatus, ChallengeType, ChallengeView, SettlementMode } from "@/api/challenges/types"
 
 export const useChallengeDescription = (challenge: ChallengeView): string => {
   const { t } = useTranslation()
@@ -24,8 +24,14 @@ export const useChallengeDescription = (challenge: ChallengeView): string => {
     : prizeLabel
   const maxLabel = humanNumber(challenge.maxParticipants)
   const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
+  // Max Actions splits the pool equally across tied top scorers (matches contract _payoutAmount).
+  const claimShare =
+    challenge.settlementMode === SettlementMode.TopWinners && challenge.bestCount > 1
+      ? (BigInt(challenge.totalPrize) / BigInt(challenge.bestCount)).toString()
+      : challenge.totalPrize
+  const claimPrizeLabel = humanNumber(claimShare, claimShare, "B3TR")
 
-  if (challenge.canClaim) return t("You won! {{prize}} is yours — claim your prize now.", { prize: prizeLabel })
+  if (challenge.canClaim) return t("You won! {{prize}} is yours — claim your prize now.", { prize: claimPrizeLabel })
   if (challenge.canClaimSplitWin)
     return t("You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.", {
       prize: perWinnerLabel,

@@ -3,7 +3,13 @@ import { UilShareAlt } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
-import { ChallengeDetail, ChallengeKind, ChallengeStatus, challengeStatusLabel } from "@/api/challenges/types"
+import {
+  ChallengeDetail,
+  ChallengeKind,
+  ChallengeStatus,
+  challengeStatusLabel,
+  SettlementMode,
+} from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
 
@@ -66,7 +72,12 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
 
   const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
   const challengeTitle = challenge.title || t("Quest #{{id}}", { id: challenge.challengeId })
-  const prizeLabel = humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")
+  // Max Actions splits the pool equally across all top scorers tied at bestScore (matches contract _payoutAmount).
+  const claimShare =
+    challenge.settlementMode === SettlementMode.TopWinners && challenge.bestCount > 1
+      ? (BigInt(challenge.totalPrize) / BigInt(challenge.bestCount)).toString()
+      : challenge.totalPrize
+  const claimPrizeLabel = humanNumber(claimShare, claimShare, "B3TR")
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
   const perWinnerLabel = humanNumber(challenge.prizePerWinner, challenge.prizePerWinner, "B3TR")
   const splitWinRefundLabel = humanNumber(
@@ -161,7 +172,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
       <ChallengeClaimModal
         isOpen={isClaimOpen}
         onClose={onClaimClose}
-        prizeLabel={prizeLabel}
+        prizeLabel={claimPrizeLabel}
         onClaim={() => actions.claimChallenge(challenge.challengeId)}
       />
       <ChallengeAcceptModal

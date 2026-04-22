@@ -71,6 +71,7 @@ export interface RawChallengeSummaryResponse {
   declinedCount: number
   selectedAppsCount: number
   winnersCount: number
+  bestCount?: number
 }
 
 export interface RawChallengeDetailResponse extends RawChallengeSummaryResponse {
@@ -120,6 +121,7 @@ type ChallengeBase = {
   declinedCount: number
   selectedAppsCount: number
   winnersCount: number
+  bestCount: number
 }
 
 const PUBLIC_PAGE_SIZE = 12
@@ -206,6 +208,7 @@ const mapRawChallengeBase = (challenge: RawChallengeSummaryResponse | RawChallen
   declinedCount: challenge.declinedCount,
   selectedAppsCount: challenge.selectedAppsCount,
   winnersCount: challenge.winnersCount,
+  bestCount: challenge.bestCount ?? 0,
 })
 
 export const mapRawChallengeDetail = (challenge: RawChallengeDetailResponse) => ({

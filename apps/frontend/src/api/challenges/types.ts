@@ -108,6 +108,7 @@ export interface ChallengeView {
   declinedCount: number
   selectedAppsCount: number
   winnersCount: number
+  bestCount: number
   viewerStatus: ParticipantStatus
   isCreator: boolean
   isJoined: boolean

@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeType, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeType, ChallengeView, ParticipantStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 
@@ -66,6 +66,12 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const prizeLabel = `${getCompactFormatter(2).format(Number(challenge.totalPrize))} B3TR`
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
   const perWinnerLabel = humanNumber(challenge.prizePerWinner, challenge.prizePerWinner, "B3TR")
+  // Max Actions splits the pool equally across tied top scorers (matches contract _payoutAmount).
+  const claimShare =
+    challenge.settlementMode === SettlementMode.TopWinners && challenge.bestCount > 1
+      ? (BigInt(challenge.totalPrize) / BigInt(challenge.bestCount)).toString()
+      : challenge.totalPrize
+  const claimPrizeLabel = `${getCompactFormatter(2).format(Number(claimShare))} B3TR`
   const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
   const allSlotsClaimed = isSplitWin && challenge.winnersClaimed >= challenge.numWinners
   const splitWinRefundLabel = humanNumber(
@@ -278,7 +284,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
       <ChallengeClaimModal
         isOpen={isClaimOpen}
         onClose={onClaimClose}
-        prizeLabel={prizeLabel}
+        prizeLabel={claimPrizeLabel}
         onClaim={() => actions.claimChallenge(challenge.challengeId)}
       />
       <ChallengeAcceptModal

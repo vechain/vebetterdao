@@ -224,6 +224,7 @@ export const resolveChallengeDetail = ({
     declinedCount: challenge.declinedCount,
     selectedAppsCount: challenge.selectedAppsCount,
     winnersCount: challenge.winnersCount,
+    bestCount: challenge.bestCount,
     viewerStatus,
     isCreator,
     isJoined,
