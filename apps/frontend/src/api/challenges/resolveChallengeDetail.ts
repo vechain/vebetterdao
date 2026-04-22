@@ -66,14 +66,15 @@ const includesAddress = (addresses: string[], viewerAddress?: string) =>
 
 const resolveViewerStatus = (
   {
-    creator,
     participants,
     invited,
     declined,
   }: Pick<ChallengeDetailResolverInput, "creator" | "participants" | "invited" | "declined">,
   viewerAddress?: string,
 ) => {
-  if (compareAddresses(creator, viewerAddress)) return ParticipantStatus.None
+  // Stake-kind creators auto-join on-chain (they front the stake), so they show up in the
+  // participants list. Defer entirely to that list so `isJoined` reflects on-chain truth and
+  // refund/claim flags work for creator-participants. `isCreator` is tracked separately.
   if (includesAddress(participants, viewerAddress)) return ParticipantStatus.Joined
   if (includesAddress(invited, viewerAddress)) return ParticipantStatus.Invited
   if (includesAddress(declined, viewerAddress)) return ParticipantStatus.Declined

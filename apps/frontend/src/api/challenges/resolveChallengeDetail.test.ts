@@ -266,6 +266,31 @@ describe("resolveChallengeDetail", () => {
     expect(detail.canRefund).toBe(true)
   })
 
+  it("refunds the creator of a cancelled stake challenge (auto-joined participant)", () => {
+    const detail = resolveChallengeDetail({
+      challenge: createChallenge({
+        kind: ChallengeKind.Stake,
+        visibility: ChallengeVisibility.Private,
+        challengeType: ChallengeType.MaxActions,
+        threshold: "0",
+        numWinners: 0,
+        prizePerWinner: "0",
+        status: ChallengeStatus.Cancelled,
+        // Stake creators auto-join on-chain, so the creator is also in `participants`.
+        participants: [CREATOR],
+        participantCount: 1,
+        stakeAmount: "100",
+      }),
+      viewerAddress: CREATOR,
+      currentRound: 8,
+    })
+
+    expect(detail.viewerStatus).toBe(ParticipantStatus.Joined)
+    expect(detail.isJoined).toBe(true)
+    expect(detail.isCreator).toBe(true)
+    expect(detail.canRefund).toBe(true)
+  })
+
   it("derives section membership from the resolved challenge state", () => {
     const actionable = resolveChallengeDetail({
       challenge: createChallenge({
