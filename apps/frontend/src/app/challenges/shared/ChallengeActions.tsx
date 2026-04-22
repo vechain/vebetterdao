@@ -101,7 +101,7 @@ export const ChallengeActions = ({
   const handleCancel = onCancelClick ?? (() => actions.cancelChallenge(id))
   const handleRefund = onRefundClick ?? (() => actions.refundChallenge(id))
   const handleJoin = onJoinClick ?? (() => actions.joinChallenge(challenge))
-  const handleLeave = onLeaveClick ?? (() => actions.leaveChallenge(id))
+  const handleLeave = onLeaveClick ?? (() => actions.leaveChallenge(challenge))
   const handleComplete = onCompleteClick ?? (() => actions.completeChallenge(id))
   const handleClaimSplitWin = onClaimSplitWinClick ?? (() => actions.claimSplitWinPrize(id))
   const handleClaimCreatorSplitWinRefund =

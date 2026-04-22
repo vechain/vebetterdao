@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useChallenge } from "@/api/challenges/useChallenge"
+import { useChallengeDetail } from "@/api/challenges/useChallengeDetail"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 
 import { ChallengeActivityCard } from "./ChallengeActivityCard"
@@ -20,7 +20,9 @@ export const ChallengeDetailPageContent = ({ challengeId }: { challengeId: strin
   const searchParams = useSearchParams()
   const router = useRouter()
   const isFresh = searchParams.get("fresh") === "1"
-  const { data: challenge, isLoading } = useChallenge(challengeId, viewerAddress, { pollWhileMissing: isFresh })
+  const { data: challenge, isLoading } = useChallengeDetail(challengeId, viewerAddress, {
+    pollWhileMissing: isFresh,
+  })
   const { t } = useTranslation()
 
   useEffect(() => {

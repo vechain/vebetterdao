@@ -13,13 +13,6 @@ export const ChallengeStatus = {
 } as const
 export type ChallengeStatus = (typeof ChallengeStatus)[keyof typeof ChallengeStatus]
 
-export const ChallengePhase = {
-  Upcoming: "Upcoming",
-  Live: "Live",
-  Ended: "Ended",
-} as const
-export type ChallengePhase = (typeof ChallengePhase)[keyof typeof ChallengePhase]
-
 export const ChallengeType = { MaxActions: 0, SplitWin: 1 } as const
 export type ChallengeType = (typeof ChallengeType)[keyof typeof ChallengeType]
 
@@ -128,6 +121,7 @@ export interface ChallengeView {
   isActionable: boolean
   isParticipating: boolean
   isHistorical: boolean
+  wasInvited: boolean
 }
 
 export interface ChallengeDetail extends ChallengeView {
@@ -138,25 +132,12 @@ export interface ChallengeDetail extends ChallengeView {
   winners: string[]
 }
 
-export interface WalletChallengeRef {
-  challengeId: number
-  createdAt: number
-}
-
 export interface PaginatedChallengeSection {
   items: ChallengeView[]
   hasNextPage: boolean
   isLoading: boolean
   isFetchingNextPage: boolean
   fetchNextPage: () => Promise<unknown>
-}
-
-export interface ChallengesHubData {
-  neededActions: PaginatedChallengeSection
-  active: PaginatedChallengeSection
-  open: PaginatedChallengeSection
-  explore: PaginatedChallengeSection
-  history: PaginatedChallengeSection
 }
 
 export type ChallengeKindLabel = "Stake" | "Sponsored"
