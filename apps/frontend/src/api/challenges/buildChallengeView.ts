@@ -3,7 +3,8 @@ import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechai
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
 
-import { resolveChallengeDetail, ChallengeDetailResolverInput } from "../../resolveChallengeDetail"
+import { ViewerClaimState } from "./claimState"
+import { resolveChallengeDetail, ChallengeDetailResolverInput } from "./resolveChallengeDetail"
 import {
   ChallengeKind,
   ChallengeStatus,
@@ -12,13 +13,10 @@ import {
   ChallengeVisibility,
   ParticipantStatus,
   SettlementMode,
-} from "../../types"
-
-import { ViewerClaimState } from "./claimState"
+} from "./types"
 
 const abi = B3TRChallenges__factory.abi
 
-// Raw tuple-shaped result decoded by executeMultipleClausesCall for view structs.
 type RawChallengeView = {
   challengeId: bigint
   kind: number
@@ -50,8 +48,6 @@ type RawChallengeView = {
   imageURI: string
   metadataURI: string
 }
-
-const MAX_PARTICIPANTS_DEFAULT = Number.MAX_SAFE_INTEGER
 
 /**
  * Maps the contract's ChallengeView struct + per-viewer flags into the
@@ -229,5 +225,3 @@ export const buildChallengeViews = async ({
 
   return views
 }
-
-export { abi as challengesAbi, MAX_PARTICIPANTS_DEFAULT }

@@ -4,7 +4,9 @@ import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechai
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
 
-import { resolveChallengeDetail, ChallengeDetailResolverInput } from "../../resolveChallengeDetail"
+import { fetchChallengeClaimedBy } from "./claimState"
+import { fetchChallengeEvents } from "./fetchChallengeEvents"
+import { resolveChallengeDetail, ChallengeDetailResolverInput } from "./resolveChallengeDetail"
 import {
   ChallengeDetail,
   ChallengeKind,
@@ -12,10 +14,7 @@ import {
   ChallengeType,
   ChallengeVisibility,
   SettlementMode,
-} from "../../types"
-
-import { fetchChallengeClaimedBy } from "./claimState"
-import { fetchChallengeEvents } from "./fetchChallengeEvents"
+} from "./types"
 
 const abi = B3TRChallenges__factory.abi
 

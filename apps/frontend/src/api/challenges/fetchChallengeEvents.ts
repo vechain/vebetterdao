@@ -62,5 +62,3 @@ export const fetchChallengeEvents = async <K extends ContractEventName<Challenge
     staleTime: 30 * 1000,
   })
 }
-
-export { challengesAbi }

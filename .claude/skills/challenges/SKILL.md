@@ -65,61 +65,52 @@ Indexed topics in parens. All lifecycle events have `challengeId` as first index
 
 ```mermaid
 graph TD
-  UI["ChallengesPageContent / ChallengeDetailPageContent"] --> Hooks["section + detail hooks"]
-  Hooks --> DS["ChallengesDataSource (interface)"]
-  DS -.oggi.-> Events["EventsChallengesDataSource"]
-  DS -.futuro.-> Indexer["IndexerChallengesDataSource (stub)"]
-  Events --> Thor["thor.logs.filterEventLogs + executeMultipleClausesCall"]
+  UI["ChallengesPageContent / ChallengeDetailPageContent"]
+  UI --> SectionHooks["use{Needed,User,OpenToJoin,WhatOthers,History}Section"]
+  UI --> DetailHook["useChallengeDetail"]
+  SectionHooks --> Indexer["api/indexer/challenges/ (fetchWalletChallenges / fetchPublicChallenges)"]
+  SectionHooks --> Multicall["buildChallengeViews (contract multicall)"]
+  SectionHooks --> Claim["fetchViewerClaimState (1 event scan)"]
+  SectionHooks --> MaxP["fetchMaxParticipants (contract)"]
+  Multicall --> Resolve["resolveChallengeDetail → canX flags"]
+  DetailHook --> BuildDetail["buildChallengeDetail (contract + event scans)"]
 ```
 
-**Everything is event-based today. No indexer dependency for `/challenges/*` endpoints.** Non-challenge indexer hooks (e.g. `/actions/users/{wallet}` via `useChallengeUserActions`) are kept.
+**Lists (sections + history) use the indexer. Detail is still event-based.** Split:
 
-### DataSource ([datasource/ChallengesDataSource.ts](apps/frontend/src/api/challenges/datasource/ChallengesDataSource.ts))
+- **Transport** ([api/indexer/challenges/](apps/frontend/src/api/indexer/challenges/)): thin HTTP fetchers for `GET /api/v1/b3tr/challenges` (public, status-filtered) and `GET /api/v1/b3tr/users/{wallet}/challenges?filter=...` (wallet-scoped). 5 `ChallengeFilter` values map 1:1 to the 5 UI sections.
+- **Orchestration** ([api/challenges/](apps/frontend/src/api/challenges/)): each section hook composes the indexer fetcher + `buildChallengeViews` (contract multicall) inline — the indexer gives IDs + createdAt, the multicall enriches with per-viewer `canX` flags.
 
-```typescript
-interface ChallengesDataSource {
-  getNeededActions(viewer, args?: PaginationArgs): Promise<ChallengePage>
-  getUserChallenges(viewer, args?: PaginationArgs): Promise<ChallengePage>
-  getOpenToJoin(viewer?, args?): Promise<ChallengePage>
-  getWhatOthersAreDoing(viewer?, args?): Promise<ChallengePage>
-  getHistory(viewer, args?): Promise<ChallengePage>
-  getChallengeDetail(id, viewer?): Promise<ChallengeDetail | null>
-}
-```
+Pagination: `CHALLENGES_PAGE_SIZE = 12`. Indexer `data[].challengeId` drives the multicall; `pagination.hasNext` drives `useInfiniteQuery.getNextPageParam`.
 
-- `PaginationArgs`: `{ page?: number, size?: number }` (default size 12 = `CHALLENGES_PAGE_SIZE`)
-- `ChallengePage`: `{ data: ChallengeView[], pagination: { hasNext, cursor? } }` — same shape as old indexer response
-- Events impl ignores pagination and returns all matching results in one page (`hasNext: false`)
-- Indexer impl (stub) will map `page`/`size` to `?page=X&size=Y` query params when endpoints land
-- Factory: [`useChallengesDataSource`](apps/frontend/src/api/challenges/datasource/useChallengesDataSource.ts)
-
-### Event scanning ([datasource/events/](apps/frontend/src/api/challenges/datasource/events/))
+### Event scans still live
 
 - `fetchChallengeEvents` caches per-event+filter via `queryClient.fetchQuery` (30s stale)
-- `fetchViewerChallengeIds` does **5 parallel scans** for the viewer: created/joined/invited/declined/left — returns sets of ids
-- `fetchViewerClaimState` scans 4 claim events filtered by viewer address → sets of ids where user already claimed
-- `buildChallengeView`: multicall `getChallenge + getChallengeStatus + getParticipantStatus + isInvitationEligible + isSplitWinWinner + getParticipantActions` per id, then `resolveChallengeDetail` → `ChallengeView`
-- `buildChallengeDetail`: same + `getChallengeParticipants/Invited/Declined/SelectedApps/Winners` + `fetchChallengeClaimedBy` (per-challenge claim events) for full arrays
+- `fetchViewerClaimState` scans 4 viewer-scoped claim events → sets of ids where the viewer already claimed. **Still used** because `ChallengeSummaryResponse` doesn't expose per-viewer claim flags yet (tracked in `B3trUserChallenge.hasClaimedPrize/Refund` server-side; follow-up: expose on the wire).
+- `fetchChallengeClaimedBy` scans per-challenge claim events for the detail view's `claimedBy` / `refundedBy` / `creatorRefunded` arrays
+
+### Build helpers (contract multicall)
+
+- [`buildChallengeView.ts`](apps/frontend/src/api/challenges/buildChallengeView.ts): multicall `getChallenge + getChallengeStatus + getParticipantStatus + isInvitationEligible + isSplitWinWinner + getParticipantActions` per id, then `resolveChallengeDetail` → `ChallengeView`
+- [`buildChallengeDetail.ts`](apps/frontend/src/api/challenges/buildChallengeDetail.ts): same + `getChallengeParticipants/Invited/Declined/SelectedApps/Winners` + `fetchChallengeClaimedBy` + `ChallengeCreated` event lookup for `createdAt`
 
 ### Wei/Ether boundary
 
-**Critical**: raw contract values (`stakeAmount`, `totalPrize`, `prizePerWinner`) are `uint256` wei. UI expects ether strings. `buildChallengeView` and `buildChallengeDetail` convert with `formatEther()`. `threshold` and `bestScore` are action counts, not B3TR — **never** format with `formatEther`.
+**Critical**: raw contract values (`stakeAmount`, `totalPrize`, `prizePerWinner`) are `uint256` wei. UI expects ether strings. `buildChallengeView` and `buildChallengeDetail` convert with `formatEther()`. `threshold` and `bestScore` are action counts, not B3TR — **never** format with `formatEther`. The indexer already returns wei-stripped ether strings for these fields but we discard them (multicall values win to keep freshness after a tx).
 
 ## Section Definitions
 
-Each section composes id sets from the 5 viewer scans + filters via `resolveChallengeDetail`-derived flags.
+Each section hook picks a fetcher + filter. The indexer's `ChallengeFilter` (see `packages/common/src/main/kotlin/org/vechain/indexer/b3tr/challenges/ChallengeFilter.kt` in the indexer repo) encodes the same predicates we previously applied client-side, so no post-fetch `.filter()` is needed.
 
-| Section | ID sources | Filter |
-|---------|------------|--------|
-| Needed Action | created ∪ joined ∪ invited ∪ declined | `v.isActionable` |
-| Your Challenges | created ∪ joined | `Pending\|Active && (isCreator \|\| isJoined)` — filter naturally excludes left-and-not-re-joined (status=None) |
-| Open to Join | all `ChallengeCreated` | `Pending && Public && canJoin` |
-| What Others Are Doing | all `ChallengeCreated` | `Active && Public && !isCreator && !isJoined` |
-| History | created ∪ joined ∪ invited ∪ declined ∪ left | `v.isHistorical \|\| (leftIds.has(id) && !v.isJoined)` |
+| Section | Viewer present → fetcher | Guest fallback |
+|---------|--------------------------|----------------|
+| Needed Action | `fetchWalletChallenges(viewer, "NeededAction")` | — (viewer-only) |
+| Your Challenges | `fetchWalletChallenges(viewer, "MyChallenges")` | — (viewer-only) |
+| Open to Join | `fetchWalletChallenges(viewer, "OpenToJoin")` | `fetchPublicChallenges("Pending")` |
+| What Others Are Doing | `fetchWalletChallenges(viewer, "OthersActive")` | `fetchPublicChallenges("Active")` |
+| History | `fetchWalletChallenges(viewer, "History")` | — (viewer-only) |
 
-History relies on two things:
-1. **Leave + decline chaining in `useChallengeActions`** puts invited leavers into Declined on-chain, which `isHistorical` picks up via its `(declined && canAccept)` branch (Pending challenges) — so invited leavers land in the existing Declined / "Changed your mind? Accept" flow for free.
-2. **`leftIds` Set fallback** catches terminal cases (Active/Completed/Cancelled/Invalid) where `canAccept` is false and `isHistorical` alone would miss the challenge.
+`NeededAction` bucket on the server already covers outstanding invites + claimable + finalizable + reclaimable. `History` covers terminal (Completed/Cancelled/Invalid) challenges the wallet was involved in (including invited-then-left users — server normalises). The UI `CurrentTab` still dedupes across sections in render order.
 
 ## resolveChallengeDetail flags ([resolveChallengeDetail.ts](apps/frontend/src/api/challenges/resolveChallengeDetail.ts))
 
@@ -150,7 +141,7 @@ Pure function from raw state → per-viewer `canX` booleans. Key rules:
 
 ## Section Hooks ([useChallengeSections.ts](apps/frontend/src/api/challenges/useChallengeSections.ts))
 
-One `useInfiniteQuery` per section with stable query keys under `["challenges", "section", sectionId, viewer]`. Detail via [`useChallengeDetail`](apps/frontend/src/api/challenges/useChallengeDetail.ts) with key `["challenges", "detail", id, viewer]`.
+One `useInfiniteQuery` per section with stable query keys under `["challenges", "section", sectionId, viewer]`. Each hook's `queryFn` = indexer fetch → `buildSectionPage` (claim-state + maxParticipants + `buildChallengeViews`). Detail via [`useChallengeDetail`](apps/frontend/src/api/challenges/useChallengeDetail.ts) with key `["challenges", "detail", id, viewer]` — calls `buildChallengeDetail` directly (no datasource indirection).
 
 ## Write path ([useChallengeActions.ts](apps/frontend/src/api/challenges/useChallengeActions.ts))
 
@@ -167,7 +158,8 @@ Builds multi-clause txs (approve+action for stake joins, leave+decline for invit
 ## Key Files Reference
 
 Frontend:
-- Data: [datasource/](apps/frontend/src/api/challenges/datasource/), [useChallengeSections.ts](apps/frontend/src/api/challenges/useChallengeSections.ts), [useChallengeDetail.ts](apps/frontend/src/api/challenges/useChallengeDetail.ts), [useChallengeActions.ts](apps/frontend/src/api/challenges/useChallengeActions.ts), [resolveChallengeDetail.ts](apps/frontend/src/api/challenges/resolveChallengeDetail.ts), [types.ts](apps/frontend/src/api/challenges/types.ts)
+- Transport (indexer): [api/indexer/challenges/](apps/frontend/src/api/indexer/challenges/) — `fetchWalletChallenges`, `fetchPublicChallenges`, hand-typed response types (swap for schema-derived once `yarn generate:schema` picks up the new endpoints)
+- Orchestration + domain: [api/challenges/](apps/frontend/src/api/challenges/) — `useChallengeSections.ts`, `useChallengeDetail.ts`, `useChallengeActions.ts`, `resolveChallengeDetail.ts`, `types.ts`, `buildChallengeView.ts`, `buildChallengeDetail.ts`, `claimState.ts`, `fetchChallengeEvents.ts`, `fetchMaxParticipants.ts`
 - Hub UI: [app/challenges/components/](apps/frontend/src/app/challenges/components/) (ChallengesPageContent, CurrentTab, HistoryTab, SectionCarousel, ChallengeCard, ChallengesGrid, ChallengeFilters, ChallengeStepsCard, CreateChallengeModal/, CompactSkeleton)
 - Detail UI: [app/challenges/[challengeId]/components/](apps/frontend/src/app/challenges/[challengeId]/components/)
 - Shared UI: [app/challenges/shared/](apps/frontend/src/app/challenges/shared/)
@@ -178,13 +170,12 @@ Contracts:
 - [interfaces/IChallenges.sol](packages/contracts/contracts/interfaces/IChallenges.sol)
 - [challenges/libraries/](packages/contracts/contracts/challenges/libraries/)
 
-## Extending to Indexer
+## Indexer integration status
 
-When `/api/v1/b3tr/challenges/*` endpoints ship:
-
-1. Implement `createIndexerChallengesDataSource()` in [datasource/indexer/indexerDataSource.ts](apps/frontend/src/api/challenges/datasource/indexer/indexerDataSource.ts) — map each method to the corresponding endpoint with `page`/`size` passthrough.
-2. Switch the factory in [useChallengesDataSource.ts](apps/frontend/src/api/challenges/datasource/useChallengesDataSource.ts) to return the indexer impl (optionally behind an env flag).
-3. UI, hooks, query keys stay unchanged.
+- **Lists**: live on indexer (`/b3tr/challenges` + `/b3tr/users/{wallet}/challenges?filter=...`).
+- **Detail**: still event-based — `/b3tr/challenges/{id}` endpoint exists but freshness right after a tx isn't guaranteed. Migrate later if desired.
+- **Follow-up**: ask the indexer team to expose `hasClaimedPrize` / `hasClaimedRefund` (ideally also `participantStatus`, `bestScore`, `maxParticipants`) on `ChallengeSummaryResponse` so we can drop the last `fetchViewerClaimState` event scan.
+- **Schema**: hand-typed in `api/indexer/challenges/types.ts`; swap for `paths`-derived types after `yarn generate:schema` picks up the new endpoints on an updated indexer.
 
 ## Conventions
 
