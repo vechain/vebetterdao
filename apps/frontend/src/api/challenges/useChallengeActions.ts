@@ -34,7 +34,7 @@ export interface CreateChallengeFormData {
 
 type ActionParams =
   | { type: "join"; challenge: ChallengeView }
-  | { type: "leave"; challengeId: number }
+  | { type: "leave"; challenge: ChallengeView }
   | { type: "decline"; challengeId: number }
   | { type: "cancel"; challengeId: number }
   | { type: "addInvites"; challengeId: number; invitees: string[] }
@@ -63,7 +63,7 @@ export const useChallengeActions = () => {
       queryClient.invalidateQueries({ queryKey: ["challenges"] }),
       queryClient.invalidateQueries({ queryKey: [challengePayoutClaimedEventName] }),
       queryClient.invalidateQueries({ queryKey: [challengeRefundClaimedEventName] }),
-      queryClient.refetchQueries({ queryKey: ["challenges", "hub"], type: "active" }),
+      queryClient.refetchQueries({ queryKey: ["challenges", "section"], type: "active" }),
       queryClient.refetchQueries({ queryKey: ["challenges", "detail"], type: "active" }),
       queryClient.refetchQueries({ queryKey: [challengePayoutClaimedEventName], type: "active" }),
       queryClient.refetchQueries({ queryKey: [challengeRefundClaimedEventName], type: "active" }),
@@ -158,16 +158,35 @@ export const useChallengeActions = () => {
           return clauses
         }
 
-        case "leave":
-          return [
+        case "leave": {
+          const { challenge } = params
+          const clauses: EnhancedClause[] = [
             buildClause({
               contractInterface: ChallengesInterface,
               to: challengesAddr,
               method: "leaveChallenge",
-              args: [params.challengeId],
-              comment: `Leave challenge #${params.challengeId}`,
+              args: [challenge.challengeId],
+              comment: `Leave challenge #${challenge.challengeId}`,
             }),
           ]
+
+          // Contract re-adds the user to the invited list on leave if they were
+          // ever invited (invitationEligible stays true), landing them back in the
+          // "invited" state. Chain a decline to fully opt out.
+          if (challenge.wasInvited) {
+            clauses.push(
+              buildClause({
+                contractInterface: ChallengesInterface,
+                to: challengesAddr,
+                method: "declineChallenge",
+                args: [challenge.challengeId],
+                comment: `Decline challenge #${challenge.challengeId}`,
+              }),
+            )
+          }
+
+          return clauses
+        }
 
         case "decline":
           return [
@@ -275,7 +294,7 @@ export const useChallengeActions = () => {
     acceptChallenge: (challenge: ChallengeView) => tx.sendTransaction({ type: "join", challenge }),
     joinChallenge: (challenge: ChallengeView) => tx.sendTransaction({ type: "join", challenge }),
 
-    leaveChallenge: (id: number) => tx.sendTransaction({ type: "leave", challengeId: id }),
+    leaveChallenge: (challenge: ChallengeView) => tx.sendTransaction({ type: "leave", challenge }),
     declineChallenge: (id: number) => tx.sendTransaction({ type: "decline", challengeId: id }),
     cancelChallenge: (id: number) => tx.sendTransaction({ type: "cancel", challengeId: id }),
     addInvites: (id: number, invitees: string[]) =>

@@ -318,7 +318,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
       <ChallengeLeaveModal
         isOpen={isLeaveOpen}
         onClose={onLeaveClose}
-        onLeave={() => actions.leaveChallenge(challenge.challengeId)}
+        onLeave={() => actions.leaveChallenge(challenge)}
       />
       <ChallengeCompleteModal
         isOpen={isCompleteOpen}

@@ -249,5 +249,6 @@ export const resolveChallengeDetail = ({
     isActionable,
     isParticipating,
     isHistorical,
+    wasInvited: isInvitationEligible,
   }
 }
