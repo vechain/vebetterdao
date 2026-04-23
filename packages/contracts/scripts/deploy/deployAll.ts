@@ -81,7 +81,7 @@ export async function deployAll(config: ContractsConfig) {
 
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
   // Also we have many roles in our contracts but we currently use one wallet for all roles
-  const TEMP_ADMIN = network.name === "vechain_solo" ? config.CONTRACTS_ADMIN_ADDRESS : deployer.address
+  const TEMP_ADMIN = config.NEXT_PUBLIC_APP_ENV === AppEnv.MAINNET ? deployer.address : config.CONTRACTS_ADMIN_ADDRESS
   console.log("================================================================================")
   console.log("Temporary admin set to ", TEMP_ADMIN)
   console.log("Final admin will be set to ", config.CONTRACTS_ADMIN_ADDRESS)
@@ -365,14 +365,14 @@ export async function deployAll(config: ContractsConfig) {
     navigatorLibraryAddresses,
   )
 
-  // In testnet and mainnet we want to point at the real external contracts,
-  // to do so we need to first add the address in the appropriate config file
-  // for local deployments instead we deploy the mocks
+  // Deploy mocks for local and testnet envs; use real external contracts for testnet-staging and mainnet
   let stargateNftMock: StargateNFT
   let stargateMock: Stargate
   let nodeManagementMock: NodeManagementV3
   let vechainNodesMock: TokenAuction
-  if (network.name !== "vechain_mainnet" && network.name !== "vechain_testnet") {
+  const useMockExternalContracts =
+    config.NEXT_PUBLIC_APP_ENV === AppEnv.LOCAL || config.NEXT_PUBLIC_APP_ENV === AppEnv.TESTNET
+  if (useMockExternalContracts) {
     // Deploy Stargate Mock
     console.log("Deploying Stargate Mock")
     const { stargateNFT, stargate } = await deployStargateMock({ logOutput: true })

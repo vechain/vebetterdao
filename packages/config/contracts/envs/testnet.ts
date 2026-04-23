@@ -1,55 +1,59 @@
 import { defineConfig } from "../defineConfig"
+import { ZERO_ADDRESS } from "@vechain/sdk-core"
 
 export function createTestnetConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "testnet",
 
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 4, // 4 -> Need 4% of voters to pass
-    TIMELOCK_MIN_DELAY: 30, // time to wait before you can execute a queued proposal, 0 for immediate execution
+    TIMELOCK_MIN_DELAY: 0, //time to wait before you can execute a queued proposal, 0 for immediate execution
     B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
-    B3TR_GOVERNOR_MIN_VOTING_DELAY: 60, // 10 minutes
+    B3TR_GOVERNOR_MIN_VOTING_DELAY: 1, // 1 -> 1 block before the vote starts
     B3TR_GOVERNOR_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
+
     //Grants proposal types
     B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD: 2, // Percentage of total B3TR supply needed to be deposited to create a proposal
     B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
     B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE: 2, // 2 -> Need 2% of voters to pass
 
     //Deposit threshold cap for grants and standard proposals
-    B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP: BigInt("15000000000000000000000"), // 15K B3TR
-    B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP: BigInt("25000000000000000000000"), // 25K B3TR
+    B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP: BigInt("3500000000000000000000000"), // 3.5M B3TR
+    B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP: BigInt("5000000000000000000000000"), // 5M B3TR
 
-    // GM weight requirements for proposal types
-    B3TR_GOVERNOR_STANDARD_GM_WEIGHT: 2, // Requires GM level 2 (Moon) for standard proposals
-    B3TR_GOVERNOR_GRANT_GM_WEIGHT: 2, // Requires GM level 2 (Moon) for grant proposals
+    // GM weight requirements for proposal types ( for tests compatibility putting to 0 )
+    B3TR_GOVERNOR_STANDARD_GM_WEIGHT: 0, // 0 -> No GM weight required for standard proposals
+    B3TR_GOVERNOR_GRANT_GM_WEIGHT: 0, // 0 -> No GM weight required for grant proposals
+
     /*
       For ambiguous functions (functions with same name), the function signature is used to differentiate them
       e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
     */
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       B3TR: ["tokenDetails"],
-      B3TRGovernorV1: [
-        "setProposalThreshold",
+      B3TRGovernor: [
+        "upgradeToAndCall",
+        "setXAllocationVoting",
+        "setVoterRewards",
         "setMinVotingDelay",
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
-        "updateQuorumNumeratorByType",
-        "updateDelay",
         "setProposalTypeDepositThresholdPercentage",
         "setProposalTypeVotingThreshold",
-        "upgradeToAndCall",
       ],
-      Treasury: ["transferB3TR"],
+      Treasury: ["transferVET", "transferB3TR"],
       XAllocationVoting: [
+        "upgradeToAndCall",
         "updateQuorumNumerator",
-        "setBaseAllocationPercentage",
-        "setAppSharesCap",
+        "setVotingPeriod",
+        "setEmissions",
         "setVotingThreshold",
       ],
       X2EarnAppsV1: ["addApp", "setVotingEligibility"],
       X2EarnApps: ["setVotingEligibility"],
       NavigatorRegistry: ["deactivateNavigator"],
     },
-    EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
+
+    EMISSIONS_CYCLE_DURATION: 24, // 24 blocks - 4 minutes.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every x-allocation decay period
     EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE: 20, // 20% decay every vote 2 earn decay period
     EMISSIONS_X_ALLOCATION_DECAY_PERIOD: 12, // every 12 cycles
@@ -57,8 +61,10 @@ export function createTestnetConfig() {
     EMISSIONS_TREASURY_PERCENTAGE: 2500, // 25% of the emissions go to the treasury
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
     EMISSIONS_IS_NOT_ALIGNED: true,
+
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
+
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
     CHALLENGES_MAX_DURATION: 4,
@@ -67,24 +73,11 @@ export function createTestnetConfig() {
     CHALLENGES_MIN_BET_AMOUNT: 100000000000000000000n, // 100 B3TR
 
     CONTRACTS_ADMIN_ADDRESS: "0x66E9709bc01B8c0AfC99a7dC513f501821306E85", //1st account from mnemonic of testnet staging wallet
-    VOTE_2_EARN_POOL_ADDRESS: "0xeaE35dfE902C5D1a44e6b4080224a6621319A671", //2nd account from mnemonic of testnet staging wallet
+    VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
 
     GM_NFT_BASE_URI: "ipfs://bafybeicz4jdfmdksq537a3cumwprvaprfuy2unc34havamwdrl7dcnnami/metadata/", // IPFS base URI for the GM NFT
-
-    /*
-      Vechain Node => Free Upgrade Level
-      None => 1
-      Strength => 2
-      Thunder => 4
-      Mjolnir => 6
-      VeThorX => 2
-      StrengthX => 4
-      ThunderX => 6
-      MjolnirX => 7
-    */
-    GM_NFT_NODE_TO_FREE_LEVEL: [1, 2, 4, 6, 2, 4, 6, 7],
 
     /*
       Level => B3TR Required
@@ -111,7 +104,20 @@ export function createTestnetConfig() {
       25000000000000000000000000n,
     ],
 
-    GM_NFT_MAX_LEVEL: 1,
+    /*
+      Vechain Node => Free Upgrade Level
+      None => 1
+      Strength => 2
+      Thunder => 4
+      Mjolnir => 6
+      VeThorX => 2
+      StrengthX => 4
+      ThunderX => 6
+      MjolnirX => 7
+    */
+    GM_NFT_NODE_TO_FREE_LEVEL: [1, 2, 4, 6, 2, 4, 6, 7],
+
+    GM_NFT_MAX_LEVEL: 1, // 1 -> No max level BUT this value is updated to 5 in the deployAll script
 
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
@@ -136,7 +142,7 @@ export function createTestnetConfig() {
       Token transfer limits. These values are not final and are for testing purposes only.
     */
     TREASURY_TRANSFER_LIMIT_VET: BigInt("200000000000000000000000"), // 200,000 VET
-    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("200000000000000000000000"), // 200,000 B3TR
+    TREASURY_TRANSFER_LIMIT_B3TR: BigInt("100000000000000000000000000"), // 100,000,000 B3TR
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
 
@@ -144,9 +150,9 @@ export function createTestnetConfig() {
     MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
     MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
 
-    // Endorsement
-    VECHAIN_NODES_CONTRACT_ADDRESS: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c", // The contract address of the VeChainNodes contract on testnet
-    XAPP_GRACE_PERIOD: 17280, // 2 days -> max time in blocks to be unendorsed by node before being removed from the XAlloction voting rounds
+    // Version 2
+    XAPP_GRACE_PERIOD: 46, // 2 cycles - 8 minutes
+    // X 2 Earn Rewards Pool
     X_2_EARN_INITIAL_IMPACT_KEYS: [
       "carbon",
       "water",
@@ -157,8 +163,9 @@ export function createTestnetConfig() {
       "plastic",
       "trees_planted",
     ],
-    // Passport
-    VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // Address must be signaled more than X times to be considered a bot
+
+    // VeBetterPassport
+    VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2,
     VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 12,
     VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL: 2,
     VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE: 20,
@@ -168,18 +175,20 @@ export function createTestnetConfig() {
 
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
 
-    X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
+    //WARNING: Cooldown depends on the current round. If the current round is 1, the cooldown cannot be greater than 1. Otherwise the endorsement will fail.
+    //Check `EndorsementUtils.sol` `checkCooldown` method for more details.
+    X2EARN_NODE_COOLDOWN_PERIOD: 0, // 0 rounds -> UPDATED to 1 in the deployAll script
     X2EARN_ENDORSEMENT_SCORE_THRESHOLD: 1,
 
     MULTI_SIG_SIGNERS: [
-      "0x66E9709bc01B8c0AfC99a7dC513f501821306E85",
-      "0xeaE35dfE902C5D1a44e6b4080224a6621319A671",
-      "0x2ac2A050C45239159dBADab740A52e0A098a7ADD",
+      "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+      "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68",
+      "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
     ],
 
     GM_PERCENTAGE_OF_TREASURY: 2500, // 25% of the treasury will be used for GM Holder Rewards
 
-    GM_MULTIPLIERS_V2: [110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers according
+    GM_MULTIPLIERS_V2: [110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers scaled -> [1.1x, 1.2x, 1.5x, 2x, 2.5x, 3x, 5x, 10x, 25x]
     VOTER_REWARDS_LEVELS_V2: [2, 3, 4, 5, 6, 7, 8, 9, 10], // Voter rewards levels for the new GM multipliers
 
     // Rewards Multipliers (basis points, 10000 = 1x)
@@ -190,18 +199,18 @@ export function createTestnetConfig() {
     VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: 3000, // Abstain vote (x0.30)
 
     /*
-        Level => B3TR Required (halved)
+    Level => B3TR Required (halved)
 
-        2 (Moon) => 5,000 B3TR
-        3 (Mercury) => 12,500 B3TR
-        4 (Venus) => 25,000 B3TR
-        5 (Mars) => 50,000 B3TR
-        6 (Jupiter) => 125,000 B3TR
-        7 (Saturn) => 250,000 B3TR
-        8 (Uranus) => 1,250,000 B3TR
-        9 (Neptune) => 2,500,000 B3TR
-        10 (Galaxy) => 12,500,000 B3TR
-    */
+    2 (Moon) => 5,000 B3TR
+    3 (Mercury) => 12,500 B3TR
+    4 (Venus) => 25,000 B3TR
+    5 (Mars) => 50,000 B3TR
+    6 (Jupiter) => 125,000 B3TR
+    7 (Saturn) => 250,000 B3TR
+    8 (Uranus) => 1,250,000 B3TR
+    9 (Neptune) => 2,500,000 B3TR
+    10 (Galaxy) => 12,500,000 B3TR
+*/
     GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: [
       5000000000000000000000n,
       12500000000000000000000n,
@@ -214,15 +223,18 @@ export function createTestnetConfig() {
       12500000000000000000000000n,
     ],
 
+    // Stargate contracts - This needs to be deployed first before starting b3tr repo
+    VECHAIN_NODES_CONTRACT_ADDRESS: process.env.LOCAL_VECHAIN_NODES_CONTRACT_ADDRESS || ZERO_ADDRESS,
     // Stargate and NFTs related contracts -> they are already deployed from stargate project
     // See from more details: {https://github.com/vechain/stargate-contracts/blob/main/README.md }
-    STARGATE_CONTRACT_ADDRESS: "0x1E02B2953AdEfEC225cF0Ec49805b1146a4429C1",
-    STARGATE_NFT_CONTRACT_ADDRESS: "0x887d9102f0003f1724d8fd5d4fe95a11572fcd77",
-    STARGATE_DELEGATE_CONTRACT_ADDRESS: "0x32cb945dc25f4fc4214df63e3825045d6088b096",
-    NODE_MANAGEMENT_CONTRACT_ADDRESS: "0xde17d0a516c38c168d37685bb71465f656aa256e",
+    //TODO: Fix this
+    STARGATE_CONTRACT_ADDRESS: ZERO_ADDRESS,
+    STARGATE_NFT_CONTRACT_ADDRESS: ZERO_ADDRESS,
+    STARGATE_DELEGATE_CONTRACT_ADDRESS: ZERO_ADDRESS,
+    NODE_MANAGEMENT_CONTRACT_ADDRESS: ZERO_ADDRESS,
 
     // Milestones
-    MINIMUM_MILESTONE_COUNT: 2, // test-compatibility
+    MINIMUM_MILESTONE_COUNT: 2, // test-compatibility,
 
     // XAllocationPoolV7 unallocated funds
     X_ALLOCATION_POOL_UNALLOCATED_FUNDS_ROUND_IDS: [],
@@ -230,13 +242,13 @@ export function createTestnetConfig() {
     DBA_DISTRIBUTION_START_ROUND: 1,
 
     // Navigator Registry
-    NAVIGATOR_MIN_STAKE: 50000n * 10n ** 18n, // 50,000 B3TR
+    NAVIGATOR_MIN_STAKE: 500n * 10n ** 18n, // 50,000 B3TR
     NAVIGATOR_MAX_STAKE_PERCENTAGE: 100, // 1% of VOT3 supply
     NAVIGATOR_FEE_LOCK_PERIOD: 4, // 4 rounds
     NAVIGATOR_FEE_PERCENTAGE: 2000, // 20% in basis points
     NAVIGATOR_EXIT_NOTICE_PERIOD: 1, // 1 round
     NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
     NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
-    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8640, // ~24hr at 10s/block
+    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 5, // 5 blocks, around 50 seconds
   })
 }

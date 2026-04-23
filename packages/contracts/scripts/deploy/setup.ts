@@ -1,10 +1,9 @@
-import { AppEnv, EnvConfig, getContractsConfig, shouldEndorseXApps } from "@repo/config/contracts"
+import { EnvConfig } from "@repo/config/contracts"
 
 import {
   B3TR,
   B3TRGovernor,
   Emissions,
-  NodeManagementV3,
   Stargate,
   Treasury,
   VOT3,
@@ -12,14 +11,14 @@ import {
   X2EarnApps,
   XAllocationVoting,
 } from "../../typechain-types"
-import { mintStargateNFTs, proposeUpgradeGovernance } from "../helpers"
+import { mintStargateNFTs } from "../helpers"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
 import { getSeedAccounts, getTestKeys, SeedStrategy } from "../helpers/seedAccounts"
 import { convertB3trForVot3 } from "../helpers/swap"
 import { ethers } from "hardhat"
 import { Address } from "@vechain/sdk-core"
-import { App, assignAppCategories, endorseXApps, endorseXAppsWithExistingNodes, registerXDapps } from "../helpers/xApp"
+import { App, assignAppCategories, endorseXApps, registerXDapps } from "../helpers/xApp"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 const accounts = getTestKeys(17)
@@ -89,31 +88,17 @@ export const setupEnvironment = async (
   emissions: Emissions,
   treasury: Treasury,
   x2EarnApps: X2EarnApps,
-  governor: B3TRGovernor,
-  xAllocationVoting: XAllocationVoting,
+  _governor: B3TRGovernor,
+  _xAllocationVoting: XAllocationVoting,
   b3tr: B3TR,
   vot3: VOT3,
   stargateMock: Stargate,
 ) => {
   switch (config) {
     case "local":
-      await setupLocalEnvironment(emissions, treasury, x2EarnApps, b3tr, vot3, stargateMock)
-      break
     case "testnet":
-      await setupTestEnvironment(emissions, treasury, x2EarnApps, b3tr, vot3, stargateMock)
-      break
     case "testnet-staging":
-      await setupTestnetStagingEnvironment(
-        emissions,
-        treasury,
-        x2EarnApps,
-        governor,
-        xAllocationVoting,
-        b3tr,
-        vot3,
-        stargateMock,
-        shouldEndorseXApps(),
-      )
+      await setupLocalEnvironment(config, emissions, treasury, x2EarnApps, b3tr, vot3, stargateMock)
       break
     case "mainnet":
       await setupMainnetEnvironment(emissions, x2EarnApps)
@@ -154,16 +139,6 @@ export const endorseAndVerifySeededApps = async (
   await verifyEndorsedApps(x2EarnApps)
 }
 
-export const endorseAndVerifyAppsWithExistingNodes = async (
-  x2EarnApps: X2EarnApps,
-  nodeManagement: NodeManagementV3,
-  endorserSigners: HardhatEthersSigner[],
-) => {
-  const unendorsedApps = await x2EarnApps.unendorsedAppIds()
-  await endorseXAppsWithExistingNodes(endorserSigners, x2EarnApps, unendorsedApps, nodeManagement)
-  await verifyEndorsedApps(x2EarnApps)
-}
-
 const verifyEndorsedApps = async (x2EarnApps: X2EarnApps) => {
   const remaining = await x2EarnApps.unendorsedAppIds()
   console.log(`Remaining apps: ${remaining.length} ${remaining.join(", ")}`)
@@ -180,6 +155,7 @@ const verifyEndorsedApps = async (x2EarnApps: X2EarnApps) => {
 }
 
 export const setupLocalEnvironment = async (
+  env: EnvConfig,
   emissions: Emissions,
   treasury: Treasury,
   x2EarnApps: X2EarnApps,
@@ -235,89 +211,26 @@ export const setupLocalEnvironment = async (
   // If the first 8 accounts does not have the correct nodes, run the following line
   await startEmissions(emissionsContract, admin)
 
-  // Always endorse apps on local to ensure all apps reach 100 pts threshold
-  const allSigners = await ethers.getSigners()
-  const endorserSigners = allSigners.slice(0, 10)
+  // Endorsement strategy depends on the environment
+  if (env === "testnet-staging") {
+    // testnet-staging uses real Stargate contracts — set threshold to 0 so apps auto-endorse
+    await x2EarnApps
+      .connect(deployer)
+      .updateEndorsementScoreThreshold(0)
+      .then(async tx => await tx.wait())
+    console.log("Endorsement score threshold set to 0 for testnet-staging")
 
-  await airdropVTHO(
-    endorserSigners.map(acct => Address.of(acct.address)),
-    5000n,
-    admin,
-  )
-
-  // Every endorser gets 3 MjolnirX nodes (need 3 per app since max 49 pts/node/app)
-  // Total: 30 nodes x 100 pts = 3000 pts >> 8 apps x 100 threshold
-  await endorseAndVerifySeededApps(x2EarnApps, stargateMock, endorserSigners)
-
-  // await proposeUpgradeGovernance(governor, xAllocationVoting)
-
-  const end = new Date(performance.now() - start)
-
-  console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
-}
-
-export const setupTestnetStagingEnvironment = async (
-  emissions: Emissions,
-  treasury: Treasury,
-  x2EarnApps: X2EarnApps,
-  governor: B3TRGovernor,
-  xAllocationVoting: XAllocationVoting,
-  b3tr: B3TR,
-  vot3: VOT3,
-  _stargateMock: Stargate,
-  endorseApps: boolean,
-) => {
-  const start = performance.now()
-  console.log("================ Setup local environment")
-
-  // Define specific accounts
-  const admin = accounts[0]
-
-  // Make sure the first 10 accounts have a VTHO balance
-  await airdropVTHO(
-    accounts.slice(1, 10).map(acct => acct.address),
-    5000n,
-    admin,
-  )
-
-  // Bootstrap emissions
-  const emissionsContract = await emissions.getAddress()
-  await bootstrapEmissions(emissionsContract, admin)
-
-  // Add x-apps to the XAllocationPool
-  const x2EarnAppsAddress = await x2EarnApps.getAddress()
-  await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
-
-  // Assign categories to apps (deployer has DEFAULT_ADMIN_ROLE)
-  const deployer = (await ethers.getSigners())[0]
-  await assignAppCategories(x2EarnApps, deployer, APPS)
-
-  // Seed the first 5 accounts with some tokens
-  const treasuryAddress = await treasury.getAddress()
-  // 5+ 8 accounts: 13 accounts
-  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
-  const seedAccounts = allAccounts.slice(0, 5)
-
-  await airdropVTHO(
-    seedAccounts.map(acct => acct.key.address),
-    500n,
-    admin,
-  )
-
-  await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
-
-  await convertB3trForVot3(b3tr, vot3, seedAccounts)
-
-  // If the first 8 accounts does not have the correct nodes, run the following line
-  await startEmissions(emissionsContract, admin)
-
-  if (endorseApps) {
+    const unendorsedApps = await x2EarnApps.unendorsedAppIds()
+    for (const appId of unendorsedApps) {
+      const tx = await x2EarnApps.checkEndorsement(appId)
+      await tx.wait()
+    }
+    console.log(`checkEndorsement called for ${unendorsedApps.length} apps`)
+    await verifyEndorsedApps(x2EarnApps)
+  } else {
+    // local and testnet use mock Stargate — mint NFTs and endorse via mock nodes
     const allSigners = await ethers.getSigners()
     const endorserSigners = allSigners.slice(0, 10)
-    const nodeManagement = (await ethers.getContractAt(
-      "NodeManagementV3",
-      getContractsConfig(AppEnv.TESTNET_STAGING).NODE_MANAGEMENT_CONTRACT_ADDRESS,
-    )) as unknown as NodeManagementV3
 
     await airdropVTHO(
       endorserSigners.map(acct => Address.of(acct.address)),
@@ -325,91 +238,13 @@ export const setupTestnetStagingEnvironment = async (
       admin,
     )
 
-    await endorseAndVerifyAppsWithExistingNodes(x2EarnApps, nodeManagement, endorserSigners)
+    // Every endorser gets 3 MjolnirX nodes (need 3 per app since max 49 pts/node/app)
+    // Total: 30 nodes x 100 pts = 3000 pts >> 8 apps x 100 threshold
+    await endorseAndVerifySeededApps(x2EarnApps, stargateMock, endorserSigners)
   }
 
-  // await proposeUpgradeGovernance(governor, xAllocationVoting)
-
   const end = new Date(performance.now() - start)
 
-  console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
-}
-
-export const setupTestEnvironment = async (
-  emissions: Emissions,
-  treasury: Treasury,
-  x2EarnApps: X2EarnApps,
-  b3tr: B3TR,
-  vot3: VOT3,
-  _stargateMock: Stargate,
-) => {
-  console.log("================ Setup Testnet environment")
-  const start = performance.now()
-
-  const admin = accounts[0]
-  const initialVthoAirdrop = 100n
-  const seedVthoAirdrop = 50n
-  const endorsementVthoAirdrop = 100n
-
-  // Make sure the first 10 accounts have a VTHO balance
-  await airdropVTHO(
-    accounts.slice(1, 10).map(acct => acct.address),
-    initialVthoAirdrop,
-    admin,
-  )
-
-  // Bootstrap emissions
-  const emissionsContract = await emissions.getAddress()
-  await bootstrapEmissions(emissionsContract, admin)
-
-  // Add x-apps to the XAllocationPool
-  const x2EarnAppsAddress = await x2EarnApps.getAddress()
-  await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
-
-  // Assign categories to apps (deployer has DEFAULT_ADMIN_ROLE)
-  const deployer = (await ethers.getSigners())[0]
-  await assignAppCategories(x2EarnApps, deployer, APPS)
-
-  // Seed the first 10 accounts with B3TR + VOT3
-  const treasuryAddress = await treasury.getAddress()
-  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 10 + APPS.length, 0)
-  const first10 = allAccounts.slice(0, 10)
-  const appCreatorSeedAccounts = allAccounts.slice(10)
-
-  await airdropVTHO(
-    first10.map(acct => acct.key.address),
-    seedVthoAirdrop,
-    admin,
-  )
-
-  // Step 1: small airdrop (10k B3TR) → convert all to VOT3
-  const vot3Accounts = first10.map(a => ({ ...a, amount: ethers.parseEther("10000") }))
-  await airdropB3trFromTreasury(treasuryAddress, admin, [...vot3Accounts, ...appCreatorSeedAccounts])
-  await convertB3trForVot3(b3tr, vot3, vot3Accounts)
-
-  // Step 2: airdrop 50k B3TR — stays as B3TR for challenges etc.
-  const b3trAccounts = first10.map(a => ({ ...a, amount: ethers.parseEther("50000") }))
-  await airdropB3trFromTreasury(treasuryAddress, admin, b3trAccounts)
-
-  await startEmissions(emissionsContract, admin)
-
-  // Endorse all apps
-  const allSigners = await ethers.getSigners()
-  const endorserSigners = allSigners.slice(0, 10)
-  const nodeManagement = (await ethers.getContractAt(
-    "NodeManagementV3",
-    getContractsConfig(AppEnv.TESTNET).NODE_MANAGEMENT_CONTRACT_ADDRESS,
-  )) as unknown as NodeManagementV3
-
-  await airdropVTHO(
-    endorserSigners.map(acct => Address.of(acct.address)),
-    endorsementVthoAirdrop,
-    admin,
-  )
-
-  await endorseAndVerifyAppsWithExistingNodes(x2EarnApps, nodeManagement, endorserSigners)
-
-  const end = new Date(performance.now() - start)
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
