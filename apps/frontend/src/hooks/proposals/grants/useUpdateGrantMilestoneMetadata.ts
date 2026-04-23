@@ -10,7 +10,7 @@ import { getGrantProposalMetadataQueryKey } from "./useStandardOrGrantProposalDe
 const grantsManagerContractAddress = getConfig().grantsManagerContractAddress
 const grantsManagerInterface = GrantsManager__factory.createInterface()
 
-export const useUpdateGrantMilestoneMetadata = (proposalId: string) => {
+export const useUpdateGrantMilestoneMetadata = (proposalId: string, proposalIpfsDescription?: string) => {
   return useBuildTransaction<string>({
     clauseBuilder: milestonesIpfsCID => [
       buildClause({
@@ -21,6 +21,6 @@ export const useUpdateGrantMilestoneMetadata = (proposalId: string) => {
         comment: `Update milestone metadata for proposal ${proposalId} with milestone ipfs url ${milestonesIpfsCID}`,
       }),
     ],
-    refetchQueryKeys: [getGrantProposalMetadataQueryKey(proposalId)],
+    refetchQueryKeys: [getGrantProposalMetadataQueryKey(proposalId, proposalIpfsDescription)],
   })
 }

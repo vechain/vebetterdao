@@ -2191,5 +2191,6 @@
   "Your voting activity": "Sua atividade de votação",
   "Your voting power": "Seu poder de voto",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Seu poder de voto foi transferido para <platform>veDelegate.vet</platform> que vota em seu nome. <br/> Se você quiser votar aqui, deve remover a delegação no veDelegate antes do snapshot.",
-  "Your Voting Qualification": "Sua Qualificação de Voto"
+  "Your Voting Qualification": "Sua Qualificação de Voto",
+  "Expenditure reports are submitted by the proposal proposer wallet.": "Expenditure reports are submitted by the proposal proposer wallet."
 }

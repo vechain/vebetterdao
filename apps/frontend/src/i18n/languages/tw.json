@@ -2191,5 +2191,6 @@
   "Your voting activity": "您的投票活動",
   "Your voting power": "您的投票權",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票權已轉移至<platform>veDelegate.vet</platform>，它將代表您投票。<br/>如果您想在此進行投票，必須在快照前於veDelegate上移除委託。",
-  "Your Voting Qualification": "您的投票資格"
+  "Your Voting Qualification": "您的投票資格",
+  "Expenditure reports are submitted by the proposal proposer wallet.": "支出報告由提案發起人錢包提交。"
 }

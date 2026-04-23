@@ -9,6 +9,7 @@ import { useMemo } from "react"
 
 import { getIpfsMetadata } from "../../../api/ipfs/hooks/useIpfsMetadata"
 
+import { parseMilestoneMetadataDocument } from "./milestoneMetadataDocument"
 import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
 
 const abi = GrantsManager__factory.abi
@@ -88,6 +89,7 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     outcomesAttachment: ipfsMetadata?.outcomesAttachment ?? [],
     costBreakdown: ipfsMetadata?.costBreakdown ?? [],
     spendingPlan: ipfsMetadata?.spendingPlan ?? "",
+    expenditureReports: ipfsMetadata?.expenditureReports ?? [],
   }
 }
 
@@ -152,10 +154,12 @@ export const useStandardOrGrantProposalDetails = ({
         })
 
         if (milestoneMetadataURI) {
-          const milestones = await safeFetchIpfsMetadata<GrantProposalEnriched["milestones"]>(
-            `ipfs://${milestoneMetadataURI}`,
-          )
-          if (milestones && proposalDetails) proposalDetails.milestones = milestones
+          const milestoneRaw = await safeFetchIpfsMetadata<unknown>(`ipfs://${milestoneMetadataURI}`)
+          if (proposalDetails) {
+            const parsed = parseMilestoneMetadataDocument(milestoneRaw, proposalDetails.milestones ?? [])
+            proposalDetails.milestones = parsed.milestones
+            proposalDetails.expenditureReports = parsed.expenditureReports
+          }
         }
 
         return proposalDetails

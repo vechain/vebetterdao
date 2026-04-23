@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
 import { toaster } from "@/components/ui/toaster"
+import { buildMilestoneChainMetadata } from "@/hooks/proposals/grants/milestoneMetadataDocument"
 import {
   ExpenditureReport,
   GrantFormData,
@@ -16,10 +17,10 @@ import {
   ProposalState,
 } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
-import { useExpenditureReport } from "@/hooks/proposals/grants/useExpenditureReport"
 import { useSubmitExpenditureReport } from "@/hooks/proposals/grants/useSubmitExpenditureReport"
 import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
+import { uploadBlobToIPFS } from "@/utils/ipfs"
 
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
@@ -37,12 +38,14 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const [accordionValue, setAccordionValue] = useState<string[]>([])
   const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
   const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
-  const { onMetadataUpload, metadataUploading } = useUploadGrantProposalMetadata()
-  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
-  // Expenditure report hooks
-  const { submitReport, isSubmitting: isReportSubmitting } = useSubmitExpenditureReport(proposal?.id || "")
-  const { data: existingReport } = useExpenditureReport(proposal?.id || "")
+  const { metadataUploading } = useUploadGrantProposalMetadata()
+  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(
+    proposal?.id || "",
+    proposal?.ipfsDescription,
+  )
+  const { submitReport } = useSubmitExpenditureReport()
   const [showReportForm, setShowReportForm] = useState(false)
+  const [isPublishingReport, setIsPublishingReport] = useState(false)
 
   const isGrantReceiver = useMemo(() => {
     return account?.address && proposal?.grantsReceiverAddress
@@ -50,19 +53,41 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
       : false
   }, [account?.address, proposal?.grantsReceiverAddress])
 
+  const isProposer = useMemo(() => {
+    return account?.address && proposal?.proposerAddress
+      ? compareAddresses(account.address, proposal.proposerAddress)
+      : false
+  }, [account?.address, proposal?.proposerAddress])
+
   const isInDevelopment = proposal?.state === ProposalState.InDevelopment
 
   const handleReportSubmit = useCallback(
     async (report: ExpenditureReport) => {
-      const cid = await submitReport(report)
-      if (cid) {
+      if (!proposal?.id || !proposal.milestones?.length) {
+        toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
+        return
+      }
+      setIsPublishingReport(true)
+      try {
+        const cid = await submitReport({
+          proposalId: proposal.id,
+          report,
+          fallbackMilestones: proposal.milestones,
+        })
+        if (!cid) {
+          toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
+          return
+        }
+        await updateMilestoneMetadata(cid)
         setShowReportForm(false)
         toaster.create({ description: t("Expenditure report submitted successfully"), type: "success", closable: true })
-      } else {
+      } catch {
         toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
+      } finally {
+        setIsPublishingReport(false)
       }
     },
-    [submitReport, t],
+    [proposal, submitReport, updateMilestoneMetadata, t],
   )
 
   const milestones = useMemo(() => {
@@ -84,36 +109,50 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     return firstPendingIndex >= 0 ? firstPendingIndex : Math.max(0, milestones.length - 1)
   }, [milestones])
 
+  const existingReport = useMemo(() => {
+    const tranche = currentStep + 1
+    return proposal?.expenditureReports?.find(r => r.trancheNumber === tranche)
+  }, [proposal?.expenditureReports, currentStep])
+
   const handleSaveEdit = useCallback(
-    async (index: number) => {
+    async (clickedIndex: number) => {
       if (!!milestoneDuration) {
         if (milestoneEditIndex === undefined) return
-        const milestones = [] as GrantFormData["milestones"]
-        let index = 0
+        const updatedMilestones = [] as GrantFormData["milestones"]
+        let loopIdx = 0
         for (const milestone of proposal?.milestones ?? []) {
-          if (index === milestoneEditIndex) {
-            milestones.push({
+          if (loopIdx === milestoneEditIndex) {
+            updatedMilestones.push({
               ...milestone,
               durationFrom: dayjs(milestoneDuration.from).unix(),
               durationTo: dayjs(milestoneDuration.to).unix(),
             })
           } else {
-            milestones.push(milestone)
+            updatedMilestones.push(milestone)
           }
-          index++
+          loopIdx++
         }
 
-        const ipfsURI = await onMetadataUpload(milestones)
-        updateMilestoneMetadata(ipfsURI)
+        const payload = buildMilestoneChainMetadata(updatedMilestones, proposal?.expenditureReports ?? [])
+        const metadataBlob = new Blob([JSON.stringify(payload)], { type: "application/json" })
+        const ipfsURI = await uploadBlobToIPFS(metadataBlob, "grant-milestone-metadata.json")
+        if (!ipfsURI) return
+        await updateMilestoneMetadata(ipfsURI)
 
         setMilestoneEditIndex(undefined)
         setMilestoneDuration(undefined)
       } else {
-        setMilestoneEditIndex(index)
+        setMilestoneEditIndex(clickedIndex)
         setMilestoneDuration(undefined)
       }
     },
-    [milestoneDuration, milestoneEditIndex, onMetadataUpload, proposal?.milestones, updateMilestoneMetadata],
+    [
+      milestoneDuration,
+      milestoneEditIndex,
+      proposal?.milestones,
+      proposal?.expenditureReports,
+      updateMilestoneMetadata,
+    ],
   )
 
   // ==========================================
@@ -149,13 +188,18 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   // ==========================================
   return (
     <Skeleton loading={isLoading}>
-      {/* Expenditure Report Section */}
-      {isInDevelopment && isGrantReceiver && !showReportForm && (
+      {/* Expenditure Report Section — on-chain metadata is updated by the proposal proposer */}
+      {isInDevelopment && isProposer && !showReportForm && (
         <VStack align="flex-start" gap={3} pb={4}>
           <Button variant="secondary" size="sm" onClick={() => setShowReportForm(true)}>
             {existingReport ? t("Update expenditure report") : t("Submit expenditure report")}
           </Button>
         </VStack>
+      )}
+      {isInDevelopment && isGrantReceiver && !isProposer && (
+        <Text textStyle="sm" color="text.subtle" pb={4}>
+          {t("Expenditure reports are submitted by the proposal proposer wallet.")}
+        </Text>
       )}
 
       {showReportForm && proposal && (
@@ -166,7 +210,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
             totalMilestones={milestones.length}
             onSubmit={handleReportSubmit}
             onCancel={() => setShowReportForm(false)}
-            isSubmitting={isReportSubmitting}
+            isSubmitting={isPublishingReport}
           />
         </VStack>
       )}

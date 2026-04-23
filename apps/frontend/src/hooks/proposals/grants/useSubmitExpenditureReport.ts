@@ -1,46 +1,67 @@
 "use client"
-import { useQueryClient } from "@tanstack/react-query"
+import { getConfig } from "@repo/config"
+import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
+import { executeCallClause, useThor } from "@vechain/vechain-kit"
 import { useCallback, useState } from "react"
 
+import { getIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 
-import { ExpenditureReport } from "./types"
-import { getExpenditureReportQueryKey } from "./useExpenditureReport"
-import { useExpenditureReportStore } from "./useExpenditureReportStore"
+import { mergeExpenditureReport, parseMilestoneMetadataDocument } from "./milestoneMetadataDocument"
+import type { ExpenditureReport, GrantFormData } from "./types"
+
+const abi = GrantsManager__factory.abi
+const contractAddress = getConfig().grantsManagerContractAddress
+
+export type SubmitExpenditureReportParams = {
+  proposalId: string
+  report: ExpenditureReport
+  fallbackMilestones: GrantFormData["milestones"]
+}
 
 /**
- * Hook to submit an expenditure report to IPFS and store the CID locally.
+ * Builds merged milestone metadata (milestones + expenditure reports), pins to IPFS.
+ * Caller must send `updateMilestoneMetadataURI` with the returned CID (proposer only).
  */
-export const useSubmitExpenditureReport = (proposalId: string) => {
+export const useSubmitExpenditureReport = () => {
+  const thor = useThor()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const { setReportCid } = useExpenditureReportStore()
-  const queryClient = useQueryClient()
 
   const submitReport = useCallback(
-    async (report: ExpenditureReport) => {
+    async ({ proposalId, report, fallbackMilestones }: SubmitExpenditureReportParams) => {
       try {
         setIsSubmitting(true)
         setError(null)
+        if (!thor) return undefined
 
-        const blob = new Blob([JSON.stringify(report)], { type: "application/json" })
-        const cid = await uploadBlobToIPFS(blob, "expenditure-report.json")
+        const [milestoneMetadataURI] = await executeCallClause({
+          thor,
+          abi,
+          contractAddress,
+          method: "getMilestoneMetadataURI",
+          args: [BigInt(proposalId)],
+        })
 
-        setReportCid(proposalId, cid)
+        let existingRaw: unknown
+        if (milestoneMetadataURI && String(milestoneMetadataURI).length > 0) {
+          existingRaw = await getIpfsMetadata<unknown>(`ipfs://${milestoneMetadataURI}`)
+        }
 
-        // Invalidate the query so the view updates
-        queryClient.invalidateQueries({ queryKey: getExpenditureReportQueryKey(proposalId) })
-
+        const parsed = parseMilestoneMetadataDocument(existingRaw, fallbackMilestones)
+        const merged = mergeExpenditureReport(parsed, report)
+        const blob = new Blob([JSON.stringify(merged)], { type: "application/json" })
+        const cid = await uploadBlobToIPFS(blob, "grant-milestone-metadata.json")
         return cid
       } catch (err) {
         setError(err as Error)
-        console.error("Error submitting expenditure report:", err)
+        console.error("Error building expenditure report metadata:", err)
         return undefined
       } finally {
         setIsSubmitting(false)
       }
     },
-    [proposalId, setReportCid, queryClient],
+    [thor],
   )
 
   return { submitReport, isSubmitting, error }

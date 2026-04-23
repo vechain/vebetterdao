@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next"
 
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
-import { useExpenditureReportStore } from "@/hooks/proposals/grants/useExpenditureReportStore"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimMilestone } from "@/hooks/useClaimMilestone"
 import { useRejectGrant } from "@/hooks/useRejectGrant"
@@ -147,9 +146,7 @@ export const MilestoneItem = ({
     )
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
-  // Expenditure report check for soft warning
-  const { getReportCid } = useExpenditureReportStore()
-  const hasExpenditureReport = !!getReportCid(proposal.id)
+  const hasExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {

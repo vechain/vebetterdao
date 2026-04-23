@@ -1,9 +1,9 @@
 import { ProposalPage } from "./ProposalPage"
 
-type Props = {
-  params: Promise<{ proposalId: string }>
+export type Props = {
+  params: { proposalId: string }
 }
 export default async function Proposal({ params }: Readonly<Props>) {
-  const { proposalId } = await params
+  const { proposalId } = params
   return <ProposalPage proposalId={proposalId} />
 }

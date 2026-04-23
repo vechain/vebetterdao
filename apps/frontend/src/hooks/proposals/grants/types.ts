@@ -9,20 +9,6 @@ export enum GovernanceType {
 export type CommunityInteraction = {
   percentage: number
 }
-export type ProposalEnriched = ProposalCreatedEvent & {
-  title: string
-  shortDescription: string
-  markdownDescription: string
-  description: string
-  proposerAddress: string
-  state: ProposalState
-  discourseUrl?: string
-}
-export type GrantProposalEnriched = ProposalEnriched &
-  Omit<GrantFormData, "termsOfService"> & {
-    grantType: string
-    grantAmountRequested: number // Amount requested by the grantee
-  }
 export type ProposalCreatedEvent = {
   id: string
   type: ProposalType
@@ -80,6 +66,12 @@ export type ExpenditureReport = {
   notes: string
 }
 
+export type AttachmentFile = {
+  type: string
+  ipfs: string
+  name?: string
+}
+
 export type GrantFormData = {
   grantType: string // dapp or infra grant
   proposerAddress: string
@@ -130,12 +122,6 @@ export type GrantFormData = {
   termsOfService: boolean
 }
 
-export type AttachmentFile = {
-  type: string
-  ipfs: string
-  name?: string
-}
-
 export enum ProposalState {
   // Extend Standard states
   Pending, // 0
@@ -150,6 +136,24 @@ export enum ProposalState {
   InDevelopment, // 8
   Completed, // 9
 }
+
+export type ProposalEnriched = ProposalCreatedEvent & {
+  title: string
+  shortDescription: string
+  markdownDescription: string
+  description: string
+  proposerAddress: string
+  state: ProposalState
+  discourseUrl?: string
+}
+
+export type GrantProposalEnriched = ProposalEnriched &
+  Omit<GrantFormData, "termsOfService"> & {
+    grantType: string
+    grantAmountRequested: number // Amount requested by the grantee
+    /** Parsed from on-chain milestone metadata IPFS (see milestoneMetadataDocument.ts) */
+    expenditureReports?: ExpenditureReport[]
+  }
 
 export enum MilestoneState {
   Pending, // 0

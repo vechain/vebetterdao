@@ -2191,5 +2191,6 @@
   "Your voting activity": "Je stemactiviteit",
   "Your voting power": "Je stemkracht",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Uw stemkracht is overgedragen aan <platform>veDelegate.vet</platform> die namens u stemt. <br/> Als je hier wilt stemmen, moet je de delegatie bij veDelegate verwijderen voordat de snapshot plaatsvindt.",
-  "Your Voting Qualification": "Je stemkwalificatie"
+  "Your Voting Qualification": "Je stemkwalificatie",
+  "Expenditure reports are submitted by the proposal proposer wallet.": "Expenditure reports are submitted by the proposal proposer wallet."
 }
