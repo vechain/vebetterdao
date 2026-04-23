@@ -211,24 +211,10 @@ export const setupLocalEnvironment = async (
   // If the first 8 accounts does not have the correct nodes, run the following line
   await startEmissions(emissionsContract, admin)
 
-  // Endorsement strategy depends on the environment
-  if (env === "testnet-staging") {
-    // testnet-staging uses real Stargate contracts — set threshold to 0 so apps auto-endorse
-    await x2EarnApps
-      .connect(deployer)
-      .updateEndorsementScoreThreshold(0)
-      .then(async tx => await tx.wait())
-    console.log("Endorsement score threshold set to 0 for testnet-staging")
-
-    const unendorsedApps = await x2EarnApps.unendorsedAppIds()
-    for (const appId of unendorsedApps) {
-      const tx = await x2EarnApps.checkEndorsement(appId)
-      await tx.wait()
-    }
-    console.log(`checkEndorsement called for ${unendorsedApps.length} apps`)
-    await verifyEndorsedApps(x2EarnApps)
-  } else {
-    // local and testnet use mock Stargate — mint NFTs and endorse via mock nodes
+  // Endorsement strategy: on solo (local) we can mint mock Stargate NFTs because accounts
+  // are pre-funded with VET. On real networks (testnet/testnet-staging) accounts lack VET,
+  // so we set endorsement threshold to 0 and call checkEndorsement to auto-endorse.
+  if (env === "local") {
     const allSigners = await ethers.getSigners()
     const endorserSigners = allSigners.slice(0, 10)
 
@@ -241,6 +227,21 @@ export const setupLocalEnvironment = async (
     // Every endorser gets 3 MjolnirX nodes (need 3 per app since max 49 pts/node/app)
     // Total: 30 nodes x 100 pts = 3000 pts >> 8 apps x 100 threshold
     await endorseAndVerifySeededApps(x2EarnApps, stargateMock, endorserSigners)
+  } else {
+    // testnet and testnet-staging: set threshold to 0 so apps auto-endorse via checkEndorsement
+    await x2EarnApps
+      .connect(deployer)
+      .updateEndorsementScoreThreshold(0)
+      .then(async tx => await tx.wait())
+    console.log("Endorsement score threshold set to 0")
+
+    const unendorsedApps = await x2EarnApps.unendorsedAppIds()
+    for (const appId of unendorsedApps) {
+      const tx = await x2EarnApps.checkEndorsement(appId)
+      await tx.wait()
+    }
+    console.log(`checkEndorsement called for ${unendorsedApps.length} apps`)
+    await verifyEndorsedApps(x2EarnApps)
   }
 
   const end = new Date(performance.now() - start)
