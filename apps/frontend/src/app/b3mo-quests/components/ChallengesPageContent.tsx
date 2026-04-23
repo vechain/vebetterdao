@@ -11,6 +11,7 @@ import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { ChallengeStepsCard } from "./ChallengeStepsCard"
 import { CreateChallengeModal } from "./CreateChallengeModal"
 import { CurrentTab } from "./CurrentTab"
+import { GuestActiveTab } from "./GuestActiveTab"
 import { HistoryTab } from "./HistoryTab"
 
 const QUESTS_STEPS_CARD_DISMISSED_KEY = "vebetterdao:quests-steps-card-dismissed"
@@ -87,24 +88,28 @@ export const ChallengesPageContent = () => {
 
       <ChallengeStepsCard isOpen={open} onClose={onClose} />
 
-      <Tabs.Root
-        value={tab}
-        onValueChange={d => setTab(d.value as TabId)}
-        variant="line"
-        size={{ base: "md", md: "lg" }}
-        lazyMount
-        unmountOnExit>
-        <Tabs.List overflowX="auto" overflowY="hidden">
-          <Tabs.Trigger value="current">{t("Current")}</Tabs.Trigger>
-          {viewerAddress && <Tabs.Trigger value="history">{t("History")}</Tabs.Trigger>}
-        </Tabs.List>
-        <Tabs.Content value="current" pt="5">
-          <CurrentTab viewerAddress={viewerAddress} />
-        </Tabs.Content>
-        <Tabs.Content value="history" pt="5">
-          <HistoryTab viewerAddress={viewerAddress} />
-        </Tabs.Content>
-      </Tabs.Root>
+      {viewerAddress ? (
+        <Tabs.Root
+          value={tab}
+          onValueChange={d => setTab(d.value as TabId)}
+          variant="line"
+          size={{ base: "md", md: "lg" }}
+          lazyMount
+          unmountOnExit>
+          <Tabs.List overflowX="auto" overflowY="hidden">
+            <Tabs.Trigger value="current">{t("Current")}</Tabs.Trigger>
+            <Tabs.Trigger value="history">{t("History")}</Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value="current" pt="5">
+            <CurrentTab viewerAddress={viewerAddress} />
+          </Tabs.Content>
+          <Tabs.Content value="history" pt="5">
+            <HistoryTab viewerAddress={viewerAddress} />
+          </Tabs.Content>
+        </Tabs.Root>
+      ) : (
+        <GuestActiveTab />
+      )}
     </VStack>
   )
 }

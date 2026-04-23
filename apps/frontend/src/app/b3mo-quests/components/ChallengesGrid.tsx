@@ -12,9 +12,10 @@ import { CompactSkeleton } from "./CompactSkeleton"
 interface ChallengesGridProps {
   items: ChallengeView[]
   section: Pick<PaginatedChallengeSection, "isLoading" | "hasNextPage" | "isFetchingNextPage" | "fetchNextPage">
+  emptyDescription?: string
 }
 
-export const ChallengesGrid = ({ items, section }: ChallengesGridProps) => {
+export const ChallengesGrid = ({ items, section, emptyDescription }: ChallengesGridProps) => {
   const { t } = useTranslation()
   const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -51,7 +52,7 @@ export const ChallengesGrid = ({ items, section }: ChallengesGridProps) => {
         py="16"
         icon={<UilCompass />}
         title={t("No B3MO quests to show")}
-        description={t("There are no B3MO quests matching your current filters")}
+        description={emptyDescription ?? t("There are no B3MO quests matching your current filters")}
       />
     )
   }
