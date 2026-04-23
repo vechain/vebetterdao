@@ -1,4 +1,4 @@
-import { Card, VStack } from "@chakra-ui/react"
+import { VStack } from "@chakra-ui/react"
 import { UilCompass } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -53,14 +53,12 @@ export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
 
   if (noItems) {
     return (
-      <Card.Root variant="primary" p={{ base: "6", md: "8" }}>
-        <EmptyState
-          py="12"
-          icon={<UilCompass />}
-          title={t("No quests to show")}
-          description={t("There are no active quests right now. Check back later or create one.")}
-        />
-      </Card.Root>
+      <EmptyState
+        py="16"
+        icon={<UilCompass />}
+        title={t("No quests to show")}
+        description={t("There are no active quests right now. Check back later or create one.")}
+      />
     )
   }
 
