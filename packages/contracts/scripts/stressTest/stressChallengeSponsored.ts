@@ -8,7 +8,7 @@ import { B3TRChallenges__factory } from "../../typechain-types"
 
 const NUM_CHALLENGES = 200
 const CREATE_BATCH_SIZE = 10
-const SPONSORED_AMOUNT = ethers.parseEther("1")
+const SPONSORED_AMOUNT = ethers.parseEther("100")
 const SPLIT_THRESHOLD = 3
 
 const ChallengeKind = { Sponsored: 1 } as const
