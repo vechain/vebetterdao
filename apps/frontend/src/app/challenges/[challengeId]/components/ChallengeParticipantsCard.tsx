@@ -1,7 +1,20 @@
-import { Badge, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Button,
+  Card,
+  Heading,
+  HStack,
+  Icon,
+  Progress,
+  Separator,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
 import { Group } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -40,6 +53,21 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const threshold = Number(challenge.threshold)
   const showTrophy = !isPending
+
+  const showPrizeProgress =
+    isSplitWin &&
+    challenge.numWinners > 0 &&
+    (challenge.status === ChallengeStatus.Active || challenge.status === ChallengeStatus.Completed)
+
+  const claimedPrize = useMemo(
+    () => new BigNumber(challenge.prizePerWinner || "0").times(challenge.winnersClaimed).toFixed(),
+    [challenge.prizePerWinner, challenge.winnersClaimed],
+  )
+
+  const claimedPercent = useMemo(() => {
+    if (!challenge.numWinners) return 0
+    return Math.min(100, (challenge.winnersClaimed / challenge.numWinners) * 100)
+  }, [challenge.numWinners, challenge.winnersClaimed])
 
   const winCondition = useMemo(() => {
     if (isSplitWin) return t("Reach {{threshold}} actions and claim a slot before they run out", { threshold })
@@ -203,6 +231,25 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
               {"!"}
             </Text>
           </VStack>
+          {showPrizeProgress && (
+            <VStack gap={2} align="stretch" w="full">
+              <HStack justify="space-between" align="baseline">
+                <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                  {t("Prize claimed")}
+                </Text>
+                <Text textStyle="xs" color="text.subtle">
+                  {humanNumber(claimedPrize, claimedPrize, "B3TR")}
+                  {" / "}
+                  {humanNumber(challenge.totalPrize, challenge.totalPrize, "B3TR")}
+                </Text>
+              </HStack>
+              <Progress.Root value={claimedPercent} size="sm" w="full">
+                <Progress.Track rounded="full">
+                  <Progress.Range bgColor="status.positive.primary" rounded="full" />
+                </Progress.Track>
+              </Progress.Root>
+            </VStack>
+          )}
         </Card.Header>
         <Card.Body p="0">
           <VStack gap={4} align="stretch" w="full">
