@@ -68,7 +68,7 @@
     "recharts": "^3.2.1",
     "rehype-sanitize": "^6.0.0",
     "swiper": "^12.1.2",
-    "uuid": "^9.0.1",
+    "uuid": "^14.0.0",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
