@@ -231,6 +231,16 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
     })
 
+    it("decrements total delegated citizens when navigator announces exit", async function () {
+      const beforeExitBlock = await ethers.provider.getBlockNumber()
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(beforeExitBlock)).to.equal(1)
+
+      await navigatorRegistry.connect(navigator1).announceExit()
+      const afterExitBlock = await ethers.provider.getBlockNumber()
+
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(afterExitBlock)).to.equal(0)
+    })
+
     it("citizen's VOT3 is auto-unlocked after navigator announces exit (lazy invalidation)", async function () {
       await navigatorRegistry.connect(navigator1).announceExit()
 
@@ -314,6 +324,16 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
       expect(await navigatorRegistry.isDelegated(citizen1.address)).to.be.false
       const balance = await vot3.balanceOf(citizen1.address)
       await expect(vot3.connect(citizen1).transfer(otherAccounts[14].address, balance)).to.not.be.reverted
+    })
+
+    it("decrements total delegated citizens when navigator is deactivated", async function () {
+      const beforeDeactivateBlock = await ethers.provider.getBlockNumber()
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(beforeDeactivateBlock)).to.equal(1)
+
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+      const afterDeactivateBlock = await ethers.provider.getBlockNumber()
+
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(afterDeactivateBlock)).to.equal(0)
     })
 
     it("new citizens cannot delegate to deactivated navigator", async function () {

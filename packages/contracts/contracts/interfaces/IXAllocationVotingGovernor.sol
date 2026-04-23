@@ -132,6 +132,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error NavigatorPreferencesNotSet(address navigator, uint256 roundId);
 
   /**
+   * @dev The skip window (minimum time into the round before skips are allowed) has not been reached
+   */
+  error SkipWindowNotReached(uint256 roundId);
+
+  /**
    * @dev Emitted when auto-voting is skipped.
    */
   event AutoVoteSkipped(
@@ -183,6 +188,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
     bytes32[] appsIds,
     uint256[] voteWeights
   );
+
+  /**
+   * @dev Emitted when a navigator vote is skipped (navigator dead or no preferences set)
+   */
+  event NavigatorVoteSkipped(address indexed citizen, address indexed navigator, uint256 indexed roundId);
 
   /**
    * @dev Emitted when a freshness multiplier is applied to a vote.

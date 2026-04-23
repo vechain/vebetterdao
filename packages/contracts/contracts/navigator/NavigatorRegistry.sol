@@ -479,6 +479,11 @@ contract NavigatorRegistry is
     return NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, timepoint);
   }
 
+  /// @inheritdoc INavigatorRegistry
+  function getTotalDelegatedCitizensAtTimepoint(uint48 timepoint) external view returns (uint208) {
+    return NavigatorDelegationUtils.getTotalDelegatedCitizensAtTimepoint(timepoint);
+  }
+
   /// @notice Check if a citizen is currently delegating to any navigator
   /// @param citizen Address of the citizen
   /// @return True if the citizen has an active delegation

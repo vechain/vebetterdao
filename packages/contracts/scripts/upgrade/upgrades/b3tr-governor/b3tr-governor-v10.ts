@@ -14,6 +14,9 @@ async function main() {
   if (!config.navigatorRegistryContractAddress) {
     throw new Error("Missing NavigatorRegistry contract address")
   }
+  if (!config.relayerRewardsPoolContractAddress) {
+    throw new Error("Missing RelayerRewardsPool contract address")
+  }
 
   console.log("Deploying B3TRGovernor V10 libraries...")
   const {
@@ -49,7 +52,7 @@ async function main() {
     "B3TRGovernorV9",
     "B3TRGovernor",
     config.b3trGovernorAddress,
-    [config.navigatorRegistryContractAddress],
+    [config.navigatorRegistryContractAddress, config.relayerRewardsPoolContractAddress],
     {
       version: 10,
       libraries: libraryAddresses,
@@ -70,6 +73,12 @@ async function main() {
   console.log(`Navigator registry: ${navigatorRegistry}`)
   if (navigatorRegistry !== config.navigatorRegistryContractAddress) {
     throw new Error("Navigator registry was not correctly set")
+  }
+
+  const relayerRewardsPoolAddr = await governor.relayerRewardsPool()
+  console.log(`Relayer rewards pool: ${relayerRewardsPoolAddr}`)
+  if (relayerRewardsPoolAddr !== config.relayerRewardsPoolContractAddress) {
+    throw new Error("Relayer rewards pool was not correctly set")
   }
 
   // Whitelist NavigatorRegistry.deactivateNavigator for governance proposals

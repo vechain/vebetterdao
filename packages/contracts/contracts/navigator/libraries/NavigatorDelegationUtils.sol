@@ -109,6 +109,8 @@ library NavigatorDelegationUtils {
     $.citizenToNavigator[citizen].push(SafeCast.toUint48(block.number), uint208(uint160(navigator)));
     $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(amount));
     _pushTotalDelegated($, navigator, int256(amount));
+    _pushTotalDelegatedCitizens($, 1);
+    $.navigatorCitizenCount[navigator]++;
 
     emit DelegationCreated(citizen, navigator, amount);
   }
@@ -162,6 +164,8 @@ library NavigatorDelegationUtils {
     // If reduced to 0, fully undelegate
     if (newAmount == 0) {
       _removeDelegation($, citizen, currentNavigator);
+      _pushTotalDelegatedCitizens($, -1);
+      $.navigatorCitizenCount[currentNavigator]--;
       emit DelegationRemoved(citizen, currentNavigator, current);
     } else {
       emit DelegationDecreased(citizen, currentNavigator, reduceBy, newAmount);
@@ -182,6 +186,8 @@ library NavigatorDelegationUtils {
     $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), 0);
 
     _removeDelegation($, citizen, currentNavigator);
+    _pushTotalDelegatedCitizens($, -1);
+    $.navigatorCitizenCount[currentNavigator]--;
 
     emit DelegationRemoved(citizen, currentNavigator, amount);
   }
@@ -277,6 +283,18 @@ library NavigatorDelegationUtils {
     return uint256($.totalDelegatedToNavigator[navigator].upperLookupRecent(SafeCast.toUint48(timepoint)));
   }
 
+  /// @notice Get total number of delegated citizens at a past block
+  /// @dev This is used by XAllocationVoting to get the total number of delegated citizens
+  ///      at round start to enable auto-voting for them. Since the exit period for a navigator is 1 round it works fine
+  ///      but if that changes we need to update the way we calculate the total number of delegated citizens.
+  /// @dev When navigator announces exit, the number of citizens is zeroed out immediately, showing 0 citizens even if it
+  ///      still has citizens to vote for in the round.
+  /// @param timepoint The block number to query
+  /// @return The total delegated citizens at that block
+  function getTotalDelegatedCitizensAtTimepoint(uint48 timepoint) external view returns (uint208) {
+    return NavigatorStorageTypes.getNavigatorStorage().totalDelegatedCitizens.upperLookupRecent(timepoint);
+  }
+
   /// @notice Check if a citizen has an active delegation (false if navigator exited/deactivated)
   /// @param citizen The citizen address
   /// @return True if the citizen has an active delegation
@@ -367,6 +385,21 @@ library NavigatorDelegationUtils {
     uint256 current = _currentTotalDelegated($, navigator);
     uint256 newValue = delta >= 0 ? current + uint256(delta) : current - uint256(-delta);
     $.totalDelegatedToNavigator[navigator].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newValue));
+  }
+
+  /// @dev Push a delta (positive or negative) to the checkpointed totalDelegatedCitizens
+  function _pushTotalDelegatedCitizens(NavigatorStorageTypes.NavigatorStorage storage $, int256 delta) private {
+    uint256 current = _currentTotalDelegatedCitizens($);
+    uint256 newValue = delta >= 0 ? current + uint256(delta) : current - uint256(-delta);
+    $.totalDelegatedCitizens.push(SafeCast.toUint48(block.number), SafeCast.toUint208(newValue));
+  }
+
+  /// @dev Read the latest total delegated citizens
+  function _currentTotalDelegatedCitizens(
+    NavigatorStorageTypes.NavigatorStorage storage $
+  ) private view returns (uint256) {
+    if ($.totalDelegatedCitizens.length() == 0) return 0;
+    return uint256($.totalDelegatedCitizens.latest());
   }
 
   /// @dev Clear a citizen's delegation checkpoint

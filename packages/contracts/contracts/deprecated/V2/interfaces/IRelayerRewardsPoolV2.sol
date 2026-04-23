@@ -37,7 +37,7 @@ enum RelayerAction {
  * @notice Interface for the RelayerRewardsPool contract that manages rewards for relayers
  * who perform auto-voting actions on behalf of users.
  */
-interface IRelayerRewardsPool {
+interface IRelayerRewardsPoolV2 {
   // =========================== Events ===========================
 
   /**
@@ -59,13 +59,13 @@ interface IRelayerRewardsPool {
   /**
    * @notice Emitted when expected actions are reduced for a round
    * @param roundId The round ID
-   * @param actionsReduced Number of plain actions removed from the round totals in this update
+   * @param userCount The number of users removed from expected actions
    * @param newTotalActions The new total actions required
    * @param newTotalWeightedActions The new total weighted actions required
    */
   event ExpectedActionsReduced(
     uint256 indexed roundId,
-    uint256 actionsReduced,
+    uint256 userCount,
     uint256 newTotalActions,
     uint256 newTotalWeightedActions
   );
@@ -212,12 +212,6 @@ interface IRelayerRewardsPool {
 
   /// @notice Custom error for when caller is not the user's preferred relayer
   error NotPreferredRelayer(address caller, address preferredRelayer);
-
-  /// @notice The user's allocation vote has already been reduced for this round
-  error UserActionAlreadyReduced(address user, uint256 roundId);
-
-  /// @notice The user's governance vote has already been reduced for this round/proposal
-  error UserGovernanceVoteAlreadyReduced(address user, uint256 roundId, uint256 proposalId);
 
   // =========================== Getters ===========================
 
@@ -376,20 +370,6 @@ interface IRelayerRewardsPool {
   function setTotalActionsForRound(uint256 roundId, uint256 totalAutoVotingUsers) external;
 
   /**
-   * @notice Sets expected actions for allocation and governance in a round
-   * @param roundId The round ID
-   * @param allocationUsers Number of users expected to perform allocation vote+claim actions
-   * @param governanceUsers Number of users expected to perform governance vote actions (citizens only)
-   * @param activeProposalIds IDs of active governance proposals for the round (cached in storage)
-   */
-  function setTotalActionsForRoundWithGovernance(
-    uint256 roundId,
-    uint256 allocationUsers,
-    uint256 governanceUsers,
-    uint256[] memory activeProposalIds
-  ) external;
-
-  /**
    * @notice Set the fee cap for the relayer.
    * @param newFeeCap The new fee cap
    */
@@ -402,29 +382,12 @@ interface IRelayerRewardsPool {
   function setPreferredRelayer(address relayer) external;
 
   /**
-   * @notice Reduces the total expected actions for a round when a legacy auto-voting user cannot vote.
-   * @dev Reduces both vote and claim (2 actions per user). Used by castVoteOnBehalfOf.
+   * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
+   * @dev This should be called when a user has auto-voting enabled but no eligible apps to vote for
    * @param roundId The round ID
    * @param userCount The number of users to remove from expected actions (typically 1)
    */
   function reduceExpectedActionsForRound(uint256 roundId, uint256 userCount) external;
-
-  /**
-   * @notice Reduces allocation vote expectation for a specific user in a round.
-   * @dev Auto-reduces claim if all vote actions for the user have been skipped.
-   * @param roundId The round ID
-   * @param user The user whose allocation vote is skipped
-   */
-  function reduceUserAllocationVote(uint256 roundId, address user) external;
-
-  /**
-   * @notice Reduces governance vote expectation for a specific user/proposal in a round.
-   * @dev Auto-reduces claim if all vote actions for the user have been skipped.
-   * @param roundId The round ID
-   * @param user The user whose governance vote is skipped
-   * @param proposalId The governance proposal ID
-   */
-  function reduceUserGovernanceVote(uint256 roundId, address user, uint256 proposalId) external;
 
   /**
    * @notice Registers an action performed by a relayer in a specific round

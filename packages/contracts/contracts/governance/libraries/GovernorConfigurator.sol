@@ -35,6 +35,7 @@ import { GovernorTypes } from "./GovernorTypes.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
+import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
 
 /// @title GovernorConfigurator Library
 /// @notice Library for managing the configuration of a Governor contract.
@@ -61,6 +62,7 @@ library GovernorConfigurator {
   /// @dev Emitted when the VeBetterPassport contract is set.
   event VeBetterPassportSet(address oldVeBetterPassport, address newVeBetterPassport);
   event NavigatorRegistrySet(address oldNavigatorRegistry, address newNavigatorRegistry);
+  event RelayerRewardsPoolSet(address oldRelayerRewardsPool, address newRelayerRewardsPool);
 
   /// @dev The deposit threshold is not in the valid range for a percentage - 0 to 100.
   error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
@@ -102,9 +104,7 @@ library GovernorConfigurator {
    * @dev Sets a new VeBetterPassport contract and emits a {VeBetterPassportSet} event.
    * @param newVeBetterPassport The new VeBetterPassport contract.
    */
-  function setVeBetterPassport(
-    IVeBetterPassport newVeBetterPassport
-  ) external {
+  function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     emit VeBetterPassportSet(address($.veBetterPassport), address(newVeBetterPassport));
     $.veBetterPassport = newVeBetterPassport;
@@ -118,6 +118,20 @@ library GovernorConfigurator {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     emit NavigatorRegistrySet(address($.navigatorRegistry), address(newNavigatorRegistry));
     $.navigatorRegistry = newNavigatorRegistry;
+  }
+
+  /**
+   * @notice Sets the RelayerRewardsPool contract.
+   * @param newRelayerRewardsPool The new RelayerRewardsPool contract.
+   */
+  function setRelayerRewardsPool(IRelayerRewardsPool newRelayerRewardsPool) external {
+    require(
+      address(newRelayerRewardsPool) != address(0),
+      "GovernorConfigurator: relayer rewards pool address cannot be zero"
+    );
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    emit RelayerRewardsPoolSet(address($.relayerRewardsPool), address(newRelayerRewardsPool));
+    $.relayerRewardsPool = newRelayerRewardsPool;
   }
 
   /**
@@ -148,9 +162,7 @@ library GovernorConfigurator {
    * @dev Sets a new XAllocationVotingGovernor contract and emits a {XAllocationVotingSet} event.
    * @param newXAllocationVoting The new XAllocationVotingGovernor contract.
    */
-  function setXAllocationVoting(
-    IXAllocationVotingGovernor newXAllocationVoting
-  ) external {
+  function setXAllocationVoting(IXAllocationVotingGovernor newXAllocationVoting) external {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     require(
       address(newXAllocationVoting) != address(0),
@@ -165,9 +177,7 @@ library GovernorConfigurator {
    * @dev Sets a new timelock controller and emits a {TimelockChange} event.
    * @param newTimelock The new timelock controller.
    */
-  function updateTimelock(
-    TimelockControllerUpgradeable newTimelock
-  ) external {
+  function updateTimelock(TimelockControllerUpgradeable newTimelock) external {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     require(address(newTimelock) != address(0), "GovernorConfigurator: timelock address cannot be zero");
     emit TimelockChange(address($.timelock), address(newTimelock));
@@ -264,17 +274,11 @@ library GovernorConfigurator {
     uint256 newDepositThresholdCap
   ) internal {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    emit DepositThresholdCapSet(
-      proposalType,
-      $.proposalTypeDepositThresholdCap[proposalType],
-      newDepositThresholdCap
-    );
+    emit DepositThresholdCapSet(proposalType, $.proposalTypeDepositThresholdCap[proposalType], newDepositThresholdCap);
     $.proposalTypeDepositThresholdCap[proposalType] = newDepositThresholdCap;
   }
 
-  function setGalaxyMemberContract(
-    IGalaxyMember newGalaxyMember
-  ) external {
+  function setGalaxyMemberContract(IGalaxyMember newGalaxyMember) external {
     require(address(newGalaxyMember) != address(0), "GovernorConfigurator: GalaxyMember address cannot be zero");
     _setGalaxyMemberContract(newGalaxyMember);
   }
@@ -283,17 +287,13 @@ library GovernorConfigurator {
    * @notice Sets the GalaxyMember contract.
    * @param newGalaxyMember The new GalaxyMember contract.
    */
-  function _setGalaxyMemberContract(
-    IGalaxyMember newGalaxyMember
-  ) internal {
+  function _setGalaxyMemberContract(IGalaxyMember newGalaxyMember) internal {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     require(address(newGalaxyMember) != address(0), "GovernorConfigurator: GalaxyMember address cannot be zero");
     $.galaxyMember = newGalaxyMember;
   }
 
-  function setGrantsManagerContract(
-    IGrantsManager newGrantsManager
-  ) external {
+  function setGrantsManagerContract(IGrantsManager newGrantsManager) external {
     require(address(newGrantsManager) != address(0), "GovernorConfigurator: GrantsManager address cannot be zero");
     _setGrantsManagerContract(newGrantsManager);
   }
@@ -302,9 +302,7 @@ library GovernorConfigurator {
    * @notice Sets the GrantsManager contract.
    * @param newGrantsManager The new GrantsManager contract.
    */
-  function _setGrantsManagerContract(
-    IGrantsManager newGrantsManager
-  ) internal {
+  function _setGrantsManagerContract(IGrantsManager newGrantsManager) internal {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     require(address(newGrantsManager) != address(0), "GovernorConfigurator: GrantsManager address cannot be zero");
     $.grantsManager = newGrantsManager;
@@ -316,9 +314,7 @@ library GovernorConfigurator {
    * @param proposalType The proposal type.
    * @return The current voting threshold.
    */
-  function getVotingThreshold(
-    GovernorTypes.ProposalType proposalType
-  ) internal view returns (uint256) {
+  function getVotingThreshold(GovernorTypes.ProposalType proposalType) internal view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     return $.proposalTypeVotingThreshold[proposalType];
@@ -338,9 +334,7 @@ library GovernorConfigurator {
    * @param proposalType The proposal type.
    * @return The current deposit threshold percentage.
    */
-  function getDepositThresholdPercentage(
-    GovernorTypes.ProposalType proposalType
-  ) internal view returns (uint256) {
+  function getDepositThresholdPercentage(GovernorTypes.ProposalType proposalType) internal view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     return $.proposalTypeDepositThresholdPercentage[proposalType];
@@ -350,8 +344,7 @@ library GovernorConfigurator {
    * @notice Returns the VeBetterPassport contract.
    * @return The current VeBetterPassport contract.
    */
-  function veBetterPassport(
-  ) internal view returns (IVeBetterPassport) {
+  function veBetterPassport() internal view returns (IVeBetterPassport) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.veBetterPassport;
   }
@@ -361,9 +354,7 @@ library GovernorConfigurator {
    * @param proposalType The proposal type.
    * @return The current deposit threshold cap.
    */
-  function getDepositThresholdCap(
-    GovernorTypes.ProposalType proposalType
-  ) internal view returns (uint256) {
+  function getDepositThresholdCap(GovernorTypes.ProposalType proposalType) internal view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     return $.proposalTypeDepositThresholdCap[proposalType];
@@ -373,8 +364,7 @@ library GovernorConfigurator {
    * @notice Returns the GalaxyMember contract.
    * @return The current GalaxyMember contract.
    */
-  function getGalaxyMemberContract(
-  ) internal view returns (IGalaxyMember) {
+  function getGalaxyMemberContract() internal view returns (IGalaxyMember) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.galaxyMember;
   }
@@ -383,8 +373,7 @@ library GovernorConfigurator {
    * @notice Returns the GrantsManager contract.
    * @return The current GrantsManager contract.
    */
-  function getGrantsManagerContract(
-  ) internal view returns (IGrantsManager) {
+  function getGrantsManagerContract() internal view returns (IGrantsManager) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     return $.grantsManager;
   }

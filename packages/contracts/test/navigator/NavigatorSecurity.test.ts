@@ -333,7 +333,7 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       )
     })
 
-    it("castNavigatorVote before navigator sets preferences: reverts NavigatorPreferencesNotSet", async function () {
+    it("castNavigatorVote before navigator sets preferences: skips vote (local round < skip window)", async function () {
       const navigator1 = otherAccounts[10]
       const citizen = otherAccounts[11]
 
@@ -343,10 +343,11 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       await bootstrapAndStartEmissions()
       const roundId = await xAllocationVoting.currentRoundId()
 
-      // Navigator has NOT set preferences for this round
-      await expect(xAllocationVoting.castNavigatorVote(citizen.address, roundId)).to.be.revertedWithCustomError(
+      // Navigator has NOT set preferences. In local config (24-block rounds), the skip window
+      // (720 blocks) always exceeds remaining round, so skip is immediately permitted.
+      await expect(xAllocationVoting.castNavigatorVote(citizen.address, roundId)).to.emit(
         xAllocationVoting,
-        "NavigatorPreferencesNotSet",
+        "NavigatorVoteSkipped",
       )
     })
 

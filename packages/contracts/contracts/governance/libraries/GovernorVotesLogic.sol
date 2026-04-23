@@ -33,12 +33,17 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
+import { RelayerAction } from "../../interfaces/IRelayerRewardsPool.sol";
 
 /// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
 /// @dev Difference from V1: `proposalId` is passed as an argument to `registerVote` function instead of `proposalSnapshot`.
 library GovernorVotesLogic {
   using Checkpoints for Checkpoints.Trace208;
+
+  /// @dev 2 hours in blocks on VeChainThor (~10s blocks)
+  /// used by relayers to skip votes if the navigator is dead or has not set a decision.
+  uint256 private constant GOVERNANCE_SKIP_WINDOW_BLOCKS = 720;
 
   /// @dev Thrown when a vote has already been cast by the voter.
   /// @param voter The address of the voter who already cast a vote.
@@ -73,6 +78,9 @@ library GovernorVotesLogic {
     string reason
   );
 
+  /// @notice Emitted when a navigator governance vote is skipped (navigator dead or no decision set)
+  event NavigatorGovernanceVoteSkipped(address indexed citizen, address indexed navigator, uint256 indexed proposalId);
+
   /// @notice Emitted when a navigator casts a vote on behalf of a delegated citizen
   event NavigatorGovernanceVoteCast(
     address indexed citizen,
@@ -91,6 +99,9 @@ library GovernorVotesLogic {
 
   /// @dev Thrown when navigator has not set a decision for the proposal
   error NavigatorDecisionNotSet(address navigator, uint256 proposalId);
+
+  /// @dev The governance skip window has not been reached yet
+  error GovernanceSkipWindowNotReached(uint256 proposalId);
 
   /// @notice Emits true if quadratic voting is disabled, false otherwise.
   /// @param disabled - The flag to enable or disable quadratic voting.
@@ -276,11 +287,15 @@ library GovernorVotesLogic {
   }
 
   /**
-   * @notice Cast a governance vote on behalf of a citizen delegated to a navigator.
-   * @dev Uses the navigator's decision. No personhood check — delegation implies trust.
-   * @param proposalId The proposal to vote on
-   * @param citizen The delegated citizen whose voting power is used
-   * @return weight The voting weight used
+   * @notice Cast a governance vote on behalf of a citizen delegated to a navigator,
+   *         or auto-skip if the navigator is dead / has not set a decision (after skip window).
+   *
+   * Decision flow:
+   *   1. Navigator dead at snapshot → revert (citizen not delegated)
+   *   2. Navigator dead NOW → skip immediately, reduce governance vote expectation
+   *   3. Navigator alive + decision set → vote normally
+   *   4. Navigator alive + no decision + skip window reached → skip
+   *   5. Navigator alive + no decision + skip window NOT reached → revert (relayer retries later)
    */
   function castNavigatorVote(uint256 proposalId, address citizen) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
@@ -289,20 +304,40 @@ library GovernorVotesLogic {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
     );
 
-    // Use snapshot-based navigator lookup — returns address(0) if not delegated or navigator dead
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
     address navigator = $.navigatorRegistry.getNavigatorAtTimepoint(citizen, proposalSnapshot);
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
-    // Navigator must have set a decision for this proposal
-    uint8 decision = $.navigatorRegistry.getProposalDecision(navigator, proposalId);
-    if (decision == 0) revert NavigatorDecisionNotSet(navigator, proposalId);
+    uint256 roundId = $.proposals[proposalId].roundIdVoteStart;
+
+    // Dead navigator → skip immediately
+    if ($.navigatorRegistry.isDeactivated(navigator)) {
+      if (address($.relayerRewardsPool) != address(0)) {
+        $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
+      }
+      emit NavigatorGovernanceVoteSkipped(citizen, navigator, proposalId);
+      return 0;
+    }
+
+    // Navigator alive — check decision
+    if (!$.navigatorRegistry.hasSetDecision(navigator, proposalId)) {
+      // No decision set — skip only after window
+      uint256 deadline = GovernorProposalLogic._proposalDeadline(proposalId);
+      if (block.number + GOVERNANCE_SKIP_WINDOW_BLOCKS < deadline) {
+        revert GovernanceSkipWindowNotReached(proposalId);
+      }
+      if (address($.relayerRewardsPool) != address(0)) {
+        $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
+      }
+      emit NavigatorGovernanceVoteSkipped(citizen, navigator, proposalId);
+      return 0;
+    }
 
     // Decision is offset by 1 in NavigatorRegistry: 1=Against, 2=For, 3=Abstain
     // B3TRGovernor uses: 0=Against, 1=For, 2=Abstain
+    uint8 decision = $.navigatorRegistry.getProposalDecision(navigator, proposalId);
     uint8 support = decision - 1;
 
-    // Voting power = delegated amount at snapshot
     uint256 weight = $.navigatorRegistry.getDelegatedAmountAtTimepoint(citizen, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;
     GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(
@@ -312,8 +347,8 @@ library GovernorVotesLogic {
     _checkVotingThreshold(weight, proposalType);
     _countVote(proposalId, citizen, support, weight, power);
 
-    // Register vote for rewards (with intent multiplier)
     _registerVoteWithIntentMultiplier($, proposalId, citizen, weight, support, proposalSnapshot);
+    _registerRelayerActionForNavigatorVote($, proposalId, citizen);
 
     emit NavigatorGovernanceVoteCast(citizen, navigator, proposalId, support, weight, power);
 
@@ -402,5 +437,19 @@ library GovernorVotesLogic {
     uint256 rewardWeight = (weight * intentMultiplier) / 10000;
 
     $.voterRewards.registerVote(proposalId, voter, rewardWeight, Math.sqrt(rewardWeight));
+  }
+
+  function _registerRelayerActionForNavigatorVote(
+    GovernorStorageTypes.GovernorStorage storage $,
+    uint256 proposalId,
+    address citizen
+  ) private {
+    if (address($.relayerRewardsPool) == address(0)) return;
+    $.relayerRewardsPool.registerRelayerAction(
+      msg.sender,
+      citizen,
+      $.proposals[proposalId].roundIdVoteStart,
+      RelayerAction.VOTE
+    );
   }
 }

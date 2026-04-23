@@ -4,7 +4,14 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ethers } from "hardhat"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
 import { getOrDeployContractInstances, waitForNextCycle } from "../helpers"
-import { B3TR, Emissions, RelayerRewardsPool, RelayerRewardsPoolV1, XAllocationVoting } from "../../typechain-types"
+import {
+  B3TR,
+  Emissions,
+  RelayerRewardsPool,
+  RelayerRewardsPoolV1,
+  RelayerRewardsPoolV2,
+  XAllocationVoting,
+} from "../../typechain-types"
 
 describe("RelayerRewardsPool - V2 Upgrade - @shard18", function () {
   let b3tr: B3TR
@@ -35,7 +42,7 @@ describe("RelayerRewardsPool - V2 Upgrade - @shard18", function () {
     await emissions.connect(minterAccount).start()
   })
 
-  it("should preserve v1 state and initialize preferred relayer storage on upgrade", async function () {
+  it("should preserve v1 state through V1 → V2 → V3 upgrade path", async function () {
     const relayerRewardsPoolV1 = (await deployProxy("RelayerRewardsPoolV1", [
       owner.address,
       owner.address,
@@ -57,25 +64,41 @@ describe("RelayerRewardsPool - V2 Upgrade - @shard18", function () {
 
     await waitForNextCycle(emissions)
 
+    // V1 → V2
     const relayerRewardsPoolV2 = (await upgradeProxy(
       "RelayerRewardsPoolV1",
-      "RelayerRewardsPool",
+      "RelayerRewardsPoolV2",
       await relayerRewardsPoolV1.getAddress(),
       [],
       { version: 2 },
-    )) as RelayerRewardsPool
+    )) as RelayerRewardsPoolV2
 
     expect(await relayerRewardsPoolV2.version()).to.equal("2")
     expect(await relayerRewardsPoolV2.isRegisteredRelayer(relayer1.address)).to.equal(true)
     expect(await relayerRewardsPoolV2.getEarlyAccessBlocks()).to.equal(123)
     expect(await relayerRewardsPoolV2.totalActions(1)).to.equal(4)
     expect(await relayerRewardsPoolV2.getTotalRewards(1)).to.equal(depositAmount)
-    expect(await relayerRewardsPoolV2.getPreferredRelayer(user1.address)).to.equal(ethers.ZeroAddress)
 
-    await expect(relayerRewardsPoolV2.connect(user1).setPreferredRelayer(relayer1.address))
-      .to.emit(relayerRewardsPoolV2, "PreferredRelayerSet")
+    // V2 → V3 (current)
+    const relayerRewardsPoolV3 = (await upgradeProxy(
+      "RelayerRewardsPoolV2",
+      "RelayerRewardsPool",
+      await relayerRewardsPoolV2.getAddress(),
+      [],
+      { version: 3 },
+    )) as RelayerRewardsPool
+
+    expect(await relayerRewardsPoolV3.version()).to.equal("3")
+    expect(await relayerRewardsPoolV3.isRegisteredRelayer(relayer1.address)).to.equal(true)
+    expect(await relayerRewardsPoolV3.getEarlyAccessBlocks()).to.equal(123)
+    expect(await relayerRewardsPoolV3.totalActions(1)).to.equal(4)
+    expect(await relayerRewardsPoolV3.getTotalRewards(1)).to.equal(depositAmount)
+    expect(await relayerRewardsPoolV3.getPreferredRelayer(user1.address)).to.equal(ethers.ZeroAddress)
+
+    await expect(relayerRewardsPoolV3.connect(user1).setPreferredRelayer(relayer1.address))
+      .to.emit(relayerRewardsPoolV3, "PreferredRelayerSet")
       .withArgs(user1.address, relayer1.address)
 
-    expect(await relayerRewardsPoolV2.getPreferredRelayer(user1.address)).to.equal(relayer1.address)
+    expect(await relayerRewardsPoolV3.getPreferredRelayer(user1.address)).to.equal(relayer1.address)
   })
 })

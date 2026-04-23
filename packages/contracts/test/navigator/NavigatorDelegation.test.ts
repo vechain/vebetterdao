@@ -439,6 +439,32 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       // Current amount should be reduced
       expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("300"))
     })
+
+    it("should checkpoint total delegated citizens count across delegation lifecycle", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await getVot3Tokens(citizen2, "1000")
+
+      const blockBefore = await ethers.provider.getBlockNumber()
+
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+      const blockAfterFirstDelegate = await ethers.provider.getBlockNumber()
+
+      await navigatorRegistry.connect(citizen2).delegate(navigator1.address, ethers.parseEther("200"))
+      const blockAfterSecondDelegate = await ethers.provider.getBlockNumber()
+
+      // Partial reduction keeps citizen delegated, so citizen-count checkpoint must remain unchanged
+      await navigatorRegistry.connect(citizen1).reduceDelegation(ethers.parseEther("100"))
+      const blockAfterPartialReduce = await ethers.provider.getBlockNumber()
+
+      await navigatorRegistry.connect(citizen1).undelegate()
+      const blockAfterUndelegate = await ethers.provider.getBlockNumber()
+
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(blockBefore)).to.equal(0)
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(blockAfterFirstDelegate)).to.equal(1)
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(blockAfterSecondDelegate)).to.equal(2)
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(blockAfterPartialReduce)).to.equal(2)
+      expect(await navigatorRegistry.getTotalDelegatedCitizensAtTimepoint(blockAfterUndelegate)).to.equal(1)
+    })
   })
 
   // ======================== VOT3 Lock ======================== //

@@ -2,6 +2,7 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import { describe, it, beforeEach } from "mocha"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { mine } from "@nomicfoundation/hardhat-network-helpers"
 
 import { getOrDeployContractInstances } from "../helpers/deploy"
 import {
@@ -209,15 +210,18 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       ).to.be.revertedWithCustomError(xAllocationVoting, "NotDelegatedToNavigator")
     })
 
-    it("reverts NavigatorPreferencesNotSet when navigator has no preferences", async function () {
+    it("skips when navigator has no preferences (local round < skip window, always permitted)", async function () {
       // Start another round where navigator hasn't set preferences
       await waitForRoundToEnd(Number(roundId))
       await emissions.distribute()
       const newRoundId = await xAllocationVoting.currentRoundId()
 
-      await expect(
-        xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, newRoundId),
-      ).to.be.revertedWithCustomError(xAllocationVoting, "NavigatorPreferencesNotSet")
+      // In local config (24-block rounds), CITIZEN_SKIP_WINDOW_BLOCKS (720) always exceeds
+      // remaining round blocks, so skip is immediately permitted.
+      await expect(xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, newRoundId)).to.emit(
+        xAllocationVoting,
+        "NavigatorVoteSkipped",
+      )
     })
 
     it("relayer action VOTE is registered for caller", async function () {
@@ -293,9 +297,8 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       expect(event?.args[4]).to.equal(DELEGATE_AMOUNT)
     })
 
-    it("reverts NavigatorDecisionNotSet when no decision set", async function () {
+    it("skips governance vote when no decision set (local round < skip window)", async function () {
       // Create a new proposal without setting a navigator decision
-      // Use proposalId's round + 1 to avoid advancing rounds
       const nextRound = (await xAllocationVoting.currentRoundId()) + 1n
       const tx2 = await createProposal(
         b3tr,
@@ -310,9 +313,22 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       await payDeposit(newProposalId.toString(), owner)
       await waitForProposalToBeActive(newProposalId as any)
 
-      await expect(
-        governor.connect(relayer).castNavigatorVote(newProposalId, citizen.address),
-      ).to.be.revertedWithCustomError(navigatorRegistry, "DecisionNotSet")
+      // In local config, skip window (720) > round duration (24), so skip is immediate
+      const tx3 = await governor.connect(relayer).castNavigatorVote(newProposalId, citizen.address)
+      const receipt = await tx3.wait()
+
+      const libraryInterface = GovernorVotesLogic__factory.createInterface()
+      const event = receipt?.logs
+        .map(log => {
+          try {
+            return libraryInterface.parseLog({ topics: [...log.topics], data: log.data })
+          } catch {
+            return null
+          }
+        })
+        .find(e => e?.name === "NavigatorGovernanceVoteSkipped")
+
+      expect(event).to.not.be.undefined
     })
 
     it("reverts NotDelegatedToNavigator when citizen is not delegated", async function () {
@@ -321,6 +337,171 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       await expect(
         governor.connect(relayer).castNavigatorVote(proposalId, nonDelegated.address),
       ).to.be.revertedWithCustomError(governorVotesLogicLib, "NotDelegatedToNavigator")
+    })
+
+    it("registers relayer governance vote action for caller", async function () {
+      const proposalRoundId = await governor.proposalStartRound(proposalId)
+      const weightedBefore = await relayerRewardsPool.totalRelayerWeightedActions(relayer.address, proposalRoundId)
+
+      await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
+
+      const weightedAfter = await relayerRewardsPool.totalRelayerWeightedActions(relayer.address, proposalRoundId)
+      expect(weightedAfter - weightedBefore).to.equal(await relayerRewardsPool.getVoteWeight())
+    })
+  })
+
+  describe("Relayer expected actions with navigator citizens", function () {
+    it("startNewRound includes delegated citizens and active governance proposals", async function () {
+      await setupFullEcosystem()
+
+      await getVot3Tokens(owner, "300000")
+      await waitForNextBlock()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      const targetRound = currentRound + 1n
+      const createTx = await createProposal(
+        b3tr,
+        await ethers.getContractFactory("B3TR"),
+        owner,
+        "Expected actions proposal",
+        "tokenDetails",
+        [],
+        targetRound.toString(),
+      )
+      const proposalId = await getProposalIdFromTx(createTx)
+      await payDeposit(proposalId.toString(), owner)
+
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const newRoundId = await xAllocationVoting.currentRoundId()
+      await waitForProposalToBeActive(proposalId as any)
+
+      expect(newRoundId).to.equal(targetRound)
+      expect(await governor.getActiveProposals()).to.deep.equal([proposalId])
+      expect(await relayerRewardsPool.totalActions(newRoundId)).to.equal(3)
+      expect(await relayerRewardsPool.totalWeightedActions(newRoundId)).to.equal(7)
+    })
+
+    it("castNavigatorVote skips when navigator has no preferences (after skip window)", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator does NOT set preferences for this round
+      const totalActionsBefore = await relayerRewardsPool.totalActions(roundId)
+      const totalWeightedBefore = await relayerRewardsPool.totalWeightedActions(roundId)
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+
+      // Advance to skip window (720 blocks before deadline)
+      const deadline = await xAllocationVoting.roundDeadline(roundId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - 720n
+      if (blocksToMine > 0n) await mine(Number(blocksToMine))
+
+      // castNavigatorVote should skip (not vote) and reduce allocation vote.
+      // With no active governance proposals, claim is also auto-reduced (all vote actions done).
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      // 2 actions reduced: vote + auto-claim
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalActionsBefore - 2n)
+      expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(
+        totalWeightedBefore - voteWeight - claimWeight,
+      )
+    })
+
+    it("castNavigatorVote with no preferences skips at round start (local round < skip window)", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // In local config (24-block rounds), CITIZEN_SKIP_WINDOW_BLOCKS (720) exceeds the round
+      // duration, so the skip window is always reached — skip succeeds immediately.
+      await expect(xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)).to.emit(
+        xAllocationVoting,
+        "NavigatorVoteSkipped",
+      )
+    })
+
+    it("castNavigatorVote skips immediately when navigator is dead", async function () {
+      await setupFullEcosystem()
+
+      await getVot3Tokens(owner, "300000")
+      await waitForNextBlock()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      const targetRound = currentRound + 1n
+      const createTx = await createProposal(
+        b3tr,
+        await ethers.getContractFactory("B3TR"),
+        owner,
+        "Dead navigator proposal",
+        "tokenDetails",
+        [],
+        targetRound.toString(),
+      )
+      const proposalId = await getProposalIdFromTx(createTx)
+      await payDeposit(proposalId.toString(), owner)
+
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForProposalToBeActive(proposalId as any)
+
+      // Kill navigator after round starts
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator.address, 0, false)
+
+      const totalActionsBefore = await relayerRewardsPool.totalActions(roundId)
+
+      // Allocation skip — immediate, no skip window needed
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      // Governance skip
+      await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
+
+      // All vote actions skipped → claim auto-reduced: allocation (1) + governance (1) + claim (1) = 3
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalActionsBefore - 3n)
+    })
+
+    it("governance castNavigatorVote skips when navigator has no decision", async function () {
+      await setupFullEcosystem()
+
+      await getVot3Tokens(owner, "300000")
+      await waitForNextBlock()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      const targetRound = currentRound + 1n
+      const createTx = await createProposal(
+        b3tr,
+        await ethers.getContractFactory("B3TR"),
+        owner,
+        "No decision proposal",
+        "tokenDetails",
+        [],
+        targetRound.toString(),
+      )
+      const proposalId = await getProposalIdFromTx(createTx)
+      await payDeposit(proposalId.toString(), owner)
+
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForProposalToBeActive(proposalId as any)
+
+      const totalActionsBefore = await relayerRewardsPool.totalActions(roundId)
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+
+      // In local config, skip window (720 blocks) > round duration (24 blocks),
+      // so skip is always permitted — no need to advance blocks.
+      await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
+
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalActionsBefore - 1n)
     })
   })
 

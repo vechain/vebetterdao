@@ -36,6 +36,10 @@ library NavigatorStorageTypes {
     mapping(address => Checkpoints.Trace208) delegatedAmount;
     // navigator => checkpointed total VOT3 delegated to them (current via latest(), past via upperLookupRecent)
     mapping(address => Checkpoints.Trace208) totalDelegatedToNavigator;
+    // checkpointed total number of delegated citizens (current via latest(), past via upperLookupRecent)
+    Checkpoints.Trace208 totalDelegatedCitizens;
+    // navigator => current number of delegated citizens
+    mapping(address => uint256) navigatorCitizenCount;
 
     // ======================== Voting Decisions ======================== //
     // navigator => round => app preferences (bytes32[] of app IDs)

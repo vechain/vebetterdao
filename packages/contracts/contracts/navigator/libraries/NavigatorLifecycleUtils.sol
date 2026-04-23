@@ -86,6 +86,7 @@ library NavigatorLifecycleUtils {
 
     uint256 currentRound = _getCurrentRound($);
     $.exitAnnouncedRound[navigator] = currentRound;
+    _removeCitizensFromGlobalCounter($, navigator);
 
     // Navigator stays alive through the notice period, dead after
     // Can't call roundDeadline for a future round that doesn't exist yet,
@@ -119,6 +120,7 @@ library NavigatorLifecycleUtils {
     if ($.isDeactivated[navigator]) revert AlreadyDeactivated(navigator);
 
     $.isDeactivated[navigator] = true;
+    _removeCitizensFromGlobalCounter($, navigator);
     // Mark as dead at round deadline (only if not already pushed by announceExit)
     if ($.navigatorDeactivated[navigator].length() == 0 || $.navigatorDeactivated[navigator].latest() == 0) {
       uint256 currentRound = _getCurrentRound($);
@@ -207,7 +209,28 @@ library NavigatorLifecycleUtils {
   }
 
   /// @dev Get the deadline block of a round from XAllocationVoting
-  function _getRoundDeadline(NavigatorStorageTypes.NavigatorStorage storage $, uint256 roundId) private view returns (uint256) {
+  function _getRoundDeadline(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    uint256 roundId
+  ) private view returns (uint256) {
     return IXAllocationVotingGovernor($.xAllocationVoting).roundDeadline(roundId);
+  }
+
+  /// @dev Remove a navigator's delegated citizens from global counter and zero their local count.
+  function _removeCitizensFromGlobalCounter(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address navigator
+  ) private {
+    uint256 citizens = $.navigatorCitizenCount[navigator];
+    if (citizens == 0) {
+      return;
+    }
+
+    /// @dev This is used by NavigatorDelegationUtils to get the total number of delegated citizens
+    ///      at round start to enable auto-voting for them. Since the exit period for a navigator is 1 round it works fine
+    ///      but if that changes we need to update the way we calculate the total number of delegated citizens.
+    uint256 currentTotal = $.totalDelegatedCitizens.length() == 0 ? 0 : uint256($.totalDelegatedCitizens.latest());
+    $.totalDelegatedCitizens.push(SafeCast.toUint48(block.number), SafeCast.toUint208(currentTotal - citizens));
+    $.navigatorCitizenCount[navigator] = 0;
   }
 }

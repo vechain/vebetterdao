@@ -69,7 +69,7 @@ describe("RelayerRewardsPool - @shard18", function () {
 
   describe("Deployment and Initialization", function () {
     it("should deploy with correct initial values", async function () {
-      expect(await relayerRewardsPool.version()).to.equal("2")
+      expect(await relayerRewardsPool.version()).to.equal("3")
       expect(await relayerRewardsPool.getVoteWeight()).to.equal(3)
       expect(await relayerRewardsPool.getClaimWeight()).to.equal(1)
       expect(await relayerRewardsPool.getEarlyAccessBlocks()).to.equal(432000)
@@ -879,10 +879,10 @@ describe("RelayerRewardsPool - @shard18", function () {
       const expectedNewTotalActions = initialTotalActions - BigInt(actionsToReduce)
       const expectedNewTotalWeightedActions = initialTotalWeightedActions - weightedActionsToReduce
 
-      // Reduce expected actions
+      // Reduce expected actions (event reports plain actions removed, e.g. 2 per user for full allocation skip)
       await expect(relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, usersToReduce))
         .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
-        .withArgs(roundId, usersToReduce, expectedNewTotalActions, expectedNewTotalWeightedActions)
+        .withArgs(roundId, actionsToReduce, expectedNewTotalActions, expectedNewTotalWeightedActions)
 
       // Verify the totals are updated correctly
       expect(await relayerRewardsPool.totalActions(roundId)).to.equal(expectedNewTotalActions)
@@ -979,7 +979,7 @@ describe("RelayerRewardsPool - @shard18", function () {
 
       await expect(relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, secondReduction))
         .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
-        .withArgs(roundId, secondReduction, expectedSecondActions, expectedSecondWeightedActions)
+        .withArgs(roundId, secondReduction * 2, expectedSecondActions, expectedSecondWeightedActions)
 
       expect(await relayerRewardsPool.totalActions(roundId)).to.equal(expectedSecondActions)
       expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(expectedSecondWeightedActions)
@@ -1358,7 +1358,7 @@ describe("RelayerRewardsPool - @shard18", function () {
 
   describe("Version", function () {
     it("should return the correct version", async function () {
-      expect(await relayerRewardsPool.version()).to.equal("2")
+      expect(await relayerRewardsPool.version()).to.equal("3")
     })
   })
 })

@@ -919,6 +919,25 @@ export const getOrDeployContractInstances = async ({
     },
   )) as GrantsManager
 
+  const relayerRewardsPool = (await deployAndUpgrade(
+    ["RelayerRewardsPoolV1", "RelayerRewardsPoolV2", "RelayerRewardsPool"],
+    [
+      [
+        owner.address, // admin
+        owner.address, // upgrader
+        await b3tr.getAddress(), // b3trAddress
+        await emissions.getAddress(), // emissionsAddress
+        await xAllocationVoting.getAddress(), // xAllocationVotingAddress
+      ],
+      [],
+      [],
+    ],
+    {
+      versions: [undefined, 2, 3],
+      logOutput: false,
+    },
+  )) as RelayerRewardsPool
+
   const governor = (await deployAndUpgrade(
     [
       "B3TRGovernorV1",
@@ -974,7 +993,7 @@ export const getOrDeployContractInstances = async ({
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
       [], // Reserved for future configuration parameters; currently no values required
       [], // v9
-      [navigatorRegistryProxyAddress], // v10
+      [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress()], // v10
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -1082,24 +1101,6 @@ export const getOrDeployContractInstances = async ({
       ],
     },
   )) as B3TRGovernor
-
-  const relayerRewardsPool = (await deployAndUpgrade(
-    ["RelayerRewardsPoolV1", "RelayerRewardsPool"],
-    [
-      [
-        owner.address, // admin
-        owner.address, // upgrader
-        await b3tr.getAddress(), // b3trAddress
-        await emissions.getAddress(), // emissionsAddress
-        await xAllocationVoting.getAddress(), // xAllocationVotingAddress
-      ],
-      [],
-    ],
-    {
-      versions: [undefined, 2],
-      logOutput: false,
-    },
-  )) as RelayerRewardsPool
 
   // Upgrade VoterRewards V5 -> V6 (needs xAllocationVoting + relayerRewardsPool)
   voterRewards = (await upgradeProxy(
@@ -1371,6 +1372,11 @@ export const getOrDeployContractInstances = async ({
     .connect(owner)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
     .then(async (tx: TransactionResponse) => await tx.wait())
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await governor.getAddress())
+    .then(async (tx: TransactionResponse) => await tx.wait())
+
   await xAllocationVoting
     .connect(owner)
     .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)

@@ -510,6 +510,11 @@ interface INavigatorRegistry {
   /// @return The total VOT3 delegated at that block
   function getTotalDelegatedAtTimepoint(address navigator, uint256 timepoint) external view returns (uint256);
 
+  /// @notice Get total delegated citizens at a past block
+  /// @param timepoint The block number to query
+  /// @return The total delegated citizens at the given block
+  function getTotalDelegatedCitizensAtTimepoint(uint48 timepoint) external view returns (uint208);
+
   /// @notice Check if a citizen has an active delegation
   /// @param citizen The citizen address
   /// @return True if delegated to an active navigator

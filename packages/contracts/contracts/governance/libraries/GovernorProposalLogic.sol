@@ -271,6 +271,35 @@ library GovernorProposalLogic {
     return uint8($.proposalType[proposalId]);
   }
 
+  /**
+   * @notice Returns proposal IDs that are currently active.
+   * @dev Iterates proposals registered for the current round and filters by Active state.
+   *      Bounded by proposals-per-round (0-3 in practice).
+   */
+  function getActiveProposals() external view returns (uint256[] memory) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
+    uint256[] storage roundProposals = $.proposalsForRound[currentRoundId];
+    uint256 len = roundProposals.length;
+    uint256[] memory activeProposalIds = new uint256[](len);
+    uint256 activeCount;
+
+    for (uint256 i; i < len; i++) {
+      uint256 proposalId = roundProposals[i];
+      if (GovernorStateLogic._state(proposalId) == GovernorTypes.ProposalState.Active) {
+        activeProposalIds[activeCount] = proposalId;
+        activeCount++;
+      }
+    }
+
+    uint256[] memory trimmed = new uint256[](activeCount);
+    for (uint256 i; i < activeCount; i++) {
+      trimmed[i] = activeProposalIds[i];
+    }
+
+    return trimmed;
+  }
+
   /** ------------------ SETTERS ------------------ **/
 
   /**
@@ -824,6 +853,7 @@ library GovernorProposalLogic {
     proposal.depositThreshold = proposalDepositThreshold;
     // set the proposal type
     $.proposalType[proposalId] = proposalTypeValue;
+    $.proposalsForRound[roundIdVoteStart].push(proposalId);
   }
 
   /**
@@ -1074,4 +1104,5 @@ library GovernorProposalLogic {
       }
     }
   }
+
 }

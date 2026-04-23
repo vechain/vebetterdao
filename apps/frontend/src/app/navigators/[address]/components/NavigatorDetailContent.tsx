@@ -170,7 +170,7 @@ export const NavigatorDetailContent = () => {
 
       {isOwnPage && (
         <>
-          <Heading size="lg">{t("Task & Rewards")}</Heading>
+          <Heading size="lg">{t("Tasks & Rewards")}</Heading>
           <HStack gap={6} align="stretch" w="full">
             {(status === "ACTIVE" || status === "EXITING") && (
               <NavigatorTaskList address={address} onSubmitReport={() => setIsReportOpen(true)} />

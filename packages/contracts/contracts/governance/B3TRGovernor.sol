@@ -51,6 +51,7 @@ import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IGrantsManager } from "../interfaces/IGrantsManager.sol";
 import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
 import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
+import { IRelayerRewardsPool } from "../interfaces/IRelayerRewardsPool.sol";
 
 /**
  * @title B3TRGovernor
@@ -92,11 +93,12 @@ import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
  * ------------------ VERSION 10 ------------------
  * - Refactored from module inheritance to library architecture for contract size optimization
  * - Added navigator delegation voting via castNavigatorVote(proposalId, citizen)
- * - New storage: GovernorStorage.navigatorRegistry (INavigatorRegistry)
+ * - New storage: GovernorStorage.navigatorRegistry (INavigatorRegistry), relayerRewardsPool (IRelayerRewardsPool),
+ *   proposalsForRound mapping (round-indexed proposal tracking for relayer expected-actions)
  * - New events: NavigatorGovernanceVoteCast
  * - New errors: NotDelegatedToNavigator, NavigatorDecisionNotSet (in GovernorVotesLogic)
- * - New initializer: initializeV10(INavigatorRegistry) — reinitializer(8)
- * - setNavigatorRegistry() setter via GovernorConfigurator
+ * - New initializer: initializeV10(INavigatorRegistry, IRelayerRewardsPool) — reinitializer(8)
+ * - setNavigatorRegistry() / setRelayerRewardsPool() setters via GovernorConfigurator
  * - GovernorVotesLogic.getVotes() returns delegated amount when citizen has active navigator at snapshot
  * - Dead navigator (deactivated/exiting) = delegation void, returns full VOT3 balance
  * - castNavigatorVote uses snapshot-based navigator lookup (getNavigatorAtTimepoint)
@@ -120,12 +122,15 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
     _disableInitializers();
   }
 
-  /// @notice Initialize V10: set NavigatorRegistry address
+  /// @notice Initialize V10: set NavigatorRegistry and RelayerRewardsPool addresses
   function initializeV10(
-    INavigatorRegistry _navigatorRegistry
+    INavigatorRegistry _navigatorRegistry,
+    IRelayerRewardsPool _relayerRewardsPool
   ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) reinitializer(8) {
     require(address(_navigatorRegistry) != address(0), "B3TRGovernor: invalid navigator registry");
+    require(address(_relayerRewardsPool) != address(0), "B3TRGovernor: invalid relayer rewards pool");
     GovernorConfigurator.setNavigatorRegistry(_navigatorRegistry);
+    GovernorConfigurator.setRelayerRewardsPool(_relayerRewardsPool);
   }
 
   /**
@@ -613,6 +618,20 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
   }
 
   /**
+   * @notice Returns the RelayerRewardsPool contract.
+   */
+  function relayerRewardsPool() external view returns (IRelayerRewardsPool) {
+    return GovernorStorageTypes.getGovernorStorage().relayerRewardsPool;
+  }
+
+  /**
+   * @notice Returns currently active proposal IDs.
+   */
+  function getActiveProposals() external view returns (uint256[] memory) {
+    return GovernorProposalLogic.getActiveProposals();
+  }
+
+  /**
    * @notice Returns the proposal type of a proposal.
    * @param proposalId The id of the proposal
    * @return GovernorTypes.ProposalType The proposal type
@@ -986,6 +1005,16 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
     INavigatorRegistry newNavigatorRegistry
   ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     GovernorConfigurator.setNavigatorRegistry(newNavigatorRegistry);
+  }
+
+  /**
+   * @notice Set the RelayerRewardsPool contract
+   * @param newRelayerRewardsPool The new RelayerRewardsPool contract
+   */
+  function setRelayerRewardsPool(
+    IRelayerRewardsPool newRelayerRewardsPool
+  ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorConfigurator.setRelayerRewardsPool(newRelayerRewardsPool);
   }
 
   /**

@@ -16,15 +16,18 @@ describe("Governance - V10 Upgrade - @shard4g", function () {
 
   it("Should preserve external contract references after upgrade chain", async () => {
     const config = createLocalConfig()
-    const { governor, vot3, b3tr, voterRewards, xAllocationVoting } = await getOrDeployContractInstances({
-      forceDeploy: true,
-      config,
-    })
+    const { governor, vot3, b3tr, voterRewards, xAllocationVoting, relayerRewardsPool, navigatorRegistry } =
+      await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
     expect(await governor.token()).to.equal(await vot3.getAddress())
     expect(await governor.b3tr()).to.equal(await b3tr.getAddress())
     expect(await governor.voterRewards()).to.equal(await voterRewards.getAddress())
     expect(await governor.xAllocationVoting()).to.equal(await xAllocationVoting.getAddress())
+    expect(await governor.navigatorRegistry()).to.equal(await navigatorRegistry.getAddress())
+    expect(await governor.relayerRewardsPool()).to.equal(await relayerRewardsPool.getAddress())
   })
 
   it("Should preserve roles after upgrade chain", async () => {

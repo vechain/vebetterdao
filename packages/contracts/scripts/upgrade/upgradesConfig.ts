@@ -32,7 +32,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v7: "Proposal Execution + Grants Feature: Add extra voting power based on support tokens + deposit threshold cap + proposal type concept",
       v8: "Give ability to mark proposals as in development/completed",
       v9: "Give ability to provide a reason for proposal cancellation",
-      v10: "Refactor to library architecture + governance intent multiplier + NavigatorRegistry + castNavigatorVote",
+      v10: "Refactor to library architecture + governance intent multiplier + NavigatorRegistry + RelayerRewardsPool (initializeV10) + castNavigatorVote",
     },
   },
   XAllocationVoting: {
@@ -158,9 +158,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Relayer Rewards Pool": {
     name: "relayer-rewards-pool",
     configAddressField: "relayerRewardsPoolContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Allow users to set a preferred relayer for early-access vote and claim actions",
+      v3: "Granular expected-action reductions and governance-weighted relayer vote registration",
     },
   },
   VOT3: {

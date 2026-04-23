@@ -35,6 +35,7 @@ import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
+import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
 
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
@@ -137,8 +138,11 @@ library GovernorStorageTypes {
     // - InDevelopment: Development phase is in progress
     // - Completed: Development phase is completed
     mapping(uint256 proposalId => GovernorTypes.ProposalDevelopmentState) proposalDevelopmentState;
-    // ------------------------------- Version 11 -------------------------------
-    // NavigatorRegistry contract (for navigator delegation voting)
+    // ------------------------------- Version 10 (navigator + relayer integration) -------------------------------
+    // NavigatorRegistry (navigator delegation voting); RelayerRewardsPool (governance vote action registration)
     INavigatorRegistry navigatorRegistry;
+    IRelayerRewardsPool relayerRewardsPool;
+    // roundId => proposal IDs targeting that round (set at proposal creation)
+    mapping(uint256 => uint256[]) proposalsForRound;
   }
 }

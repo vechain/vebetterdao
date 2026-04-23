@@ -560,7 +560,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       // Check that expected actions reduction event is emitted
       await expect(castVoteTx)
         .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
-        .withArgs(roundId, 1, reducedTotalActions, reducedTotalWeightedActions)
+        .withArgs(roundId, 2, reducedTotalActions, reducedTotalWeightedActions)
 
       expect(await relayerRewardsPool.totalActions(roundId)).to.equal(reducedTotalActions)
       expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(reducedTotalWeightedActions)

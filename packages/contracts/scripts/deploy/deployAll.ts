@@ -711,7 +711,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as VoterRewards
 
   const relayerRewardsPool = (await deployAndUpgrade(
-    ["RelayerRewardsPoolV1", "RelayerRewardsPool"],
+    ["RelayerRewardsPoolV1", "RelayerRewardsPoolV2", "RelayerRewardsPool"],
     [
       [
         TEMP_ADMIN, // admin
@@ -721,9 +721,10 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN, // xAllocationVotingAddress - will be assigned later below
       ],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
       logOutput: true,
     },
   )) as RelayerRewardsPool
@@ -1006,7 +1007,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [],
       [], // v9
-      [navigatorRegistryProxyAddress], // v10
+      [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress()], // v10
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -1515,6 +1516,12 @@ export async function deployAll(config: ContractsConfig) {
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
     .then(async (tx: TransactionResponse) => await tx.wait())
   console.log("Pool admin role granted to VoterRewards")
+
+  await relayerRewardsPool
+    .connect(deployer)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await governor.getAddress())
+    .then(async (tx: TransactionResponse) => await tx.wait())
+  console.log("Pool admin role granted to B3TRGovernor")
 
   // Set RelayerRewardsPool address in XAllocationVoting
   await xAllocationVoting

@@ -122,6 +122,9 @@ contract XAllocationVoting is
   /// @dev Bitmask with every valid `RoundState` bit set: bit `i` is 1 for enum value `i` (same layout as
   ///      `_encodeStateBitmap`). `2 ** (max + 1) - 1` sets bits `0` through `type(RoundState).max` inclusive.
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
+  /// @dev 2 hours in blocks on VeChainThor (~10s blocks)
+  /// used by relayers to skip votes for citizens when the navigator is dead or has not set a decision
+  uint256 private constant CITIZEN_SKIP_WINDOW_BLOCKS = 720;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -173,12 +176,28 @@ contract XAllocationVoting is
     // Snapshot earnings settings for the round
     RoundEarningsSettingsUtils.snapshotRoundEarningsCap(newRoundId);
 
-    // Set expected auto-voting actions for relayer rewards
-    // Only set if there are auto-voting users (avoids emitting TotalAutoVotingActionsSet with 0)
+    // Set expected allocation/governance actions for relayer rewards.
     uint208 totalAutoVotingUsers = AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint(currentClock);
-    if (totalAutoVotingUsers > 0) {
+    INavigatorRegistry navRegistry = XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry;
+    uint208 totalDelegatedCitizens = address(navRegistry) == address(0)
+      ? 0
+      : navRegistry.getTotalDelegatedCitizensAtTimepoint(currentClock);
+    uint256 allocationUsers = uint256(totalAutoVotingUsers) + uint256(totalDelegatedCitizens);
+
+    uint256[] memory activeProposals;
+    IB3TRGovernor governor = XAllocationVotingStorageTypes._getExternalContractsStorage()._b3trGovernor;
+    if (address(governor) != address(0) && totalDelegatedCitizens > 0) {
+      activeProposals = governor.getActiveProposals();
+    }
+
+    if (allocationUsers > 0 || activeProposals.length > 0) {
       IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
-      pool.setTotalActionsForRound(newRoundId, totalAutoVotingUsers);
+      pool.setTotalActionsForRoundWithGovernance(
+        newRoundId,
+        allocationUsers,
+        uint256(totalDelegatedCitizens),
+        activeProposals
+      );
     }
 
     return newRoundId;
@@ -254,13 +273,19 @@ contract XAllocationVoting is
   }
 
   /**
-   * @dev Cast a vote on behalf of a citizen delegated to a navigator.
-   * Uses the navigator's allocation preferences and equal-weight distribution.
-   * No personhood check — delegation already implies trust.
-   * @param citizen The delegated citizen whose voting power is used
-   * @param roundId The round ID to vote in
+   * @dev Cast a vote on behalf of a citizen delegated to a navigator, or auto-skip if the
+   *      navigator is dead / has not set preferences (after the skip window).
+   *
+   * Decision flow:
+   *   1. Navigator dead at snapshot → revert (citizen not delegated)
+   *   2. Navigator dead NOW → skip immediately, reduce allocation vote expectation
+   *   3. Navigator alive + preferences set → vote normally
+   *   4. Navigator alive + no preferences + skip window reached → skip
+   *   5. Navigator alive + no preferences + skip window NOT reached → revert (relayer retries later)
    */
   function castNavigatorVote(address citizen, uint256 roundId) public {
+    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
+
     INavigatorRegistry navigatorRegistryContract = XAllocationVotingStorageTypes
       ._getExternalContractsStorage()
       ._navigatorRegistry;
@@ -270,9 +295,21 @@ contract XAllocationVoting is
     address navigator = navigatorRegistryContract.getNavigatorAtTimepoint(citizen, snapshot);
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
-    // Navigator must have set allocation preferences for this round
+    IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
+
+    // Dead navigator → skip immediately
+    if (_isNavigatorDead(navigator)) {
+      pool.reduceUserAllocationVote(roundId, citizen);
+      emit NavigatorVoteSkipped(citizen, navigator, roundId);
+      return;
+    }
+
+    // Navigator alive — check preferences
     if (!navigatorRegistryContract.hasSetPreferences(navigator, roundId)) {
-      revert NavigatorPreferencesNotSet(navigator, roundId);
+      _validateSkipWindow(roundId);
+      pool.reduceUserAllocationVote(roundId, citizen);
+      emit NavigatorVoteSkipped(citizen, navigator, roundId);
+      return;
     }
 
     _checkEarlyAccessEligibility(roundId, citizen);
@@ -294,20 +331,13 @@ contract XAllocationVoting is
       voteWeights[i] = (delegatedPower * percentages[i]) / basisPoints;
       allocated += voteWeights[i];
     }
-    // Assign any dust from rounding to the first app
     if (allocated < delegatedPower && voteWeights.length > 0) {
       voteWeights[0] += delegatedPower - allocated;
     }
 
     _handleCastVoteWithPower(citizen, roundId, appIds, voteWeights, delegatedPower, false);
 
-    // Register relayer action for the caller
-    XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.registerRelayerAction(
-      _msgSender(),
-      citizen,
-      roundId,
-      RelayerAction.VOTE
-    );
+    pool.registerRelayerAction(_msgSender(), citizen, roundId, RelayerAction.VOTE);
 
     emit NavigatorVoteCast(citizen, navigator, roundId, appIds, voteWeights);
   }
@@ -449,6 +479,24 @@ contract XAllocationVoting is
       voter,
       _msgSender()
     );
+  }
+
+  /**
+   * @dev Validate that the skip window has been reached for a given round
+   * @param roundId The round ID to validate
+   */
+  function _validateSkipWindow(uint256 roundId) internal view {
+    uint256 deadline = RoundsStorageUtils.roundDeadline(roundId);
+    if (block.number + CITIZEN_SKIP_WINDOW_BLOCKS < deadline) revert SkipWindowNotReached(roundId);
+  }
+
+  /**
+   * @dev Check if a navigator is dead
+   * @param navigator The navigator address
+   * @return True if the navigator is dead
+   */
+  function _isNavigatorDead(address navigator) internal view returns (bool) {
+    return XAllocationVotingStorageTypes._getExternalContractsStorage()._navigatorRegistry.isDeactivated(navigator);
   }
 
   // ======================== Setters (role-gated) ======================== //
