@@ -137,7 +137,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
       duration: duration,
       threshold: challenge.threshold,
       numWinners: challenge.numWinners,
-      winnersClaimed: challenge.winnersClaimed,
+      winnersClaimed: challenge.winners.length,
       prizePerWinner: challenge.prizePerWinner,
       allApps: challenge.allApps,
       totalPrize: challenge.totalPrize,

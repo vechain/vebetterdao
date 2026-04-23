@@ -152,7 +152,7 @@ library ChallengeSettlementLogic {
 
     if ($.isSplitWinWinner[challengeId][msg.sender]) revert IChallenges.AlreadyClaimed(challengeId, msg.sender);
 
-    if (challenge.winnersClaimed >= challenge.numWinners) {
+    if (challenge.winners.length >= challenge.numWinners) {
       revert IChallenges.SplitWinSlotsExhausted(challengeId);
     }
 
@@ -163,15 +163,14 @@ library ChallengeSettlementLogic {
 
     amount = challenge.prizePerWinner;
     challenge.winners.push(msg.sender);
-    challenge.winnersClaimed++;
     $.isSplitWinWinner[challengeId][msg.sender] = true;
 
     if (!$.b3tr.transfer(msg.sender, amount)) revert IChallenges.TransferFailed();
 
-    emit SplitWinPrizeClaimed(challengeId, msg.sender, amount, actions, challenge.winnersClaimed);
+    emit SplitWinPrizeClaimed(challengeId, msg.sender, amount, actions, challenge.winners.length);
 
     // Auto-complete once every slot is taken so downstream consumers see a terminal state.
-    if (challenge.winnersClaimed == challenge.numWinners) {
+    if (challenge.winners.length == challenge.numWinners) {
       challenge.status = ChallengeTypes.ChallengeStatus.Completed;
       challenge.settlementMode = ChallengeTypes.SettlementMode.SplitWinCompleted;
       emit ChallengeCompleted(challengeId, challenge.settlementMode, 0, 0);
@@ -211,10 +210,10 @@ library ChallengeSettlementLogic {
     if ($.hasRefunded[challengeId][msg.sender]) revert IChallenges.AlreadyRefunded(challengeId, msg.sender);
 
     // Total = unclaimed slots + integer-division remainder retained at creation.
-    uint256 unclaimedSlots = challenge.numWinners - challenge.winnersClaimed;
+    uint256 unclaimedSlots = challenge.numWinners - challenge.winners.length;
     if (unclaimedSlots == 0) revert IChallenges.NothingToRefund(challengeId, msg.sender);
 
-    uint256 paidOut = challenge.prizePerWinner * challenge.winnersClaimed;
+    uint256 paidOut = challenge.prizePerWinner * challenge.winners.length;
     amount = challenge.totalPrize - paidOut;
 
     $.hasRefunded[challengeId][msg.sender] = true;

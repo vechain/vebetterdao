@@ -78,20 +78,20 @@ library ChallengeTypes {
   }
 
   struct Challenge {
+    // Slot 0: 5 enum (5B) + bool (1B) + address (20B) = 26/32B packed
     ChallengeKind kind;
     ChallengeVisibility visibility;
     ChallengeType challengeType;
     ChallengeStatus status;
     SettlementMode settlementMode;
+    bool allApps;
     address creator;
     uint256 stakeAmount;
     uint256 startRound;
     uint256 endRound;
     uint256 threshold;
     uint256 numWinners;
-    uint256 winnersClaimed;
     uint256 prizePerWinner;
-    bool allApps;
     uint256 totalPrize;
     uint256 bestScore;
     uint256 bestCount;
