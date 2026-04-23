@@ -5,7 +5,7 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuTrophy } from "react-icons/lu"
 
-import { ChallengeKind, ChallengeView, ParticipantStatus } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeView } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 
@@ -74,7 +74,6 @@ export const ChallengeActions = ({
     joinStakeAmount > 0n &&
     BigInt(b3trBalance.original) < joinStakeAmount
 
-  const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const isCardLayout = layout === "card"
   const resolvedButtonSize = buttonSize ?? (isCardLayout ? "md" : "sm")
   const cardButtonProps = isCardLayout ? { w: "full" } : {}
@@ -236,16 +235,6 @@ export const ChallengeActions = ({
 
   return (
     <VStack align={isCardLayout ? "stretch" : "start"} gap={isCardLayout ? "3" : "1"}>
-      {isReacceptingInvite && (
-        <VStack align="start" gap="1">
-          <Text textStyle="sm" color="status.negative.strong" fontWeight="semibold">
-            {t("Declined")}
-          </Text>
-          <Text textStyle="sm" color="text.subtle">
-            {t("Changed your mind? There is still time to accept.")}
-          </Text>
-        </VStack>
-      )}
       {isCardLayout ? (
         <SimpleGrid columns={actionCount > 1 ? 2 : 1} gap="3" w="full">
           {actionButtons}

@@ -8,6 +8,7 @@ import {
   ChallengeKind,
   ChallengeStatus,
   challengeStatusLabel,
+  ParticipantStatus,
   SettlementMode,
 } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
@@ -86,6 +87,8 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
     "B3TR",
   )
 
+  const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
+
   return (
     <>
       <Card.Root variant="primary" p="4" w="full">
@@ -95,31 +98,42 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
               <ChallengeVisibilityBadge challenge={challenge} />
               <ChallengeCreatorChip creator={challenge.creator} />
             </HStack>
-
-            <HStack gap="2" flexShrink={0}>
-              {hasChallengeActions(challenge) && (
-                <Box display={{ base: "none", md: "block" }}>
-                  <ChallengeActions
-                    challenge={challenge}
-                    buttonSize="sm"
-                    onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
-                    onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
-                    onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
-                    onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
-                    onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
-                    onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
-                    onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
-                    onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
-                    onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
-                    onClaimCreatorSplitWinRefundClick={
-                      challenge.canClaimCreatorSplitWinRefund ? onSplitWinRefundOpen : undefined
-                    }
-                  />
-                </Box>
+            <HStack gap="5">
+              {isReacceptingInvite && (
+                <VStack align="start" gap="1" w="full">
+                  <Text textStyle="sm" color="status.negative.strong" fontWeight="semibold">
+                    {t("Declined")}
+                  </Text>
+                  <Text textStyle="sm" color="text.subtle">
+                    {t("Changed your mind? There is still time to accept.")}
+                  </Text>
+                </VStack>
               )}
-              <IconButton aria-label="share" variant="ghost" size="sm" onClick={onShareOpen}>
-                <Icon as={UilShareAlt} color="icon.subtle" />
-              </IconButton>
+              <HStack gap="2" flexShrink={0}>
+                {hasChallengeActions(challenge) && (
+                  <Box display={{ base: "none", md: "block" }}>
+                    <ChallengeActions
+                      challenge={challenge}
+                      buttonSize="sm"
+                      onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                      onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
+                      onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
+                      onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
+                      onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
+                      onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
+                      onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
+                      onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
+                      onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
+                      onClaimCreatorSplitWinRefundClick={
+                        challenge.canClaimCreatorSplitWinRefund ? onSplitWinRefundOpen : undefined
+                      }
+                    />
+                  </Box>
+                )}
+                <IconButton aria-label="share" variant="ghost" size="sm" onClick={onShareOpen}>
+                  <Icon as={UilShareAlt} color="icon.subtle" />
+                </IconButton>
+              </HStack>
             </HStack>
           </HStack>
 

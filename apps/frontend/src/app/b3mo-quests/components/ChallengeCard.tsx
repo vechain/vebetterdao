@@ -247,37 +247,49 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
           </VStack>
         </Card.Body>
         <Card.Footer mt={4}>
-          <HStack gap="2" w="full" align="stretch">
-            {hasChallengeActions(challenge) && (
-              <Box flex="1" minW="0">
-                <ChallengeActions
-                  challenge={challenge}
-                  layout="card"
-                  buttonSize="sm"
-                  onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
-                  onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
-                  onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
-                  onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
-                  onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
-                  onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
-                  onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
-                  onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
-                  onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
-                  onClaimCreatorSplitWinRefundClick={
-                    challenge.canClaimCreatorSplitWinRefund ? onSplitWinRefundOpen : undefined
-                  }
-                />
-              </Box>
+          <VStack gap="3" w="full" align="stretch">
+            {isReacceptingInvite && (
+              <VStack align="start" gap="1" w="full">
+                <Text textStyle="sm" color="status.negative.strong" fontWeight="semibold">
+                  {t("Declined")}
+                </Text>
+                <Text textStyle="sm" color="text.subtle">
+                  {t("Changed your mind? There is still time to accept.")}
+                </Text>
+              </VStack>
             )}
-            <Button
-              variant="secondary"
-              size="sm"
-              flex="1"
-              minW="0"
-              onClick={() => router.push(`/b3mo-quests/${challenge.challengeId}`)}>
-              {t("View details")}
-            </Button>
-          </HStack>
+            <HStack gap="2" w="full" align="stretch">
+              {hasChallengeActions(challenge) && (
+                <Box flex="1" minW="0">
+                  <ChallengeActions
+                    challenge={challenge}
+                    layout="card"
+                    buttonSize="sm"
+                    onClaimClick={challenge.canClaim ? onClaimOpen : undefined}
+                    onAcceptClick={challenge.canAccept ? onAcceptOpen : undefined}
+                    onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
+                    onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
+                    onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
+                    onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
+                    onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
+                    onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
+                    onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
+                    onClaimCreatorSplitWinRefundClick={
+                      challenge.canClaimCreatorSplitWinRefund ? onSplitWinRefundOpen : undefined
+                    }
+                  />
+                </Box>
+              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                flex="1"
+                minW="0"
+                onClick={() => router.push(`/b3mo-quests/${challenge.challengeId}`)}>
+                {t("View details")}
+              </Button>
+            </HStack>
+          </VStack>
         </Card.Footer>
       </Card.Root>
 
