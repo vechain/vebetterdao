@@ -10,7 +10,12 @@ import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 
 import { ChallengeKind, ChallengeView } from "./types"
-import { challengePayoutClaimedEventName, challengeRefundClaimedEventName } from "./useChallengeClaimState"
+import {
+  challengePayoutClaimedEventName,
+  challengeRefundClaimedEventName,
+  splitWinCreatorRefundedEventName,
+  splitWinPrizeClaimedEventName,
+} from "./useChallengeClaimState"
 
 const ChallengesInterface = B3TRChallenges__factory.createInterface()
 const B3TRInterface = B3TR__factory.createInterface()
@@ -59,14 +64,18 @@ export const useChallengeActions = () => {
   useEffect(() => clearScheduledRefetches, [clearScheduledRefetches])
 
   const refetchChallengeQueries = useCallback(async () => {
+    const claimEventKeys = [
+      challengePayoutClaimedEventName,
+      challengeRefundClaimedEventName,
+      splitWinPrizeClaimedEventName,
+      splitWinCreatorRefundedEventName,
+    ]
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["challenges"] }),
-      queryClient.invalidateQueries({ queryKey: [challengePayoutClaimedEventName] }),
-      queryClient.invalidateQueries({ queryKey: [challengeRefundClaimedEventName] }),
+      ...claimEventKeys.map(key => queryClient.invalidateQueries({ queryKey: [key] })),
       queryClient.refetchQueries({ queryKey: ["challenges", "section"], type: "active" }),
       queryClient.refetchQueries({ queryKey: ["challenges", "detail"], type: "active" }),
-      queryClient.refetchQueries({ queryKey: [challengePayoutClaimedEventName], type: "active" }),
-      queryClient.refetchQueries({ queryKey: [challengeRefundClaimedEventName], type: "active" }),
+      ...claimEventKeys.map(key => queryClient.refetchQueries({ queryKey: [key], type: "active" })),
     ])
   }, [queryClient])
 
