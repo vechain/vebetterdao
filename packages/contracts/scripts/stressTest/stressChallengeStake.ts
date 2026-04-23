@@ -12,8 +12,8 @@ const SELECTED_APP_COUNT = 5
 const PRIMARY_WINNER_ADDRESS = "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68"
 
 const ChallengeKind = { Stake: 0 } as const
-const ChallengeVisibility = { Public: 0 } as const
-const ThresholdMode = { None: 0 } as const
+const ChallengeVisibility = { Private: 1 } as const
+const ChallengeType = { MaxActions: 0 } as const
 
 type ChallengePlan = {
   label: string
@@ -293,14 +293,15 @@ async function main() {
   for (const plan of challengePlans) {
     const tx = await challenges.createChallenge({
       kind: ChallengeKind.Stake,
-      visibility: ChallengeVisibility.Public,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       stakeAmount: STAKE_AMOUNT,
       startRound: plan.startRound,
       endRound: plan.endRound,
       threshold: 0,
+      numWinners: 0,
       appIds: plan.appIds,
-      invitees: [],
+      invitees: joiners.map(s => s.address),
       title: "",
       description: "",
       imageURI: "",

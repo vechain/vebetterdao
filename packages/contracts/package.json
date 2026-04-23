@@ -1,6 +1,6 @@
 {
   "name": "@vechain/vebetterdao-contracts",
-  "version": "8.5.0",
+  "version": "8.6.0",
   "main": "dist/cjs/contracts/index.js",
   "module": "dist/esm/contracts/index.js",
   "types": "dist/esm/contracts/index.d.ts",
@@ -136,7 +136,7 @@
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-ignore-warnings": "^0.2.11",
-    "inquirer": "^13.4.2",
+    "inquirer": "^12.1.0",
     "mime-types": "^2.1.35",
     "nyc": "^17.1.0",
     "solidity-coverage": "^0.8.11",

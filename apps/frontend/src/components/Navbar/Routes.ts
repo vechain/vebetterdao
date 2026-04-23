@@ -66,8 +66,8 @@ export const Routes: Route[] = [
     ],
   },
   {
-    name: "Quests",
-    onClick: "/challenges",
+    name: "B3MO Quests",
+    onClick: "/b3mo-quests",
     isVisible: true,
     icon: LuTrophy,
   },

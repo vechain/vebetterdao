@@ -62,6 +62,11 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     $.maxParticipants = data.maxParticipants;
     _setMinBetAmount(data.minBetAmount);
 
+    // Emit updates so event-driven indexers can capture initial settings without extra contract calls.
+    emit MaxChallengeDurationUpdated(0, data.maxChallengeDuration);
+    emit MaxSelectedAppsUpdated(0, data.maxSelectedApps);
+    emit MaxParticipantsUpdated(0, data.maxParticipants);
+
     _initializeAddresses(
       data.b3trAddress,
       data.veBetterPassportAddress,
@@ -122,7 +127,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
       challengeId: challengeId,
       kind: challenge.kind,
       visibility: challenge.visibility,
-      thresholdMode: challenge.thresholdMode,
+      challengeType: challenge.challengeType,
       status: ChallengeTypes.ChallengeStatus(ChallengeCoreLogic.getComputedStatus(challengeId)),
       settlementMode: challenge.settlementMode,
       creator: challenge.creator,
@@ -131,15 +136,18 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
       endRound: challenge.endRound,
       duration: duration,
       threshold: challenge.threshold,
+      numWinners: challenge.numWinners,
+      winnersClaimed: challenge.winners.length,
+      prizePerWinner: challenge.prizePerWinner,
       allApps: challenge.allApps,
       totalPrize: challenge.totalPrize,
       participantCount: challenge.participants.length,
       invitedCount: challenge.invited.length,
       declinedCount: challenge.declined.length,
       selectedAppsCount: challenge.appIds.length,
+      winnersCount: challenge.winners.length,
       bestScore: challenge.bestScore,
       bestCount: challenge.bestCount,
-      qualifiedCount: challenge.qualifiedCount,
       payoutsClaimed: challenge.payoutsClaimed,
       title: challenge.title,
       description: challenge.description,
@@ -182,6 +190,13 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
   }
 
   /// @inheritdoc IChallenges
+  function getChallengeWinners(uint256 challengeId) external view returns (address[] memory) {
+    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
+    _ensureChallengeExists(challengeId, $.challengeCount);
+    return $.challenges[challengeId].winners;
+  }
+
+  /// @inheritdoc IChallenges
   function getParticipantStatus(
     uint256 challengeId,
     address account
@@ -196,6 +211,13 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
     ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
     _ensureChallengeExists(challengeId, $.challengeCount);
     return $.invitationEligible[challengeId][account];
+  }
+
+  /// @inheritdoc IChallenges
+  function isSplitWinWinner(uint256 challengeId, address account) external view returns (bool) {
+    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
+    _ensureChallengeExists(challengeId, $.challengeCount);
+    return $.isSplitWinWinner[challengeId][account];
   }
 
   /// @inheritdoc IChallenges
@@ -239,13 +261,23 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
   }
 
   /// @inheritdoc IChallenges
-  function finalizeChallenge(uint256 challengeId) external nonReentrant {
-    ChallengeSettlementLogic.finalizeChallenge(challengeId);
+  function completeChallenge(uint256 challengeId) external nonReentrant {
+    ChallengeSettlementLogic.completeChallenge(challengeId);
   }
 
   /// @inheritdoc IChallenges
   function claimChallengePayout(uint256 challengeId) external nonReentrant returns (uint256) {
     return ChallengeSettlementLogic.claimChallengePayout(challengeId);
+  }
+
+  /// @inheritdoc IChallenges
+  function claimSplitWinPrize(uint256 challengeId) external nonReentrant returns (uint256) {
+    return ChallengeSettlementLogic.claimSplitWinPrize(challengeId);
+  }
+
+  /// @inheritdoc IChallenges
+  function claimCreatorSplitWinRefund(uint256 challengeId) external nonReentrant returns (uint256) {
+    return ChallengeSettlementLogic.claimCreatorSplitWinRefund(challengeId);
   }
 
   /// @inheritdoc IChallenges
