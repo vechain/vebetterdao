@@ -1,11 +1,11 @@
 ---
-name: challenges
-description: Complete domain knowledge for B3TR Challenges (branded "Quests" in UI) on VeBetterDAO. Covers the on-chain contract, frontend datasource architecture, event-based data flow, UI structure (Current/History tabs), section hooks, resolveChallengeDetail logic, claim/refund flows, and wei/ether formatting boundaries. Use when working on anything under apps/frontend/src/app/challenges/, apps/frontend/src/api/challenges/, or packages/contracts/contracts/B3TRChallenges* / challenges/** / interfaces/IChallenges.sol. Triggers on challenge, quest, quests page, B3TRChallenges, SplitWin, MaxActions, challenge invite, claim prize, claim refund, challenge datasource, challenge section, challenge carousel, left challenge, declined challenge.
+name: b3mo-quests
+description: Complete domain knowledge for B3TR Challenges (branded "Quests" in UI, route `/b3mo-quests`) on VeBetterDAO. Covers the on-chain contract, frontend datasource architecture, event-based data flow, UI structure (Current/History tabs), section hooks, resolveChallengeDetail logic, claim/refund flows, and wei/ether formatting boundaries. Use when working on anything under apps/frontend/src/app/b3mo-quests/, apps/frontend/src/api/challenges/, or packages/contracts/contracts/B3TRChallenges* / challenges/** / interfaces/IChallenges.sol. Triggers on challenge, quest, quests page, b3mo-quests, B3TRChallenges, SplitWin, MaxActions, challenge invite, claim prize, claim refund, challenge datasource, challenge section, challenge carousel, left challenge, declined challenge.
 ---
 
 # B3TR Challenges (Quests)
 
-Peer-to-peer or sponsored competitions where users complete X2Earn app actions to win B3TR prizes. Branded as "Quests" in the UI, referred to as "challenges" in code.
+Peer-to-peer or sponsored competitions where users complete X2Earn app actions to win B3TR prizes. Branded as "Quests" in the UI (route `/b3mo-quests`), referred to as "challenges" in code.
 
 ## Contract & Config
 
@@ -130,14 +130,14 @@ Pure function from raw state → per-viewer `canX` booleans. Key rules:
 
 ## UI Structure
 
-[ChallengesPageContent](apps/frontend/src/app/challenges/components/ChallengesPageContent.tsx) is a 2-tab shell:
+[ChallengesPageContent](apps/frontend/src/app/b3mo-quests/components/ChallengesPageContent.tsx) is a 2-tab shell:
 
-- **Current** ([CurrentTab.tsx](apps/frontend/src/app/challenges/components/CurrentTab.tsx)): 4 `SectionCarousel`s (Needed Action, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`).
-- **History** ([HistoryTab.tsx](apps/frontend/src/app/challenges/components/HistoryTab.tsx)): `ChallengesGrid` infinite scroll, items deduped by `challengeId`. **No filters** (sections already segment meaningfully; filters added noise).
+- **Current** ([CurrentTab.tsx](apps/frontend/src/app/b3mo-quests/components/CurrentTab.tsx)): 4 `SectionCarousel`s (Needed Action, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`).
+- **History** ([HistoryTab.tsx](apps/frontend/src/app/b3mo-quests/components/HistoryTab.tsx)): `ChallengesGrid` infinite scroll, items deduped by `challengeId`. **No filters** (sections already segment meaningfully; filters added noise).
 
 `SectionCarousel` uses Swiper with `onReachEnd` → auto `fetchNextPage`, skeleton slides while `isFetchingNextPage`. `ChallengesGrid` uses an IntersectionObserver sentinel + skeleton grid cards.
 
-`ChallengeCard` action buttons come from `canX` flags; detail page uses the same flags (`ChallengeActionsRow`, modals under [`[challengeId]/components/`](apps/frontend/src/app/challenges/[challengeId]/components/)).
+`ChallengeCard` action buttons come from `canX` flags; detail page uses the same flags (`ChallengeActionsRow`, modals under [`[challengeId]/components/`](apps/frontend/src/app/b3mo-quests/[challengeId]/components/)).
 
 ## Section Hooks ([useChallengeSections.ts](apps/frontend/src/api/challenges/useChallengeSections.ts))
 
@@ -160,9 +160,9 @@ Builds multi-clause txs (approve+action for stake joins, leave+decline for invit
 Frontend:
 - Transport (indexer): [api/indexer/challenges/](apps/frontend/src/api/indexer/challenges/) — `fetchWalletChallenges`, `fetchPublicChallenges`, hand-typed response types (swap for schema-derived once `yarn generate:schema` picks up the new endpoints)
 - Orchestration + domain: [api/challenges/](apps/frontend/src/api/challenges/) — `useChallengeSections.ts`, `useChallengeDetail.ts`, `useChallengeActions.ts`, `resolveChallengeDetail.ts`, `types.ts`, `buildChallengeView.ts`, `buildChallengeDetail.ts`, `claimState.ts`, `fetchChallengeEvents.ts`, `fetchMaxParticipants.ts`
-- Hub UI: [app/challenges/components/](apps/frontend/src/app/challenges/components/) (ChallengesPageContent, CurrentTab, HistoryTab, SectionCarousel, ChallengeCard, ChallengesGrid, ChallengeFilters, ChallengeStepsCard, CreateChallengeModal/, CompactSkeleton)
-- Detail UI: [app/challenges/[challengeId]/components/](apps/frontend/src/app/challenges/[challengeId]/components/)
-- Shared UI: [app/challenges/shared/](apps/frontend/src/app/challenges/shared/)
+- Hub UI: [app/b3mo-quests/components/](apps/frontend/src/app/b3mo-quests/components/) (ChallengesPageContent, CurrentTab, HistoryTab, SectionCarousel, ChallengeCard, ChallengesGrid, ChallengeFilters, ChallengeStepsCard, CreateChallengeModal/, CompactSkeleton)
+- Detail UI: [app/b3mo-quests/[challengeId]/components/](apps/frontend/src/app/b3mo-quests/[challengeId]/components/)
+- Shared UI: [app/b3mo-quests/shared/](apps/frontend/src/app/b3mo-quests/shared/)
 - Hooks: [hooks/useChallengesDeployBlock.ts](apps/frontend/src/hooks/useChallengesDeployBlock.ts) (returns `0`)
 
 Contracts:
@@ -182,4 +182,4 @@ Contracts:
 - Translation keys for user-facing text; add via the `translate` skill across all 17 languages
 - Status labels: `challengeStatusLabel(status)` in types.ts; don't format manually
 - `humanNumber()` / `getCompactFormatter()` from `@repo/utils/FormattingUtils` for B3TR displays (ether strings in, formatted string out)
-- i18n label "Quests" replaces "Challenges" in all user-facing copy; code still uses "challenge"
+- i18n label "Quests" replaces "Challenges" in all user-facing copy; code still uses "challenge"; route is `/b3mo-quests`
