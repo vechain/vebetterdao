@@ -29,10 +29,9 @@ const ChallengeVisibility = {
   Private: 1,
 } as const
 
-const ThresholdMode = {
-  None: 0,
-  SplitAboveThreshold: 1,
-  TopAboveThreshold: 2,
+const ChallengeType = {
+  MaxActions: 0,
+  SplitWin: 1,
 } as const
 
 const ParticipantStatus = {
@@ -45,7 +44,7 @@ const ParticipantStatus = {
 const ChallengeStatus = {
   Pending: 0,
   Active: 1,
-  Finalized: 2,
+  Completed: 2,
   Cancelled: 3,
   Invalid: 4,
 } as const
@@ -53,11 +52,14 @@ const ChallengeStatus = {
 const SettlementMode = {
   None: 0,
   TopWinners: 1,
-  QualifiedSplit: 2,
-  CreatorRefund: 3,
+  CreatorRefund: 2,
+  SplitWinCompleted: 3,
 } as const
 
-async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: number } = {}) {
+async function deployFixture({
+  maxParticipants = 100,
+  minBetAmount = MIN_BET_AMOUNT,
+}: { maxParticipants?: number; minBetAmount?: bigint } = {}) {
   const [admin, alice, bob, carol] = await ethers.getSigners()
 
   const b3tr = (await (
@@ -92,7 +94,7 @@ async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: numb
         maxChallengeDuration: 4,
         maxSelectedApps: 5,
         maxParticipants,
-        minBetAmount: MIN_BET_AMOUNT,
+        minBetAmount,
       },
       {
         admin: admin.address,
@@ -115,18 +117,23 @@ async function deployFixture({ maxParticipants = 100 }: { maxParticipants?: numb
   return { admin, alice, bob, carol, b3tr, roundGovernor, passport, x2EarnApps, challenges }
 }
 
+/**
+ * Default helper: Stake + Private + MaxActions (the only valid Bet combination in the new matrix).
+ * Pass `invitees` to allow others to join, or override fields explicitly for sponsored challenges.
+ */
 async function createChallenge(
   challenges: B3TRChallenges,
   overrides: Partial<Parameters<B3TRChallenges["createChallenge"]>[0]> = {},
 ) {
   return challenges.createChallenge({
     kind: ChallengeKind.Stake,
-    visibility: ChallengeVisibility.Public,
-    thresholdMode: ThresholdMode.None,
+    visibility: ChallengeVisibility.Private,
+    challengeType: ChallengeType.MaxActions,
     stakeAmount: STAKE_AMOUNT,
     startRound: 2,
     endRound: 3,
     threshold: 0,
+    numWinners: 0,
     appIds: [APP_1],
     invitees: [],
     title: "",
@@ -138,11 +145,13 @@ async function createChallenge(
 }
 
 describe("B3TRChallenges - @shard9a", function () {
-  it("creates a challenge and auto-adds the creator", async function () {
+  // ──── Creation: matrix + basic fields ────
+
+  it("creates a Bet (Stake/Private/MaxActions) challenge and auto-adds the creator", async function () {
     const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    const tx = await createChallenge(challenges)
+    const tx = await createChallenge(challenges, { invitees: [] })
     const receipt = await tx.wait()
     const challengeCreated = receipt?.logs
       .map(log => {
@@ -159,41 +168,246 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(challengeCreated?.args.creator).to.equal(admin.address)
     expect(challengeCreated?.args.endRound).to.equal(3n)
     expect(challengeCreated?.args.kind).to.equal(ChallengeKind.Stake)
-    expect(challengeCreated?.args.visibility).to.equal(ChallengeVisibility.Public)
-    expect(challengeCreated?.args.thresholdMode).to.equal(ThresholdMode.None)
+    expect(challengeCreated?.args.visibility).to.equal(ChallengeVisibility.Private)
+    expect(challengeCreated?.args.challengeType).to.equal(ChallengeType.MaxActions)
     expect(challengeCreated?.args.stakeAmount).to.equal(STAKE_AMOUNT)
     expect(challengeCreated?.args.startRound).to.equal(2n)
     expect(challengeCreated?.args.threshold).to.equal(0n)
     expect(challengeCreated?.args.allApps).to.equal(false)
     expect(challengeCreated?.args.selectedApps).to.deep.equal([APP_1])
-    expect(challengeCreated?.args.title).to.equal("")
-    expect(challengeCreated?.args.description).to.equal("")
-    expect(challengeCreated?.args.imageURI).to.equal("")
-    expect(challengeCreated?.args.metadataURI).to.equal("")
 
     const challenge = await challenges.getChallenge(1)
-
     expect(challenge.creator).to.equal(admin.address)
     expect(challenge.participantCount).to.equal(1n)
     expect(challenge.totalPrize).to.equal(STAKE_AMOUNT)
+    expect(challenge.numWinners).to.equal(0n)
+    expect(challenge.prizePerWinner).to.equal(0n)
     expect(await challenges.getParticipantStatus(1, admin.address)).to.equal(ParticipantStatus.Joined)
     expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(STAKE_AMOUNT)
   })
 
-  it("stores title and defaults the other metadata fields to empty strings", async function () {
+  it("creates a Sponsored Public Split Win challenge with locked prizePerWinner", async function () {
+    const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    const sponsorAmount = ethers.parseEther("300")
+    const tx = await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: sponsorAmount,
+      threshold: 5,
+      numWinners: 3,
+      appIds: [],
+    })
+    const receipt = await tx.wait()
+    const splitConfigured = receipt?.logs
+      .map(log => {
+        try {
+          return ChallengeCoreLogic__factory.createInterface().parseLog(log)
+        } catch {
+          return null
+        }
+      })
+      .find(log => log?.name === "SplitWinConfigured")
+
+    expect(splitConfigured?.args.numWinners).to.equal(3n)
+    expect(splitConfigured?.args.prizePerWinner).to.equal(ethers.parseEther("100"))
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.challengeType).to.equal(ChallengeType.SplitWin)
+    expect(challenge.numWinners).to.equal(3n)
+    expect(challenge.threshold).to.equal(5n)
+    expect(challenge.prizePerWinner).to.equal(ethers.parseEther("100"))
+    expect(challenge.winnersClaimed).to.equal(0n)
+    expect(challenge.participantCount).to.equal(0n)
+    expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(sponsorAmount)
+  })
+
+  it("creates a Sponsored Private Max Actions challenge with no auto-creator", async function () {
+    const { roundGovernor, challenges, alice } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address],
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.participantCount).to.equal(0n)
+    expect(challenge.invitedCount).to.equal(1n)
+  })
+
+  // ──── Matrix rejection cases ────
+
+  it("rejects Bet (Stake) Public", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Stake,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.MaxActions,
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidChallengeTypeForCombo")
+  })
+
+  it("rejects Bet (Stake) with SplitWin", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Stake,
+        visibility: ChallengeVisibility.Private,
+        challengeType: ChallengeType.SplitWin,
+        threshold: 5,
+        numWinners: 3,
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidChallengeTypeForCombo")
+  })
+
+  it("rejects Sponsored Public with MaxActions (only SplitWin allowed)", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.MaxActions,
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidChallengeTypeForCombo")
+  })
+
+  it("rejects MaxActions with non-zero threshold or numWinners", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(createChallenge(challenges, { threshold: 5 })).to.be.revertedWithCustomError(
+      challenges,
+      "InvalidTypeConfiguration",
+    )
+    await expect(createChallenge(challenges, { numWinners: 2 })).to.be.revertedWithCustomError(
+      challenges,
+      "InvalidTypeConfiguration",
+    )
+  })
+
+  it("rejects SplitWin with zero threshold or zero numWinners", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.SplitWin,
+        threshold: 0,
+        numWinners: 3,
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidTypeConfiguration")
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.SplitWin,
+        threshold: 5,
+        numWinners: 0,
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InvalidTypeConfiguration")
+  })
+
+  it("rejects SplitWin when stakeAmount < numWinners * 1 B3TR (InsufficientPrizePerWinner)", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.SplitWin,
+        stakeAmount: ethers.parseEther("100"),
+        threshold: 5,
+        numWinners: 101,
+        appIds: [],
+      }),
+    ).to.be.revertedWithCustomError(challenges, "InsufficientPrizePerWinner")
+
+    const { roundGovernor: rg2, challenges: ch2 } = await deployFixture({ minBetAmount: ethers.parseEther("1") })
+    await rg2.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(ch2, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.SplitWin,
+        stakeAmount: ethers.parseEther("10"),
+        threshold: 5,
+        numWinners: 11,
+        appIds: [],
+      }),
+    ).to.be.revertedWithCustomError(ch2, "InsufficientPrizePerWinner")
+  })
+
+  it("accepts SplitWin when stakeAmount == numWinners * 1 B3TR (exactly 1 B3TR per winner)", async function () {
+    const { roundGovernor, challenges } = await deployFixture({ minBetAmount: ethers.parseEther("1") })
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("5"),
+      threshold: 1,
+      numWinners: 5,
+      appIds: [],
+    })
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.prizePerWinner).to.equal(ethers.parseEther("1"))
+  })
+
+  it("rejects SplitWin when threshold > 1_000_000 (ThresholdTooHigh)", async function () {
+    const { roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await expect(
+      createChallenge(challenges, {
+        kind: ChallengeKind.Sponsored,
+        visibility: ChallengeVisibility.Public,
+        challengeType: ChallengeType.SplitWin,
+        stakeAmount: ethers.parseEther("100"),
+        threshold: 1_000_001,
+        numWinners: 3,
+        appIds: [],
+      }),
+    ).to.be.revertedWithCustomError(challenges, "ThresholdTooHigh")
+  })
+
+  it("accepts SplitWin when threshold == 1_000_000", async function () {
     const { roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, {
-      title: "Spring Sprint",
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1_000_000,
+      numWinners: 3,
+      appIds: [],
     })
 
     const challenge = await challenges.getChallenge(1)
-    expect(challenge.title).to.equal("Spring Sprint")
-    expect(challenge.description).to.equal("")
-    expect(challenge.imageURI).to.equal("")
-    expect(challenge.metadataURI).to.equal("")
+    expect(challenge.threshold).to.equal(1_000_000n)
   })
+
+  // ──── Metadata ────
 
   it("stores metadata fields at their maximum allowed lengths", async function () {
     const { roundGovernor, challenges } = await deployFixture()
@@ -234,13 +448,17 @@ describe("B3TRChallenges - @shard9a", function () {
       .withArgs(METADATA_URI_MAX_BYTES + 1, METADATA_URI_MAX_BYTES)
   })
 
-  it("rejects joining a sponsored challenge after reaching the participant cap", async function () {
+  // ──── Participant cap (MaxActions only) ────
+
+  it("rejects joining a Sponsored Private Max Actions challenge after the participant cap", async function () {
     const { alice, bob, carol, roundGovernor, challenges } = await deployFixture({ maxParticipants: 2 })
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address, bob.address, carol.address],
     })
 
     await challenges.connect(alice).joinChallenge(1)
@@ -251,11 +469,11 @@ describe("B3TRChallenges - @shard9a", function () {
       .withArgs(3, 2)
   })
 
-  it("counts the creator toward the participant cap", async function () {
+  it("counts the creator toward the participant cap on Bet challenges", async function () {
     const { alice, bob, carol, roundGovernor, challenges } = await deployFixture({ maxParticipants: 3 })
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address, bob.address, carol.address] })
     await challenges.connect(alice).joinChallenge(1)
     await challenges.connect(bob).joinChallenge(1)
 
@@ -263,6 +481,28 @@ describe("B3TRChallenges - @shard9a", function () {
       .to.be.revertedWithCustomError(challenges, "MaxParticipantsExceeded")
       .withArgs(4, 3)
   })
+
+  it("does NOT enforce the participant cap on Split Win challenges", async function () {
+    const { alice, bob, carol, roundGovernor, challenges } = await deployFixture({ maxParticipants: 1 })
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("300"),
+      threshold: 5,
+      numWinners: 3,
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+    await challenges.connect(carol).joinChallenge(1)
+
+    expect((await challenges.getChallenge(1)).participantCount).to.equal(3n)
+  })
+
+  // ──── Round / app validations ────
 
   it("rejects challenges whose start round is not after the current round", async function () {
     const { roundGovernor, challenges } = await deployFixture()
@@ -286,9 +526,7 @@ describe("B3TRChallenges - @shard9a", function () {
     const { roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges, {
-      appIds: [APP_1, APP_2, APP_3, APP_4, APP_5],
-    })
+    await createChallenge(challenges, { appIds: [APP_1, APP_2, APP_3, APP_4, APP_5] })
 
     const challenge = await challenges.getChallenge(1)
     expect(challenge.allApps).to.equal(false)
@@ -299,11 +537,7 @@ describe("B3TRChallenges - @shard9a", function () {
     const { roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await expect(
-      createChallenge(challenges, {
-        appIds: [APP_1, APP_2, APP_3, APP_4, APP_5, APP_6],
-      }),
-    )
+    await expect(createChallenge(challenges, { appIds: [APP_1, APP_2, APP_3, APP_4, APP_5, APP_6] }))
       .to.be.revertedWithCustomError(challenges, "MaxSelectedAppsExceeded")
       .withArgs(6, 5)
   })
@@ -319,6 +553,8 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(challenge.selectedAppsCount).to.equal(0n)
   })
 
+  // ──── Invitations / lifecycle ────
+
   it("lets an invited user decline and later join a private sponsored challenge", async function () {
     const { alice, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
@@ -326,7 +562,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Private,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.MaxActions,
       invitees: [alice.address],
       appIds: [],
     })
@@ -341,7 +577,7 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await challenges.getParticipantStatus(1, alice.address)).to.equal(ParticipantStatus.Joined)
   })
 
-  it("marks an unjoined challenge invalid and refunds the creator", async function () {
+  it("marks an unjoined Bet challenge invalid and refunds the creator", async function () {
     const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
@@ -356,11 +592,11 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE)
   })
 
-  it("cancels a challenge and refunds creator and participant", async function () {
+  it("cancels a Bet challenge and refunds creator and participant", async function () {
     const { admin, alice, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
     await challenges.cancelChallenge(1)
 
@@ -371,11 +607,17 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE)
   })
 
-  it("finalizes and splits the stake pot between tied winners", async function () {
+  // ──── Max Actions completion + payout ────
+
+  it("completes and splits the Bet pot between tied winners", async function () {
     const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges, { appIds: [APP_1, APP_2], endRound: 3 })
+    await createChallenge(challenges, {
+      appIds: [APP_1, APP_2],
+      endRound: 3,
+      invitees: [alice.address, bob.address],
+    })
     await challenges.connect(alice).joinChallenge(1)
     await challenges.connect(bob).joinChallenge(1)
 
@@ -387,10 +629,10 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await roundGovernor.setCurrentRoundId(4)
 
-    await challenges.finalizeChallenge(1)
+    await challenges.completeChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
-    expect(challenge.status).to.equal(ChallengeStatus.Finalized)
+    expect(challenge.status).to.equal(ChallengeStatus.Completed)
     expect(challenge.bestScore).to.equal(5n)
     expect(challenge.bestCount).to.equal(2n)
     expect(challenge.settlementMode).to.equal(SettlementMode.TopWinners)
@@ -404,187 +646,348 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await b3tr.balanceOf(bob.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("50"))
   })
 
-  it("refunds the sponsor when nobody reaches the threshold in all-apps mode", async function () {
-    const { admin, b3tr, alice, bob, roundGovernor, passport, challenges } = await deployFixture()
+  it("refunds the sponsor when nobody participates in a Sponsored Private Max Actions challenge", async function () {
+    const { admin, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       appIds: [],
-      threshold: 10,
       endRound: 3,
     })
 
-    await challenges.connect(alice).joinChallenge(1)
-    await challenges.connect(bob).joinChallenge(1)
-
-    await passport.setUserRoundActionCount(alice.address, 2, 3)
-    await passport.setUserRoundActionCount(alice.address, 3, 2)
-    await passport.setUserRoundActionCount(bob.address, 2, 4)
-    await passport.setUserRoundActionCount(bob.address, 3, 1)
-
     await roundGovernor.setCurrentRoundId(4)
-    await challenges.finalizeChallenge(1)
+    await challenges.syncChallenge(1)
+    expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Invalid)
 
-    const challenge = await challenges.getChallenge(1)
-    expect(challenge.settlementMode).to.equal(SettlementMode.CreatorRefund)
-
-    await challenges.claimChallengePayout(1)
+    await challenges.claimChallengeRefund(1)
     expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE)
   })
 
-  it("awards the sponsored prize to the best threshold-qualified participant on selected apps", async function () {
+  // ──── Split Win lifecycle ────
+
+  it("Split Win: joiners can claim a slot once they reach the threshold; first-come first-served", async function () {
     const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
+    const sponsorAmount = ethers.parseEther("300")
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.TopAboveThreshold,
-      appIds: [APP_1],
-      threshold: 5,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: sponsorAmount,
+      threshold: 3,
+      numWinners: 2,
+      appIds: [],
       endRound: 3,
     })
 
     await challenges.connect(alice).joinChallenge(1)
     await challenges.connect(bob).joinChallenge(1)
 
-    await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 3)
-    await passport.setUserRoundActionCountApp(alice.address, 3, APP_1, 3)
-    await passport.setUserRoundActionCountApp(alice.address, 2, APP_2, 100)
-    await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 4)
-    await passport.setUserRoundActionCountApp(bob.address, 3, APP_1, 4)
+    await roundGovernor.setCurrentRoundId(2)
+    await challenges.syncChallenge(1)
+    expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Active)
 
-    await roundGovernor.setCurrentRoundId(4)
-    await challenges.finalizeChallenge(1)
-
-    const challenge = await challenges.getChallenge(1)
-    expect(challenge.bestScore).to.equal(8n)
-    expect(challenge.bestCount).to.equal(1n)
-
-    await expect(challenges.connect(alice).claimChallengePayout(1)).to.be.revertedWithCustomError(
+    // Below threshold → reverts
+    await passport.setUserRoundActionCount(alice.address, 2, 2)
+    await expect(challenges.connect(alice).claimSplitWinPrize(1)).to.be.revertedWithCustomError(
       challenges,
-      "NothingToClaim",
+      "NotEligibleForSplitWin",
     )
 
-    await challenges.connect(bob).claimChallengePayout(1)
+    // Reaches threshold → claims first slot
+    await passport.setUserRoundActionCount(alice.address, 2, 3)
+    await challenges.connect(alice).claimSplitWinPrize(1)
+    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("150"))
+    expect((await challenges.getChallenge(1)).winnersClaimed).to.equal(1n)
+    expect(await challenges.isSplitWinWinner(1, alice.address)).to.equal(true)
 
-    expect(await b3tr.balanceOf(bob.address)).to.equal(INITIAL_BALANCE + STAKE_AMOUNT)
-    expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE - STAKE_AMOUNT)
+    // Bob claims second slot — flips status to Completed
+    await passport.setUserRoundActionCount(bob.address, 2, 4)
+    await challenges.connect(bob).claimSplitWinPrize(1)
+    expect(await b3tr.balanceOf(bob.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("150"))
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.winnersClaimed).to.equal(2n)
+    expect(challenge.status).to.equal(ChallengeStatus.Completed)
+    expect(challenge.settlementMode).to.equal(SettlementMode.SplitWinCompleted)
+    expect(await challenges.getChallengeWinners(1)).to.deep.equal([alice.address, bob.address])
+
+    // Creator pool drained, contract holds nothing
+    expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(0n)
+    expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE - sponsorAmount)
   })
 
-  it("splits the sponsored prize among all participants who reach the threshold", async function () {
-    const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+  it("Split Win: rejects claim once all slots are exhausted", async function () {
+    const { alice, bob, carol, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1,
+      numWinners: 1,
       appIds: [],
-      threshold: 5,
       endRound: 3,
     })
 
     await challenges.connect(alice).joinChallenge(1)
     await challenges.connect(bob).joinChallenge(1)
+    await challenges.connect(carol).joinChallenge(1)
 
-    // Both alice and bob reach threshold (>= 5)
-    await passport.setUserRoundActionCount(alice.address, 2, 3)
-    await passport.setUserRoundActionCount(alice.address, 3, 4) // total: 7
-    await passport.setUserRoundActionCount(bob.address, 2, 2)
-    await passport.setUserRoundActionCount(bob.address, 3, 3) // total: 5
+    await roundGovernor.setCurrentRoundId(2)
+    await passport.setUserRoundActionCount(alice.address, 2, 1)
+    await passport.setUserRoundActionCount(bob.address, 2, 1)
 
-    await roundGovernor.setCurrentRoundId(4)
-    await challenges.finalizeChallenge(1)
-
-    const challenge = await challenges.getChallenge(1)
-    expect(challenge.settlementMode).to.equal(SettlementMode.QualifiedSplit)
-    expect(challenge.qualifiedCount).to.equal(2n)
-
-    // Creator cannot claim
-    await expect(challenges.claimChallengePayout(1)).to.be.revertedWithCustomError(challenges, "NothingToClaim")
-
-    await challenges.connect(alice).claimChallengePayout(1)
-    await challenges.connect(bob).claimChallengePayout(1)
-
-    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("50"))
-    expect(await b3tr.balanceOf(bob.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("50"))
-    expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE - STAKE_AMOUNT)
+    await challenges.connect(alice).claimSplitWinPrize(1)
+    await expect(challenges.connect(bob).claimSplitWinPrize(1)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengeInvalidStatus",
+    )
   })
 
-  it("only pays qualified participants when some fall below the threshold", async function () {
-    const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+  it("Split Win: same winner cannot claim twice", async function () {
+    const { alice, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.SplitAboveThreshold,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("200"),
+      threshold: 1,
+      numWinners: 2,
       appIds: [],
-      threshold: 5,
+      endRound: 3,
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+    await roundGovernor.setCurrentRoundId(2)
+    await passport.setUserRoundActionCount(alice.address, 2, 1)
+
+    await challenges.connect(alice).claimSplitWinPrize(1)
+    await expect(challenges.connect(alice).claimSplitWinPrize(1)).to.be.revertedWithCustomError(
+      challenges,
+      "AlreadyClaimed",
+    )
+  })
+
+  it("Split Win: non-participant cannot claim", async function () {
+    const { alice, roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1,
+      numWinners: 1,
+      appIds: [],
+      endRound: 3,
+    })
+    await roundGovernor.setCurrentRoundId(2)
+    await challenges.syncChallenge(1)
+    expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Invalid)
+
+    await expect(challenges.connect(alice).claimSplitWinPrize(1)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengeInvalidStatus",
+    )
+  })
+
+  it("Split Win: rejects claim after endRound", async function () {
+    const { alice, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1,
+      numWinners: 1,
+      appIds: [],
+      endRound: 2,
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+    await passport.setUserRoundActionCount(alice.address, 2, 1)
+
+    await roundGovernor.setCurrentRoundId(3)
+    await expect(challenges.connect(alice).claimSplitWinPrize(1)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengeEnded",
+    )
+  })
+
+  it("Split Win: completeChallenge rejects with SplitWinCannotComplete", async function () {
+    const { alice, roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1,
+      numWinners: 1,
+      appIds: [],
+      endRound: 2,
+    })
+    await challenges.connect(alice).joinChallenge(1)
+    await roundGovernor.setCurrentRoundId(3)
+
+    await expect(challenges.completeChallenge(1)).to.be.revertedWithCustomError(challenges, "SplitWinCannotComplete")
+  })
+
+  it("Split Win: creator can refund unclaimed slots after endRound (incl. integer remainder)", async function () {
+    const { admin, alice, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    // 100 / 3 = 33 per winner, 1 wei remainder
+    const sponsorAmount = ethers.parseEther("100")
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: sponsorAmount,
+      threshold: 1,
+      numWinners: 3,
+      appIds: [],
+      endRound: 2,
+    })
+
+    await challenges.connect(alice).joinChallenge(1)
+    await passport.setUserRoundActionCount(alice.address, 2, 1)
+    await roundGovernor.setCurrentRoundId(2)
+    await challenges.connect(alice).claimSplitWinPrize(1)
+
+    const prizePerWinner = sponsorAmount / 3n
+    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + prizePerWinner)
+
+    // After endRound, creator reclaims 2 unclaimed slots + remainder
+    await roundGovernor.setCurrentRoundId(3)
+    await challenges.claimCreatorSplitWinRefund(1)
+
+    const refunded = sponsorAmount - prizePerWinner
+    expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE - sponsorAmount + refunded)
+    expect(await b3tr.balanceOf(await challenges.getAddress())).to.equal(0n)
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.status).to.equal(ChallengeStatus.Completed)
+    expect(challenge.settlementMode).to.equal(SettlementMode.SplitWinCompleted)
+  })
+
+  it("Split Win: creator refund rejects before endRound", async function () {
+    const { alice, roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1,
+      numWinners: 2,
+      appIds: [],
+      endRound: 3,
+    })
+    await challenges.connect(alice).joinChallenge(1)
+    await roundGovernor.setCurrentRoundId(2)
+    await challenges.syncChallenge(1)
+
+    await expect(challenges.claimCreatorSplitWinRefund(1)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengeNotEnded",
+    )
+  })
+
+  it("Split Win: creator refund rejects when all slots already claimed", async function () {
+    const { alice, bob, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("200"),
+      threshold: 1,
+      numWinners: 2,
+      appIds: [],
       endRound: 2,
     })
 
     await challenges.connect(alice).joinChallenge(1)
     await challenges.connect(bob).joinChallenge(1)
-
-    await passport.setUserRoundActionCount(alice.address, 2, 6) // qualifies
-    await passport.setUserRoundActionCount(bob.address, 2, 3) // does NOT qualify
+    await roundGovernor.setCurrentRoundId(2)
+    await passport.setUserRoundActionCount(alice.address, 2, 1)
+    await passport.setUserRoundActionCount(bob.address, 2, 1)
+    await challenges.connect(alice).claimSplitWinPrize(1)
+    await challenges.connect(bob).claimSplitWinPrize(1)
 
     await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallenge(1)
+    await expect(challenges.claimCreatorSplitWinRefund(1)).to.be.revertedWithCustomError(challenges, "NothingToRefund")
+  })
 
-    const challenge = await challenges.getChallenge(1)
-    expect(challenge.settlementMode).to.equal(SettlementMode.QualifiedSplit)
-    expect(challenge.qualifiedCount).to.equal(1n)
+  it("Split Win: only the creator can claim the refund", async function () {
+    const { alice, roundGovernor, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
 
-    await expect(challenges.connect(bob).claimChallengePayout(1)).to.be.revertedWithCustomError(
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 1,
+      numWinners: 2,
+      appIds: [],
+      endRound: 2,
+    })
+    await challenges.connect(alice).joinChallenge(1)
+    await roundGovernor.setCurrentRoundId(3)
+
+    await expect(challenges.connect(alice).claimCreatorSplitWinRefund(1)).to.be.revertedWithCustomError(
       challenges,
-      "NothingToClaim",
+      "ChallengesUnauthorizedUser",
+    )
+  })
+
+  it("Split Win: claim across multiple rounds and selected apps reads live progress", async function () {
+    const { alice, roundGovernor, passport, challenges, b3tr } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await createChallenge(challenges, {
+      kind: ChallengeKind.Sponsored,
+      visibility: ChallengeVisibility.Public,
+      challengeType: ChallengeType.SplitWin,
+      stakeAmount: ethers.parseEther("100"),
+      threshold: 4,
+      numWinners: 1,
+      appIds: [APP_1, APP_2],
+      endRound: 4,
+    })
+    await challenges.connect(alice).joinChallenge(1)
+
+    await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 1)
+    await passport.setUserRoundActionCountApp(alice.address, 3, APP_2, 1)
+
+    await roundGovernor.setCurrentRoundId(3)
+    await expect(challenges.connect(alice).claimSplitWinPrize(1)).to.be.revertedWithCustomError(
+      challenges,
+      "NotEligibleForSplitWin",
     )
 
-    await challenges.connect(alice).claimChallengePayout(1)
-    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + STAKE_AMOUNT)
-  })
+    await passport.setUserRoundActionCountApp(alice.address, 4, APP_1, 2)
+    await roundGovernor.setCurrentRoundId(4)
+    await challenges.connect(alice).claimSplitWinPrize(1)
 
-  it("rejects sponsored challenge with threshold > 0 and ThresholdMode.None", async function () {
-    const { roundGovernor, challenges } = await deployFixture()
-    await roundGovernor.setCurrentRoundId(1)
-
-    await expect(
-      createChallenge(challenges, {
-        kind: ChallengeKind.Sponsored,
-        thresholdMode: ThresholdMode.None,
-        threshold: 5,
-        appIds: [],
-      }),
-    ).to.be.revertedWithCustomError(challenges, "InvalidThresholdConfiguration")
-  })
-
-  it("rejects sponsored challenge with threshold 0 and SplitAboveThreshold mode", async function () {
-    const { roundGovernor, challenges } = await deployFixture()
-    await roundGovernor.setCurrentRoundId(1)
-
-    await expect(
-      createChallenge(challenges, {
-        kind: ChallengeKind.Sponsored,
-        thresholdMode: ThresholdMode.SplitAboveThreshold,
-        threshold: 0,
-        appIds: [],
-      }),
-    ).to.be.revertedWithCustomError(challenges, "InvalidThresholdConfiguration")
-  })
-
-  it("rejects stake challenge with a threshold", async function () {
-    const { roundGovernor, challenges } = await deployFixture()
-    await roundGovernor.setCurrentRoundId(1)
-
-    await expect(
-      createChallenge(challenges, {
-        kind: ChallengeKind.Stake,
-        thresholdMode: ThresholdMode.SplitAboveThreshold,
-        threshold: 5,
-      }),
-    ).to.be.revertedWithCustomError(challenges, "InvalidThresholdConfiguration")
+    expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE + ethers.parseEther("100"))
   })
 
   // ──── View functions ────
@@ -610,7 +1013,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Private,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.MaxActions,
       invitees: [alice.address, bob.address],
       appIds: [APP_1, APP_2],
     })
@@ -634,7 +1037,7 @@ describe("B3TRChallenges - @shard9a", function () {
     const { admin, alice, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges, { appIds: [APP_1], endRound: 2 })
+    await createChallenge(challenges, { appIds: [APP_1], endRound: 2, invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
 
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 7)
@@ -657,11 +1060,16 @@ describe("B3TRChallenges - @shard9a", function () {
       challenges,
       "ChallengeDoesNotExist",
     )
+    await expect(challenges.getChallengeWinners(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.getParticipantStatus(0, admin.address)).to.be.revertedWithCustomError(
       challenges,
       "ChallengeDoesNotExist",
     )
     await expect(challenges.isInvitationEligible(0, admin.address)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengeDoesNotExist",
+    )
+    await expect(challenges.isSplitWinWinner(99, admin.address)).to.be.revertedWithCustomError(
       challenges,
       "ChallengeDoesNotExist",
     )
@@ -671,7 +1079,7 @@ describe("B3TRChallenges - @shard9a", function () {
   // ──── Admin setters ────
 
   it("updates address setters and emits events", async function () {
-    const { admin, alice, challenges } = await deployFixture()
+    const { alice, challenges } = await deployFixture()
 
     await expect(challenges.setB3TRAddress(alice.address)).to.emit(challenges, "B3TRAddressUpdated")
     await expect(challenges.setVeBetterPassportAddress(alice.address)).to.emit(
@@ -789,16 +1197,6 @@ describe("B3TRChallenges - @shard9a", function () {
       .withArgs(belowMinimumBetAmount, MIN_BET_AMOUNT)
   })
 
-  it("enforces the updated minimum bet amount", async function () {
-    const { roundGovernor, challenges } = await deployFixture()
-    await roundGovernor.setCurrentRoundId(1)
-    await challenges.setMinBetAmount(ethers.parseEther("150"))
-
-    await expect(createChallenge(challenges))
-      .to.be.revertedWithCustomError(challenges, "BetAmountBelowMinimum")
-      .withArgs(STAKE_AMOUNT, ethers.parseEther("150"))
-  })
-
   it("auto-calculates startRound when set to 0", async function () {
     const { roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(5)
@@ -838,12 +1236,14 @@ describe("B3TRChallenges - @shard9a", function () {
   })
 
   it("does not auto-add creator for sponsored challenges", async function () {
-    const { roundGovernor, challenges } = await deployFixture()
+    const { roundGovernor, challenges, alice } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address],
     })
 
     const challenge = await challenges.getChallenge(1)
@@ -851,15 +1251,17 @@ describe("B3TRChallenges - @shard9a", function () {
   })
 
   it("rejects sponsored challenge below minimum prize amount", async function () {
-    const { roundGovernor, challenges } = await deployFixture()
+    const { roundGovernor, challenges, alice } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
     const belowMinimumPrizeAmount = ethers.parseEther("99")
 
     await expect(
       createChallenge(challenges, {
         kind: ChallengeKind.Sponsored,
-        thresholdMode: ThresholdMode.None,
+        visibility: ChallengeVisibility.Private,
+        challengeType: ChallengeType.MaxActions,
         stakeAmount: belowMinimumPrizeAmount,
+        invitees: [alice.address],
       }),
     )
       .to.be.revertedWithCustomError(challenges, "BetAmountBelowMinimum")
@@ -872,7 +1274,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       invitees: [alice.address, bob.address],
     })
 
@@ -888,7 +1291,8 @@ describe("B3TRChallenges - @shard9a", function () {
     await expect(
       createChallenge(challenges, {
         kind: ChallengeKind.Sponsored,
-        thresholdMode: ThresholdMode.None,
+        visibility: ChallengeVisibility.Private,
+        challengeType: ChallengeType.MaxActions,
         invitees: [ethers.ZeroAddress],
       }),
     ).to.be.revertedWithCustomError(challenges, "ZeroAddress")
@@ -902,7 +1306,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
     })
 
     await challenges.addInvites(1, [alice.address])
@@ -917,7 +1322,8 @@ describe("B3TRChallenges - @shard9a", function () {
     await expect(
       createChallenge(challenges, {
         kind: ChallengeKind.Sponsored,
-        thresholdMode: ThresholdMode.None,
+        visibility: ChallengeVisibility.Private,
+        challengeType: ChallengeType.MaxActions,
         invitees: [alice.address, alice.address],
       }),
     )
@@ -931,7 +1337,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       invitees: [alice.address],
     })
 
@@ -946,7 +1353,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
     })
 
     await expect(challenges.connect(alice).addInvites(1, [alice.address])).to.be.revertedWithCustomError(
@@ -962,13 +1370,11 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Private,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.MaxActions,
       invitees: [alice.address],
     })
 
     await challenges.connect(alice).joinChallenge(1)
-
-    // Re-inviting creator and already-joined user should not revert
     await challenges.addInvites(1, [admin.address, alice.address])
 
     expect((await challenges.getChallenge(1)).participantCount).to.equal(1n)
@@ -982,7 +1388,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
     })
 
     await expect(challenges.joinChallenge(1)).to.be.revertedWithCustomError(challenges, "CreatorCannotJoin")
@@ -994,7 +1401,9 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address],
     })
 
     await challenges.connect(alice).joinChallenge(1)
@@ -1011,7 +1420,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Private,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.MaxActions,
     })
 
     await expect(challenges.connect(alice).joinChallenge(1)).to.be.revertedWithCustomError(challenges, "NotInvited")
@@ -1021,7 +1430,7 @@ describe("B3TRChallenges - @shard9a", function () {
     const { alice, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
 
     const challenge = await challenges.getChallenge(1)
@@ -1035,7 +1444,9 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address],
     })
 
     await roundGovernor.setCurrentRoundId(2)
@@ -1052,12 +1463,12 @@ describe("B3TRChallenges - @shard9a", function () {
     const { alice, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
 
     await challenges.connect(alice).leaveChallenge(1)
 
-    expect(await challenges.getParticipantStatus(1, alice.address)).to.equal(ParticipantStatus.None)
+    expect(await challenges.getParticipantStatus(1, alice.address)).to.equal(ParticipantStatus.Invited)
     expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE)
     expect((await challenges.getChallenge(1)).totalPrize).to.equal(STAKE_AMOUNT)
   })
@@ -1077,7 +1488,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
     })
 
     await expect(challenges.connect(alice).leaveChallenge(1)).to.be.revertedWithCustomError(
@@ -1093,7 +1505,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Private,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.MaxActions,
       invitees: [alice.address],
     })
 
@@ -1113,7 +1525,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Private,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.MaxActions,
       invitees: [admin.address],
     })
 
@@ -1126,7 +1538,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
     })
 
     await expect(challenges.connect(alice).declineChallenge(1)).to.be.revertedWithCustomError(challenges, "NotInvited")
@@ -1136,9 +1549,7 @@ describe("B3TRChallenges - @shard9a", function () {
     const { alice, b3tr, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges, {
-      invitees: [alice.address],
-    })
+    await createChallenge(challenges, { invitees: [alice.address] })
 
     await challenges.connect(alice).joinChallenge(1)
     expect(await b3tr.balanceOf(alice.address)).to.equal(INITIAL_BALANCE - STAKE_AMOUNT)
@@ -1183,7 +1594,6 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges)
     await challenges.cancelChallenge(1)
 
-    // syncing a cancelled challenge returns Cancelled without changing it
     expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Cancelled)
   })
 
@@ -1203,7 +1613,9 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address],
       endRound: 2,
     })
 
@@ -1220,7 +1632,8 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       endRound: 2,
     })
 
@@ -1229,60 +1642,60 @@ describe("B3TRChallenges - @shard9a", function () {
     expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Invalid)
   })
 
-  // ──── finalizeChallenge edge cases ────
+  // ──── completeChallenge edge cases ────
 
-  it("rejects finalize before challenge ends", async function () {
+  it("rejects complete before challenge ends", async function () {
     const { alice, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
 
-    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeNotEnded")
+    await expect(challenges.completeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeNotEnded")
   })
 
-  it("rejects finalize on cancelled challenge", async function () {
+  it("rejects complete on cancelled challenge", async function () {
     const { alice, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
     await challenges.cancelChallenge(1)
     await roundGovernor.setCurrentRoundId(4)
 
-    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeInvalidStatus")
+    await expect(challenges.completeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeInvalidStatus")
   })
 
-  it("rejects finalize on already-finalized challenge", async function () {
+  it("rejects complete on already-completed challenge", async function () {
     const { alice, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
     await roundGovernor.setCurrentRoundId(4)
 
-    await challenges.finalizeChallenge(1)
+    await challenges.completeChallenge(1)
 
-    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeAlreadyFinalized")
+    await expect(challenges.completeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeAlreadyCompleted")
   })
 
-  it("rejects finalize on invalid challenge", async function () {
+  it("rejects complete on invalid challenge", async function () {
     const { roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, { endRound: 2 })
     await roundGovernor.setCurrentRoundId(3)
 
-    await expect(challenges.finalizeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeInvalidStatus")
+    await expect(challenges.completeChallenge(1)).to.be.revertedWithCustomError(challenges, "ChallengeInvalidStatus")
   })
 
   // ──── claimChallengePayout edge cases ────
 
-  it("rejects payout claim on non-finalized challenge", async function () {
+  it("rejects payout claim on non-completed challenge", async function () {
     const { alice, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
 
     await expect(challenges.claimChallengePayout(1)).to.be.revertedWithCustomError(challenges, "ChallengeInvalidStatus")
@@ -1292,12 +1705,12 @@ describe("B3TRChallenges - @shard9a", function () {
     const { alice, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges, { endRound: 2 })
+    await createChallenge(challenges, { endRound: 2, invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
 
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 10)
     await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallenge(1)
+    await challenges.completeChallenge(1)
 
     await challenges.connect(alice).claimChallengePayout(1)
 
@@ -1312,7 +1725,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await roundGovernor.setCurrentRoundId(1)
 
     const stakeAmount = ethers.parseEther("100")
-    await createChallenge(challenges, { stakeAmount, endRound: 2 })
+    await createChallenge(challenges, { stakeAmount, endRound: 2, invitees: [alice.address, bob.address] })
     await challenges.connect(alice).joinChallenge(1)
     await challenges.connect(bob).joinChallenge(1)
 
@@ -1321,7 +1734,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 5)
 
     await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallenge(1)
+    await challenges.completeChallenge(1)
 
     const totalPrize = stakeAmount * 3n
     const baseShare = totalPrize / 3n
@@ -1341,7 +1754,7 @@ describe("B3TRChallenges - @shard9a", function () {
     const { alice, roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
-    await createChallenge(challenges)
+    await createChallenge(challenges, { invitees: [alice.address] })
     await challenges.connect(alice).joinChallenge(1)
     await roundGovernor.setCurrentRoundId(2)
     await challenges.syncChallenge(1)
@@ -1381,7 +1794,9 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address],
     })
 
     await challenges.connect(alice).joinChallenge(1)
@@ -1397,58 +1812,14 @@ describe("B3TRChallenges - @shard9a", function () {
   })
 
   it("auto-syncs pending challenge when claiming refund", async function () {
-    const { b3tr, roundGovernor, challenges } = await deployFixture()
+    const { roundGovernor, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await createChallenge(challenges, { endRound: 2 })
     await roundGovernor.setCurrentRoundId(2)
 
-    // claimChallengeRefund auto-syncs to Invalid, then refunds
     await challenges.claimChallengeRefund(1)
     expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Invalid)
-  })
-
-  // ──── TopAboveThreshold: creator refund when nobody qualifies ────
-
-  it("refunds creator in TopAboveThreshold mode when nobody reaches threshold", async function () {
-    const { admin, alice, b3tr, roundGovernor, passport, challenges } = await deployFixture()
-    await roundGovernor.setCurrentRoundId(1)
-
-    await createChallenge(challenges, {
-      kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.TopAboveThreshold,
-      appIds: [APP_1],
-      threshold: 20,
-      endRound: 2,
-    })
-
-    await challenges.connect(alice).joinChallenge(1)
-    await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 5)
-
-    await roundGovernor.setCurrentRoundId(3)
-    await challenges.finalizeChallenge(1)
-
-    const challenge = await challenges.getChallenge(1)
-    expect(challenge.settlementMode).to.equal(SettlementMode.CreatorRefund)
-    expect(challenge.bestCount).to.equal(0n)
-
-    await challenges.claimChallengePayout(1)
-    expect(await b3tr.balanceOf(admin.address)).to.equal(INITIAL_BALANCE)
-  })
-
-  // ──── Stake challenge with ThresholdMode.None but threshold=0 is valid ────
-
-  it("rejects stake challenge with non-None threshold mode even with threshold 0", async function () {
-    const { roundGovernor, challenges } = await deployFixture()
-    await roundGovernor.setCurrentRoundId(1)
-
-    await expect(
-      createChallenge(challenges, {
-        kind: ChallengeKind.Stake,
-        thresholdMode: ThresholdMode.TopAboveThreshold,
-        threshold: 0,
-      }),
-    ).to.be.revertedWithCustomError(challenges, "InvalidThresholdConfiguration")
   })
 
   // ──── Re-invite a previously declined user ────
@@ -1460,7 +1831,7 @@ describe("B3TRChallenges - @shard9a", function () {
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
       visibility: ChallengeVisibility.Private,
-      thresholdMode: ThresholdMode.None,
+      challengeType: ChallengeType.MaxActions,
       invitees: [alice.address],
     })
 
@@ -1482,8 +1853,13 @@ describe("B3TRChallenges - @shard9a", function () {
     await expect(challenges.declineChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.cancelChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.syncChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
-    await expect(challenges.finalizeChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
+    await expect(challenges.completeChallenge(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.claimChallengePayout(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
+    await expect(challenges.claimSplitWinPrize(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
+    await expect(challenges.claimCreatorSplitWinRefund(99)).to.be.revertedWithCustomError(
+      challenges,
+      "ChallengeDoesNotExist",
+    )
     await expect(challenges.claimChallengeRefund(99)).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.addInvites(99, [])).to.be.revertedWithCustomError(challenges, "ChallengeDoesNotExist")
     await expect(challenges.getParticipantActions(99, ethers.ZeroAddress)).to.be.revertedWithCustomError(
@@ -1492,7 +1868,7 @@ describe("B3TRChallenges - @shard9a", function () {
     )
   })
 
-  // ──── Leaving sponsored challenge (no refund) ────
+  // ──── Leaving sponsored challenge (no token refund) ────
 
   it("allows leaving a sponsored challenge without token refund", async function () {
     const { alice, b3tr, roundGovernor, challenges } = await deployFixture()
@@ -1500,7 +1876,9 @@ describe("B3TRChallenges - @shard9a", function () {
 
     await createChallenge(challenges, {
       kind: ChallengeKind.Sponsored,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      invitees: [alice.address],
     })
 
     await challenges.connect(alice).joinChallenge(1)

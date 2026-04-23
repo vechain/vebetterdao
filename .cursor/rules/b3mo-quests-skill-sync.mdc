@@ -1,0 +1,22 @@
+---
+description: Keep the b3mo-quests skill in sync with changes to Challenges/Quests code and contracts
+globs: {apps/frontend/src/app/b3mo-quests/**,apps/frontend/src/api/challenges/**,packages/contracts/contracts/B3TRChallenges*.sol,packages/contracts/contracts/challenges/**,packages/contracts/contracts/interfaces/IChallenges.sol}
+alwaysApply: false
+---
+
+# Keep the b3mo-quests skill synchronized
+
+The skill at [`.claude/skills/b3mo-quests/SKILL.md`](.claude/skills/b3mo-quests/SKILL.md) is the single source of truth for challenge domain knowledge. When modifying files in this scope, **update the skill in the same commit** if your change touches any of:
+
+- **Contract surface**: events (names, indexed topics, params), enums (`ChallengeKind`, `ChallengeVisibility`, `ChallengeType`, `ChallengeStatus`, `SettlementMode`, `ParticipantStatus`), new view/setter functions, new getter shapes
+- **Datasource interface**: `ChallengesDataSource` method signatures, `PaginationArgs`/`ChallengePage` shape, new sections, `CHALLENGES_PAGE_SIZE`
+- **Section semantics**: what ids feed a section, what filter predicate is applied (see "Section Definitions" table)
+- **`resolveChallengeDetail` rules**: any `canX` / `isActionable` / `isHistorical` / `isParticipating` logic change
+- **UI tab structure**: tab ids, what each tab renders, `SectionCarousel` / `ChallengesGrid` behaviour
+- **Query-key conventions**: prefixes used by sections, detail, events-cache, or invalidation in `useChallengeActions`
+- **Wei/ether boundary**: any new monetary field that must be `formatEther`-ed at the datasource boundary
+- **File locations**: moved/renamed/added files referenced in the "Key Files Reference" section
+
+Keep the skill concise (under ~300 lines). Prefer updating tables in place over adding new sections. Match existing terminology: code says "challenge", UI copy says "Quest", route is `/b3mo-quests`.
+
+If a change is purely cosmetic or internal (e.g. refactoring a component's internal layout, adding a translation, fixing a bug without behaviour change), no skill update is needed.

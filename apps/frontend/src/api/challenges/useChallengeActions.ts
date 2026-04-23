@@ -10,7 +10,12 @@ import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 
 import { ChallengeKind, ChallengeView } from "./types"
-import { challengePayoutClaimedEventName, challengeRefundClaimedEventName } from "./useChallengeClaimState"
+import {
+  challengePayoutClaimedEventName,
+  challengeRefundClaimedEventName,
+  splitWinCreatorRefundedEventName,
+  splitWinPrizeClaimedEventName,
+} from "./useChallengeClaimState"
 
 const ChallengesInterface = B3TRChallenges__factory.createInterface()
 const B3TRInterface = B3TR__factory.createInterface()
@@ -18,11 +23,12 @@ const B3TRInterface = B3TR__factory.createInterface()
 export interface CreateChallengeFormData {
   kind: number
   visibility: number
-  thresholdMode: number
+  challengeType: number
   stakeAmount: string
   startRound: number
   endRound: number
   threshold: string
+  numWinners: string
   appIds: string[]
   invitees: string[]
   title: string
@@ -33,13 +39,15 @@ export interface CreateChallengeFormData {
 
 type ActionParams =
   | { type: "join"; challenge: ChallengeView }
-  | { type: "leave"; challengeId: number }
+  | { type: "leave"; challenge: ChallengeView }
   | { type: "decline"; challengeId: number }
   | { type: "cancel"; challengeId: number }
   | { type: "addInvites"; challengeId: number; invitees: string[] }
   | { type: "claimPayout"; challengeId: number }
+  | { type: "claimSplitWin"; challengeId: number }
+  | { type: "claimCreatorSplitWinRefund"; challengeId: number }
   | { type: "claimRefund"; challengeId: number }
-  | { type: "finalize"; challengeId: number }
+  | { type: "complete"; challengeId: number }
   | { type: "create"; form: CreateChallengeFormData }
 
 export const useChallengeActions = () => {
@@ -56,14 +64,18 @@ export const useChallengeActions = () => {
   useEffect(() => clearScheduledRefetches, [clearScheduledRefetches])
 
   const refetchChallengeQueries = useCallback(async () => {
+    const claimEventKeys = [
+      challengePayoutClaimedEventName,
+      challengeRefundClaimedEventName,
+      splitWinPrizeClaimedEventName,
+      splitWinCreatorRefundedEventName,
+    ]
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["challenges"] }),
-      queryClient.invalidateQueries({ queryKey: [challengePayoutClaimedEventName] }),
-      queryClient.invalidateQueries({ queryKey: [challengeRefundClaimedEventName] }),
-      queryClient.refetchQueries({ queryKey: ["challenges", "hub"], type: "active" }),
+      ...claimEventKeys.map(key => queryClient.invalidateQueries({ queryKey: [key] })),
+      queryClient.refetchQueries({ queryKey: ["challenges", "section"], type: "active" }),
       queryClient.refetchQueries({ queryKey: ["challenges", "detail"], type: "active" }),
-      queryClient.refetchQueries({ queryKey: [challengePayoutClaimedEventName], type: "active" }),
-      queryClient.refetchQueries({ queryKey: [challengeRefundClaimedEventName], type: "active" }),
+      ...claimEventKeys.map(key => queryClient.refetchQueries({ queryKey: [key], type: "active" })),
     ])
   }, [queryClient])
 
@@ -106,11 +118,12 @@ export const useChallengeActions = () => {
                 {
                   kind: form.kind,
                   visibility: form.visibility,
-                  thresholdMode: form.thresholdMode,
+                  challengeType: form.challengeType,
                   stakeAmount: weiAmount,
                   startRound: form.startRound,
                   endRound: form.endRound,
                   threshold: BigInt(form.threshold || "0"),
+                  numWinners: BigInt(form.numWinners || "0"),
                   appIds: form.appIds,
                   invitees: form.invitees,
                   title: form.title,
@@ -154,16 +167,35 @@ export const useChallengeActions = () => {
           return clauses
         }
 
-        case "leave":
-          return [
+        case "leave": {
+          const { challenge } = params
+          const clauses: EnhancedClause[] = [
             buildClause({
               contractInterface: ChallengesInterface,
               to: challengesAddr,
               method: "leaveChallenge",
-              args: [params.challengeId],
-              comment: `Leave challenge #${params.challengeId}`,
+              args: [challenge.challengeId],
+              comment: `Leave challenge #${challenge.challengeId}`,
             }),
           ]
+
+          // Contract re-adds the user to the invited list on leave if they were
+          // ever invited (invitationEligible stays true), landing them back in the
+          // "invited" state. Chain a decline to fully opt out.
+          if (challenge.wasInvited) {
+            clauses.push(
+              buildClause({
+                contractInterface: ChallengesInterface,
+                to: challengesAddr,
+                method: "declineChallenge",
+                args: [challenge.challengeId],
+                comment: `Decline challenge #${challenge.challengeId}`,
+              }),
+            )
+          }
+
+          return clauses
+        }
 
         case "decline":
           return [
@@ -209,6 +241,28 @@ export const useChallengeActions = () => {
             }),
           ]
 
+        case "claimSplitWin":
+          return [
+            buildClause({
+              contractInterface: ChallengesInterface,
+              to: challengesAddr,
+              method: "claimSplitWinPrize",
+              args: [params.challengeId],
+              comment: `Claim Split Win slot for challenge #${params.challengeId}`,
+            }),
+          ]
+
+        case "claimCreatorSplitWinRefund":
+          return [
+            buildClause({
+              contractInterface: ChallengesInterface,
+              to: challengesAddr,
+              method: "claimCreatorSplitWinRefund",
+              args: [params.challengeId],
+              comment: `Refund unclaimed Split Win slots for challenge #${params.challengeId}`,
+            }),
+          ]
+
         case "claimRefund":
           return [
             buildClause({
@@ -220,14 +274,14 @@ export const useChallengeActions = () => {
             }),
           ]
 
-        case "finalize":
+        case "complete":
           return [
             buildClause({
               contractInterface: ChallengesInterface,
               to: challengesAddr,
-              method: "finalizeChallenge",
+              method: "completeChallenge",
               args: [params.challengeId],
-              comment: `Finalize challenge #${params.challengeId}`,
+              comment: `Complete challenge #${params.challengeId}`,
             }),
           ]
       }
@@ -249,14 +303,17 @@ export const useChallengeActions = () => {
     acceptChallenge: (challenge: ChallengeView) => tx.sendTransaction({ type: "join", challenge }),
     joinChallenge: (challenge: ChallengeView) => tx.sendTransaction({ type: "join", challenge }),
 
-    leaveChallenge: (id: number) => tx.sendTransaction({ type: "leave", challengeId: id }),
+    leaveChallenge: (challenge: ChallengeView) => tx.sendTransaction({ type: "leave", challenge }),
     declineChallenge: (id: number) => tx.sendTransaction({ type: "decline", challengeId: id }),
     cancelChallenge: (id: number) => tx.sendTransaction({ type: "cancel", challengeId: id }),
     addInvites: (id: number, invitees: string[]) =>
       tx.sendTransaction({ type: "addInvites", challengeId: id, invitees }),
     claimChallenge: (id: number) => tx.sendTransaction({ type: "claimPayout", challengeId: id }),
+    claimSplitWinPrize: (id: number) => tx.sendTransaction({ type: "claimSplitWin", challengeId: id }),
+    claimCreatorSplitWinRefund: (id: number) =>
+      tx.sendTransaction({ type: "claimCreatorSplitWinRefund", challengeId: id }),
     refundChallenge: (id: number) => tx.sendTransaction({ type: "claimRefund", challengeId: id }),
-    finalizeChallenge: (id: number) => tx.sendTransaction({ type: "finalize", challengeId: id }),
+    completeChallenge: (id: number) => tx.sendTransaction({ type: "complete", challengeId: id }),
 
     status: tx.status,
     txReceipt: tx.txReceipt,

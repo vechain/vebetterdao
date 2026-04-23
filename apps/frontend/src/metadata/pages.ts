@@ -29,10 +29,10 @@ export const pagesMetadata = {
     imageExtension: "image/webp",
   },
   challenges: {
-    path: "/challenges",
-    title: "VeBetter Quests | Compete in Stake and Sponsored Rounds",
+    path: "/b3mo-quests",
+    title: "VeBetter B3MO Quests | Compete in Stake and Sponsored Rounds",
     description:
-      "Explore quest flows for VeBetter users, from invitations and joins to payout, refunds, and manual finalization.",
+      "Explore B3MO quest flows for VeBetter users, from invitations and joins to payout, refunds, and manual finalization.",
     image: "/assets/images/allocations_page.webp",
     imageExtension: "image/webp",
   },

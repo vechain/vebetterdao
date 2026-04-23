@@ -1,0 +1,45 @@
+---
+description: Consult and keep the frontend-ui skill in sync when working on apps/frontend UI, components, or the design system
+globs: {apps/frontend/src/components/**,apps/frontend/src/app/**/*.{ts,tsx},apps/frontend/src/app/theme/**}
+alwaysApply: false
+---
+
+# Use & sync the frontend-ui skill
+
+The skill at [`.claude/skills/frontend-ui/SKILL.md`](.claude/skills/frontend-ui/SKILL.md) is the single source of truth for:
+
+- Reusable components catalog (`apps/frontend/src/components/**`)
+- Design tokens, semantic colors, `textStyle`/`size` scales
+- Recipe variants (`apps/frontend/src/app/theme/*.ts`)
+- Style patterns (mobile-first, modal/bottom-sheet split, card/button/badge usage, i18n)
+
+## Before writing frontend code
+
+**Read the skill first.** Then:
+
+1. Check the catalog in SKILL.md §3 before creating a new component — reuse existing ones.
+2. Use semantic tokens from §2 for every color / typography decision. No hex, no raw `fontSize`/`lineHeight`, no font weights other than `normal`/`semibold`/`bold`.
+3. Match the patterns in §4 (mobile-first, `BaseModal`, `Card.Root` variants, `StatCard`/`EmptyStateCard`, `FormItem`, `TransactionModal`).
+
+## Update the skill in the same commit when your change touches any of
+
+- **New / renamed / deleted shared component** in `apps/frontend/src/components/` → update §3 table
+- **New / removed recipe variant** in `apps/frontend/src/app/theme/*.ts` → update §2 cheat sheet
+- **New / removed / renamed semantic token** in `apps/frontend/src/app/theme/theme.ts` (tokens or semanticTokens) → update §2 semantic colors table
+- **New house pattern** (new modal shell, toast, skeleton convention, etc.) → add to §4
+- **Deprecation** — mark the old row "deprecated — use X instead" in §3, don't delete outright
+- **New `textStyle` scale entry** or font-weight policy change → update §2 typography
+
+No skill update needed for:
+
+- Purely internal refactor of a component (no exported shape change, no new token usage)
+- Bug fixes without behaviour change
+- Translation-only edits
+- Business logic / data fetching changes that don't touch style or exported UI primitives
+
+## Constraints when editing the skill
+
+- Keep it **under 500 lines**
+- Prefer **updating existing tables** over adding sections
+- Don't paste implementation code — link to the file path
+- Don't document feature-specific internals here (feature skills exist for that, e.g. `challenges`)

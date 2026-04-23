@@ -27,6 +27,7 @@ library ChallengeStorageTypes {
     mapping(uint256 challengeId => mapping(address account => bool claimed)) hasClaimed;
     mapping(uint256 challengeId => mapping(address account => bool refunded)) hasRefunded;
     uint256 minBetAmount;
+    mapping(uint256 challengeId => mapping(address account => bool isWinner)) isSplitWinWinner;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.Challenges")) - 1)) & ~bytes32(uint256(0xff))

@@ -7,20 +7,49 @@ export type ChallengeVisibility = (typeof ChallengeVisibility)[keyof typeof Chal
 export const ChallengeStatus = {
   Pending: 0,
   Active: 1,
-  Finalized: 2,
+  Completed: 2,
   Cancelled: 3,
   Invalid: 4,
 } as const
 export type ChallengeStatus = (typeof ChallengeStatus)[keyof typeof ChallengeStatus]
 
-export const ThresholdMode = { None: 0, SplitAboveThreshold: 1, TopAboveThreshold: 2 } as const
-export type ThresholdMode = (typeof ThresholdMode)[keyof typeof ThresholdMode]
+export const ChallengeType = { MaxActions: 0, SplitWin: 1 } as const
+export type ChallengeType = (typeof ChallengeType)[keyof typeof ChallengeType]
 
 export const ParticipantStatus = { None: 0, Invited: 1, Declined: 2, Joined: 3 } as const
 export type ParticipantStatus = (typeof ParticipantStatus)[keyof typeof ParticipantStatus]
 
-export const SettlementMode = { None: 0, TopWinners: 1, QualifiedSplit: 2, CreatorRefund: 3 } as const
+export const SettlementMode = {
+  None: 0,
+  TopWinners: 1,
+  CreatorRefund: 2,
+  SplitWinCompleted: 3,
+} as const
 export type SettlementMode = (typeof SettlementMode)[keyof typeof SettlementMode]
+
+export const ChallengeViewerRelation = {
+  Creator: "Creator",
+  Joined: "Joined",
+  Invited: "Invited",
+  Declined: "Declined",
+  None: "None",
+} as const
+export type ChallengeViewerRelation = (typeof ChallengeViewerRelation)[keyof typeof ChallengeViewerRelation]
+
+export const ChallengeAction = {
+  Join: "Join",
+  Leave: "Leave",
+  AcceptInvite: "AcceptInvite",
+  DeclineInvite: "DeclineInvite",
+  Cancel: "Cancel",
+  AddInvites: "AddInvites",
+  Claim: "Claim",
+  Refund: "Refund",
+  Complete: "Complete",
+  ClaimSplitWin: "ClaimSplitWin",
+  ClaimCreatorSplitWinRefund: "ClaimCreatorSplitWinRefund",
+} as const
+export type ChallengeAction = (typeof ChallengeAction)[keyof typeof ChallengeAction]
 
 export const challengeMetadataByteLimits = {
   title: 120,
@@ -48,7 +77,7 @@ export interface ChallengeView {
   createdAt: number
   kind: ChallengeKind
   visibility: ChallengeVisibility
-  thresholdMode: ThresholdMode
+  challengeType: ChallengeType
   status: ChallengeStatus
   settlementMode: SettlementMode
   creator: string
@@ -62,16 +91,22 @@ export interface ChallengeView {
   endRound: number
   duration: number
   threshold: string
+  numWinners: number
+  winnersClaimed: number
+  prizePerWinner: string
   allApps: boolean
   participantCount: number
   maxParticipants: number
   invitedCount: number
   declinedCount: number
   selectedAppsCount: number
+  winnersCount: number
+  bestCount: number
   viewerStatus: ParticipantStatus
   isCreator: boolean
   isJoined: boolean
   isInvitationPending: boolean
+  isSplitWinWinner: boolean
   canJoin: boolean
   canLeave: boolean
   canAccept: boolean
@@ -80,7 +115,13 @@ export interface ChallengeView {
   canAddInvites: boolean
   canClaim: boolean
   canRefund: boolean
-  canFinalize: boolean
+  canComplete: boolean
+  canClaimSplitWin: boolean
+  canClaimCreatorSplitWinRefund: boolean
+  isActionable: boolean
+  isParticipating: boolean
+  isHistorical: boolean
+  wasInvited: boolean
 }
 
 export interface ChallengeDetail extends ChallengeView {
@@ -88,9 +129,8 @@ export interface ChallengeDetail extends ChallengeView {
   invited: string[]
   declined: string[]
   selectedApps: string[]
+  winners: string[]
 }
-
-export type ChallengeSection = "needed-actions" | "active" | "open" | "explore" | "history"
 
 export interface PaginatedChallengeSection {
   items: ChallengeView[]
@@ -100,17 +140,10 @@ export interface PaginatedChallengeSection {
   fetchNextPage: () => Promise<unknown>
 }
 
-export interface ChallengesHubData {
-  neededActions: PaginatedChallengeSection
-  active: PaginatedChallengeSection
-  open: PaginatedChallengeSection
-  explore: PaginatedChallengeSection
-  history: PaginatedChallengeSection
-}
-
 export type ChallengeKindLabel = "Stake" | "Sponsored"
 export type ChallengeVisibilityLabel = "Public" | "Private"
-export type ChallengeStatusLabel = "Pending" | "Active" | "Finalized" | "Cancelled" | "Invalid"
+export type ChallengeTypeLabel = "Max actions" | "Split win"
+export type ChallengeStatusLabel = "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid"
 
 export const challengeKindLabel = (kind: ChallengeKind): ChallengeKindLabel =>
   kind === ChallengeKind.Stake ? "Stake" : "Sponsored"
@@ -118,5 +151,8 @@ export const challengeKindLabel = (kind: ChallengeKind): ChallengeKindLabel =>
 export const challengeVisibilityLabel = (v: ChallengeVisibility): ChallengeVisibilityLabel =>
   v === ChallengeVisibility.Public ? "Public" : "Private"
 
+export const challengeTypeLabel = (t: ChallengeType): ChallengeTypeLabel =>
+  t === ChallengeType.SplitWin ? "Split win" : "Max actions"
+
 export const challengeStatusLabel = (s: ChallengeStatus): ChallengeStatusLabel =>
-  (["Pending", "Active", "Finalized", "Cancelled", "Invalid"] as const)[s]
+  (["Pending", "Active", "Completed", "Cancelled", "Invalid"] as const)[s]

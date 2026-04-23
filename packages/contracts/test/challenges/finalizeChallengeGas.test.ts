@@ -10,15 +10,15 @@ const MIN_BET_AMOUNT = ethers.parseEther("1")
 const APP_IDS = Array.from({ length: 5 }, (_, i) => ethers.keccak256(ethers.toUtf8Bytes(`app-${i + 1}`)))
 
 const ChallengeKind = { Stake: 0, Sponsored: 1 } as const
-const ChallengeVisibility = { Public: 0 } as const
-const ThresholdMode = { None: 0 } as const
+const ChallengeVisibility = { Private: 1 } as const
+const ChallengeType = { MaxActions: 0 } as const
 
 const MAX_PARTICIPANTS = 100
 const MAX_DURATION = 4
 const START_ROUND = 2
 const END_ROUND = START_ROUND + MAX_DURATION - 1 // 4 rounds inclusive: 2,3,4,5
 
-describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
+describe("B3TRChallenges - complete gas worst case @shard-gas", function () {
   this.timeout(600_000)
 
   async function deployFixtureWorstCase() {
@@ -90,45 +90,38 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
     return wallets
   }
 
-  it("measures finalizeChallenge gas at worst case (100 participants × 4 rounds × 5 apps, Sponsored, non-allApps)", async function () {
+  it("measures completeChallenge gas at worst case (100 participants × 4 rounds × 5 apps, Sponsored Private MaxActions)", async function () {
     const { admin, b3tr, roundGovernor, passport, challenges } = await deployFixtureWorstCase()
 
-    // Round = 1 so startRound=2 is valid
     await roundGovernor.setCurrentRoundId(1)
 
-    // Mint sponsor stake to creator (admin)
     const sponsorAmount = STAKE_AMOUNT * BigInt(MAX_PARTICIPANTS)
     await b3tr.mint(admin.address, sponsorAmount)
     await b3tr.connect(admin).approve(await challenges.getAddress(), sponsorAmount)
 
-    // Create a SPONSORED challenge (creator is NOT auto-added; max 100 other participants)
+    const joiners = await makeFundedWallets(MAX_PARTICIPANTS, b3tr, await challenges.getAddress())
+
     await challenges.connect(admin).createChallenge({
       kind: ChallengeKind.Sponsored,
-      visibility: ChallengeVisibility.Public,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       stakeAmount: sponsorAmount,
       startRound: START_ROUND,
       endRound: END_ROUND,
       threshold: 0,
-      appIds: APP_IDS, // 5 apps → triggers the nested app loop
-      invitees: [],
+      numWinners: 0,
+      appIds: APP_IDS,
+      invitees: joiners.map(w => w.address),
       title: "",
       description: "",
       imageURI: "",
       metadataURI: "",
     })
 
-    // Create 100 fresh joiners
-    const joiners = await makeFundedWallets(MAX_PARTICIPANTS, b3tr, await challenges.getAddress())
-
-    // Join all 100 (Sponsored, no stake transfer per joiner — just status bookkeeping)
     for (const w of joiners) {
       await challenges.connect(w).joinChallenge(1)
     }
 
-    // Populate action counts so every (participant, round, app) slot is non-zero.
-    // This forces the contract to actually do the work (though 0 values still iterate —
-    // the cost is dominated by external call overhead, not by the SSTOREs in the mock).
     for (const w of joiners) {
       for (let round = START_ROUND; round <= END_ROUND; round++) {
         for (const appId of APP_IDS) {
@@ -137,21 +130,17 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
       }
     }
 
-    // Advance round past endRound so finalizeChallenge is allowed
     await roundGovernor.setCurrentRoundId(END_ROUND + 1)
 
-    // Measure gas for finalizeChallenge
-    const tx = await challenges.connect(admin).finalizeChallenge(1)
+    const tx = await challenges.connect(admin).completeChallenge(1)
     const receipt = await tx.wait()
     const gasUsed = receipt!.gasUsed
 
-    // VeChain mainnet block gas limit is ~40M currently. Ethereum is ~30M.
     const VECHAIN_BLOCK_GAS = 40_000_000n
     const ETH_BLOCK_GAS = 30_000_000n
 
-    // Log for visibility
     // eslint-disable-next-line no-console
-    console.log(`\n========== finalizeChallenge WORST-CASE gas ==========`)
+    console.log(`\n========== completeChallenge WORST-CASE gas ==========`)
     // eslint-disable-next-line no-console
     console.log(`Participants: ${MAX_PARTICIPANTS}`)
     // eslint-disable-next-line no-console
@@ -169,11 +158,10 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
     // eslint-disable-next-line no-console
     console.log(`======================================================\n`)
 
-    // Loose sanity check — just assert the tx actually succeeded.
     expect(gasUsed).to.be.gt(0n)
   })
 
-  it("measures finalizeChallenge gas at 5× the configured maxes to check DoS ceiling", async function () {
+  it("measures completeChallenge gas at 5× the configured maxes to check DoS ceiling", async function () {
     // Raise maxParticipants to 500 (keep 4 rounds × 5 apps). If this still fits in 40M → DoS claim is false even at 5×.
     const [admin] = await ethers.getSigners()
 
@@ -225,23 +213,25 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
     await b3tr.mint(admin.address, sponsorAmount)
     await b3tr.connect(admin).approve(await challenges.getAddress(), sponsorAmount)
 
+    const joiners = await makeFundedWallets(HUGE_PARTICIPANTS, b3tr, await challenges.getAddress())
+
     await challenges.connect(admin).createChallenge({
       kind: ChallengeKind.Sponsored,
-      visibility: ChallengeVisibility.Public,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       stakeAmount: sponsorAmount,
       startRound: START_ROUND,
       endRound: END_ROUND,
       threshold: 0,
+      numWinners: 0,
       appIds: APP_IDS,
-      invitees: [],
+      invitees: joiners.map(w => w.address),
       title: "",
       description: "",
       imageURI: "",
       metadataURI: "",
     })
 
-    const joiners = await makeFundedWallets(HUGE_PARTICIPANTS, b3tr, await challenges.getAddress())
     for (const w of joiners) await challenges.connect(w).joinChallenge(1)
 
     for (const w of joiners) {
@@ -254,7 +244,7 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
 
     await roundGovernor.setCurrentRoundId(END_ROUND + 1)
 
-    const tx = await challenges.connect(admin).finalizeChallenge(1)
+    const tx = await challenges.connect(admin).completeChallenge(1)
     const receipt = await tx.wait()
     const gasUsed = receipt!.gasUsed
 
@@ -323,23 +313,25 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
       await b3tr.mint(admin.address, sponsorAmount)
       await b3tr.connect(admin).approve(await challenges.getAddress(), sponsorAmount)
 
+      const joiners = await makeFundedWallets(N, b3tr, await challenges.getAddress())
+
       await challenges.connect(admin).createChallenge({
         kind: ChallengeKind.Sponsored,
-        visibility: ChallengeVisibility.Public,
-        thresholdMode: ThresholdMode.None,
+        visibility: ChallengeVisibility.Private,
+        challengeType: ChallengeType.MaxActions,
         stakeAmount: sponsorAmount,
         startRound: START_ROUND,
         endRound: END_ROUND_2,
         threshold: 0,
+        numWinners: 0,
         appIds: APP_IDS,
-        invitees: [],
+        invitees: joiners.map(w => w.address),
         title: "",
         description: "",
         imageURI: "",
         metadataURI: "",
       })
 
-      const joiners = await makeFundedWallets(N, b3tr, await challenges.getAddress())
       for (const w of joiners) await challenges.connect(w).joinChallenge(1)
 
       for (const w of joiners) {
@@ -354,7 +346,7 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
 
       let gasUsed: bigint | null = null
       try {
-        const tx = await challenges.connect(admin).finalizeChallenge(1, { gasLimit: 50_000_000 })
+        const tx = await challenges.connect(admin).completeChallenge(1, { gasLimit: 50_000_000 })
         const receipt = await tx.wait()
         gasUsed = receipt!.gasUsed
       } catch {
@@ -382,7 +374,7 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
     console.log(`=============================================\n`)
   })
 
-  it("measures finalizeChallenge gas at worst case (allApps=true, 100 participants × 4 rounds)", async function () {
+  it("measures completeChallenge gas at worst case (allApps=true, 100 participants × 4 rounds)", async function () {
     const { admin, b3tr, roundGovernor, passport, challenges } = await deployFixtureWorstCase()
 
     await roundGovernor.setCurrentRoundId(1)
@@ -391,23 +383,25 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
     await b3tr.mint(admin.address, sponsorAmount)
     await b3tr.connect(admin).approve(await challenges.getAddress(), sponsorAmount)
 
+    const joiners = await makeFundedWallets(MAX_PARTICIPANTS, b3tr, await challenges.getAddress())
+
     await challenges.connect(admin).createChallenge({
       kind: ChallengeKind.Sponsored,
-      visibility: ChallengeVisibility.Public,
-      thresholdMode: ThresholdMode.None,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
       stakeAmount: sponsorAmount,
       startRound: START_ROUND,
       endRound: END_ROUND,
       threshold: 0,
-      appIds: [], // allApps path
-      invitees: [],
+      numWinners: 0,
+      appIds: [],
+      invitees: joiners.map(w => w.address),
       title: "",
       description: "",
       imageURI: "",
       metadataURI: "",
     })
 
-    const joiners = await makeFundedWallets(MAX_PARTICIPANTS, b3tr, await challenges.getAddress())
     for (const w of joiners) {
       await challenges.connect(w).joinChallenge(1)
     }
@@ -420,12 +414,12 @@ describe("B3TRChallenges - finalize gas worst case @shard-gas", function () {
 
     await roundGovernor.setCurrentRoundId(END_ROUND + 1)
 
-    const tx = await challenges.connect(admin).finalizeChallenge(1)
+    const tx = await challenges.connect(admin).completeChallenge(1)
     const receipt = await tx.wait()
     const gasUsed = receipt!.gasUsed
 
     // eslint-disable-next-line no-console
-    console.log(`\n========== finalizeChallenge allApps gas ==========`)
+    console.log(`\n========== completeChallenge allApps gas ==========`)
     // eslint-disable-next-line no-console
     console.log(`Gas used: ${gasUsed.toString()}`)
     // eslint-disable-next-line no-console
