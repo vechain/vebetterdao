@@ -2192,5 +2192,7 @@
   "Your voting power": "आपकी मतदान शक्ति",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "आपकी मतदान शक्ति <platform>veDelegate.vet</platform> को हस्तांतरित की गई है जो आपकी ओर से मतदान करता है। <br/> यदि आप यहां वोट करना चाहते हैं, तो आपको स्नैपशॉट से पहले veDelegate पर प्रतिनिधित्व निकालना होगा।",
   "Your Voting Qualification": "आपकी वोटिंग योग्यता",
-  "Expenditure reports are submitted by the proposal proposer wallet.": "Expenditure reports are submitted by the proposal proposer wallet."
+  "Expenditure reports are submitted by the proposal proposer wallet.": "Expenditure reports are submitted by the proposal proposer wallet.",
+  "Expenditure report missing for this payout": "Expenditure report missing for this payout",
+  "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.": "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds."
 }

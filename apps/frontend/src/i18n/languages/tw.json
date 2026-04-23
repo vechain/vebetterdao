@@ -2192,5 +2192,7 @@
   "Your voting power": "您的投票權",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "您的投票權已轉移至<platform>veDelegate.vet</platform>，它將代表您投票。<br/>如果您想在此進行投票，必須在快照前於veDelegate上移除委託。",
   "Your Voting Qualification": "您的投票資格",
-  "Expenditure reports are submitted by the proposal proposer wallet.": "支出報告由提案發起人錢包提交。"
+  "Expenditure reports are submitted by the proposal proposer wallet.": "支出報告由提案發起人錢包提交。",
+  "Expenditure report missing for this payout": "此筆撥款缺少支出報告",
+  "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.": "鏈上未記錄該資金里程碑的標準化支出報告。核准撥款前請確認。"
 }

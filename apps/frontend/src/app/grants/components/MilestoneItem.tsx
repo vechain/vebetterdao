@@ -146,7 +146,12 @@ export const MilestoneItem = ({
     )
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
-  const hasExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
+  /** Report keyed by tranche (see ExpenditureReportForm: trancheNumber = currentStep + 1). */
+  const hasTrancheExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
+
+  /** Reviewer sees a warning before Approve & Fund if no on-chain expenditure report for this payout (tranche). */
+  const shouldWarnReviewerMissingExpenditureReport =
+    shouldShowReviewerActions && !hasTrancheExpenditureReport
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -219,6 +224,18 @@ export const MilestoneItem = ({
       />
 
       {/* Reviewer actions (approve/reject) - only on current pending milestone */}
+      {shouldWarnReviewerMissingExpenditureReport && (
+        <VStack w="full" bg="orange.50" p={3} borderRadius="xl" align="flex-start">
+          <Text textStyle="sm" color="orange.700" fontWeight="semibold">
+            {t("Expenditure report missing for this payout")}
+          </Text>
+          <Text textStyle="sm" color="orange.600">
+            {t(
+              "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
+            )}
+          </Text>
+        </VStack>
+      )}
       {shouldShowReviewerActions && (
         <HStack w="full">
           <Button variant="secondary" onClick={handleReject}>
@@ -231,18 +248,6 @@ export const MilestoneItem = ({
       )}
 
       {/* Grant receiver actions (claim) - available on any approved milestone */}
-      {shouldShowClaimAction && !hasExpenditureReport && (
-        <VStack w="full" bg="orange.50" p={3} borderRadius="xl" align="flex-start">
-          <Text textStyle="sm" color="orange.700" fontWeight="semibold">
-            {t("Expenditure report recommended")}
-          </Text>
-          <Text textStyle="sm" color="orange.600">
-            {t(
-              "Consider submitting an expenditure report before claiming. Reports are required for transparency and may be reviewed before the next tranche is released.",
-            )}
-          </Text>
-        </VStack>
-      )}
       {shouldShowClaimAction && (
         <HStack w="full">
           <Button variant="primary" onClick={handleClaim}>

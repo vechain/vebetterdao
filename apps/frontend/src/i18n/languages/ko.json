@@ -2192,5 +2192,7 @@
   "Your voting power": "당신의 투표권",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "귀하의 투표 권한은 <platform>veDelegate.vet</platform>으로 이전되어 대리 투표됩니다. <br/> 여기에서 투표하려면, 스냅샷 전에 veDelegate에서 위임을 제거해야 합니다.",
   "Your Voting Qualification": "당신의 투표 자격",
-  "Expenditure reports are submitted by the proposal proposer wallet.": "Expenditure reports are submitted by the proposal proposer wallet."
+  "Expenditure reports are submitted by the proposal proposer wallet.": "Expenditure reports are submitted by the proposal proposer wallet.",
+  "Expenditure report missing for this payout": "Expenditure report missing for this payout",
+  "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.": "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds."
 }

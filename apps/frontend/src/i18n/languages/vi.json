@@ -2192,5 +2192,7 @@
   "Your voting power": "Quyền biểu quyết của bạn",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. <br/> If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Quyền biểu quyết của bạn đã được chuyển đến <platform>veDelegate.vet</platform> nơi bỏ phiếu thay mặt bạn. <br/> Nếu bạn muốn bỏ phiếu tại đây, bạn phải gỡ bỏ ủy quyền trên veDelegate trước khi chụp nhanh.",
   "Your Voting Qualification": "Điều kiện Bỏ phiếu của bạn",
-  "Expenditure reports are submitted by the proposal proposer wallet.": "Báo cáo chi tiêu được nộp bởi ví người đề xuất đề án."
+  "Expenditure reports are submitted by the proposal proposer wallet.": "Báo cáo chi tiêu được nộp bởi ví người đề xuất đề án.",
+  "Expenditure report missing for this payout": "Thiếu báo cáo chi tiêu cho đợt giải ngân này",
+  "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.": "Chưa có báo cáo chi tiêu chuẩn hóa cho milestone tài trợ này trên chuỗi. Xác nhận trước khi phê duyệt giải ngân."
 }
