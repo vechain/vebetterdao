@@ -39,6 +39,7 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
   const twitterHandle = textRecords?.["com.x"]
 
   const actionButton = (() => {
+    if (!account?.address) return null
     if (isOwnCard && isNavigator) {
       return (
         <Button

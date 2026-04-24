@@ -115,15 +115,17 @@ export const NavigatorHeader = ({
             </Skeleton>
 
             <HStack flex={1} w={{ base: "full", md: "auto" }} justify="end" gap={2}>
-              <Button
-                variant={variant}
-                size="sm"
-                flex={{ base: 1, md: "initial" }}
-                onClick={onClick}
-                disabled={mainAction === "delegate" && isAtCapacity}>
-                {mainAction === "share" && <LuShare2 />}
-                {label}
-              </Button>
+              {isConnected && (
+                <Button
+                  variant={variant}
+                  size="sm"
+                  flex={{ base: 1, md: "initial" }}
+                  onClick={onClick}
+                  disabled={mainAction === "delegate" && isAtCapacity}>
+                  {mainAction === "share" && <LuShare2 />}
+                  {label}
+                </Button>
+              )}
               <NavigatorHeaderMenu
                 address={address}
                 isDelegatedHere={isDelegatedHere}
