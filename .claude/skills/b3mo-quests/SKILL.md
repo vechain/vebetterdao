@@ -104,7 +104,7 @@ Each section hook picks a fetcher + filter. The indexer's `ChallengeFilter` (see
 
 | Section | Viewer present → fetcher | Guest fallback |
 |---------|--------------------------|----------------|
-| Needed Action | `fetchWalletChallenges(viewer, "NeededAction")` | — (viewer-only) |
+| Action needed | `fetchWalletChallenges(viewer, "NeededAction")` | — (viewer-only) |
 | Your Challenges | `fetchWalletChallenges(viewer, "MyChallenges")` | — (viewer-only) |
 | Open to Join | `fetchWalletChallenges(viewer, "OpenToJoin")` | `fetchPublicChallenges("Pending")` |
 | What Others Are Doing | `fetchWalletChallenges(viewer, "OthersActive")` | `fetchPublicChallenges("Active")` |
@@ -132,7 +132,7 @@ Pure function from raw state → per-viewer `canX` booleans. Key rules:
 
 [ChallengesPageContent](apps/frontend/src/app/b3mo-quests/components/ChallengesPageContent.tsx) is a 2-tab shell:
 
-- **Current** ([CurrentTab.tsx](apps/frontend/src/app/b3mo-quests/components/CurrentTab.tsx)): 4 `SectionCarousel`s (Needed Action, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`).
+- **Current** ([CurrentTab.tsx](apps/frontend/src/app/b3mo-quests/components/CurrentTab.tsx)): 4 `SectionCarousel`s (Action needed, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`).
 - **History** ([HistoryTab.tsx](apps/frontend/src/app/b3mo-quests/components/HistoryTab.tsx)): `ChallengesGrid` infinite scroll, items deduped by `challengeId`. **No filters** (sections already segment meaningfully; filters added noise).
 
 `SectionCarousel` uses Swiper with `onReachEnd` → auto `fetchNextPage`, skeleton slides while `isFetchingNextPage`. `ChallengesGrid` uses an IntersectionObserver sentinel + skeleton grid cards.
