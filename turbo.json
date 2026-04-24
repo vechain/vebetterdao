@@ -241,6 +241,10 @@
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false
     },
+    "advance-round:local": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "cache": false
+    },
     "get-galaxy-member-owners": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false

@@ -1,14 +1,14 @@
 import { Badge, HStack, Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { LuLock, LuSparkles } from "react-icons/lu"
+import { LuLock, LuSparkles, LuCoins, LuScale } from "react-icons/lu"
 
 import {
   ChallengeKind,
   ChallengeStatus,
+  ChallengeType,
   ChallengeVisibility,
   ChallengeView,
   challengeStatusLabel,
-  challengeVisibilityLabel,
 } from "@/api/challenges/types"
 import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
 
@@ -17,31 +17,39 @@ import { SponsoredChallengeInfo } from "./SponsoredChallengeInfo"
 
 export const ChallengeVisibilityBadge = ({ challenge }: { challenge: ChallengeView }) => {
   const { t } = useTranslation()
-  const isPrivate = challenge.visibility === ChallengeVisibility.Private
-
-  if (challenge.kind === ChallengeKind.Sponsored) {
-    return (
-      <>
+  const sponsoredCreator = challenge.kind === ChallengeKind.Sponsored && challenge.isCreator
+  const sponsoredUser = challenge.kind === ChallengeKind.Sponsored && !challenge.isCreator
+  return (
+    <>
+      {sponsoredCreator && (
         <Badge variant="yellow" size="sm">
           <Icon as={LuSparkles} />
           {t("Sponsored")}
         </Badge>
-        {isPrivate && (
-          <Badge variant="neutral" size="sm">
-            <Icon as={LuLock} />
-            {t(challengeVisibilityLabel(ChallengeVisibility.Private))}
-          </Badge>
-        )}
-      </>
-    )
-  }
+      )}
+      {sponsoredUser && (
+        <Badge variant="positive" size="sm">
+          <Icon as={LuCoins} />
+          {t("Free entry")}
+        </Badge>
+      )}
+      {challenge.visibility === ChallengeVisibility.Private && (
+        <Badge variant={"neutral"} size="sm">
+          <Icon as={LuLock} />
+          {t("Private")}
+        </Badge>
+      )}
+    </>
+  )
+}
 
-  if (!isPrivate) return null
-
+export const ChallengeWinnerTypeBadge = ({ challenge }: { challenge: ChallengeView }) => {
+  const { t } = useTranslation()
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   return (
-    <Badge variant="neutral" size="sm">
-      <Icon as={LuLock} />
-      {t(challengeVisibilityLabel(challenge.visibility))}
+    <Badge variant={isSplitWin ? "info" : "purple"} size="sm">
+      <Icon as={LuScale} />
+      {t(isSplitWin ? "Split win" : "Max actions")}
     </Badge>
   )
 }
@@ -57,11 +65,19 @@ export const ChallengeKindBadges = ({ challenge }: { challenge: ChallengeView })
   )
 }
 
-export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }) => {
+export const ChallengeStatusBadge = ({
+  challenge,
+  outlined = false,
+}: {
+  challenge: ChallengeView
+  outlined?: boolean
+}) => {
   const { t } = useTranslation()
   const statusTime = useChallengeStatusTime(challenge)
 
+  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed
   const timeLabel = (() => {
+    if (isEnded) return t("Ended")
     if (!statusTime) return null
     const time = statusTime.fromNow()
     const opts = { time, interpolation: { escapeValue: false } }
@@ -70,15 +86,16 @@ export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }
         return t("Starts {{time}}", opts)
       case ChallengeStatus.Active:
         return t("Ends {{time}}", opts)
-      case ChallengeStatus.Completed:
-        return t("Ended {{time}}", opts)
       default:
         return null
     }
   })()
 
   return (
-    <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">
+    <Badge
+      variant={getChallengeStatusBadgeVariant(challenge)}
+      size="sm"
+      {...(outlined && { bg: "transparent", borderWidth: "1px", borderColor: "currentColor" })}>
       {timeLabel ?? t(challengeStatusLabel(challenge.status))}
     </Badge>
   )
