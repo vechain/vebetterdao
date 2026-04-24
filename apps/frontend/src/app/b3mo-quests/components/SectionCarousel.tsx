@@ -24,12 +24,12 @@ interface SectionCarouselProps {
 
 const BREAKPOINTS = {
   0: { slidesPerView: 1.1, spaceBetween: 12 },
-  640: { slidesPerView: 1.6, spaceBetween: 14 },
-  960: { slidesPerView: 2.2, spaceBetween: 16 },
-  1200: { slidesPerView: 2.6, spaceBetween: 16 },
+  640: { slidesPerView: 2, spaceBetween: 14 },
+  960: { slidesPerView: 2.6, spaceBetween: 16 },
+  1200: { slidesPerView: 3.3, spaceBetween: 16 },
 }
 
-const SKELETON_SLIDES = 2
+const SKELETON_SLIDES = 1
 const INITIAL_SKELETON_SLIDES = 3
 
 export const SectionCarousel = ({ title, section, items, hideWhenEmpty = true }: SectionCarouselProps) => {

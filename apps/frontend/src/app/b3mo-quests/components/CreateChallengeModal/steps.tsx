@@ -60,9 +60,9 @@ const getTypeExplainerKey = (kind: number, visibility: number, challengeType: nu
   if (kind === ChallengeKind.Stake)
     return "Each participant stakes the same amount; the participant with the most actions wins the pool. Up to 100 participants."
   if (visibility === ChallengeVisibility.Public)
-    return "Let's set up your B3MO quest. Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize, win."
+    return "Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize win."
   return challengeType === ChallengeType.SplitWin
-    ? "Let's set up your B3MO quest. Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize, win."
+    ? "Split Win — multiple winners share the prize. The fastest to complete all actions and claim the prize win."
     : "Max Actions — invitees compete; the one with the most actions wins the sponsor pool. Up to 100 participants."
 }
 
@@ -113,7 +113,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     typeFinalized,
   } = flow
 
-  const amountLabelKey = isSponsored ? "Prize amount (B3TR)" : "Bet amount (B3TR)"
+  const amountLabelKey = isSponsored ? "Total prize pool amount (B3TR)" : "Bet amount (B3TR)"
   const quickAmounts = getMinimumBetQuickAmounts(minBetAmountWei)
   const minimumBetAmount = quickAmounts[0] ?? "100"
   const currentQuickStartRounds = [minStartRound, minStartRound + 1, minStartRound + 2]
@@ -199,7 +199,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("Sponsored")}
             </Text>
             <Text textStyle="xs" mt="1" opacity={0.85}>
-              {t("The creator funds the prize. Winners are chosen from participant actions.")}
+              {t("The creator provides the prize pool. Winners are selected based on completed actions.")}
             </Text>
           </Box>
         </VStack>
@@ -425,7 +425,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
       isComplete: splitWinNumWinnersConfirmed,
       prompt: (
         <Text textStyle="sm" fontWeight="semibold">
-          {t("How many winners?")}
+          {t("How many winners will split the prize?")}
         </Text>
       ),
       answer: (

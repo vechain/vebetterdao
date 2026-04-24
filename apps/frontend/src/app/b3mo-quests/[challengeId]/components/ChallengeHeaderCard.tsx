@@ -1,4 +1,16 @@
-import { Badge, Box, Card, Heading, HStack, Icon, IconButton, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Card,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Text,
+  useDisclosure,
+  VStack,
+  Wrap,
+} from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
@@ -18,7 +30,7 @@ import { ChallengeActions, hasChallengeActions } from "../../shared/ChallengeAct
 import { getChallengeStatusBadgeVariant } from "../../shared/challengeBadgeVariants"
 import { ChallengeCreatorChip } from "../../shared/ChallengeCreatorChip"
 import { getChallengeInvalidReason } from "../../shared/challengeInvalidReason"
-import { ChallengeVisibilityBadge } from "../../shared/ChallengeStatusBadges"
+import { ChallengeVisibilityBadge, ChallengeWinnerTypeBadge } from "../../shared/ChallengeStatusBadges"
 import { useChallengeDescription } from "../../shared/useChallengeDescription"
 
 import { ChallengeAcceptModal } from "./ChallengeAcceptModal"
@@ -55,7 +67,9 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
 
   const challengeDescription = useChallengeDescription(challenge)
 
+  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed
   const statusTimeLabel = (() => {
+    if (isEnded) return t("Ended")
     if (!statusTime) return null
     const time = statusTime.fromNow()
     const opts = { time, interpolation: { escapeValue: false } }
@@ -64,8 +78,6 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
         return t("Starts {{time}}", opts)
       case ChallengeStatus.Active:
         return t("Ends {{time}}", opts)
-      case ChallengeStatus.Completed:
-        return t("Ended {{time}}", opts)
       default:
         return null
     }
@@ -74,9 +86,10 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
   const slotsLeft = Math.max(challenge.numWinners - challenge.winnersClaimed, 0)
   const challengeTitle = challenge.title || t("B3MO Quest #{{id}}", { id: challenge.challengeId })
   // Max Actions splits the pool equally across all top scorers tied at bestScore (matches contract _payoutAmount).
+  // totalPrize is an ether-formatted decimal string (see buildChallengeView), so divide as Number.
   const claimShare =
     challenge.settlementMode === SettlementMode.TopWinners && challenge.bestCount > 1
-      ? (BigInt(challenge.totalPrize) / BigInt(challenge.bestCount)).toString()
+      ? (Number(challenge.totalPrize) / challenge.bestCount).toString()
       : challenge.totalPrize
   const claimPrizeLabel = humanNumber(claimShare, claimShare, "B3TR")
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
@@ -94,10 +107,11 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
       <Card.Root variant="primary" p="4" w="full">
         <VStack align="stretch" gap="4">
           <HStack justify="space-between" align="start">
-            <HStack gap="1.5">
+            <Wrap gap="1.5">
               <ChallengeVisibilityBadge challenge={challenge} />
+              <ChallengeWinnerTypeBadge challenge={challenge} />
               <ChallengeCreatorChip creator={challenge.creator} />
-            </HStack>
+            </Wrap>
             <HStack gap="5">
               {isReacceptingInvite && (
                 <VStack align="start" gap="1" w="full">
@@ -150,7 +164,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
           </Text>
 
           <Badge
-            variant={getChallengeStatusBadgeVariant(challenge.status)}
+            variant={getChallengeStatusBadgeVariant(challenge)}
             size="md"
             w="fit-content"
             maxW="full"

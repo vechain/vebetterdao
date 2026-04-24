@@ -1,5 +1,6 @@
 import { Button, Heading, HStack, Icon, Link, Stack, Tabs, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useQueryClient } from "@tanstack/react-query"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,6 +25,7 @@ export const ChallengesPageContent = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
+  const queryClient = useQueryClient()
 
   /** null = before first client read of localStorage */
   const [stepsOpen, setStepsOpen] = useState<boolean | null>(null)
@@ -56,6 +58,16 @@ export const ChallengesPageContent = () => {
   }, [isMobile])
 
   const [tab, setTab] = useState<TabId>("current")
+
+  const handleTabChange = useCallback(
+    (next: TabId) => {
+      if (next === tab) return
+      // Reset infinite-scroll pagination so the destination tab re-mounts at page 0.
+      queryClient.removeQueries({ queryKey: ["challenges", "section"] })
+      setTab(next)
+    },
+    [tab, queryClient],
+  )
 
   return (
     <VStack align="stretch" w="full" gap="8">
@@ -91,7 +103,7 @@ export const ChallengesPageContent = () => {
       {viewerAddress ? (
         <Tabs.Root
           value={tab}
-          onValueChange={d => setTab(d.value as TabId)}
+          onValueChange={d => handleTabChange(d.value as TabId)}
           variant="line"
           size={{ base: "md", md: "lg" }}
           lazyMount

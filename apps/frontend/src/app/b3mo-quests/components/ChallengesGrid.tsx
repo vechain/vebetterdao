@@ -63,7 +63,12 @@ export const ChallengesGrid = ({ items, section, emptyDescription }: ChallengesG
         {items.map(c => (
           <ChallengeCard key={c.challengeId} challenge={c} />
         ))}
-        {section.isFetchingNextPage && Array.from({ length: 2 }).map((_, i) => <CompactSkeleton key={`skel-${i}`} />)}
+        {section.isFetchingNextPage &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <Box key={`skel-${i}`} display={i === 0 ? "block" : { base: "none", md: "block" }}>
+              <CompactSkeleton />
+            </Box>
+          ))}
       </SimpleGrid>
       <Box ref={sentinelRef} h="1px" />
     </>
