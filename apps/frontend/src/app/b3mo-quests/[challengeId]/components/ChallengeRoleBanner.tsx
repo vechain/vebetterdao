@@ -14,14 +14,26 @@ export const ChallengeRoleBanner = ({ challenge }: ChallengeRoleBannerProps) => 
     challenge.isJoined && challenge.status !== ChallengeStatus.Cancelled && challenge.status !== ChallengeStatus.Invalid
   const isSponsor = challenge.kind === ChallengeKind.Sponsored && challenge.isCreator
 
-  const isWinner = challenge.canClaim
+  const isMaxActionsWinner = challenge.canClaim
+  const isSplitWinClaimer = challenge.canClaimSplitWin
+  const isWinner = isMaxActionsWinner || isSplitWinClaimer
   if (!isParticipant && !isSponsor && !isWinner) return null
 
   const { title, description, status } = (() => {
-    if (isWinner) {
+    if (isMaxActionsWinner) {
       return {
         title: t("You won this B3MO quest!"),
-        description: t("Congratulations! Claim your prize before it's too late."),
+        description: t("You crushed it like a B3MO on caffeine! Prize unlocked, legend."),
+
+        status: "success" as const,
+      }
+    }
+
+    if (isSplitWinClaimer) {
+      return {
+        title: t("You unlocked a B3MO quest prize!"),
+        description: t("Act fast! B3MO prizes disappear faster than snacks at a dev meetup!"),
+
         status: "warning" as const,
       }
     }
