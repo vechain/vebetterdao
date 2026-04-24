@@ -73,6 +73,7 @@
     "upload-creator-nft-metadata": "npx hardhat run scripts/metadata/CreatorNFT/upload.ts",
     "start-round:testnet": "npx hardhat run scripts/emissions/startRound.ts --network vechain_testnet",
     "start-round": "npx hardhat run scripts/emissions/startRound.ts",
+    "advance-round:local": "npx hardhat run scripts/emissions/advanceToNextRound.ts --network vechain_solo",
     "get-galaxy-member-owners": "npx hardhat run scripts/galaxyMember/getGMowners.ts --network vechain_mainnet",
     "get-galaxy-member-owners:staging": "npx hardhat run scripts/galaxyMember/getGMowners.ts --network vechain_testnet",
     "get-galaxy-member-selected-tokens": "npx hardhat run scripts/galaxyMember/getGmSelectedTokens.ts --network vechain_mainnet",

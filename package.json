@@ -101,7 +101,8 @@
     "contracts:endorsement-migration:verify:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run endorsement-migration:verify:local --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run endorsement-migration:verify:testnet-staging --filter=@vechain/vebetterdao-contracts",
     "contracts:endorsement-migration:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run endorsement-migration:verify:mainnet --filter=@vechain/vebetterdao-contracts",
-    "contracts:stress:challenges:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run stress:challenges:local --filter=@vechain/vebetterdao-contracts"
+    "contracts:stress:challenges:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run stress:challenges:local --filter=@vechain/vebetterdao-contracts",
+    "contracts:advance-round": "dotenv -e .env -v NEXT_PUBLIC_APP_ENV=local -- turbo run advance-round:local --filter=@vechain/vebetterdao-contracts"
   },
   "dependencies": {
     "dotenv-cli": "latest",
