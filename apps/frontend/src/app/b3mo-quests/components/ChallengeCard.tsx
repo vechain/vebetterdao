@@ -16,7 +16,7 @@ import {
 import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
+import { LuClock, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeType, ChallengeView, ParticipantStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
@@ -34,7 +34,11 @@ import { ChallengeSplitWinClaimModal } from "../[challengeId]/components/Challen
 import { ChallengeSplitWinCreatorRefundModal } from "../[challengeId]/components/ChallengeSplitWinCreatorRefundModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
 import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
-import { ChallengeStatusBadge, ChallengeVisibilityBadge } from "../shared/ChallengeStatusBadges"
+import {
+  ChallengeStatusBadge,
+  ChallengeVisibilityBadge,
+  ChallengeWinnerTypeBadge,
+} from "../shared/ChallengeStatusBadges"
 import { useChallengeDescription } from "../shared/useChallengeDescription"
 
 interface ChallengeCardProps {
@@ -58,7 +62,6 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
 
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
-  const winnerTypeLabel = t(isSplitWin ? "Split win" : "Max actions")
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
@@ -94,22 +97,29 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
               <VStack align="start" gap="3" flex="1" minW="0">
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
-                  <ChallengeStatusBadge challenge={challenge} />
+                  <ChallengeWinnerTypeBadge challenge={challenge} />
                   {allSlotsClaimed && (
                     <Badge variant="neutral" size="sm">
                       {t("All slots claimed")}
                     </Badge>
                   )}
                 </Wrap>
-                <Heading
-                  textStyle={{ base: "lg", md: "xl" }}
-                  lineHeight="1.1"
-                  lineClamp={2}
-                  title={challengeTitle}
-                  wordBreak="break-word"
-                  overflowWrap="anywhere">
-                  {challengeTitle}
-                </Heading>
+                <HStack gap="2" align="start" w="full" minW="0">
+                  <Heading
+                    textStyle={{ base: "lg", md: "xl" }}
+                    lineHeight="1.1"
+                    lineClamp={2}
+                    title={challengeTitle}
+                    wordBreak="break-word"
+                    overflowWrap="anywhere"
+                    flex="1"
+                    minW="0">
+                    {challengeTitle}
+                  </Heading>
+                  <Box flexShrink={0}>
+                    <ChallengeStatusBadge challenge={challenge} outlined />
+                  </Box>
+                </HStack>
                 <Text textStyle="sm" color="text.subtle">
                   {challengeDescription}
                 </Text>
@@ -201,14 +211,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
             </VStack>
 
             <Wrap gap="2">
-              {isSponsored ? (
-                <Badge variant="neutral" size="sm">
-                  <Icon boxSize={3}>
-                    <LuSparkles />
-                  </Icon>
-                  {t("No bet required!")}
-                </Badge>
-              ) : (
+              {!isSponsored && (
                 <Badge variant="neutral" size="sm">
                   <Icon boxSize={3}>
                     <LuTicket />
@@ -221,12 +224,6 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                   <LuClock />
                 </Icon>
                 {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
-              </Badge>
-              <Badge variant="neutral" size="sm">
-                <Icon boxSize={3}>
-                  <LuScale />
-                </Icon>
-                {t("Winner")} {winnerTypeLabel}
               </Badge>
               {isSplitWin && (
                 <Badge variant="neutral" size="sm">
