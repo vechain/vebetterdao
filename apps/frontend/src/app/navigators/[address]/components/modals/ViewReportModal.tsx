@@ -1,13 +1,15 @@
 "use client"
 
-import { Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+import { LuExternalLink } from "react-icons/lu"
 
 import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { BaseModal } from "@/components/BaseModal"
 
 type ReportData = {
-  content: string
+  link?: string
+  text?: string
   submittedAt: string
 }
 
@@ -44,9 +46,29 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
                 })}
               </Text>
             )}
-            <Text textStyle="sm" whiteSpace="pre-wrap">
-              {report.content}
-            </Text>
+            {report.link && (
+              <Link
+                href={report.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="underline"
+                aria-label={t("Open link")}
+                lineClamp={1}>
+                <HStack gap={1}>
+                  <Text textStyle="sm" truncate>
+                    {report.link}
+                  </Text>
+                  <Icon flexShrink={0}>
+                    <LuExternalLink />
+                  </Icon>
+                </HStack>
+              </Link>
+            )}
+            {report.text && (
+              <Text textStyle="sm" whiteSpace="pre-wrap">
+                {report.text}
+              </Text>
+            )}
           </>
         ) : (
           <Text textStyle="sm" color="text.subtle">

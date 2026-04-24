@@ -22,7 +22,6 @@ type FormData = {
   twitter: string
   discord: string
   website: string
-  other: string
 }
 
 const fromMetadata = (m: NavigatorMetadata): FormData => ({
@@ -38,7 +37,6 @@ const fromMetadata = (m: NavigatorMetadata): FormData => ({
   twitter: m.socials?.twitter ?? "",
   discord: m.socials?.discord ?? "",
   website: m.socials?.website ?? "",
-  other: m.socials?.other ?? "",
 })
 
 const toMetadata = (form: FormData, original: NavigatorMetadata): NavigatorMetadata => ({
@@ -58,7 +56,7 @@ const toMetadata = (form: FormData, original: NavigatorMetadata): NavigatorMetad
     twitter: form.twitter,
     discord: form.discord,
     website: form.website,
-    other: form.other,
+    other: original.socials?.other ?? "",
   },
 })
 
@@ -109,7 +107,12 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
 
   const { sendTransaction, status } = useUpdateNavigatorMetadata({ onSuccess: handleSuccess })
 
-  const canSave = form.motivation.trim().length > 0 && form.qualifications.trim().length > 0
+  const canSave =
+    form.motivation.trim().length > 0 &&
+    form.qualifications.trim().length > 0 &&
+    (!form.isAppAffiliated || form.affiliatedAppNames.trim().length > 0) &&
+    (!form.isFoundationMember || form.foundationRole.trim().length > 0) &&
+    (!form.hasConflictsOfInterest || form.conflictsDescription.trim().length > 0)
 
   const onSave = async () => {
     setIsUploading(true)
@@ -133,10 +136,19 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
         <Heading size="lg">{t("Edit Profile")}</Heading>
 
         <VStack gap={4} align="stretch">
-          <Heading size="md">{t("Motivation and Qualifications")}</Heading>
+          <Field.Root>
+            <Field.Label>{t("Voting Strategy")}</Field.Label>
+            <Textarea
+              value={form.votingStrategy}
+              onChange={e => update({ votingStrategy: e.target.value })}
+              rows={3}
+              maxLength={1000}
+              size="sm"
+            />
+          </Field.Root>
 
           <Field.Root required>
-            <Field.Label>{t("Why do you want to become a navigator?")}</Field.Label>
+            <Field.Label>{t("Motivation")}</Field.Label>
             <Textarea
               value={form.motivation}
               onChange={e => update({ motivation: e.target.value })}
@@ -147,21 +159,10 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
           </Field.Root>
 
           <Field.Root required>
-            <Field.Label>{t("What experience do you have with VeBetterDAO and governance?")}</Field.Label>
+            <Field.Label>{t("Qualifications")}</Field.Label>
             <Textarea
               value={form.qualifications}
               onChange={e => update({ qualifications: e.target.value })}
-              rows={3}
-              maxLength={1000}
-              size="sm"
-            />
-          </Field.Root>
-
-          <Field.Root>
-            <Field.Label>{t("How will you decide which apps to vote for and how to vote on proposals?")}</Field.Label>
-            <Textarea
-              value={form.votingStrategy}
-              onChange={e => update({ votingStrategy: e.target.value })}
               rows={3}
               maxLength={1000}
               size="sm"
@@ -178,7 +179,7 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
             onCheckedChange={checked => update({ isAppAffiliated: checked })}
           />
           {form.isAppAffiliated && (
-            <Field.Root>
+            <Field.Root required>
               <Field.Label>{t("App names")}</Field.Label>
               <Input
                 placeholder={t("e.g. Mugshot, GreenCart")}
@@ -195,7 +196,7 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
             onCheckedChange={checked => update({ isFoundationMember: checked })}
           />
           {form.isFoundationMember && (
-            <Field.Root>
+            <Field.Root required>
               <Field.Label>{t("Role")}</Field.Label>
               <Input
                 placeholder={t("e.g. Developer Relations")}
@@ -212,9 +213,10 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
             onCheckedChange={checked => update({ hasConflictsOfInterest: checked })}
           />
           {form.hasConflictsOfInterest && (
-            <Field.Root>
+            <Field.Root required>
               <Field.Label>{t("Description")}</Field.Label>
               <Textarea
+                placeholder={t("Describe any conflicts...")}
                 value={form.conflictsDescription}
                 onChange={e => update({ conflictsDescription: e.target.value })}
                 rows={3}
@@ -239,20 +241,8 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
           </Field.Root>
 
           <Field.Root>
-            <Field.Label>{t("Website")}</Field.Label>
+            <Field.Label>{t("Website or Blog")}</Field.Label>
             <Input value={form.website} onChange={e => update({ website: e.target.value })} size="sm" />
-          </Field.Root>
-
-          <Field.Root>
-            <Field.Label>{t("Other links")}</Field.Label>
-            <Textarea
-              placeholder={t("https://github.com/myuser\nhttps://linkedin.com/in/myprofile")}
-              value={form.other}
-              onChange={e => update({ other: e.target.value })}
-              rows={3}
-              size="sm"
-            />
-            <Field.HelperText>{t("GitHub, LinkedIn, forum profile, etc.")}</Field.HelperText>
           </Field.Root>
         </VStack>
 

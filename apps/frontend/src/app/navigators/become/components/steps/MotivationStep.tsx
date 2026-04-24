@@ -17,6 +17,17 @@ export const MotivationStep = () => {
       </VStack>
 
       <Field.Root required>
+        <Field.Label>{t("How will you decide which apps to vote for and how to vote on proposals?")}</Field.Label>
+        <Textarea
+          placeholder={t("My voting strategy will focus on...")}
+          value={data.votingStrategy}
+          onChange={e => setData({ votingStrategy: e.target.value })}
+          rows={4}
+          maxLength={1000}
+        />
+      </Field.Root>
+
+      <Field.Root required>
         <Field.Label>{t("Why do you want to become a navigator?")}</Field.Label>
         <Textarea
           placeholder={t("My motivation for becoming a navigator is...")}
@@ -33,17 +44,6 @@ export const MotivationStep = () => {
           placeholder={t("I have been active in VeBetterDAO for...")}
           value={data.qualifications}
           onChange={e => setData({ qualifications: e.target.value })}
-          rows={4}
-          maxLength={1000}
-        />
-      </Field.Root>
-
-      <Field.Root required>
-        <Field.Label>{t("How will you decide which apps to vote for and how to vote on proposals?")}</Field.Label>
-        <Textarea
-          placeholder={t("My voting strategy will focus on...")}
-          value={data.votingStrategy}
-          onChange={e => setData({ votingStrategy: e.target.value })}
           rows={4}
           maxLength={1000}
         />
