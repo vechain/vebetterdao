@@ -222,7 +222,7 @@ export const ChallengeActions = ({
           variant="primary"
           onClick={handleClaimCreatorSplitWinRefund}
           {...cardButtonProps}>
-          {t("Refund unclaimed slots")}
+          {t("Refund slots")}
         </Button>
       )}
       {challenge.canComplete && (
