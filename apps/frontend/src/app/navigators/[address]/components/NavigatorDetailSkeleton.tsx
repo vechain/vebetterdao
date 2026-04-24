@@ -4,10 +4,10 @@ const DetailHeaderSkeleton = () => (
   <Card.Root variant="outline" borderRadius="xl">
     <Card.Body>
       <VStack gap={4} align="stretch">
-        <HStack gap={4} align="center">
-          <Skeleton boxSize={12} rounded="full" />
-          <Skeleton height="7" width="40" rounded="md" />
-          <HStack flex={1} justify="end">
+        <HStack gap={4} align="center" flexWrap="wrap">
+          <Skeleton boxSize={12} rounded="full" flexShrink={0} />
+          <Skeleton height="7" width={{ base: "32", md: "40" }} rounded="md" />
+          <HStack flex={1} minW={0} justify="end">
             <Skeleton height="8" width="24" rounded="md" />
           </HStack>
         </HStack>

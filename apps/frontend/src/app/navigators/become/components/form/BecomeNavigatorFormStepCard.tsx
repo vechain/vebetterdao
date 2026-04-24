@@ -1,4 +1,4 @@
-import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
+import { Button, Card, HStack, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -69,9 +69,17 @@ export const BecomeNavigatorFormStepCard = () => {
   const canProceed = useCallback(() => {
     switch (currentStep) {
       case 0:
-        return data.motivation.trim().length > 0 && data.qualifications.trim().length > 0
-      case 1:
+        return (
+          data.motivation.trim().length > 0 &&
+          data.qualifications.trim().length > 0 &&
+          data.votingStrategy.trim().length > 0
+        )
+      case 1: {
+        if (data.isAppAffiliated && data.affiliatedAppNames.trim().length === 0) return false
+        if (data.isFoundationMember && data.foundationRole.trim().length === 0) return false
+        if (data.hasConflictsOfInterest && data.conflictsDescription.trim().length === 0) return false
         return true
+      }
       case 2: {
         const stakeNum = Number(data.stakeAmount) || 0
         const minNum = minStake ? Number(minStake.scaled) : 0
@@ -137,7 +145,6 @@ export const BecomeNavigatorFormStepCard = () => {
           twitter: data.twitterHandle,
           discord: data.discordHandle,
           website: data.websiteUrl,
-          other: data.otherLinks,
         },
         registeredAt: new Date().toISOString(),
         address: account.address,
@@ -166,35 +173,32 @@ export const BecomeNavigatorFormStepCard = () => {
 
           {currentStepData?.content}
 
-          <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
-            <HStack gap={4} w="full">
-              {currentStep !== FIRST_STEP && (
-                <Button w="40" type="button" onClick={goBack} variant="secondary" size="lg">
-                  {t("Back")}
-                </Button>
-              )}
-              {currentStep === LAST_STEP ? (
-                <Button
-                  w="40"
-                  variant="primary"
-                  onClick={onSubmit}
-                  disabled={!canProceed() || isSubmitting}
-                  loading={isSubmitting}
-                  size="lg">
-                  {t("Register")}
-                </Button>
-              ) : (
-                <Button w="40" variant="primary" onClick={goNext} disabled={!canProceed()} size="lg">
-                  {t("Continue")}
-                </Button>
-              )}
-            </HStack>
-            {currentStep === FIRST_STEP && (
+          <HStack gap={4} w="full">
+            {currentStep === FIRST_STEP ? (
               <Button w="40" variant="link" onClick={() => router.push("/navigators")} size="lg">
                 {t("Cancel")}
               </Button>
+            ) : (
+              <Button w="40" type="button" onClick={goBack} variant="secondary" size="lg">
+                {t("Back")}
+              </Button>
             )}
-          </Stack>
+            {currentStep === LAST_STEP ? (
+              <Button
+                w="40"
+                variant="primary"
+                onClick={onSubmit}
+                disabled={!canProceed() || isSubmitting}
+                loading={isSubmitting}
+                size="lg">
+                {t("Register")}
+              </Button>
+            ) : (
+              <Button w="40" variant="primary" onClick={goNext} disabled={!canProceed()} size="lg">
+                {t("Continue")}
+              </Button>
+            )}
+          </HStack>
         </VStack>
       </Card.Body>
     </Card.Root>

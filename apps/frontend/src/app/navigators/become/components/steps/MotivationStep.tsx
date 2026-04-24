@@ -38,7 +38,7 @@ export const MotivationStep = () => {
         />
       </Field.Root>
 
-      <Field.Root>
+      <Field.Root required>
         <Field.Label>{t("How will you decide which apps to vote for and how to vote on proposals?")}</Field.Label>
         <Textarea
           placeholder={t("My voting strategy will focus on...")}

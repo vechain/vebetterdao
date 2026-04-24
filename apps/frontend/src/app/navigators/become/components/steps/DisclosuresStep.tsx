@@ -45,7 +45,7 @@ export const DisclosuresStep = () => {
           onCheckedChange={checked => setData({ isAppAffiliated: checked })}
         />
         {data.isAppAffiliated && (
-          <Field.Root>
+          <Field.Root required>
             <Field.Label>{t("App names")}</Field.Label>
             <Input
               placeholder={t("e.g. Mugshot, GreenCart")}
@@ -53,7 +53,6 @@ export const DisclosuresStep = () => {
               onChange={e => setData({ affiliatedAppNames: e.target.value })}
               size="sm"
             />
-            <Field.HelperText>{t("List the apps you are affiliated with")}</Field.HelperText>
           </Field.Root>
         )}
       </VStack>
@@ -65,7 +64,7 @@ export const DisclosuresStep = () => {
           onCheckedChange={checked => setData({ isFoundationMember: checked })}
         />
         {data.isFoundationMember && (
-          <Field.Root>
+          <Field.Root required>
             <Field.Label>{t("Role")}</Field.Label>
             <Input
               placeholder={t("e.g. Developer Relations")}
@@ -73,7 +72,6 @@ export const DisclosuresStep = () => {
               onChange={e => setData({ foundationRole: e.target.value })}
               size="sm"
             />
-            <Field.HelperText>{t("What is your role at the foundation?")}</Field.HelperText>
           </Field.Root>
         )}
       </VStack>
@@ -85,7 +83,7 @@ export const DisclosuresStep = () => {
           onCheckedChange={checked => setData({ hasConflictsOfInterest: checked })}
         />
         {data.hasConflictsOfInterest && (
-          <Field.Root>
+          <Field.Root required>
             <Field.Label>{t("Description")}</Field.Label>
             <Textarea
               placeholder={t("Describe any conflicts...")}
@@ -125,28 +123,15 @@ export const DisclosuresStep = () => {
           value={data.discordHandle}
           onChange={e => setData({ discordHandle: e.target.value })}
         />
-        <Field.HelperText>{t("Your Discord username")}</Field.HelperText>
       </Field.Root>
 
       <Field.Root>
-        <Field.Label>{t("Website")}</Field.Label>
+        <Field.Label>{t("Personal website or blog")}</Field.Label>
         <Input
           placeholder={t("https://mywebsite.com")}
           value={data.websiteUrl}
           onChange={e => setData({ websiteUrl: e.target.value })}
         />
-        <Field.HelperText>{t("Personal website or blog")}</Field.HelperText>
-      </Field.Root>
-
-      <Field.Root>
-        <Field.Label>{t("Other links")}</Field.Label>
-        <Textarea
-          placeholder={t("https://github.com/myuser\nhttps://linkedin.com/in/myprofile")}
-          value={data.otherLinks}
-          onChange={e => setData({ otherLinks: e.target.value })}
-          rows={3}
-        />
-        <Field.HelperText>{t("GitHub, LinkedIn, forum profile, etc.")}</Field.HelperText>
       </Field.Root>
     </VStack>
   )

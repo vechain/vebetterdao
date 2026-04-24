@@ -1,8 +1,9 @@
 import { Button, Field, Heading, HStack, Input, Switch, Text, Textarea, VStack } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { getGetMetadataURIQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetMetadataURI"
 import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { BaseModal } from "@/components/BaseModal"
 import { useUpdateNavigatorMetadata } from "@/hooks/navigator/useUpdateNavigatorMetadata"
@@ -84,16 +85,15 @@ const ToggleField = ({
 type Props = {
   isOpen: boolean
   onClose: () => void
+  address: string
   metadata: NavigatorMetadata
-  metadataURI: string
 }
 
-export const EditNavigatorProfileModal = ({ isOpen, onClose, metadata, metadataURI }: Props) => {
+export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }: Props) => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [form, setForm] = useState<FormData>(() => fromMetadata(metadata))
   const [isUploading, setIsUploading] = useState(false)
-  const pendingUpdateRef = useRef<{ newMetadata: NavigatorMetadata; newURI: string } | null>(null)
 
   useEffect(() => {
     if (isOpen) setForm(fromMetadata(metadata))
@@ -102,14 +102,10 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, metadata, metadataU
   const update = (partial: Partial<FormData>) => setForm(prev => ({ ...prev, ...partial }))
 
   const handleSuccess = useCallback(() => {
-    if (pendingUpdateRef.current) {
-      const { newMetadata, newURI } = pendingUpdateRef.current
-      queryClient.setQueryData(["navigator", "metadata", metadataURI], newMetadata)
-      queryClient.setQueryData(["navigator", "metadata", newURI], newMetadata)
-      pendingUpdateRef.current = null
-    }
+    // Refetch the on-chain metadataURI; the new URI then drives a fresh IPFS fetch.
+    queryClient.invalidateQueries({ queryKey: getGetMetadataURIQueryKey(address) })
     onClose()
-  }, [onClose, queryClient, metadataURI])
+  }, [onClose, queryClient, address])
 
   const { sendTransaction, status } = useUpdateNavigatorMetadata({ onSuccess: handleSuccess })
 
@@ -121,12 +117,9 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, metadata, metadataU
       const newMetadata = toMetadata(form, metadata)
       const blob = new Blob([JSON.stringify(newMetadata)], { type: "application/json" })
       const ipfsHash = await uploadBlobToIPFS(blob, "navigator-metadata.json")
-      const uri = `ipfs://${ipfsHash}`
-      pendingUpdateRef.current = { newMetadata, newURI: uri }
-      await sendTransaction({ metadataURI: uri })
+      await sendTransaction({ metadataURI: `ipfs://${ipfsHash}` })
     } catch (error) {
       console.error("Failed to update metadata:", error)
-      pendingUpdateRef.current = null
     } finally {
       setIsUploading(false)
     }

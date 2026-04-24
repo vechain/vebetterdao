@@ -19,7 +19,6 @@ export type NavigatorFormData = {
   twitterHandle: string
   discordHandle: string
   websiteUrl: string
-  otherLinks: string
 
   // Step 4: Stake
   stakeAmount: string
@@ -51,7 +50,6 @@ const initialData: NavigatorFormData = {
   twitterHandle: "",
   discordHandle: "",
   websiteUrl: "",
-  otherLinks: "",
   stakeAmount: "",
   acceptedVotingPenalty: false,
   acceptedReportPenalty: false,

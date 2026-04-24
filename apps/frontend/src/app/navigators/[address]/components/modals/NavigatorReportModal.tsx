@@ -6,7 +6,7 @@ import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/us
 import { BaseModal } from "@/components/BaseModal"
 import { useSubmitNavigatorReport } from "@/hooks/navigator/useSubmitNavigatorReport"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { toIPFSURL, uploadBlobToIPFS } from "@/utils/ipfs"
+import { uploadBlobToIPFS } from "@/utils/ipfs"
 
 type Props = {
   isOpen: boolean
@@ -38,8 +38,7 @@ export const NavigatorReportModal = ({ isOpen, onClose }: Props) => {
       }
       const blob = new Blob([JSON.stringify(reportData)], { type: "application/json" })
       const cid = await uploadBlobToIPFS(blob, "navigator-report.json")
-      const reportURI = toIPFSURL(cid, "navigator-report.json")
-      submitReport.sendTransaction({ reportURI })
+      submitReport.sendTransaction({ reportURI: `ipfs://${cid}` })
     } catch (err) {
       console.error("Failed to upload report:", err)
     } finally {

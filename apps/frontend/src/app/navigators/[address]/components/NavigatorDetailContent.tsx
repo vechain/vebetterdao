@@ -1,4 +1,4 @@
-import { Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next"
 import { LuCompass } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetMetadataURI } from "@/api/contracts/navigatorRegistry/hooks/useGetMetadataURI"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useAllocationsRoundsEvents } from "@/api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
@@ -56,7 +57,10 @@ export const NavigatorDetailContent = () => {
   const [isReportOpen, setIsReportOpen] = useState(false)
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address, { waitForIndexer })
-  const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(nav?.metadataURI)
+  // Read metadataURI directly from the contract so edits reflect immediately on refresh
+  // without waiting for the indexer to pick up MetadataURIUpdated events.
+  const { data: metadataURI } = useGetMetadataURI(address)
+  const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(metadataURI)
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
@@ -120,7 +124,7 @@ export const NavigatorDetailContent = () => {
       <PageBreadcrumb
         items={[
           { label: t("Navigators"), href: "/navigators" },
-          { label: domainData?.domain ? displayName : t("Overview"), href: `/navigators/${address}` },
+          { label: t("Overview"), href: `/navigators/${address}` },
         ]}
       />
 
@@ -171,12 +175,12 @@ export const NavigatorDetailContent = () => {
       {isOwnPage && (
         <>
           <Heading size="lg">{t("Tasks & Rewards")}</Heading>
-          <HStack gap={6} align="stretch" w="full">
+          <Stack direction={{ base: "column", md: "row" }} gap={6} align="stretch" w="full">
             {(status === "ACTIVE" || status === "EXITING") && (
               <NavigatorTaskList address={address} onSubmitReport={() => setIsReportOpen(true)} />
             )}
             <NavigatorRewardsCard address={address} />
-          </HStack>
+          </Stack>
         </>
       )}
 
@@ -207,12 +211,12 @@ export const NavigatorDetailContent = () => {
       <ManageStakeModal isOpen={isManageStakeOpen} onClose={() => setIsManageStakeOpen(false)} navigator={nav} />
       <WithdrawStakeModal isOpen={isWithdrawStakeOpen} onClose={() => setIsWithdrawStakeOpen(false)} navigator={nav} />
       <AnnounceExitModal isOpen={isAnnounceExitOpen} onClose={() => setIsAnnounceExitOpen(false)} />
-      {metadata && nav.metadataURI && (
+      {metadata && metadataURI && (
         <EditNavigatorProfileModal
           isOpen={isEditProfileOpen}
           onClose={() => setIsEditProfileOpen(false)}
+          address={address}
           metadata={metadata}
-          metadataURI={nav.metadataURI}
         />
       )}
       <NavigatorReportModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} />
