@@ -94,6 +94,12 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeStatusBadge challenge={challenge} />
+                  <Badge variant="neutral" size="sm">
+                    <Icon boxSize={3}>
+                      <LuScale />
+                    </Icon>
+                    {t("Winner")} {winnerTypeLabel}
+                  </Badge>
                   {allSlotsClaimed && (
                     <Badge variant="neutral" size="sm">
                       {t("All slots claimed")}
@@ -220,12 +226,6 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                   <LuClock />
                 </Icon>
                 {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
-              </Badge>
-              <Badge variant="neutral" size="sm">
-                <Icon boxSize={3}>
-                  <LuScale />
-                </Icon>
-                {t("Winner")} {winnerTypeLabel}
               </Badge>
               {isSplitWin && (
                 <Badge variant="neutral" size="sm">
