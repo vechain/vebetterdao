@@ -745,7 +745,7 @@
   "Enabling automation...": "자동화 활성화 중...",
   "Enabling rewards pool...": "리워드 풀 활성화 중...",
   "End round": "라운드 종료",
-  "Ended {{time}}": "{{time}}에 종료됨",
+  "Ended": "종료됨",
   "Ended and executed": "종료되고 실행됨",
   "Ended and queued": "종료되고 대기 중",
   "Ended and rejected": "종료되고 거부됨",

@@ -745,7 +745,7 @@
   "Enabling automation...": "正在啟用自動化...",
   "Enabling rewards pool...": "正在啟用獎勵池...",
   "End round": "結束輪次",
-  "Ended {{time}}": "{{time}}已結束",
+  "Ended": "已結束",
   "Ended and executed": "已結束並執行",
   "Ended and queued": "已結束並排入隊列",
   "Ended and rejected": "已結束並被拒絕",

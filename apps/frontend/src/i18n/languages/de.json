@@ -745,7 +745,7 @@
   "Enabling automation...": "Automatisierung wird aktiviert...",
   "Enabling rewards pool...": "Belohnungspool wird aktiviert...",
   "End round": "Runde beenden",
-  "Ended {{time}}": "Beendet {{time}}",
+  "Ended": "Beendet",
   "Ended and executed": "Beendet und ausgeführt",
   "Ended and queued": "Beendet und in die Warteschlange eingereiht",
   "Ended and rejected": "Beendet und abgelehnt",

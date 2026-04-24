@@ -745,7 +745,7 @@
   "Enabling automation...": "Aktiverar automation...",
   "Enabling rewards pool...": "Aktiverar belöningspool...",
   "End round": "Avsluta omgång",
-  "Ended {{time}}": "Avslutades {{time}}",
+  "Ended": "Avslutad",
   "Ended and executed": "Avslutad och genomförd",
   "Ended and queued": "Avslutad och i kö",
   "Ended and rejected": "Avslutad och avvisad",

@@ -26,6 +26,14 @@ export const ChallengeRoleBanner = ({ challenge }: ChallengeRoleBannerProps) => 
       }
     }
 
+    if (challenge.canComplete) {
+      return {
+        title: t("Complete B3MO quest"),
+        description: t("Complete this B3MO quest to lock in the results and let winners claim their prize."),
+        status: "info" as const,
+      }
+    }
+
     if (isSponsor) {
       switch (challenge.status) {
         case ChallengeStatus.Pending:

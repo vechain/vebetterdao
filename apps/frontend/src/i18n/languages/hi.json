@@ -745,7 +745,7 @@
   "Enabling automation...": "स्वचालन सक्षम कर रहा है...",
   "Enabling rewards pool...": "इनाम पूल सक्षम कर रहा है...",
   "End round": "राउंड समाप्त करें",
-  "Ended {{time}}": "समाप्त हुआ {{time}}",
+  "Ended": "समाप्त",
   "Ended and executed": "समाप्त और निष्पादित",
   "Ended and queued": "समाप्त और कतार में",
   "Ended and rejected": "समाप्त और अस्वीकृत",

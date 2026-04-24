@@ -745,7 +745,7 @@
   "Enabling automation...": "Activation de l'automatisation...",
   "Enabling rewards pool...": "Activation de la piscine de récompenses...",
   "End round": "Terminer le tour",
-  "Ended {{time}}": "Terminé {{time}}",
+  "Ended": "Terminé",
   "Ended and executed": "Terminé et exécuté",
   "Ended and queued": "Terminé et mis en file d'attente",
   "Ended and rejected": "Terminé et rejeté",

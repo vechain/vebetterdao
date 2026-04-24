@@ -61,7 +61,9 @@ export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }
   const { t } = useTranslation()
   const statusTime = useChallengeStatusTime(challenge)
 
+  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed
   const timeLabel = (() => {
+    if (isEnded) return t("Ended")
     if (!statusTime) return null
     const time = statusTime.fromNow()
     const opts = { time, interpolation: { escapeValue: false } }
@@ -70,15 +72,13 @@ export const ChallengeStatusBadge = ({ challenge }: { challenge: ChallengeView }
         return t("Starts {{time}}", opts)
       case ChallengeStatus.Active:
         return t("Ends {{time}}", opts)
-      case ChallengeStatus.Completed:
-        return t("Ended {{time}}", opts)
       default:
         return null
     }
   })()
 
   return (
-    <Badge variant={getChallengeStatusBadgeVariant(challenge.status)} size="sm">
+    <Badge variant={getChallengeStatusBadgeVariant(challenge)} size="sm">
       {timeLabel ?? t(challengeStatusLabel(challenge.status))}
     </Badge>
   )

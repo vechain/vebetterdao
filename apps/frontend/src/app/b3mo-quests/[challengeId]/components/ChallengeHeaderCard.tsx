@@ -55,7 +55,9 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
 
   const challengeDescription = useChallengeDescription(challenge)
 
+  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed
   const statusTimeLabel = (() => {
+    if (isEnded) return t("Ended")
     if (!statusTime) return null
     const time = statusTime.fromNow()
     const opts = { time, interpolation: { escapeValue: false } }
@@ -64,8 +66,6 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
         return t("Starts {{time}}", opts)
       case ChallengeStatus.Active:
         return t("Ends {{time}}", opts)
-      case ChallengeStatus.Completed:
-        return t("Ended {{time}}", opts)
       default:
         return null
     }
@@ -150,7 +150,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
           </Text>
 
           <Badge
-            variant={getChallengeStatusBadgeVariant(challenge.status)}
+            variant={getChallengeStatusBadgeVariant(challenge)}
             size="md"
             w="fit-content"
             maxW="full"

@@ -745,7 +745,7 @@
   "Enabling automation...": "Otomasyon etkinleştiriliyor...",
   "Enabling rewards pool...": "Ödül havuzu etkinleştiriliyor...",
   "End round": "Turu bitir",
-  "Ended {{time}}": "{{time}} sona erdi",
+  "Ended": "Sona erdi",
   "Ended and executed": "Sonlandı ve yürütüldü",
   "Ended and queued": "Sonlandı ve sıraya alındı",
   "Ended and rejected": "Sonlandı ve reddedildi",

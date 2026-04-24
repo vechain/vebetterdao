@@ -729,7 +729,7 @@
   "Enabling automation...": "Включение автоматизации...",
   "Enabling rewards pool...": "Включение пула наград...",
   "End round": "Завершить раунд",
-  "Ended {{time}}": "Завершилось {{time}}",
+  "Ended": "Завершено",
   "Ended and executed": "Завершено и выполнено",
   "Ended and queued": "Завершено и в очереди",
   "Ended and rejected": "Завершено и отклонено",

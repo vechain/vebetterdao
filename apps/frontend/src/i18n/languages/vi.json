@@ -745,7 +745,7 @@
   "Enabling automation...": "Đang kích hoạt tự động hóa...",
   "Enabling rewards pool...": "Đang bật quỹ thưởng...",
   "End round": "Kết thúc vòng",
-  "Ended {{time}}": "Đã kết thúc {{time}}",
+  "Ended": "Đã kết thúc",
   "Ended and executed": "Đã kết thúc và thực hiện",
   "Ended and queued": "Đã kết thúc và được đưa vào hàng đợi",
   "Ended and rejected": "Đã kết thúc và bị từ chối",

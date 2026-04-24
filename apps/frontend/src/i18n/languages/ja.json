@@ -745,7 +745,7 @@
   "Enabling automation...": "オートメーションを有効にしています...",
   "Enabling rewards pool...": "報酬プールを有効にしています...",
   "End round": "ラウンドを終了",
-  "Ended {{time}}": "{{time}}に終了",
+  "Ended": "終了",
   "Ended and executed": "終了して実行されました",
   "Ended and queued": "終了してキューに追加されました",
   "Ended and rejected": "終了して拒否されました",
