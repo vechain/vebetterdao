@@ -59,6 +59,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const winnerTypeLabel = t(isSplitWin ? "Split win" : "Max actions")
+  const winnerTypePalette = isSplitWin ? "blue" : "purple"
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
@@ -94,6 +95,12 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeStatusBadge challenge={challenge} />
+                  <Badge variant="outline" size="sm" colorPalette={winnerTypePalette}>
+                    <Icon boxSize={3}>
+                      <LuScale />
+                    </Icon>
+                    {winnerTypeLabel}
+                  </Badge>
                   {allSlotsClaimed && (
                     <Badge variant="neutral" size="sm">
                       {t("All slots claimed")}
@@ -220,12 +227,6 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                   <LuClock />
                 </Icon>
                 {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
-              </Badge>
-              <Badge variant="neutral" size="sm">
-                <Icon boxSize={3}>
-                  <LuScale />
-                </Icon>
-                {t("Winner")} {winnerTypeLabel}
               </Badge>
               {isSplitWin && (
                 <Badge variant="neutral" size="sm">
