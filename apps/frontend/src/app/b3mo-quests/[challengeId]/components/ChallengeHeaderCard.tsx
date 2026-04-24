@@ -1,4 +1,16 @@
-import { Badge, Box, Card, Heading, HStack, Icon, IconButton, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Card,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Text,
+  useDisclosure,
+  VStack,
+  Wrap,
+} from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
@@ -18,7 +30,7 @@ import { ChallengeActions, hasChallengeActions } from "../../shared/ChallengeAct
 import { getChallengeStatusBadgeVariant } from "../../shared/challengeBadgeVariants"
 import { ChallengeCreatorChip } from "../../shared/ChallengeCreatorChip"
 import { getChallengeInvalidReason } from "../../shared/challengeInvalidReason"
-import { ChallengeVisibilityBadge } from "../../shared/ChallengeStatusBadges"
+import { ChallengeVisibilityBadge, ChallengeWinnerTypeBadge } from "../../shared/ChallengeStatusBadges"
 import { useChallengeDescription } from "../../shared/useChallengeDescription"
 
 import { ChallengeAcceptModal } from "./ChallengeAcceptModal"
@@ -76,7 +88,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
   // Max Actions splits the pool equally across all top scorers tied at bestScore (matches contract _payoutAmount).
   const claimShare =
     challenge.settlementMode === SettlementMode.TopWinners && challenge.bestCount > 1
-      ? (BigInt(challenge.totalPrize) / BigInt(challenge.bestCount)).toString()
+      ? (challenge.totalPrize / challenge.bestCount).toString()
       : challenge.totalPrize
   const claimPrizeLabel = humanNumber(claimShare, claimShare, "B3TR")
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
@@ -94,10 +106,11 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
       <Card.Root variant="primary" p="4" w="full">
         <VStack align="stretch" gap="4">
           <HStack justify="space-between" align="start">
-            <HStack gap="1.5">
+            <Wrap gap="1.5">
               <ChallengeVisibilityBadge challenge={challenge} />
+              <ChallengeWinnerTypeBadge challenge={challenge} />
               <ChallengeCreatorChip creator={challenge.creator} />
-            </HStack>
+            </Wrap>
             <HStack gap="5">
               {isReacceptingInvite && (
                 <VStack align="start" gap="1" w="full">

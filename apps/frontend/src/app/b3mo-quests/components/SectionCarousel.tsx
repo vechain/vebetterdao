@@ -24,9 +24,9 @@ interface SectionCarouselProps {
 
 const BREAKPOINTS = {
   0: { slidesPerView: 1.1, spaceBetween: 12 },
-  640: { slidesPerView: 2.2, spaceBetween: 14 },
-  960: { slidesPerView: 3.2, spaceBetween: 16 },
-  1200: { slidesPerView: 3.6, spaceBetween: 16 },
+  640: { slidesPerView: 2, spaceBetween: 14 },
+  960: { slidesPerView: 2.6, spaceBetween: 16 },
+  1200: { slidesPerView: 3.3, spaceBetween: 16 },
 }
 
 const SKELETON_SLIDES = 1

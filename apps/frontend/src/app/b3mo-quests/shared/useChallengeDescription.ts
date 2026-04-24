@@ -27,7 +27,7 @@ export const useChallengeDescription = (challenge: ChallengeView): string => {
   // Max Actions splits the pool equally across tied top scorers (matches contract _payoutAmount).
   const claimShare =
     challenge.settlementMode === SettlementMode.TopWinners && challenge.bestCount > 1
-      ? (BigInt(challenge.totalPrize) / BigInt(challenge.bestCount)).toString()
+      ? (challenge.totalPrize / challenge.bestCount).toString()
       : challenge.totalPrize
   const claimPrizeLabel = humanNumber(claimShare, claimShare, "B3TR")
 
