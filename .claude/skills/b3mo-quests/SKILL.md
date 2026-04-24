@@ -110,7 +110,7 @@ Each section hook picks a fetcher + filter. The indexer's `ChallengeFilter` (see
 | What Others Are Doing | `fetchWalletChallenges(viewer, "OthersActive")` | `fetchPublicChallenges("Active")` |
 | History | `fetchWalletChallenges(viewer, "History")` | — (viewer-only) |
 
-`NeededAction` bucket on the server already covers outstanding invites + claimable + finalizable + reclaimable. `History` covers terminal (Completed/Cancelled/Invalid) challenges the wallet was involved in (including invited-then-left users — server normalises). The UI `CurrentTab` still dedupes across sections in render order.
+`NeededAction` bucket on the server already covers outstanding invites + claimable + finalizable + reclaimable. `History` covers two cases the user perceives as "no longer current": (1) terminal-state (Completed/Cancelled/Invalid) challenges the wallet was involved in, plus (2) still-live (Pending/Active) challenges the wallet has actively bowed out of — declined invitations and joined-then-left participants (detected as non-creator records with `participantStatus ∈ {None, Declined}`). Re-accept / re-join works straight from the History card via the existing `canAccept` / `canJoin` flags. The UI `CurrentTab` still dedupes across sections in render order; History is its own tab so a left-Pending-Public challenge can appear in both History and OpenToJoin.
 
 ## resolveChallengeDetail flags ([resolveChallengeDetail.ts](apps/frontend/src/api/challenges/resolveChallengeDetail.ts))
 
