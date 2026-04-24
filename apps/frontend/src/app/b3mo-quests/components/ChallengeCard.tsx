@@ -16,7 +16,7 @@ import {
 import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { LuClock, LuScale, LuSparkles, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
+import { LuClock, LuSparkles, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeType, ChallengeView, ParticipantStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
@@ -59,6 +59,8 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const winnerTypeLabel = t(isSplitWin ? "Split win" : "Max actions")
+  const WinnerTypeIcon = isSplitWin ? LuTrophy : LuTarget
+  const winnerTypeBadgeVariant = isSplitWin ? "info" : "purple"
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
@@ -94,6 +96,12 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeStatusBadge challenge={challenge} />
+                  <Badge variant={winnerTypeBadgeVariant} size="sm">
+                    <Icon boxSize={3}>
+                      <WinnerTypeIcon />
+                    </Icon>
+                    {winnerTypeLabel}
+                  </Badge>
                   {allSlotsClaimed && (
                     <Badge variant="neutral" size="sm">
                       {t("All slots claimed")}
@@ -220,12 +228,6 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                   <LuClock />
                 </Icon>
                 {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
-              </Badge>
-              <Badge variant="neutral" size="sm">
-                <Icon boxSize={3}>
-                  <LuScale />
-                </Icon>
-                {t("Winner")} {winnerTypeLabel}
               </Badge>
               {isSplitWin && (
                 <Badge variant="neutral" size="sm">
