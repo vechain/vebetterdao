@@ -1,4 +1,4 @@
-import { Badge, Button, Card, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Badge, Box, Button, Card, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
@@ -37,6 +37,51 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 8, 6)
   const twitterHandle = textRecords?.["com.x"]
+
+  const actionButton = (() => {
+    if (isOwnCard && isNavigator) {
+      return (
+        <Button
+          variant="outline"
+          size="xs"
+          width={{ base: "full", md: "auto" }}
+          onClick={e => {
+            e.stopPropagation()
+            router.push(`/navigators/${nav.address}`)
+          }}>
+          <LuSettings />
+          {t("Manage")}
+        </Button>
+      )
+    }
+    if (!isNavigator && isActive && onDelegate) {
+      return isDelegatedHere ? (
+        <Button
+          variant="primary"
+          size="xs"
+          width={{ base: "full", md: "auto" }}
+          onClick={e => {
+            e.stopPropagation()
+            onDelegate(nav)
+          }}>
+          {t("Manage Delegation")}
+        </Button>
+      ) : (
+        <Button
+          variant="primary"
+          size="xs"
+          width={{ base: "full", md: "auto" }}
+          disabled={isAtCapacity}
+          onClick={e => {
+            e.stopPropagation()
+            onDelegate(nav)
+          }}>
+          {t("Delegate")}
+        </Button>
+      )
+    }
+    return null
+  })()
 
   return (
     <Card.Root
@@ -78,41 +123,7 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
                     <FaXTwitter size={14} />
                   </HStack>
                 )}
-                {isOwnCard && isNavigator ? (
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    onClick={e => {
-                      e.stopPropagation()
-                      router.push(`/navigators/${nav.address}`)
-                    }}>
-                    <LuSettings />
-                    {t("Manage")}
-                  </Button>
-                ) : !isNavigator && isActive && onDelegate ? (
-                  isDelegatedHere ? (
-                    <Button
-                      variant="primary"
-                      size="xs"
-                      onClick={e => {
-                        e.stopPropagation()
-                        onDelegate(nav)
-                      }}>
-                      {t("Manage Delegation")}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      size="xs"
-                      disabled={isAtCapacity}
-                      onClick={e => {
-                        e.stopPropagation()
-                        onDelegate(nav)
-                      }}>
-                      {t("Delegate")}
-                    </Button>
-                  )
-                ) : null}
+                {actionButton && <Box display={{ base: "none", md: "flex" }}>{actionButton}</Box>}
               </HStack>
             </HStack>
 
@@ -154,6 +165,8 @@ export const NavigatorCard = ({ navigator: nav, onDelegate }: Props) => {
                 {t("Trusted by {{count}} citizens", { count: nav.citizenCount })}
               </Text>
             </HStack>
+
+            {actionButton && <Box display={{ base: "flex", md: "none" }}>{actionButton}</Box>}
           </VStack>
         </VStack>
       </Card.Body>

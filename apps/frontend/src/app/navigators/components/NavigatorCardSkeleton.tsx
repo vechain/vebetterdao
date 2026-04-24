@@ -13,6 +13,7 @@ export const NavigatorCardSkeleton = () => (
                 <Skeleton height="3" width="14" rounded="sm" />
               </VStack>
             </HStack>
+            <Skeleton height="6" width="20" rounded="md" display={{ base: "none", md: "block" }} />
           </HStack>
           <VStack gap={1} align="stretch">
             <Skeleton height="3" width="full" rounded="sm" />
@@ -33,6 +34,8 @@ export const NavigatorCardSkeleton = () => (
             </HStack>
           </HStack>
           <Skeleton height="3" width="40" rounded="sm" />
+
+          <Skeleton height="6" width="full" rounded="md" display={{ base: "block", md: "none" }} />
         </VStack>
       </VStack>
     </Card.Body>
