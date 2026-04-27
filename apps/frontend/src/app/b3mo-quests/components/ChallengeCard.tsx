@@ -33,6 +33,7 @@ import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefun
 import { ChallengeSplitWinClaimModal } from "../[challengeId]/components/ChallengeSplitWinClaimModal"
 import { ChallengeSplitWinCreatorRefundModal } from "../[challengeId]/components/ChallengeSplitWinCreatorRefundModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
+import { ChallengeCreatorChip } from "../shared/ChallengeCreatorChip"
 import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
 import {
   ChallengeStatusBadge,
@@ -123,6 +124,22 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Text textStyle="sm" color="text.subtle">
                   {challengeDescription}
                 </Text>
+                <HStack gap="2" flexWrap="wrap">
+                  <HStack gap="1.5" minW="0">
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {t("Created by")}
+                    </Text>
+                    <ChallengeCreatorChip creator={challenge.creator} />
+                  </HStack>
+                  {isSplitWin && (
+                    <Badge variant="neutral" size="sm">
+                      <Icon boxSize={3}>
+                        <LuUsers />
+                      </Icon>
+                      {t("Participants")} {humanNumber(challenge.participantCount)}
+                    </Badge>
+                  )}
+                </HStack>
               </VStack>
             </Stack>
 
