@@ -33,6 +33,7 @@ import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefun
 import { ChallengeSplitWinClaimModal } from "../[challengeId]/components/ChallengeSplitWinClaimModal"
 import { ChallengeSplitWinCreatorRefundModal } from "../[challengeId]/components/ChallengeSplitWinCreatorRefundModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
+import { ChallengeCreatorChip } from "../shared/ChallengeCreatorChip"
 import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
 import {
   ChallengeStatusBadge,
@@ -94,7 +95,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
               justify="space-between"
               align={isReacceptingInvite ? "stretch" : { base: "stretch", md: "start" }}
               gap="4">
-              <VStack align="start" gap="3" flex="1" minW="0">
+              <VStack align="start" gap="2" flex="1" minW="0">
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeWinnerTypeBadge challenge={challenge} />
@@ -120,6 +121,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                     <ChallengeStatusBadge challenge={challenge} outlined />
                   </Box>
                 </HStack>
+                <ChallengeCreatorChip creator={challenge.creator} noBackground />
                 <Text textStyle="sm" color="text.subtle">
                   {challengeDescription}
                 </Text>
@@ -225,6 +227,14 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 </Icon>
                 {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
               </Badge>
+              {isSplitWin && (
+                <Badge variant="neutral" size="sm">
+                  <Icon boxSize={3}>
+                    <LuUsers />
+                  </Icon>
+                  {t("Participants")} {humanNumber(challenge.participantCount)}
+                </Badge>
+              )}
               {isSplitWin && (
                 <Badge variant="neutral" size="sm">
                   <Icon boxSize={3}>
