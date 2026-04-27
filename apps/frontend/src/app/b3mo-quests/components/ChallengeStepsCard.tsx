@@ -48,7 +48,7 @@ export const ChallengeStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
         heading: t("1. What are B3MO Quests?"),
         listItems: [
           t(
-            "B3MO Quests are reward-based challenges powered by B3MO. Compete with friends, sponsor someone you want to motivate, or take on app-sponsored B3MO quests - all with B3TR on the line.",
+            "B3MO Quests are reward-based quests powered by B3MO. Compete with friends, sponsor someone you want to motivate, or take on app-sponsored B3MO quests - all with B3TR on the line.",
           ),
           t(
             "B3MO holds funds, verifies your actions, determines winners, and pays out automatically - every B3MO quest is fair and trustless.",
@@ -59,10 +59,10 @@ export const ChallengeStepsCard = ({ isOpen, onClose }: { isOpen: boolean; onClo
         key: "actions",
         title: t("Stake & compete"),
         image: "/assets/mascot/14_Phone.webp",
-        heading: t("2. Challenge a Friend"),
+        heading: t("2. B3MO Quest with a Friend"),
         listItems: [
           t(
-            "Challenge another user to a duel. Both of you stake B3TR and compete by completing sustainable actions across chosen apps. Whoever earns more points wins the entire pool.",
+            "Create a B3MO Quest with another user. Both of you stake B3TR and compete by completing sustainable actions across chosen apps. Whoever earns more points wins the entire pool.",
           ),
           t("You can also form squads and compete team vs team - points from all members count."),
         ],

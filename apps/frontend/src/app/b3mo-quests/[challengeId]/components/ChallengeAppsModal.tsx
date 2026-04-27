@@ -23,7 +23,7 @@ export const ChallengeAppsModal = ({ isOpen, onClose, appIds, appNames }: Challe
           </Heading>
           <Text textStyle="sm" color="text.subtle">
             {t(
-              "Use any of these apps to perform actions and earn points toward this challenge. Actions on apps not listed here will not count.",
+              "Use any of these apps to perform actions and earn points toward this B3MO Quest. Actions on apps not listed here will not count.",
             )}
           </Text>
         </VStack>
