@@ -33,6 +33,7 @@ import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefun
 import { ChallengeSplitWinClaimModal } from "../[challengeId]/components/ChallengeSplitWinClaimModal"
 import { ChallengeSplitWinCreatorRefundModal } from "../[challengeId]/components/ChallengeSplitWinCreatorRefundModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
+import { ChallengeCreatorChip } from "../shared/ChallengeCreatorChip"
 import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
 import {
   ChallengeStatusBadge,
@@ -123,6 +124,29 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Text textStyle="sm" color="text.subtle">
                   {challengeDescription}
                 </Text>
+                <SimpleGrid columns={{ base: 1, sm: isSplitWin ? 2 : 1 }} gap="2" w="full">
+                  <HStack justify="space-between" gap="3" bg="bg.secondary" borderRadius="lg" px="3" py="2">
+                    <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                      {t("Created by")}
+                    </Text>
+                    <ChallengeCreatorChip creator={challenge.creator} />
+                  </HStack>
+                  {isSplitWin && (
+                    <HStack justify="space-between" gap="3" bg="bg.secondary" borderRadius="lg" px="3" py="2">
+                      <HStack gap="1.5" color="text.subtle">
+                        <Icon boxSize={3}>
+                          <LuUsers />
+                        </Icon>
+                        <Text textStyle="xs" fontWeight="semibold">
+                          {t("Participants")}
+                        </Text>
+                      </HStack>
+                      <Text textStyle="sm" fontWeight="bold">
+                        {humanNumber(challenge.participantCount)}
+                      </Text>
+                    </HStack>
+                  )}
+                </SimpleGrid>
               </VStack>
             </Stack>
 
