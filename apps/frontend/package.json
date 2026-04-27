@@ -39,7 +39,7 @@
     "@use-gesture/react": "^10.3.1",
     "@vechain/picasso": "^2.1.1",
     "@vechain/vebetterdao-contracts": "8.6.0",
-    "@vechain/vechain-kit": "2.6.1",
+    "@vechain/vechain-kit": "2.7.0",
     "browser-image-compression": "^2.0.2",
     "canvas-confetti": "^1.9.4",
     "dayjs": "^1.11.10",
