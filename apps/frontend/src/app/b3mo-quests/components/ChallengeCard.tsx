@@ -63,7 +63,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
-  const challengeTitle = challenge.title || t("Challenge #{{id}}", { id: challenge.challengeId })
+  const challengeTitle = challenge.title || t("B3MO Quest #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
 
   const prizeLabel = `${getCompactFormatter(2).format(Number(challenge.totalPrize))} B3TR`

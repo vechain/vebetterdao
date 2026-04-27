@@ -177,7 +177,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
               {t("Bet")}
             </Text>
             <Text textStyle="xs" mt="1" opacity={0.85}>
-              {t("Private challenge. Each participant bets the same amount. Winners split the prize pool.")}
+              {t("Private B3MO Quest. Each participant bets the same amount. Winners split the prize pool.")}
             </Text>
           </Box>
           <Box

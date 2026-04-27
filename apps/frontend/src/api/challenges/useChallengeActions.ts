@@ -2,11 +2,13 @@ import { getConfig } from "@repo/config"
 import { useQueryClient } from "@tanstack/react-query"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { EnhancedClause } from "@vechain/vechain-kit"
+import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
+import { useTranslation } from "react-i18next"
 
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
+import { getB3trBalanceQueryKey } from "@/hooks/useGetB3trBalance"
 import { buildClause } from "@/utils/buildClause"
 
 import { ChallengeKind, ChallengeView } from "./types"
@@ -51,8 +53,10 @@ type ActionParams =
   | { type: "create"; form: CreateChallengeFormData }
 
 export const useChallengeActions = () => {
+  const { t } = useTranslation()
   const challengesAddr = getConfig().challengesContractAddress
   const b3trAddr = getConfig().b3trContractAddress
+  const { account } = useWallet()
   const queryClient = useQueryClient()
   const scheduledRefetchesRef = useRef<number[]>([])
 
@@ -89,6 +93,11 @@ export const useChallengeActions = () => {
     })
   }, [clearScheduledRefetches, refetchChallengeQueries])
 
+  const refetchQueryKeys = useMemo(
+    () => [["challenges"], getB3trBalanceQueryKey(account?.address ?? "")],
+    [account?.address],
+  )
+
   const clauseBuilder = useCallback(
     (params: ActionParams): EnhancedClause[] => {
       switch (params.type) {
@@ -104,7 +113,7 @@ export const useChallengeActions = () => {
                 to: b3trAddr,
                 method: "approve",
                 args: [challengesAddr, weiAmount],
-                comment: `Approve ${form.stakeAmount} B3TR for challenge`,
+                comment: t("Approve {{amount}} B3TR for B3MO Quest", { amount: form.stakeAmount }),
               }),
             )
           }
@@ -132,7 +141,7 @@ export const useChallengeActions = () => {
                   metadataURI: form.metadataURI,
                 },
               ],
-              comment: "Create challenge",
+              comment: t("Create B3MO Quest"),
             }),
           )
 
@@ -150,7 +159,7 @@ export const useChallengeActions = () => {
                 to: b3trAddr,
                 method: "approve",
                 args: [challengesAddr, ethers.parseEther(challenge.stakeAmount)],
-                comment: `Approve ${challenge.stakeAmount} B3TR`,
+                comment: t("Approve {{amount}} B3TR", { amount: challenge.stakeAmount }),
               }),
             )
           }
@@ -161,7 +170,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "joinChallenge",
               args: [challenge.challengeId],
-              comment: `Join challenge #${challenge.challengeId}`,
+              comment: t("Join B3MO Quest #{{id}}", { id: challenge.challengeId }),
             }),
           )
           return clauses
@@ -175,7 +184,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "leaveChallenge",
               args: [challenge.challengeId],
-              comment: `Leave challenge #${challenge.challengeId}`,
+              comment: t("Leave B3MO Quest #{{id}}", { id: challenge.challengeId }),
             }),
           ]
 
@@ -189,7 +198,7 @@ export const useChallengeActions = () => {
                 to: challengesAddr,
                 method: "declineChallenge",
                 args: [challenge.challengeId],
-                comment: `Decline challenge #${challenge.challengeId}`,
+                comment: t("Decline B3MO Quest #{{id}}", { id: challenge.challengeId }),
               }),
             )
           }
@@ -204,7 +213,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "declineChallenge",
               args: [params.challengeId],
-              comment: `Decline challenge #${params.challengeId}`,
+              comment: t("Decline B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
 
@@ -215,7 +224,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "cancelChallenge",
               args: [params.challengeId],
-              comment: `Cancel challenge #${params.challengeId}`,
+              comment: t("Cancel B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
 
@@ -226,7 +235,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "addInvites",
               args: [params.challengeId, params.invitees],
-              comment: `Add invites to challenge #${params.challengeId}`,
+              comment: t("Add invites to B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
 
@@ -237,7 +246,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "claimChallengePayout",
               args: [params.challengeId],
-              comment: `Claim prize for challenge #${params.challengeId}`,
+              comment: t("Claim prize for B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
 
@@ -248,7 +257,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "claimSplitWinPrize",
               args: [params.challengeId],
-              comment: `Claim Split Win slot for challenge #${params.challengeId}`,
+              comment: t("Claim Split Win slot for B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
 
@@ -259,7 +268,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "claimCreatorSplitWinRefund",
               args: [params.challengeId],
-              comment: `Refund unclaimed Split Win slots for challenge #${params.challengeId}`,
+              comment: t("Refund unclaimed Split Win slots for B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
 
@@ -270,7 +279,7 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "claimChallengeRefund",
               args: [params.challengeId],
-              comment: `Claim refund for challenge #${params.challengeId}`,
+              comment: t("Claim refund for B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
 
@@ -281,17 +290,17 @@ export const useChallengeActions = () => {
               to: challengesAddr,
               method: "completeChallenge",
               args: [params.challengeId],
-              comment: `Complete challenge #${params.challengeId}`,
+              comment: t("Complete B3MO Quest #{{id}}", { id: params.challengeId }),
             }),
           ]
       }
     },
-    [challengesAddr, b3trAddr],
+    [challengesAddr, b3trAddr, t],
   )
 
   const tx = useBuildTransaction<ActionParams>({
     clauseBuilder,
-    refetchQueryKeys: [["challenges"]],
+    refetchQueryKeys,
     onSuccess: scheduleFollowUpRefetches,
     gasPadding: 0.3,
   })

@@ -334,16 +334,16 @@ export const ChallengeParticipantActionsSection = ({ challenge }: { challenge: C
                 textTransform="uppercase"
                 letterSpacing="0.08em"
                 fontWeight="semibold">
-                {t("Challenge outcome")}
+                {t("B3MO Quest outcome")}
               </Text>
               {outcome.kind === "winner" && viewerAddress && (
                 <Text textStyle="sm" fontWeight="semibold">
-                  {t(outcome.isViewerWinner ? "You won this challenge" : "You did not win this challenge")}
+                  {t(outcome.isViewerWinner ? "You won this B3MO Quest" : "You did not win this B3MO Quest")}
                 </Text>
               )}
               {outcome.kind === "payout" && (
                 <Text textStyle="sm" fontWeight="semibold">
-                  {t("No participant won this challenge")}
+                  {t("No participant won this B3MO Quest")}
                 </Text>
               )}
               <VStack align="start" gap="2">

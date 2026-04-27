@@ -11,7 +11,7 @@ export const PendingInvitationsBanner = ({ count }: { count: number }) => {
     <Alert.Root status="warning">
       <HStack align="flex-start" justify="space-between" w="full" gap="4" flexWrap="wrap">
         <VStack align="start" gap="1">
-          <Alert.Title>{t("You have pending challenge invitations")}</Alert.Title>
+          <Alert.Title>{t("You have pending B3MO Quest invitations")}</Alert.Title>
           <Alert.Description>
             <Text textStyle="sm">{t("{{count}} invitations still need a response", { count })}</Text>
           </Alert.Description>

@@ -236,14 +236,14 @@ export const ChallengeStatsGrid = ({ challenge }: ChallengeStatsGridProps) => {
                   </Text>
                   <Tooltip
                     content={t(
-                      "Use any of these apps to perform actions and earn points toward this challenge. Actions on apps not listed here will not count.",
+                      "Use any of these apps to perform actions and earn points toward this B3MO Quest. Actions on apps not listed here will not count.",
                     )}
                     contentProps={{ maxW: "xs" }}
                     positioning={{ placement: "top" }}>
                     <chakra.button
                       type="button"
                       aria-label={t(
-                        "Use any of these apps to perform actions and earn points toward this challenge. Actions on apps not listed here will not count.",
+                        "Use any of these apps to perform actions and earn points toward this B3MO Quest. Actions on apps not listed here will not count.",
                       )}
                       display="inline-flex"
                       alignItems="center"
