@@ -65,7 +65,7 @@ export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
   return (
     <VStack align="stretch" gap="8" w="full">
       {viewerAddress && <SectionCarousel title={t("Action needed")} section={neededActions} items={deduped.needed} />}
-      {viewerAddress && <SectionCarousel title={t("Your Challenges")} section={userChallenges} items={deduped.user} />}
+      {viewerAddress && <SectionCarousel title={t("Your B3MO Quests")} section={userChallenges} items={deduped.user} />}
       <SectionCarousel title={t("Open to Join")} section={openToJoin} items={deduped.open} />
       <SectionCarousel title={t("What Others Are Doing")} section={whatOthers} items={deduped.others} />
     </VStack>
