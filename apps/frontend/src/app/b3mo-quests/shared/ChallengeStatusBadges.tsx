@@ -75,7 +75,9 @@ export const ChallengeStatusBadge = ({
   const { t } = useTranslation()
   const statusTime = useChallengeStatusTime(challenge)
 
-  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed
+  const hasEndTimePassed =
+    !!statusTime && challenge.status === ChallengeStatus.Active && statusTime.valueOf() <= Date.now()
+  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed || hasEndTimePassed
   const timeLabel = (() => {
     if (isEnded) return t("Ended")
     if (!statusTime) return null

@@ -67,7 +67,9 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
 
   const challengeDescription = useChallengeDescription(challenge)
 
-  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed
+  const hasEndTimePassed =
+    !!statusTime && challenge.status === ChallengeStatus.Active && statusTime.valueOf() <= Date.now()
+  const isEnded = challenge.canComplete || challenge.status === ChallengeStatus.Completed || hasEndTimePassed
   const statusTimeLabel = (() => {
     if (isEnded) return t("Ended")
     if (!statusTime) return null
