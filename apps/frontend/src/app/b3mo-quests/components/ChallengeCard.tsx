@@ -95,11 +95,10 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
               justify="space-between"
               align={isReacceptingInvite ? "stretch" : { base: "stretch", md: "start" }}
               gap="4">
-              <VStack align="start" gap="3" flex="1" minW="0">
+              <VStack align="start" gap="2" flex="1" minW="0">
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeWinnerTypeBadge challenge={challenge} />
-                  <ChallengeCreatorChip creator={challenge.creator} />
                   {allSlotsClaimed && (
                     <Badge variant="neutral" size="sm">
                       {t("All slots claimed")}
@@ -122,6 +121,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                     <ChallengeStatusBadge challenge={challenge} outlined />
                   </Box>
                 </HStack>
+                <ChallengeCreatorChip creator={challenge.creator} noBackground />
                 <Text textStyle="sm" color="text.subtle">
                   {challengeDescription}
                 </Text>
