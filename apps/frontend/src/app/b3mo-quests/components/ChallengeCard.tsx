@@ -16,7 +16,7 @@ import {
 import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { LuClock, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
+import { LuClock, LuTarget, LuTicket, LuUsers } from "react-icons/lu"
 
 import { ChallengeKind, ChallengeType, ChallengeView, ParticipantStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
@@ -33,6 +33,7 @@ import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefun
 import { ChallengeSplitWinClaimModal } from "../[challengeId]/components/ChallengeSplitWinClaimModal"
 import { ChallengeSplitWinCreatorRefundModal } from "../[challengeId]/components/ChallengeSplitWinCreatorRefundModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
+import { ChallengeCreatorChip } from "../shared/ChallengeCreatorChip"
 import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
 import {
   ChallengeStatusBadge,
@@ -128,7 +129,13 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
 
             <VStack gap="1" py="2" px="3" bg="bg.secondary" borderRadius="xl" align="start">
               <ChallengeEligibleAppsRow challenge={challenge} />
-              <SimpleGrid columns={{ base: 2, md: 2 }} gap="3" py="2" px="3" w="full">
+              <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap="3" py="2" px="3" w="full">
+                <VStack gap="1" align="start">
+                  <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
+                    {t("Created by")}
+                  </Text>
+                  <ChallengeCreatorChip creator={challenge.creator} />
+                </VStack>
                 <VStack gap="1" align="start">
                   <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
                     {isSplitWin ? t("Prize per winner") : t("Prize")}
@@ -153,7 +160,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 {isSplitWin ? (
                   <VStack gap="1" align="start">
                     <Text textStyle="xs" color="text.subtle" fontWeight="semibold">
-                      {t("Winners")}
+                      {t("Participants")}
                     </Text>
                     <HStack gap="2">
                       <HStack
@@ -166,14 +173,14 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                         color="status.info.primary"
                         flexShrink={0}>
                         <Icon boxSize={4}>
-                          <LuTrophy />
+                          <LuUsers />
                         </Icon>
                       </HStack>
                       <Text textStyle="md" fontWeight="bold">
-                        {humanNumber(challenge.winnersClaimed)}
+                        {humanNumber(challenge.participantCount)}
                         <Text as="span" color="text.subtle" fontWeight="semibold">
-                          {" / "}
-                          {humanNumber(challenge.numWinners)}
+                          {" "}
+                          {t("Participants")}
                         </Text>
                       </Text>
                     </HStack>
