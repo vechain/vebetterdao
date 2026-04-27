@@ -18,7 +18,7 @@ import { useChallengesDeployBlock } from "@/hooks/useChallengesDeployBlock"
 import { buildChallengeViews } from "./buildChallengeView"
 import { fetchViewerClaimState, ViewerClaimState } from "./claimState"
 import { fetchMaxParticipants } from "./fetchMaxParticipants"
-import { ChallengeView } from "./types"
+import { ChallengeStatus, ChallengeView } from "./types"
 
 export const CHALLENGES_PAGE_SIZE = 12 as const
 
@@ -139,6 +139,9 @@ const walletSectionFetcher = (viewer: string, filter: IndexerChallengeFilter) =>
 const publicSectionFetcher = (status: IndexerChallengeStatus) => (page: number) =>
   fetchPublicChallenges({ status, page, size: CHALLENGES_PAGE_SIZE })
 
+const isActiveChallengeWindowOpen = (challenge: ChallengeView, currentRound: number) =>
+  challenge.status !== ChallengeStatus.Active || challenge.endRound >= currentRound
+
 export const useNeededActionsSection = (viewer?: string) => {
   const deps = useSectionDeps()
   const fetcher = viewer ? walletSectionFetcher(viewer, "NeededAction") : null
@@ -160,7 +163,16 @@ export const useOpenToJoinSection = (viewer?: string) => {
 export const useWhatOthersAreDoingSection = (viewer?: string) => {
   const deps = useSectionDeps()
   const fetcher = viewer ? walletSectionFetcher(viewer, "OthersActive") : publicSectionFetcher("Active")
-  return useSectionQuery("whatOthersAreDoing", viewer, deps, fetcher)
+  const section = useSectionQuery("whatOthersAreDoing", viewer, deps, fetcher)
+  const items = useMemo(
+    () =>
+      deps
+        ? section.items.filter(challenge => isActiveChallengeWindowOpen(challenge, deps.currentRound))
+        : section.items,
+    [deps, section.items],
+  )
+
+  return { ...section, items }
 }
 
 export const useHistorySection = (viewer?: string) => {
