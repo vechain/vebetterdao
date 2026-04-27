@@ -33,6 +33,7 @@ import { ChallengeRefundModal } from "../[challengeId]/components/ChallengeRefun
 import { ChallengeSplitWinClaimModal } from "../[challengeId]/components/ChallengeSplitWinClaimModal"
 import { ChallengeSplitWinCreatorRefundModal } from "../[challengeId]/components/ChallengeSplitWinCreatorRefundModal"
 import { ChallengeActions, hasChallengeActions } from "../shared/ChallengeActions"
+import { ChallengeCreatorChip } from "../shared/ChallengeCreatorChip"
 import { ChallengeEligibleAppsRow } from "../shared/ChallengeEligibleAppsRow"
 import {
   ChallengeStatusBadge,
@@ -98,6 +99,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 <Wrap gap="2">
                   <ChallengeVisibilityBadge challenge={challenge} />
                   <ChallengeWinnerTypeBadge challenge={challenge} />
+                  <ChallengeCreatorChip creator={challenge.creator} />
                   {allSlotsClaimed && (
                     <Badge variant="neutral" size="sm">
                       {t("All slots claimed")}
@@ -225,6 +227,14 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                 </Icon>
                 {challenge.duration} {challenge.duration === 1 ? t("Round") : t("Rounds")}
               </Badge>
+              {isSplitWin && (
+                <Badge variant="neutral" size="sm">
+                  <Icon boxSize={3}>
+                    <LuUsers />
+                  </Icon>
+                  {t("Participants")} {humanNumber(challenge.participantCount)}
+                </Badge>
+              )}
               {isSplitWin && (
                 <Badge variant="neutral" size="sm">
                   <Icon boxSize={3}>
