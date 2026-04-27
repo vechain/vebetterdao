@@ -2,11 +2,12 @@ import { getConfig } from "@repo/config"
 import { useQueryClient } from "@tanstack/react-query"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { EnhancedClause } from "@vechain/vechain-kit"
+import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
+import { getB3trBalanceQueryKey } from "@/hooks/useGetB3trBalance"
 import { buildClause } from "@/utils/buildClause"
 
 import { ChallengeKind, ChallengeView } from "./types"
@@ -53,6 +54,7 @@ type ActionParams =
 export const useChallengeActions = () => {
   const challengesAddr = getConfig().challengesContractAddress
   const b3trAddr = getConfig().b3trContractAddress
+  const { account } = useWallet()
   const queryClient = useQueryClient()
   const scheduledRefetchesRef = useRef<number[]>([])
 
@@ -88,6 +90,11 @@ export const useChallengeActions = () => {
       scheduledRefetchesRef.current.push(timeoutId)
     })
   }, [clearScheduledRefetches, refetchChallengeQueries])
+
+  const refetchQueryKeys = useMemo(
+    () => [["challenges"], getB3trBalanceQueryKey(account?.address ?? "")],
+    [account?.address],
+  )
 
   const clauseBuilder = useCallback(
     (params: ActionParams): EnhancedClause[] => {
@@ -291,7 +298,7 @@ export const useChallengeActions = () => {
 
   const tx = useBuildTransaction<ActionParams>({
     clauseBuilder,
-    refetchQueryKeys: [["challenges"]],
+    refetchQueryKeys,
     onSuccess: scheduleFollowUpRefetches,
     gasPadding: 0.3,
   })

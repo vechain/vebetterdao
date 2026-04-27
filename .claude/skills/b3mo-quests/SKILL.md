@@ -147,7 +147,7 @@ One `useInfiniteQuery` per section with stable query keys under `["challenges", 
 
 Builds multi-clause txs (approve+action for stake joins, leave+decline for invited users). After success:
 
-1. Invalidates `["challenges"]` + claim-event keys broadly
+1. Invalidates `["challenges"]`, account B3TR balance, and claim-event keys broadly
 2. Actively refetches `["challenges", "section"]` + `["challenges", "detail"]`
 3. Schedules follow-up refetches at 1.5s / 4s / 8s to catch the tx being indexed in new events
 
