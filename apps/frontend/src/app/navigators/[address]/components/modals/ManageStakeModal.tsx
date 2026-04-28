@@ -16,6 +16,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { InfoCircle, WarningTriangle } from "iconoir-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { formatEther, parseEther } from "viem"
 
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
@@ -63,7 +64,15 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
   const isDecreasing = delta < 0
   const hasChanged = delta !== 0
 
-  const maxAmount = Math.min(currentStake + balanceNum, maxStake || Infinity)
+  // Precise wei-based max for "Use max" to avoid floating-point drift causing reverts
+  const maxAmountExact = useMemo(() => {
+    const balanceWei = BigInt(b3trBalance?.original ?? "0")
+    const stakeWei = parseEther(nav.stakeFormatted ?? "0")
+    const maxStakeWei = maxStakeData?.raw ?? 0n
+    const total = stakeWei + balanceWei
+    if (maxStakeWei > 0n && total > maxStakeWei) return formatEther(maxStakeWei)
+    return formatEther(total)
+  }, [b3trBalance?.original, nav.stakeFormatted, maxStakeData?.raw])
 
   const headroom = maxStake > 0 ? Math.max(maxStake - currentStake, 0) : Infinity
   const isCapBinding = maxStake > 0 && balanceNum > headroom
@@ -96,12 +105,16 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
   const handleSubmit = useCallback(() => {
     if (!isValid) return
 
+    // Compute delta in wei to avoid floating-point drift causing reverts
+    const inputWei = parseEther(amount || "0")
+    const stakeWei = parseEther(nav.stakeFormatted ?? "0")
+
     if (isIncreasing) {
-      sendAddStake({ amount: delta.toString() })
+      sendAddStake({ amount: formatEther(inputWei - stakeWei) })
     } else if (isDecreasing) {
-      sendReduceStake({ amount: Math.abs(delta).toString() })
+      sendReduceStake({ amount: formatEther(stakeWei - inputWei) })
     }
-  }, [isValid, isIncreasing, isDecreasing, delta, sendAddStake, sendReduceStake])
+  }, [isValid, isIncreasing, isDecreasing, amount, nav.stakeFormatted, sendAddStake, sendReduceStake])
 
   const buttonLabel = useMemo(() => {
     if (!hasChanged) return t("No changes")
@@ -176,7 +189,7 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
                 height="5"
                 size="sm"
                 p="0"
-                onClick={() => setAmount(handleAmountInput(maxAmount.toString()))}>
+                onClick={() => setAmount(handleAmountInput(maxAmountExact))}>
                 {t("Use max")}
               </Button>
             </Field.Label>

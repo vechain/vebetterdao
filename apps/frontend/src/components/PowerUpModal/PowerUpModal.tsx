@@ -10,15 +10,12 @@ import NextLink from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuUsers } from "react-icons/lu"
-import { parseEther } from "viem"
+import { formatEther, parseEther } from "viem"
 
 import { getB3TrTokenDetailsQueryKey } from "@/api/contracts/b3tr/hooks/useB3trTokenDetails"
 import { buildB3trApprovesTx } from "@/api/contracts/b3tr/utils/buildB3trApprovesTx"
 import { getVotesOnBlockPrefixQueryKey } from "@/api/contracts/governance/hooks/useVotesOnBlock"
-import {
-  useGetDelegatedAmount,
-  getGetDelegatedAmountQueryKey,
-} from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { getGetDelegatedAmountQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { buildConvertB3trTx } from "@/api/contracts/vot3/utils/buildConvertB3trTx"
@@ -62,20 +59,23 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
   const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
-  const { data: currentDelegation } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
   const { data: domainData } = useVechainDomain(navigatorAddress ?? "")
   const requiresSelfDelegation = useVot3RequireSelfDelegation()
   const availableBalance = b3trBalance?.scaled ?? "0"
 
-  const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
-  // User's own delegation is part of totalDelegated, so add it back to get true remaining capacity
-  const remainingCapacity = navigatorData
-    ? Math.max(
-        0,
-        Number(navigatorData.stakeFormatted) * 10 - Number(navigatorData.totalDelegatedFormatted) + currentDelegatedNum,
-      )
-    : 0
-  const freeCapacity = Math.max(0, remainingCapacity - currentDelegatedNum)
+  // Compute free capacity in wei to avoid floating-point precision issues
+  const freeCapacityWei = useMemo(() => {
+    if (!navigatorData) return 0n
+    try {
+      const stakeWei = parseEther(navigatorData.stakeFormatted)
+      const totalDelegatedWei = parseEther(navigatorData.totalDelegatedFormatted)
+      const free = stakeWei * 10n - totalDelegatedWei
+      return free > 0n ? free : 0n
+    } catch {
+      return 0n
+    }
+  }, [navigatorData])
+  const freeCapacity = Number(formatEther(freeCapacityWei))
   const amountNum = Number(amount) || 0
   const exceedsCapacity = isDelegated && includeDelegation && amountNum > freeCapacity
   const navigatorDisplayName =
@@ -272,7 +272,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                     variant="underline"
                     textStyle="xs"
                     color="status.negative.strong"
-                    onClick={() => setAmount(handleAmountInput(String(freeCapacity)))}>
+                    onClick={() => setAmount(handleAmountInput(formatEther(freeCapacityWei)))}>
                     {t("Use max allowed")}
                   </Link>
                 )}

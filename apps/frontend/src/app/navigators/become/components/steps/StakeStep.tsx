@@ -1,7 +1,9 @@
 import { Button, Separator, Field, Heading, HStack, Icon, NumberInput, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { WarningTriangle } from "iconoir-react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { formatEther } from "viem"
 
 import { useGetMaxStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMaxStake"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
@@ -31,8 +33,15 @@ export const StakeStep = () => {
   const isAboveMax = stakeNum > 0 && maxStakeNum > 0 && stakeNum > maxStakeNum
   const isAboveBalance = stakeNum > balanceNum
 
-  const effectiveMax = maxStakeNum > 0 ? Math.min(balanceNum, maxStakeNum) : balanceNum
-  const handleUseMax = () => setData({ stakeAmount: handleAmountInput(String(effectiveMax)) })
+  // Precise "Use max" from raw wei values to avoid floating-point drift
+  const effectiveMaxExact = useMemo(() => {
+    const balanceWei = BigInt(b3trBalance?.original ?? "0")
+    const maxWei = maxStake?.raw ?? 0n
+    if (maxWei > 0n && balanceWei > maxWei) return formatEther(maxWei)
+    return b3trBalance?.scaled ?? "0"
+  }, [b3trBalance?.original, b3trBalance?.scaled, maxStake?.raw])
+
+  const handleUseMax = () => setData({ stakeAmount: handleAmountInput(effectiveMaxExact) })
 
   return (
     <VStack gap={5} align="stretch">
