@@ -2478,6 +2478,8 @@
   "You can only convert Voting Power that you powered up yourself.": "Yalnızca kendiniz güçlendirdiğiniz oy gücünü dönüştürebilirsiniz.",
   "You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools.": "Uygulama dağıtımınızı duraklatabilirsiniz. Bu, <bold>distribütörünüzün ödülleri dağıtmasını durduracaktır</bold>. Dağıtımı istediğiniz zaman sürdürebilirsiniz. Bu eylem, uygulamanızın havuzlarını etkilemez.",
   "You can revoke access anytime.": "İstediğiniz zaman erişimi iptal edebilirsiniz.",
+  "You can stake up to {{amount}} B3TR (1% of VOT3 supply)": "En fazla {{amount}} B3TR stake edebilirsiniz (VOT3 arzının %1'i)",
+  "You can stake up to {{amount}} more B3TR (1% of VOT3 supply)": "{{amount}} B3TR daha stake edebilirsiniz (VOT3 arzının %1'i)",
   "You can still join later if you change your mind.": "Fikrini değiştirirsen daha sonra yine katılabilirsin.",
   "You can't delegate from an account linked as a secondary account": "İkincil hesap olarak bağlantılı bir hesaptan yetkilendirme yapamazsınız",
   "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.": "Node'unuzu devrettiyseniz bu hesapla uygulamaları onaylayamazsınız. Bu hesapla tekrar uygulamaları onaylayabilmek için devri iptal edin.",

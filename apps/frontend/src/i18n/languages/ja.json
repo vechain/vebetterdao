@@ -2478,6 +2478,8 @@
   "You can only convert Voting Power that you powered up yourself.": "自分でパワーアップした投票力のみ変換できます。",
   "You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools.": "アプリの配布を一時停止できます。これにより、<bold>ディストリビューターが報酬を配布することが停止します</bold>。配布はいつでも再開できます。この操作はアプリのプールに影響を与えません。",
   "You can revoke access anytime.": "アクセスをいつでも取り消すことができます。",
+  "You can stake up to {{amount}} B3TR (1% of VOT3 supply)": "最大{{amount}} B3TRまでステーキングできます（VOT3供給量の1%）",
+  "You can stake up to {{amount}} more B3TR (1% of VOT3 supply)": "あと{{amount}} B3TRまでステーキングできます（VOT3供給量の1%）",
   "You can still join later if you change your mind.": "気が変わったら、後からでも参加できます。",
   "You can't delegate from an account linked as a secondary account": "セカンダリーアカウントとしてリンクされたアカウントから委任することはできません",
   "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.": "ノードを委譲した場合、このアカウントでアプリを支持することはできません。委譲をキャンセルして、このアカウントで再びアプリを支持できるようにしてください。",

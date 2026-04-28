@@ -25,6 +25,8 @@ export const StakeStep = () => {
   const availableBalance = b3trBalance?.scaled ?? "0"
   const balanceNum = Number(availableBalance)
 
+  const isCapBinding = maxStakeNum > 0 && balanceNum > maxStakeNum
+
   const isBelowMin = stakeNum > 0 && stakeNum < minStakeNum
   const isAboveMax = stakeNum > 0 && maxStakeNum > 0 && stakeNum > maxStakeNum
   const isAboveBalance = stakeNum > balanceNum
@@ -145,6 +147,17 @@ export const StakeStep = () => {
             </VStack>
           </HStack>
         </Field.Root>
+
+        {isCapBinding && !isAboveMax && !isAboveBalance && !isBelowMin && (
+          <HStack gap={2} align="center" color="status.warning.primary" mt={2}>
+            <Icon as={WarningTriangle} boxSize="4" flexShrink={0} />
+            <Text textStyle="xs">
+              {t("You can stake up to {{amount}} B3TR (1% of VOT3 supply)", {
+                amount: maxStakeNum.toLocaleString(),
+              })}
+            </Text>
+          </HStack>
+        )}
 
         <Separator my={3} w="full" />
 

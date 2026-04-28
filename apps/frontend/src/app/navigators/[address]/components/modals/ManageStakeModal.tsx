@@ -65,6 +65,9 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
 
   const maxAmount = Math.min(currentStake + balanceNum, maxStake || Infinity)
 
+  const headroom = maxStake > 0 ? Math.max(maxStake - currentStake, 0) : Infinity
+  const isCapBinding = maxStake > 0 && balanceNum > headroom
+
   const exceedsBalance = isIncreasing && delta > balanceNum
   const exceedsMax = isIncreasing && amountNum > maxStake && maxStake > 0
   const belowMin = amountNum > 0 && amountNum < effectiveMin
@@ -219,6 +222,17 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
               </VStack>
             </HStack>
           </Field.Root>
+
+          {isCapBinding && !errorMessage && (
+            <HStack gap={2} align="center" color="status.warning.primary">
+              <Icon as={WarningTriangle} boxSize="4" flexShrink={0} />
+              <Text textStyle="xs">
+                {t("You can stake up to {{amount}} more B3TR (1% of VOT3 supply)", {
+                  amount: formatter.format(headroom),
+                })}
+              </Text>
+            </HStack>
+          )}
         </VStack>
 
         {/* Summary card */}

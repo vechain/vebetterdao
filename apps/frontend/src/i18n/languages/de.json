@@ -2477,6 +2477,8 @@
   "You can only convert Voting Power that you powered up yourself.": "Du kannst nur Stimmkraft umwandeln, die du selbst aufgeladen hast.",
   "You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools.": "Sie können die Verteilung Ihrer App pausieren. Dadurch wird <bold>Ihr Verteiler daran gehindert, Belohnungen zu verteilen</bold>. Sie können die Verteilung jederzeit fortsetzen. Diese Aktion wirkt sich nicht auf die Pools Ihrer App aus.",
   "You can revoke access anytime.": "Sie können den Zugriff jederzeit widerrufen.",
+  "You can stake up to {{amount}} B3TR (1% of VOT3 supply)": "Sie können bis zu {{amount}} B3TR staken (1% des VOT3-Angebots)",
+  "You can stake up to {{amount}} more B3TR (1% of VOT3 supply)": "Sie können bis zu {{amount}} weitere B3TR staken (1% des VOT3-Angebots)",
   "You can still join later if you change your mind.": "Du kannst später trotzdem beitreten, falls du es dir anders überlegst.",
   "You can't delegate from an account linked as a secondary account": "Sie können nicht von einem als Sekundärkonto verknüpften Konto delegieren",
   "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.": "Sie können mit diesem Konto keine Apps unterstützen, wenn Sie Ihren Node delegiert haben. Widerrufen Sie die Delegation, um erneut Apps mit diesem Konto zu unterstützen.",
