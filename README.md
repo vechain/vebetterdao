@@ -1,6 +1,6 @@
-# B3TR Monorepo
+# VeBetterDAO Monorepo
 
-![Security Checks Badge](https://github.com/vechain/b3tr/actions/workflows/security-checks.yml/badge.svg)
+![Security Checks Badge](https://github.com/vechain/vebetterdao/actions/workflows/security-checks.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ```
@@ -26,7 +26,7 @@
                                    #########
 ```
 
-B3TR is the monorepo behind the [VeBetterDAO](https://governance.vebetterdao.org) ecosystem — frontend, smart contracts, indexer setup, and serverless backend, all in one place.
+VeBetterDAO is the monorepo behind the [VeBetterDAO](https://governance.vebetterdao.org) ecosystem — frontend, smart contracts, indexer setup, and serverless backend, all in one place.
 
 ## What's in here
 
