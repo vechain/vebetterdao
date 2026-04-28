@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { saveLibrariesToFile, upgradeProxy } from "../../../helpers"
-import { EnvConfig } from "@repo/config/contracts"
+import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
 import { B3TRGovernor, NavigatorRegistry__factory } from "../../../../typechain-types"
 import { governanceLibraries } from "../../../libraries"
 
@@ -10,6 +10,7 @@ async function main() {
   }
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+  const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
   if (!config.navigatorRegistryContractAddress) {
     throw new Error("Missing NavigatorRegistry contract address")
@@ -55,7 +56,7 @@ async function main() {
     [
       config.navigatorRegistryContractAddress,
       config.relayerRewardsPoolContractAddress,
-      config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS,
+      contractsConfig.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS,
     ],
     {
       version: 10,
@@ -87,8 +88,10 @@ async function main() {
 
   const skipWindow = await governor.governanceSkipWindowBlocks()
   console.log(`Governance skip window: ${skipWindow}`)
-  if (Number(skipWindow) !== config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS) {
-    throw new Error(`Governance skip window mismatch: ${skipWindow} !== ${config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS}`)
+  if (Number(skipWindow) !== contractsConfig.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS) {
+    throw new Error(
+      `Governance skip window mismatch: ${skipWindow} !== ${contractsConfig.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS}`,
+    )
   }
 
   // Whitelist NavigatorRegistry.deactivateNavigator for governance proposals

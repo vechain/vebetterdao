@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { saveLibrariesToFile, upgradeProxy } from "../../../helpers"
-import { EnvConfig } from "@repo/config/contracts"
+import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
 import { XAllocationVoting } from "../../../../typechain-types"
 import { xAllocationVotingLibraries } from "../../../libraries/xAllocationVotingLibraries"
 
@@ -10,6 +10,7 @@ async function main() {
   }
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+  const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
   if (!config.navigatorRegistryContractAddress) {
     throw new Error("Missing NavigatorRegistry contract address")
@@ -41,7 +42,7 @@ async function main() {
     "XAllocationVotingV8",
     "XAllocationVoting",
     config.xAllocationVotingContractAddress,
-    [config.navigatorRegistryContractAddress, config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS],
+    [config.navigatorRegistryContractAddress, contractsConfig.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS],
     {
       version: 9,
       libraries: libraryAddresses,
@@ -66,8 +67,10 @@ async function main() {
 
   const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
   console.log(`Citizen skip window: ${skipWindow}`)
-  if (Number(skipWindow) !== config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS) {
-    throw new Error(`Citizen skip window mismatch: ${skipWindow} !== ${config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS}`)
+  if (Number(skipWindow) !== contractsConfig.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS) {
+    throw new Error(
+      `Citizen skip window mismatch: ${skipWindow} !== ${contractsConfig.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS}`,
+    )
   }
 
   await saveLibrariesToFile({ XAllocationVoting: libraryAddresses })
