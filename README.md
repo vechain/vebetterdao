@@ -42,6 +42,7 @@ B3TR is the monorepo behind the [VeBetterDAO](https://governance.vebetterdao.org
 
 **Related repos:**
 
+- [vebetterdao-docs](https://github.com/vechain/vebetterdao-docs) — user-facing and developer documentation
 - [vechain-kit](https://github.com/vechain/vechain-kit) — React hooks & components for VeChain dApps
 - [vechain-indexer](https://github.com/vechain/vechain-indexer) — blockchain indexer used by this project
 - [vebetterdao-relayers-dashboard](https://github.com/vechain/vebetterdao-relayers-dashboard) — relayer analytics dashboard
