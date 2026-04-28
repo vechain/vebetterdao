@@ -1,4 +1,4 @@
-# Contributing to B3TR
+# Contributing to VeBetterDAO
 
 Thank you for your interest in contributing to VeBetterDAO.
 
