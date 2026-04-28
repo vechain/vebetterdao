@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend/SKILL.md",
+      "computedHash": "8567b28fc75395adb33b6a104fabc6c7e4f29c758c147bc52779cda09fd2e8f7"
+    },
+    "grill-me": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "skillPath": "skills/grill-me/SKILL.md",
+      "computedHash": "a096bc3a1b5f73b889f688b82cf806cc9ffc278551b47efee4465265280c555f"
+    },
+    "secure-github-actions": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "skillPath": "skills/secure-github-actions/SKILL.md",
+      "computedHash": "b145bad15d85685851039cc06417735cb3f1b4e5c541b8fc3c3de3579c9d31b4"
+    },
+    "smart-contract-development": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "skillPath": "skills/smart-contract-development/SKILL.md",
+      "computedHash": "08c9f327f8ced2f29ac193950a7511462607111a6e3c515892153136d60eb600"
+    },
+    "vebetterdao": {
+      "source": "vechain/vechain-ai-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vebetterdao/SKILL.md",
+      "computedHash": "84598d8413d1a032767ed17a956817495f125835d5e5b1b3d27e6f0d6bab7e27"
+    }
+  }
+}
