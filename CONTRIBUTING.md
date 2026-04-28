@@ -42,6 +42,28 @@ Contract changes must be gas-efficient and safe at scale.
 - **Preserve existing patterns.** The contracts follow well-established patterns (OpenZeppelin upgradeable, reentrancy guards, custom errors). Do not break or deviate from them.
 - **Do not compromise DAO operability.** Every contract change must be evaluated for its impact on the DAO's day-to-day operation. If a change could cause a round to fail, voting to stall, or emissions to break, it will not be merged.
 
+### Retrocompatibility
+
+In almost all cases, **changes must be backwards compatible**. Existing integrations, contracts, APIs, and frontends must continue to work after your change is merged.
+
+- Do not rename or remove public contract functions, events, or storage slots that are already in use.
+- Do not change existing API response shapes or indexer query formats without a migration path.
+- If a breaking change is truly unavoidable, it must be clearly flagged in the PR description with a migration plan and coordinated across all affected repos.
+
+### Cross-repo impact
+
+VeBetterDAO spans multiple repositories. If your change affects core functionality (contracts, ABIs, config, indexer schemas, public APIs), **all impacted repos must be updated as part of the same effort** — either in the same PR (for this monorepo) or with linked PRs in the affected repos.
+
+Repos that commonly need updates when core changes land:
+
+- [vebetterdao-docs](https://github.com/vechain/vebetterdao-docs) — user-facing and developer documentation
+- [vechain-ai-skills](https://github.com/vechain/vechain-ai-skills) — AI context and skill definitions
+- [vechain-indexer](https://github.com/vechain/vechain-indexer) — blockchain indexer (new events, schema changes)
+- [vechain-kit](https://github.com/vechain/vechain-kit) — SDK hooks and components
+- [vebetterdao-relayer-node](https://github.com/vechain/vebetterdao-relayer-node) — relayer node logic
+
+PRs that change core functionality without corresponding updates to impacted repos will not be merged until those companion PRs are linked.
+
 ## Frontend standards
 
 ### Data sources
