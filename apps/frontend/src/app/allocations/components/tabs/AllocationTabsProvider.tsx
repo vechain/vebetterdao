@@ -20,12 +20,15 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
+import { NavigatorsIntroModal } from "../NavigatorsIntroModal"
 
 import { useAutoVoteEditMode } from "./hooks/useAutoVoteEditMode"
 import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
 import { VoteButtons } from "./vote/VoteButtons"
 
 export const MAX_SELECTED_APPS = 15
+
+const NAVIGATORS_INTRO_DISMISSED_KEY = "NAVIGATORS_INTRO_DISMISSED"
 
 interface AllocationTabsContextType {
   roundId: string
@@ -96,6 +99,20 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
   // Initialize local state from chain data
   const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(isAutoVotingEnabledOnChain ?? false)
+
+  // First-visit intro modal for the navigators feature. SSR-safe: starts closed and opens
+  // from a client effect once we can read localStorage.
+  const [isNavigatorsIntroOpen, setIsNavigatorsIntroOpen] = useState(false)
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (localStorage.getItem(NAVIGATORS_INTRO_DISMISSED_KEY) !== "true") {
+      setIsNavigatorsIntroOpen(true)
+    }
+  }, [])
+  const handleCloseNavigatorsIntro = useCallback(() => {
+    localStorage.setItem(NAVIGATORS_INTRO_DISMISSED_KEY, "true")
+    setIsNavigatorsIntroOpen(false)
+  }, [])
 
   // Keep local state synced with chain state
   useEffect(() => {
@@ -306,6 +323,8 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         roundId={roundDetails.id.toString()}
         isNavigator={isNavigator ?? false}
       />
+
+      <NavigatorsIntroModal isOpen={isNavigatorsIntroOpen} onClose={handleCloseNavigatorsIntro} />
     </AllocationTabsContext.Provider>
   )
 }
