@@ -2,22 +2,20 @@ import { Button, Heading, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
-import { NavigatorEntityFormatted, NavigatorOrderBy, useNavigators } from "@/api/indexer/navigators/useNavigators"
+import { NavigatorOrderBy, useNavigators } from "@/api/indexer/navigators/useNavigators"
 import {
   NavigatorStatusFilter,
   useFilteredNavigators,
   useNavigatorFilterValues,
 } from "@/hooks/navigator/useNavigatorFilterValues"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
-
-import { DelegationModal } from "../shared/DelegationModal"
 
 import { BecomeNavigatorCTA } from "./BecomeNavigatorCTA"
 import { DelegatingAlert } from "./DelegatingAlert"
@@ -36,19 +34,6 @@ export const NavigatorsPageContent = () => {
   const { data: isNavigator } = useIsNavigator()
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigatorAddr } = useGetNavigator(account?.address)
-  const [delegateTarget, setDelegateTarget] = useState<NavigatorEntityFormatted | null>(null)
-  const [isDelegationOpen, setIsDelegationOpen] = useState(false)
-  const rafRef = useRef<number>()
-
-  const handleDelegate = useCallback((nav: NavigatorEntityFormatted) => {
-    setDelegateTarget(nav)
-    cancelAnimationFrame(rafRef.current!)
-    rafRef.current = requestAnimationFrame(() => setIsDelegationOpen(true))
-  }, [])
-
-  const handleDelegationClose = useCallback(() => {
-    setIsDelegationOpen(false)
-  }, [])
 
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegating = !!currentNavigatorAddr && currentDelegatedNum > 0
@@ -162,13 +147,9 @@ export const NavigatorsPageContent = () => {
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4} w="full">
           {!hasActiveFilters && !isNavigator && <BecomeNavigatorCTA />}
           {navigators.map(nav => (
-            <NavigatorCard key={nav.address} navigator={nav} onDelegate={handleDelegate} />
+            <NavigatorCard key={nav.address} navigator={nav} />
           ))}
         </SimpleGrid>
-      )}
-
-      {delegateTarget && (
-        <DelegationModal isOpen={isDelegationOpen} onClose={handleDelegationClose} navigator={delegateTarget} />
       )}
     </VStack>
   )
