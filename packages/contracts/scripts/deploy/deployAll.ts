@@ -766,7 +766,7 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
-      [navigatorRegistryProxyAddress], // V9: set NavigatorRegistry address
+      [navigatorRegistryProxyAddress, config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS], // V9: set NavigatorRegistry + skip window
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -1007,7 +1007,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [],
       [], // v9
-      [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress()], // v10
+      [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress(), config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS], // v10
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],

@@ -47,12 +47,16 @@ async function main() {
     `Upgrading B3TRGovernor contract at address: ${config.b3trGovernorAddress} on network: ${config.network.name}`,
   )
 
-  // V10: Refactored to library architecture + governance intent multiplier in GovernorVotesLogic
+  // V10: Refactored to library architecture + governance intent multiplier + skip window
   const governor = (await upgradeProxy(
     "B3TRGovernorV9",
     "B3TRGovernor",
     config.b3trGovernorAddress,
-    [config.navigatorRegistryContractAddress, config.relayerRewardsPoolContractAddress],
+    [
+      config.navigatorRegistryContractAddress,
+      config.relayerRewardsPoolContractAddress,
+      config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS,
+    ],
     {
       version: 10,
       libraries: libraryAddresses,
@@ -79,6 +83,12 @@ async function main() {
   console.log(`Relayer rewards pool: ${relayerRewardsPoolAddr}`)
   if (relayerRewardsPoolAddr !== config.relayerRewardsPoolContractAddress) {
     throw new Error("Relayer rewards pool was not correctly set")
+  }
+
+  const skipWindow = await governor.governanceSkipWindowBlocks()
+  console.log(`Governance skip window: ${skipWindow}`)
+  if (Number(skipWindow) !== config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS) {
+    throw new Error(`Governance skip window mismatch: ${skipWindow} !== ${config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS}`)
   }
 
   // Whitelist NavigatorRegistry.deactivateNavigator for governance proposals

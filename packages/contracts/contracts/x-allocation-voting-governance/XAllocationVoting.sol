@@ -98,8 +98,10 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *  - New function: disableAutoVotingFor(user) — privileged, callable only by NavigatorRegistry
  *  - New events: NavigatorVoteCast, FreshnessMultiplierApplied
  *  - New errors: NotDelegatedToNavigator, NavigatorPreferencesNotSet
- *  - New initializer: initializeV9(INavigatorRegistry) — reinitializer(8)
+ *  - New initializer: initializeV9(INavigatorRegistry, uint256 citizenSkipWindowBlocks) — reinitializer(8)
  *  - setNavigatorRegistry() setter via ExternalContractsUtils
+ *  - citizenSkipWindowBlocks moved from constant to storage (VotingSettingsStorage), configurable per env
+ *  - setCitizenSkipWindowBlocks(uint256) governance-gated setter
  *  - VotesUtils.getVotes() returns delegated amount when citizen has active navigator at snapshot
  *  - Deprecated: getTotalVotingPower() is replaced by getVotes()
  */
@@ -122,19 +124,19 @@ contract XAllocationVoting is
   /// @dev Bitmask with every valid `RoundState` bit set: bit `i` is 1 for enum value `i` (same layout as
   ///      `_encodeStateBitmap`). `2 ** (max + 1) - 1` sets bits `0` through `type(RoundState).max` inclusive.
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
-  /// @dev 2 hours in blocks on VeChainThor (~10s blocks)
-  /// used by relayers to skip votes for citizens when the navigator is dead or has not set a decision
-  uint256 private constant CITIZEN_SKIP_WINDOW_BLOCKS = 720;
-
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
   }
 
-  /// @notice Initialize V9: set NavigatorRegistry address
-  function initializeV9(INavigatorRegistry _navigatorRegistry) external onlyRole(UPGRADER_ROLE) reinitializer(8) {
+  /// @notice Initialize V9: set NavigatorRegistry address and citizen skip window
+  function initializeV9(
+    INavigatorRegistry _navigatorRegistry,
+    uint256 _citizenSkipWindowBlocks
+  ) external onlyRole(UPGRADER_ROLE) reinitializer(8) {
     require(address(_navigatorRegistry) != address(0), "XAllocationVoting: invalid navigator registry");
     ExternalContractsUtils.setNavigatorRegistry(_navigatorRegistry);
+    VotingSettingsUtils.setCitizenSkipWindowBlocks(_citizenSkipWindowBlocks);
   }
 
   // ======================== Authorizations ======================== //
@@ -487,7 +489,7 @@ contract XAllocationVoting is
    */
   function _validateSkipWindow(uint256 roundId) internal view {
     uint256 deadline = RoundsStorageUtils.roundDeadline(roundId);
-    if (block.number + CITIZEN_SKIP_WINDOW_BLOCKS < deadline) revert SkipWindowNotReached(roundId);
+    if (block.number + VotingSettingsUtils.citizenSkipWindowBlocks() < deadline) revert SkipWindowNotReached(roundId);
   }
 
   /**
@@ -590,6 +592,13 @@ contract XAllocationVoting is
   }
 
   /**
+   * @dev Set the citizen skip window (blocks before round deadline when relayers can skip navigator votes)
+   */
+  function setCitizenSkipWindowBlocks(uint256 newValue) public onlyRole(GOVERNANCE_ROLE) {
+    VotingSettingsUtils.setCitizenSkipWindowBlocks(newValue);
+  }
+
+  /**
    * @dev Update the quorum a round needs to reach to be successful
    */
   function updateQuorumNumerator(uint256 newQuorumNumerator) public onlyRole(GOVERNANCE_ROLE) {
@@ -603,6 +612,13 @@ contract XAllocationVoting is
    */
   function version() public pure returns (string memory) {
     return "9";
+  }
+
+  /**
+   * @dev Returns the citizen skip window in blocks
+   */
+  function citizenSkipWindowBlocks() public view returns (uint256) {
+    return VotingSettingsUtils.citizenSkipWindowBlocks();
   }
 
   /**

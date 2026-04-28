@@ -740,7 +740,7 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
-      [navigatorRegistryProxyAddress], // V9: set NavigatorRegistry address
+      [navigatorRegistryProxyAddress, config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS], // V9: set NavigatorRegistry + skip window
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -993,7 +993,7 @@ export const getOrDeployContractInstances = async ({
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
       [], // Reserved for future configuration parameters; currently no values required
       [], // v9
-      [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress()], // v10
+      [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress(), config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS], // v10
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],

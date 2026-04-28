@@ -2,9 +2,8 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import { describe, it, beforeEach } from "mocha"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-
 import { getOrDeployContractInstances } from "../helpers/deploy"
-import { bootstrapAndStartEmissions, getVot3Tokens, waitForRoundToEnd } from "../helpers/common"
+import { bootstrapAndStartEmissions, getVot3Tokens, waitForRoundToEnd, moveBlocks } from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import {
   B3TR,
@@ -333,7 +332,7 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       )
     })
 
-    it("castNavigatorVote before navigator sets preferences: skips vote (local round < skip window)", async function () {
+    it("castNavigatorVote before navigator sets preferences: skips vote (after skip window)", async function () {
       const navigator1 = otherAccounts[10]
       const citizen = otherAccounts[11]
 
@@ -343,8 +342,13 @@ describe("NavigatorRegistry Security - @shard19h", function () {
       await bootstrapAndStartEmissions()
       const roundId = await xAllocationVoting.currentRoundId()
 
-      // Navigator has NOT set preferences. In local config (24-block rounds), the skip window
-      // (720 blocks) always exceeds remaining round, so skip is immediately permitted.
+      // Advance past the skip window so skip is permitted
+      const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
+      const deadline = await xAllocationVoting.roundDeadline(roundId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
+
       await expect(xAllocationVoting.castNavigatorVote(citizen.address, roundId)).to.emit(
         xAllocationVoting,
         "NavigatorVoteSkipped",

@@ -144,5 +144,7 @@ library GovernorStorageTypes {
     IRelayerRewardsPool relayerRewardsPool;
     // roundId => proposal IDs targeting that round (set at proposal creation)
     mapping(uint256 => uint256[]) proposalsForRound;
+    // V10: configurable skip window for navigator governance vote skipping (blocks before proposal deadline)
+    uint256 governanceSkipWindowBlocks;
   }
 }

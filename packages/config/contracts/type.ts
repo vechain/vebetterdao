@@ -132,4 +132,8 @@ export type ContractsConfig = {
   NAVIGATOR_REPORT_INTERVAL: number // rounds between required reports (default: 2)
   NAVIGATOR_MINOR_SLASH_PERCENTAGE: number // minor slash in basis points (default: 500 = 5%)
   NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: number // blocks before round deadline (default: 8640 = ~24hr)
+
+  // Navigator skip windows (blocks before round/proposal deadline when relayers can skip navigator votes)
+  XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: number // XAllocationVoting skip window (default: 720 = ~2hr)
+  B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: number // B3TRGovernor skip window (default: 720 = ~2hr)
 }

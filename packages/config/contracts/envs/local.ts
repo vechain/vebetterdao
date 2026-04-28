@@ -43,6 +43,7 @@ export function createLocalConfig() {
         "setIsFunctionRestrictionEnabled",
         "setProposalTypeDepositThresholdPercentage",
         "setProposalTypeVotingThreshold",
+        "setGovernanceSkipWindowBlocks",
       ],
       Treasury: ["transferVET", "transferB3TR"],
       XAllocationVoting: [
@@ -51,6 +52,7 @@ export function createLocalConfig() {
         "setVotingPeriod",
         "setEmissions",
         "setVotingThreshold",
+        "setCitizenSkipWindowBlocks",
       ],
       X2EarnAppsV1: ["addApp", "setVotingEligibility"],
       X2EarnApps: ["setVotingEligibility"],
@@ -254,5 +256,8 @@ export function createLocalConfig() {
     NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
     NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
     NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 5, // 5 blocks, around 50 seconds
+
+    XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
+    B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
   })
 }

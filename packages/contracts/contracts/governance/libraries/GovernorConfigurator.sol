@@ -63,6 +63,7 @@ library GovernorConfigurator {
   event VeBetterPassportSet(address oldVeBetterPassport, address newVeBetterPassport);
   event NavigatorRegistrySet(address oldNavigatorRegistry, address newNavigatorRegistry);
   event RelayerRewardsPoolSet(address oldRelayerRewardsPool, address newRelayerRewardsPool);
+  event GovernanceSkipWindowBlocksSet(uint256 oldValue, uint256 newValue);
 
   /// @dev The deposit threshold is not in the valid range for a percentage - 0 to 100.
   error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
@@ -132,6 +133,17 @@ library GovernorConfigurator {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     emit RelayerRewardsPoolSet(address($.relayerRewardsPool), address(newRelayerRewardsPool));
     $.relayerRewardsPool = newRelayerRewardsPool;
+  }
+
+  /**
+   * @notice Sets the governance skip window in blocks.
+   * @param newValue The new skip window in blocks (must be > 0).
+   */
+  function setGovernanceSkipWindowBlocks(uint256 newValue) external {
+    require(newValue > 0, "GovernorConfigurator: skip window must be > 0");
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    emit GovernanceSkipWindowBlocksSet($.governanceSkipWindowBlocks, newValue);
+    $.governanceSkipWindowBlocks = newValue;
   }
 
   /**
@@ -399,6 +411,14 @@ library GovernorConfigurator {
    * @param proposalTypeValue The proposal type.
    * @param newGMWeight The new GM weight for the proposal type.
    */
+  /**
+   * @notice Returns the governance skip window in blocks.
+   * @return The governance skip window in blocks.
+   */
+  function governanceSkipWindowBlocks() internal view returns (uint256) {
+    return GovernorStorageTypes.getGovernorStorage().governanceSkipWindowBlocks;
+  }
+
   function setRequiredGMLevelByProposalType(
     GovernorTypes.ProposalType proposalTypeValue,
     uint256 newGMWeight

@@ -46,6 +46,8 @@ library XAllocationVotingStorageTypes {
 
   struct VotingSettingsStorage {
     uint32 _votingPeriod;
+    // V9: configurable skip window for navigator vote skipping (blocks before round deadline)
+    uint256 _citizenSkipWindowBlocks;
   }
 
   struct VotesStorage {

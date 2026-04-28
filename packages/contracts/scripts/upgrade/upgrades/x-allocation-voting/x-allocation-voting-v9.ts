@@ -36,12 +36,12 @@ async function main() {
     `Upgrading XAllocationVoting contract at address: ${config.xAllocationVotingContractAddress} on network: ${config.network.name}`,
   )
 
-  // V9: Refactored from modules to libraries + freshness multiplier + hasUserVotedForApp
+  // V9: Refactored from modules to libraries + freshness multiplier + hasUserVotedForApp + skip window
   const xAllocationVoting = (await upgradeProxy(
     "XAllocationVotingV8",
     "XAllocationVoting",
     config.xAllocationVotingContractAddress,
-    [config.navigatorRegistryContractAddress],
+    [config.navigatorRegistryContractAddress, config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS],
     {
       version: 9,
       libraries: libraryAddresses,
@@ -62,6 +62,12 @@ async function main() {
   console.log(`Navigator registry: ${navigatorRegistry}`)
   if (navigatorRegistry !== config.navigatorRegistryContractAddress) {
     throw new Error("Navigator registry was not correctly set")
+  }
+
+  const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
+  console.log(`Citizen skip window: ${skipWindow}`)
+  if (Number(skipWindow) !== config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS) {
+    throw new Error(`Citizen skip window mismatch: ${skipWindow} !== ${config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS}`)
   }
 
   await saveLibrariesToFile({ XAllocationVoting: libraryAddresses })

@@ -41,10 +41,6 @@ import { RelayerAction } from "../../interfaces/IRelayerRewardsPool.sol";
 library GovernorVotesLogic {
   using Checkpoints for Checkpoints.Trace208;
 
-  /// @dev 2 hours in blocks on VeChainThor (~10s blocks)
-  /// used by relayers to skip votes if the navigator is dead or has not set a decision.
-  uint256 private constant GOVERNANCE_SKIP_WINDOW_BLOCKS = 720;
-
   /// @dev Thrown when a vote has already been cast by the voter.
   /// @param voter The address of the voter who already cast a vote.
   error GovernorAlreadyCastVote(address voter);
@@ -323,7 +319,7 @@ library GovernorVotesLogic {
     if (!$.navigatorRegistry.hasSetDecision(navigator, proposalId)) {
       // No decision set — skip only after window
       uint256 deadline = GovernorProposalLogic._proposalDeadline(proposalId);
-      if (block.number + GOVERNANCE_SKIP_WINDOW_BLOCKS < deadline) {
+      if (block.number + GovernorConfigurator.governanceSkipWindowBlocks() < deadline) {
         revert GovernanceSkipWindowNotReached(proposalId);
       }
       if (address($.relayerRewardsPool) != address(0)) {

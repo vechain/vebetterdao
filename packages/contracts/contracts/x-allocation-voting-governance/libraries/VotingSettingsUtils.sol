@@ -12,6 +12,9 @@ library VotingSettingsUtils {
   /// @notice Emitted when the voting period is updated
   event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
 
+  /// @notice Emitted when the citizen skip window is updated
+  event CitizenSkipWindowBlocksSet(uint256 oldValue, uint256 newValue);
+
   /// @notice Thrown when the voting period is invalid (zero or >= emissions cycle duration)
   error GovernorInvalidVotingPeriod(uint256 votingPeriod);
 
@@ -48,5 +51,25 @@ library VotingSettingsUtils {
 
     emit VotingPeriodSet($._votingPeriod, newVotingPeriod);
     $._votingPeriod = newVotingPeriod;
+  }
+
+  /**
+   * @notice Returns the citizen skip window in blocks
+   * @return The skip window in blocks
+   */
+  function citizenSkipWindowBlocks() external view returns (uint256) {
+    return XAllocationVotingStorageTypes._getVotingSettingsStorage()._citizenSkipWindowBlocks;
+  }
+
+  /**
+   * @notice Sets the citizen skip window
+   * @param newValue The new skip window in blocks
+   */
+  function setCitizenSkipWindowBlocks(uint256 newValue) external {
+    require(newValue > 0, "VotingSettingsUtils: skip window must be > 0");
+    XAllocationVotingStorageTypes.VotingSettingsStorage storage $ = XAllocationVotingStorageTypes
+      ._getVotingSettingsStorage();
+    emit CitizenSkipWindowBlocksSet($._citizenSkipWindowBlocks, newValue);
+    $._citizenSkipWindowBlocks = newValue;
   }
 }

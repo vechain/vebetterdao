@@ -2,8 +2,6 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import { describe, it, beforeEach } from "mocha"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { mine } from "@nomicfoundation/hardhat-network-helpers"
-
 import { getOrDeployContractInstances } from "../helpers/deploy"
 import {
   bootstrapAndStartEmissions,
@@ -14,6 +12,7 @@ import {
   payDeposit,
   waitForProposalToBeActive,
   getProposalIdFromTx,
+  moveBlocks,
 } from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import {
@@ -210,14 +209,19 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       ).to.be.revertedWithCustomError(xAllocationVoting, "NotDelegatedToNavigator")
     })
 
-    it("skips when navigator has no preferences (local round < skip window, always permitted)", async function () {
+    it("skips when navigator has no preferences (after skip window)", async function () {
       // Start another round where navigator hasn't set preferences
       await waitForRoundToEnd(Number(roundId))
       await emissions.distribute()
       const newRoundId = await xAllocationVoting.currentRoundId()
 
-      // In local config (24-block rounds), CITIZEN_SKIP_WINDOW_BLOCKS (720) always exceeds
-      // remaining round blocks, so skip is immediately permitted.
+      // Advance past the skip window so skip is permitted
+      const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
+      const deadline = await xAllocationVoting.roundDeadline(newRoundId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
+
       await expect(xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, newRoundId)).to.emit(
         xAllocationVoting,
         "NavigatorVoteSkipped",
@@ -297,7 +301,7 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       expect(event?.args[4]).to.equal(DELEGATE_AMOUNT)
     })
 
-    it("skips governance vote when no decision set (local round < skip window)", async function () {
+    it("skips governance vote when no decision set (after skip window)", async function () {
       // Create a new proposal without setting a navigator decision
       const nextRound = (await xAllocationVoting.currentRoundId()) + 1n
       const tx2 = await createProposal(
@@ -313,7 +317,14 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       await payDeposit(newProposalId.toString(), owner)
       await waitForProposalToBeActive(newProposalId as any)
 
-      // In local config, skip window (720) > round duration (24), so skip is immediate
+      // Advance past the governance skip window
+      const skipWindow = await governor.governanceSkipWindowBlocks()
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+      const deadline = await xAllocationVoting.roundDeadline(currentRoundId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
+
       const tx3 = await governor.connect(relayer).castNavigatorVote(newProposalId, citizen.address)
       const receipt = await tx3.wait()
 
@@ -396,11 +407,12 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       const voteWeight = await relayerRewardsPool.getVoteWeight()
       const claimWeight = await relayerRewardsPool.getClaimWeight()
 
-      // Advance to skip window (720 blocks before deadline)
+      // Advance to skip window
+      const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
       const deadline = await xAllocationVoting.roundDeadline(roundId)
       const currentBlock = BigInt(await ethers.provider.getBlockNumber())
-      const blocksToMine = deadline - currentBlock - 720n
-      if (blocksToMine > 0n) await mine(Number(blocksToMine))
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
 
       // castNavigatorVote should skip (not vote) and reduce allocation vote.
       // With no active governance proposals, claim is also auto-reduced (all vote actions done).
@@ -413,7 +425,7 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       )
     })
 
-    it("castNavigatorVote with no preferences skips at round start (local round < skip window)", async function () {
+    it("castNavigatorVote with no preferences skips after advancing past skip window", async function () {
       await setupFullEcosystem()
 
       const currentRound = await xAllocationVoting.currentRoundId()
@@ -421,8 +433,13 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       await emissions.distribute()
       const roundId = await xAllocationVoting.currentRoundId()
 
-      // In local config (24-block rounds), CITIZEN_SKIP_WINDOW_BLOCKS (720) exceeds the round
-      // duration, so the skip window is always reached — skip succeeds immediately.
+      // Advance past the skip window so skip is permitted
+      const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
+      const deadline = await xAllocationVoting.roundDeadline(roundId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
+
       await expect(xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)).to.emit(
         xAllocationVoting,
         "NavigatorVoteSkipped",
@@ -497,8 +514,13 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       const totalActionsBefore = await relayerRewardsPool.totalActions(roundId)
       const voteWeight = await relayerRewardsPool.getVoteWeight()
 
-      // In local config, skip window (720 blocks) > round duration (24 blocks),
-      // so skip is always permitted — no need to advance blocks.
+      // Advance past the governance skip window so skip is permitted
+      const skipWindow = await governor.governanceSkipWindowBlocks()
+      const deadline = await xAllocationVoting.roundDeadline(roundId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
+
       await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
 
       expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalActionsBefore - 1n)
@@ -956,6 +978,69 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       const totalPower = await xAllocationVoting.getTotalVotingPower(citizen.address, roundStart)
 
       expect(totalPower).to.equal(DELEGATE_AMOUNT)
+    })
+  })
+
+  // ======================== 6. Skip Window Setter Tests ======================== //
+
+  describe("Skip window governance setters", function () {
+    it("citizenSkipWindowBlocks returns initial config value", async function () {
+      const { xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true })
+      const value = await xAllocationVoting.citizenSkipWindowBlocks()
+      expect(value).to.be.gt(0n)
+    })
+
+    it("governanceSkipWindowBlocks returns initial config value", async function () {
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: true })
+      const value = await governor.governanceSkipWindowBlocks()
+      expect(value).to.be.gt(0n)
+    })
+
+    it("setCitizenSkipWindowBlocks updates value", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const governanceRole = await xAllocationVoting.GOVERNANCE_ROLE()
+      await xAllocationVoting.connect(owner).grantRole(governanceRole, owner.address)
+
+      const before = await xAllocationVoting.citizenSkipWindowBlocks()
+      await xAllocationVoting.connect(owner).setCitizenSkipWindowBlocks(42)
+      expect(await xAllocationVoting.citizenSkipWindowBlocks()).to.equal(42n)
+      expect(before).to.not.equal(42n)
+    })
+
+    it("setCitizenSkipWindowBlocks reverts for non-governance caller", async function () {
+      const { xAllocationVoting, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+      await expect(xAllocationVoting.connect(otherAccounts[0]).setCitizenSkipWindowBlocks(100)).to.be.reverted
+    })
+
+    it("setGovernanceSkipWindowBlocks updates value", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const before = await governor.governanceSkipWindowBlocks()
+      await governor.connect(owner).setGovernanceSkipWindowBlocks(99)
+      expect(await governor.governanceSkipWindowBlocks()).to.equal(99n)
+      expect(before).to.not.equal(99n)
+    })
+
+    it("setGovernanceSkipWindowBlocks reverts for non-admin caller", async function () {
+      const { governor, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+      await expect(governor.connect(otherAccounts[0]).setGovernanceSkipWindowBlocks(100)).to.be.reverted
+    })
+
+    it("setCitizenSkipWindowBlocks reverts with zero value", async function () {
+      const { xAllocationVoting, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const governanceRole = await xAllocationVoting.GOVERNANCE_ROLE()
+      await xAllocationVoting.connect(owner).grantRole(governanceRole, owner.address)
+
+      await expect(xAllocationVoting.connect(owner).setCitizenSkipWindowBlocks(0)).to.be.revertedWith(
+        "VotingSettingsUtils: skip window must be > 0",
+      )
+    })
+
+    it("setGovernanceSkipWindowBlocks reverts with zero value", async function () {
+      const { governor, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      await expect(governor.connect(owner).setGovernanceSkipWindowBlocks(0)).to.be.revertedWith(
+        "GovernorConfigurator: skip window must be > 0",
+      )
     })
   })
 })

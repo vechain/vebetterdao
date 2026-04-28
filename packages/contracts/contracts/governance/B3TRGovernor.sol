@@ -97,7 +97,9 @@ import { IRelayerRewardsPool } from "../interfaces/IRelayerRewardsPool.sol";
  *   proposalsForRound mapping (round-indexed proposal tracking for relayer expected-actions)
  * - New events: NavigatorGovernanceVoteCast
  * - New errors: NotDelegatedToNavigator, NavigatorDecisionNotSet (in GovernorVotesLogic)
- * - New initializer: initializeV10(INavigatorRegistry, IRelayerRewardsPool) — reinitializer(8)
+ * - New initializer: initializeV10(INavigatorRegistry, IRelayerRewardsPool, uint256 governanceSkipWindowBlocks) — reinitializer(8)
+ * - governanceSkipWindowBlocks moved from constant to storage (GovernorStorage), configurable per env
+ * - setGovernanceSkipWindowBlocks(uint256) setter via GovernorConfigurator
  * - setNavigatorRegistry() / setRelayerRewardsPool() setters via GovernorConfigurator
  * - GovernorVotesLogic.getVotes() returns delegated amount when citizen has active navigator at snapshot
  * - Dead navigator (deactivated/exiting) = delegation void, returns full VOT3 balance
@@ -122,15 +124,17 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
     _disableInitializers();
   }
 
-  /// @notice Initialize V10: set NavigatorRegistry and RelayerRewardsPool addresses
+  /// @notice Initialize V10: set NavigatorRegistry, RelayerRewardsPool, and governance skip window
   function initializeV10(
     INavigatorRegistry _navigatorRegistry,
-    IRelayerRewardsPool _relayerRewardsPool
+    IRelayerRewardsPool _relayerRewardsPool,
+    uint256 _governanceSkipWindowBlocks
   ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) reinitializer(8) {
     require(address(_navigatorRegistry) != address(0), "B3TRGovernor: invalid navigator registry");
     require(address(_relayerRewardsPool) != address(0), "B3TRGovernor: invalid relayer rewards pool");
     GovernorConfigurator.setNavigatorRegistry(_navigatorRegistry);
     GovernorConfigurator.setRelayerRewardsPool(_relayerRewardsPool);
+    GovernorConfigurator.setGovernanceSkipWindowBlocks(_governanceSkipWindowBlocks);
   }
 
   /**
@@ -625,6 +629,13 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
   }
 
   /**
+   * @notice Returns the governance skip window in blocks.
+   */
+  function governanceSkipWindowBlocks() external view returns (uint256) {
+    return GovernorConfigurator.governanceSkipWindowBlocks();
+  }
+
+  /**
    * @notice Returns currently active proposal IDs.
    */
   function getActiveProposals() external view returns (uint256[] memory) {
@@ -953,6 +964,14 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
    */
   function setMinVotingDelay(uint256 newMinVotingDelay) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorConfigurator.setMinVotingDelay(newMinVotingDelay);
+  }
+
+  /**
+   * @notice Set the governance skip window (blocks before proposal deadline when relayers can skip navigator votes)
+   * @param newValue The new skip window in blocks
+   */
+  function setGovernanceSkipWindowBlocks(uint256 newValue) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorConfigurator.setGovernanceSkipWindowBlocks(newValue);
   }
 
   /**

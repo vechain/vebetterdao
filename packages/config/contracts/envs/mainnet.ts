@@ -219,5 +219,8 @@ export function createMainnetConfig() {
     NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
     NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
     NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8640, // ~24hr at 10s/block
+
+    XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: 720, // 720 blocks (~2hr at 10s/block)
+    B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: 720, // 720 blocks (~2hr at 10s/block)
   })
 }
