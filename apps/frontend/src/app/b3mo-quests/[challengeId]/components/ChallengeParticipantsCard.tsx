@@ -187,6 +187,8 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
           <ChallengeActionsRow
             key={ranking.address}
             {...ranking}
+            position={isPending ? 0 : ranking.position}
+            tag={isPending ? t("Joined") : undefined}
             showTrophy={showTrophy}
             hideScore={isPending}
             isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
@@ -259,6 +261,8 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
                 <Separator w="full" h={1} color="border.secondary" />
                 <ChallengeActionsRow
                   {...viewerRanking}
+                  position={isPending ? 0 : viewerRanking.position}
+                  tag={isPending ? t("Joined") : undefined}
                   isYou
                   showTrophy={showTrophy}
                   hideScore={isPending}
