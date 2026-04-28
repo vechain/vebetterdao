@@ -63,7 +63,15 @@ export const ChallengeActionsRow = ({
       </HStack>
       <HStack gap={2} zIndex={1}>
         {tag && (
-          <Badge variant="outline" size="sm" rounded="full" fontWeight="semibold" colorPalette="yellow">
+          <Badge
+            variant="outline"
+            size="sm"
+            rounded="full"
+            fontWeight="semibold"
+            colorPalette={isYou ? undefined : "yellow"}
+            color={isYou ? "white" : undefined}
+            borderColor={isYou ? "transparency.700" : undefined}
+            bg={isYou ? "transparency.200" : undefined}>
             {tag}
           </Badge>
         )}
