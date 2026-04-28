@@ -2,7 +2,7 @@ import { Button, Heading, HStack, Icon, Link, SimpleGrid, Text, VStack } from "@
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass } from "react-icons/lu"
 
@@ -66,17 +66,35 @@ export const NavigatorsPageContent = () => {
   const navigators = useFilteredNavigators(rawNavigators, searchTerm)
 
   const STORAGE_KEY = "NAVIGATOR_STEPS_DISMISSED"
-  const [open, setOpen] = useState(() => {
-    if (isMobile) return false
-    if (typeof window === "undefined") return true
-    return localStorage.getItem(STORAGE_KEY) !== "true"
-  })
+  // null = before first client read of localStorage. Avoids the bug where the lazy
+  // useState initializer reads `isMobile` from useMediaQuery before it has hydrated,
+  // which kept the card closed on desktop first-visit.
+  const [stepsOpen, setStepsOpen] = useState<boolean | null>(null)
+  const open = stepsOpen !== null ? stepsOpen : !isMobile
 
-  const onOpen = useCallback(() => setOpen(true), [])
+  const onOpen = useCallback(() => setStepsOpen(true), [])
   const onClose = useCallback(() => {
-    setOpen(false)
-    localStorage.setItem(STORAGE_KEY, "true")
+    setStepsOpen(false)
+    try {
+      localStorage.setItem(STORAGE_KEY, "true")
+    } catch {
+      // ignore quota / private mode
+    }
   }, [])
+
+  useEffect(() => {
+    let dismissed = false
+    try {
+      dismissed = localStorage.getItem(STORAGE_KEY) === "true"
+    } catch {
+      // ignore
+    }
+    if (dismissed) {
+      setStepsOpen(false)
+    } else {
+      setStepsOpen(!isMobile)
+    }
+  }, [isMobile])
 
   return (
     <VStack w="full" gap={8} pb={8}>
