@@ -13,6 +13,7 @@ import {
   payDeposit,
   waitForProposalToBeActive,
   getProposalIdFromTx,
+  moveBlocks,
 } from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import {
@@ -90,6 +91,14 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
     const proposalId = await getProposalIdFromTx(tx)
     await payDeposit(proposalId.toString(), owner)
     return proposalId as bigint
+  }
+
+  async function advancePastSkipWindow(roundId: bigint) {
+    const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
+    const deadline = await xAllocationVoting.roundDeadline(roundId)
+    const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+    const blocksToMine = deadline - currentBlock - skipWindow
+    if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
   }
 
   /**
@@ -254,6 +263,11 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
 
       // Nav1 sets allocation ONLY
       await navigatorRegistry.connect(nav1).setAllocationPreferences(roundId, [app1Id, app2Id], [6000, 4000])
+      // Nav2 also no governance decision
+      await navigatorRegistry.connect(nav2).setAllocationPreferences(roundId, [app1Id, app2Id], [5000, 5000])
+
+      // Advance past skip window so governance skips are permitted
+      await advancePastSkipWindow(roundId)
 
       // Allocation vote succeeds
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenA.address, roundId)
@@ -270,8 +284,6 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenC.address, roundId)
       await governor.connect(relayer1).castNavigatorVote(proposalId, citizenC.address)
 
-      // Nav2 also no governance decision
-      await navigatorRegistry.connect(nav2).setAllocationPreferences(roundId, [app1Id, app2Id], [5000, 5000])
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenB.address, roundId)
       await governor.connect(relayer1).castNavigatorVote(proposalId, citizenB.address)
 
@@ -311,6 +323,9 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
 
       // Nav1 sets governance ONLY
       await navigatorRegistry.connect(nav1).setProposalDecision(proposalId, 2)
+
+      // Advance past skip window so allocation skips are permitted
+      await advancePastSkipWindow(roundId)
 
       // Allocation vote skips (no prefs)
       await expect(xAllocationVoting.connect(relayer1).castNavigatorVote(citizenA.address, roundId)).to.emit(
@@ -370,6 +385,9 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
       await navigatorRegistry.connect(nav1).setAllocationPreferences(roundId, [app1Id, app2Id], [6000, 4000])
       await navigatorRegistry.connect(nav1).setProposalDecision(proposalId1, 2)
 
+      // Advance past skip window so skips are permitted
+      await advancePastSkipWindow(roundId)
+
       // citizenA: allocation succeeds, gov proposal1 succeeds, gov proposal2 skips
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenA.address, roundId)
       await governor.connect(relayer1).castNavigatorVote(proposalId1, citizenA.address)
@@ -420,6 +438,9 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
       const totalBefore = await relayerRewardsPool.totalActions(roundId)
 
       // Nav1 + Nav2 set NOTHING
+
+      // Advance past skip window so skips are permitted
+      await advancePastSkipWindow(roundId)
 
       // Skip all for every citizen
       for (const citizen of [citizenA, citizenB, citizenC]) {
@@ -519,6 +540,9 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser1.address, roundId)
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser2.address, roundId)
 
+      // Advance past skip window so skips are permitted
+      await advancePastSkipWindow(roundId)
+
       // Nav1's citizens: vote
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenA.address, roundId)
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenC.address, roundId)
@@ -561,13 +585,19 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
       // Nav1 sets allocation
       await navigatorRegistry.connect(nav1).setAllocationPreferences(roundId, [app1Id, app2Id], [5000, 5000])
 
-      // Relayer1 handles autoUser1 + citizenA + citizenC
+      // Relayer1 handles autoUser1
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser1.address, roundId)
+      // Relayer2 handles autoUser2
+      await xAllocationVoting.connect(relayer2).castVoteOnBehalfOf(autoUser2.address, roundId)
+
+      // Advance past skip window so skips are permitted
+      await advancePastSkipWindow(roundId)
+
+      // Relayer1: citizenA + citizenC (nav1 has prefs → votes)
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenA.address, roundId)
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenC.address, roundId)
 
-      // Relayer2 handles autoUser2 + citizenB (nav2 no prefs → skip)
-      await xAllocationVoting.connect(relayer2).castVoteOnBehalfOf(autoUser2.address, roundId)
+      // Relayer2: citizenB (nav2 no prefs → skip)
       await xAllocationVoting.connect(relayer2).castNavigatorVote(citizenB.address, roundId)
 
       await waitForRoundToEnd(Number(roundId))
@@ -727,6 +757,9 @@ describe("Relayer + Navigator E2E - @shard20e2e", function () {
       // Auto-votes
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser1.address, roundId)
       await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser2.address, roundId)
+
+      // Advance past skip window so skips are permitted
+      await advancePastSkipWindow(roundId)
 
       // Nav1's citizens: alloc + gov
       await xAllocationVoting.connect(relayer1).castNavigatorVote(citizenA.address, roundId)
