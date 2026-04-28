@@ -113,7 +113,7 @@
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv": "^16.4.5",
-    "hardhat": "2.19.1",
+    "hardhat": "3.4.0",
     "husky": "^8.0.0",
     "lint-staged": "12.5.0",
     "prettier": "^3.3.0",
