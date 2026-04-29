@@ -6,7 +6,7 @@ on:
 jobs:
   run-slither:
     name: Slither Analysis
-    uses: vechain/github-actions/.github/workflows/slither.yaml@72c47d9d8d3f9ed4404f9056f48967e524b43ae9 # v.1.13.0
+    uses: vechain/github-actions-public/.github/workflows/slither.yaml@f54f69d33344b241b5ec901d3d5e1b02d44a1b96 # v.2.3.0
     with:
       solc-version: "0.8.20"
       target: "packages/contracts/"
