@@ -72,6 +72,8 @@ export const ChallengeLeaderboardModal = ({
             <ChallengeActionsRow
               key={ranking.address}
               {...ranking}
+              position={isPending ? 0 : ranking.position}
+              tag={isPending ? t("Joined") : undefined}
               showTrophy={showTrophy}
               hideScore={isPending}
               isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}

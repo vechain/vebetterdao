@@ -1,21 +1,21 @@
 ---
 name: branch-versions
-description: "Single external worktree workflow: stash, add detached worktree under ~/worktrees, return to main and stash pop so main stays usable, build each variant in the worktree and push to origin on dedicated branches, remove worktree, print one-line checkout commands. Triggers: parallel versions, alternatives, A/B branches."
+description: "Single external worktree workflow: stash, add detached worktree under ~/worktrees, return to main and stash pop so main stays usable, build each variant in the worktree on local branches, remove worktree, print one-line checkout commands. Triggers: parallel versions, alternatives, A/B branches."
 ---
 
 # Branch Versions (single worktree)
 
-Create `K` alternative implementations as separate branches (`<current-branch>-vN`), each pushed to `origin` when possible. The **main repo checkout stays on the user's branch** with their working tree restored right after setup, so they can keep working while the agent finishes variants in one isolated worktree.
+Create `K` alternative implementations as separate local branches (`<branch-prefix>-vN`). Do **not** push version branches unless the user explicitly asks for a push. By default `branch-prefix = <current-branch>`, but if the current branch is `main`/`master` or the user provides a feature name, use a short custom prefix (for example `card-changes-v1`, `card-changes-v2`). The **main repo checkout stays on the user's branch** with their working tree restored right after setup, so they can keep working while the agent finishes variants in one isolated worktree.
 
 ## Why this flow
 
 - **Stash + worktree + pop:** frees the main working copy immediately after `stash pop`; variants are built only inside the worktree.
 - **One worktree:** fewer Cursor Source Control roots than spawning one worktree per version; remove it when done so nothing lingers under `~/worktrees/`.
-- **Push:** remote branches make handoff and CI easy; if `origin` is missing or push fails, branches still exist locally after the worktree is removed.
+- **No automatic push:** branches stay local by default; push only when the user explicitly asks.
 
 ## Convention
 
-- **Version branches:** `<current-branch>-v<N>` (slashes preserved, e.g. `feat/foo-v1`).
+- **Version branches:** `<branch-prefix>-v<N>`. Default prefix is `<current-branch>` (slashes preserved, e.g. `feat/foo-v1`). When starting from `main`/`master`, ask for or infer a concise task prefix instead of creating `main-vN`/`master-vN` branches.
 - **Worktree path (reused for all variants):** `~/worktrees/<repo-name>/<branch-flat>-versions/` where `branch-flat` = current branch with `/` replaced by `-`. If the path exists, try `-versions-2`, `-versions-3`, … until `git worktree add` succeeds.
 - **Fork point:** `BASE_SHA = git rev-parse HEAD` captured **before** stash (same commit the user was on; stashing does not move HEAD).
 
@@ -41,8 +41,7 @@ flowchart TD
   resetBase --> newBranch["git checkout -b BRANCH-vN"]
   newBranch --> editFiles[Edit files with file tools]
   editFiles --> commitFiles["git add SPECIFIC_PATHS && git commit"]
-  commitFiles --> pushFiles["git push -u origin BRANCH-vN if origin exists"]
-  pushFiles --> moreVersions{more versions?}
+  commitFiles --> moreVersions{more versions?}
   moreVersions -->|yes| versionsLoop
   moreVersions -->|no| cdMainAgain[cd main repo]
   cdMainAgain --> removeWt["git worktree remove WORKTREE_PATH"]
@@ -55,11 +54,12 @@ flowchart TD
 REPO_ROOT=$(git rev-parse --show-toplevel)
 REPO_NAME=$(basename "$REPO_ROOT")
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-BRANCH_FLAT=${CURRENT_BRANCH//\//-}
+BRANCH_PREFIX="$CURRENT_BRANCH" # or a user/task-provided prefix when on main/master
+BRANCH_FLAT=${BRANCH_PREFIX//\//-}
 BASE_SHA=$(git rev-parse HEAD)
 ```
 
-If `CURRENT_BRANCH` is `HEAD` (detached) or `main`/`master`, warn and ask whether to proceed.
+If `CURRENT_BRANCH` is `HEAD` (detached), warn and ask whether to proceed. If `CURRENT_BRANCH` is `main`/`master`, ask for or infer a short task branch prefix before proceeding.
 
 Read root `package.json` (and relevant workspace `package.json` in monorepos) for a real dev/test command to mention optionally in the report (never invent script names).
 
@@ -101,14 +101,14 @@ From here the **main repo is usable** in parallel; all variant work happens unde
 ### 5. Next free `vN` (run from main repo)
 
 ```bash
-git branch --list "${CURRENT_BRANCH}-v*"
+git branch --list "${BRANCH_PREFIX}-v*"
 ```
 
 Parse `-vN` suffixes: `next = max(N) + 1` (or `1` if none).
 
 ### 6. Build each version (only inside `$WT`)
 
-For `i = 0 .. K-1`, `N = next + i`, `VERSION_BRANCH="${CURRENT_BRANCH}-v${N}"`:
+For `i = 0 .. K-1`, `N = next + i`, `VERSION_BRANCH="${BRANCH_PREFIX}-v${N}"`:
 
 ```bash
 cd "$WT"
@@ -128,13 +128,9 @@ Never `git add -A` or `git add .` (avoids unrelated untracked files).
 git commit -m "<descriptive variant message>"
 ```
 
-Push (if `origin` exists):
+Do not push the branch. If the user explicitly asks to push variants, push later from the main repo after reporting the local branches.
 
-```bash
-git remote get-url origin >/dev/null 2>&1 && git push -u origin "$VERSION_BRANCH"
-```
-
-If `checkout -b` fails (branch exists), bump `N` and retry. If push fails, warn in the final report; branch remains local.
+If `checkout -b` fails (branch exists), bump `N` and retry.
 
 **Hooks in worktree:** if `husky` / `lint-staged` fails because `node_modules` or `.husky/_` is missing in the worktree, symlink `node_modules` from `$REPO_ROOT` into `$WT` and/or copy `$REPO_ROOT/.husky/_` into `$WT/.husky/_`, then retry commit — do not use `--no-verify` unless the user explicitly allows it.
 
@@ -154,21 +150,20 @@ Compact block: one line per version = `git checkout` + short `#` description.
 ```
 Versions (forked from <CURRENT_BRANCH> @ <BASE_SHA short>):
 
-  git checkout <CURRENT_BRANCH>-v1   # <one-line variant summary>
-  git checkout <CURRENT_BRANCH>-v2   # <one-line variant summary>
+  git checkout <BRANCH_PREFIX>-v1   # <one-line variant summary>
+  git checkout <BRANCH_PREFIX>-v2   # <one-line variant summary>
 
 Back to your branch:
   git checkout <CURRENT_BRANCH>
 
-Worktree removed. Pushed: origin/<CURRENT_BRANCH>-vN (or note if push skipped/failed).
+Worktree removed. Branches are local only unless the user explicitly requested push.
 ```
 
 Optional second line per version with the detected dev command if useful.
 
 ## Edge cases
 
-- **No `origin`:** skip push; say so in report.
-- **Push auth / network failure:** warn; branches still exist locally.
+- **Push requested:** only then run `git push -u origin <branch>` for the requested version branches.
 - **Worktree path collision:** suffix `-versions-2`, `-versions-3`, …
 - **Repo with no commits:** `git worktree add` fails — surface error, stop.
 - **Interrupted run:** user from main: `git worktree list`, `git worktree remove <path> --force` if needed, `git worktree prune`, `git stash list` to recover stash.

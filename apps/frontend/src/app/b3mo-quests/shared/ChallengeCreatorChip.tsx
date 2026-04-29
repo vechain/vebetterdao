@@ -7,9 +7,10 @@ import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 
 interface ChallengeCreatorChipProps {
   creator: string
+  noBackground?: boolean
 }
 
-export const ChallengeCreatorChip = ({ creator }: ChallengeCreatorChipProps) => {
+export const ChallengeCreatorChip = ({ creator, noBackground = false }: ChallengeCreatorChipProps) => {
   const router = useRouter()
   const { data: vetDomains } = useGetVetDomains(creator ? [creator] : undefined)
   const displayName = vetDomains?.[0] ?? humanAddress(creator, 6, 4)
@@ -18,9 +19,9 @@ export const ChallengeCreatorChip = ({ creator }: ChallengeCreatorChipProps) => 
     <HStack
       w="fit-content"
       gap="1"
-      bg="bg.secondary"
+      bg={noBackground ? "transparent" : "bg.secondary"}
       borderRadius="full"
-      px="2"
+      px={noBackground ? "0" : "2"}
       py="0.5"
       align="center"
       cursor="pointer"
