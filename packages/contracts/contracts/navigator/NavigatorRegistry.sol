@@ -117,6 +117,7 @@ contract NavigatorRegistry is
     uint256 preferenceCutoffPeriod;
     address voterRewards;
     address xAllocationVoting;
+    address relayerRewardsPool;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -155,6 +156,7 @@ contract NavigatorRegistry is
     $.preferenceCutoffPeriod = params.preferenceCutoffPeriod;
     $.voterRewards = params.voterRewards;
     $.xAllocationVoting = params.xAllocationVoting;
+    $.relayerRewardsPool = params.relayerRewardsPool;
 
     // Self-delegate on VOT3 so staked VOT3 has voting power in checkpoints
     IVOT3(params.vot3Token).delegate(address(this));

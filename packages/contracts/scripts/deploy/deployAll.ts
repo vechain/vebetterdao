@@ -1234,6 +1234,7 @@ export async function deployAll(config: ContractsConfig) {
         preferenceCutoffPeriod: config.NAVIGATOR_PREFERENCE_CUTOFF_PERIOD,
         voterRewards: await voterRewards.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
+        relayerRewardsPool: await relayerRewardsPool.getAddress(),
       },
     ],
     navigatorLibraryAddresses,

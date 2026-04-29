@@ -126,6 +126,7 @@ describe("NavigatorRegistry - @shard19a", function () {
           preferenceCutoffPeriod: 8640,
           voterRewards: owner.address,
           xAllocationVoting: owner.address,
+          relayerRewardsPool: owner.address,
         }),
       ).to.be.reverted
     })
