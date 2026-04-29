@@ -9,7 +9,6 @@ on:
       - main
   workflow_dispatch:
 
-# Caller token scope must cover reusable workflows (intersection with callee permissions).
 permissions:
   contents: read
   actions: write
