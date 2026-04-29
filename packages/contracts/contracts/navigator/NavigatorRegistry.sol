@@ -30,6 +30,8 @@ import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/
 
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
+import { IVOT3 } from "../interfaces/IVOT3.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import { NavigatorStorageTypes } from "./libraries/NavigatorStorageTypes.sol";
 import { NavigatorStakingUtils } from "./libraries/NavigatorStakingUtils.sol";
@@ -50,6 +52,13 @@ import { NavigatorLifecycleUtils } from "./libraries/NavigatorLifecycleUtils.sol
  * - Single ERC-7201 namespaced storage
  * - Role-based access control (GOVERNANCE_ROLE, UPGRADER_ROLE)
  *
+ * Staking & Voting Power:
+ * - Staked B3TR is converted to VOT3 under the hood (via VOT3.convertToVOT3) so it counts as
+ *   the navigator's personal voting power. The contract self-delegates on VOT3 during initialization
+ *   to enable ERC20Votes checkpointing. Per-navigator staked amounts are tracked with Checkpoints.Trace208
+ *   for snapshot queries (getStakedAmountAtTimepoint). On withdraw/slash, VOT3 is converted back to B3TR.
+ * - The staked VOT3 only counts for voting power — it cannot support proposals or be powered down.
+ *
  * Key features:
  * - Permissionless navigator registration with B3TR staking (min 50K, max 1% of VOT3 supply)
  * - Citizens delegate specific VOT3 amounts with checkpointed snapshots
@@ -61,7 +70,7 @@ import { NavigatorLifecycleUtils } from "./libraries/NavigatorLifecycleUtils.sol
  * - Stale delegations auto-cleared: citizens can re-delegate directly to new navigator
  *
  * Cross-contract integrations:
- * - VOT3: reads getDelegatedAmount() to enforce transfer lock
+ * - VOT3: reads getDelegatedAmount() to enforce transfer lock; convertToVOT3/convertToB3TR for staking
  * - XAllocationVoting: castNavigatorVote() uses delegated amount at snapshot as voting power
  * - B3TRGovernor: castNavigatorVote() for governance proposals
  * - VoterRewards: deducts navigator fee at claim time, deposits to this contract
@@ -146,6 +155,12 @@ contract NavigatorRegistry is
     $.preferenceCutoffPeriod = params.preferenceCutoffPeriod;
     $.voterRewards = params.voterRewards;
     $.xAllocationVoting = params.xAllocationVoting;
+
+    // Self-delegate on VOT3 so staked VOT3 has voting power in checkpoints
+    IVOT3(params.vot3Token).delegate(address(this));
+    // B3TR approval for VOT3 contract — needed because convertToVOT3() internally
+    // calls b3tr.transferFrom(msg.sender=NavigatorRegistry, vot3, amount)
+    IERC20(params.b3trToken).approve(params.vot3Token, type(uint256).max);
   }
 
   // ======================== Version & Upgrade ======================== //
@@ -440,6 +455,14 @@ contract NavigatorRegistry is
   /// @return The maximum stake amount
   function getMaxStake() external view returns (uint256) {
     return NavigatorStakingUtils.getMaxStake();
+  }
+
+  /// @notice Get the staked amount for a navigator at a past block (checkpointed)
+  /// @param navigator Address of the navigator
+  /// @param timepoint Block number to query
+  /// @return The staked amount at that block
+  function getStakedAmountAtTimepoint(address navigator, uint256 timepoint) external view returns (uint256) {
+    return NavigatorStakingUtils.getStakedAmountAtTimepoint(navigator, timepoint);
   }
 
   // -- Delegation --
