@@ -9,6 +9,12 @@ on:
       - main
   workflow_dispatch:
 
+# Caller token scope must cover reusable workflows (intersection with callee permissions).
+permissions:
+  contents: read
+  actions: write
+  pull-requests: write
+
 jobs:
   checkov:
     uses: vechain/github-actions-public/.github/workflows/checkov.yaml@f54f69d33344b241b5ec901d3d5e1b02d44a1b96 # v.2.3.0
