@@ -1,25 +1,26 @@
 "use client"
 
-import { Badge, Button, Card, HStack, Heading, Icon, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Badge, Box, Button, Card, HStack, Icon, IconButton, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useCurrentBlock } from "@vechain/vechain-kit"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   LuCheck,
-  LuChevronDown,
-  LuChevronUp,
+  LuChevronLeft,
+  LuChevronRight,
   LuCircle,
   LuEye,
   LuFileText,
   LuFlag,
   LuGavel,
-  LuInfo,
   LuVote,
   LuX,
 } from "react-icons/lu"
+import { A11y, Navigation } from "swiper/modules"
+import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useGetMinorSlashPercentage } from "@/api/contracts/navigatorRegistry/hooks/useGetMinorSlashPercentage"
 import { useGetPreferenceCutoffPeriod } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferenceCutoffPeriod"
@@ -38,12 +39,13 @@ import { type ReportableInfraction } from "@/hooks/navigator/useReportNavigatorI
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useEvents } from "@/hooks/useEvents"
 
+import "swiper/css"
+import "swiper/css/navigation"
+
 import { ReportNavigatorModal } from "./modals/ReportNavigatorModal"
-import { TasksHistoryInfoModal } from "./modals/TasksHistoryInfoModal"
 import { ViewReportModal } from "./modals/ViewReportModal"
 
 const formatter = getCompactFormatter(2)
-const PREVIEW_ROUNDS = 3
 
 /** `pending` = round voting period not over yet (not a compliance failure). */
 type TaskStatus = "done" | "late" | "missed" | "pending"
@@ -74,14 +76,16 @@ type Props = {
   isOwnPage: boolean
 }
 
+const SWIPER_BREAKPOINTS = {
+  0: { slidesPerView: 1.05, spaceBetween: 12 },
+  640: { slidesPerView: 2, spaceBetween: 14 },
+  960: { slidesPerView: 2.5, spaceBetween: 16 },
+}
+
 export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   const { t } = useTranslation()
-  const [visibleCount, setVisibleCount] = useState(PREVIEW_ROUNDS)
-  const [expandedRounds, setExpandedRounds] = useState<Set<string>>(new Set())
-  const [hasInitializedExpansion, setHasInitializedExpansion] = useState(false)
   const [viewReportURI, setViewReportURI] = useState<string | null>(null)
   const [isReportOpen, setIsReportOpen] = useState(false)
-  const [isTasksHistoryInfoOpen, setIsTasksHistoryInfoOpen] = useState(false)
 
   const { data: roundsData } = useAllocationsRoundsEvents()
   const { data: prefEvents } = useNavigatorPreferenceEvents(address)
@@ -248,78 +252,66 @@ export const NavigatorRoundHistory = ({ address, isOwnPage }: Props) => {
   const stakeNum = stake ? Number(stake.scaled) : 0
   const penaltyAmount = slashBps != null ? (stakeNum * slashBps) / 10_000 : 0
 
-  const visibleRounds = rounds.slice(0, visibleCount)
-  const hasMore = visibleCount < rounds.length
-
-  useEffect(() => {
-    if (hasInitializedExpansion || rounds.length === 0) return
-    setExpandedRounds(new Set([rounds[0].roundId]))
-    setHasInitializedExpansion(true)
-  }, [rounds, hasInitializedExpansion])
+  const prevClass = "swiper-nav-prev-rounds"
+  const nextClass = "swiper-nav-next-rounds"
 
   if (rounds.length === 0) return null
 
   return (
     <>
-      <Card.Root variant="outline" borderRadius="xl">
-        <Card.Body>
-          <VStack gap={4} align="stretch">
-            <HStack justify="space-between">
-              <HStack gap={2}>
-                <Heading size="md">{t("Tasks History")}</Heading>
-                <IconButton
-                  variant="ghost"
-                  size="xs"
-                  rounded="full"
-                  aria-label={t("tasksHistoryInfoTitle")}
-                  onClick={() => setIsTasksHistoryInfoOpen(true)}>
-                  <LuInfo />
-                </IconButton>
-              </HStack>
-              {!isOwnPage && infractions.length > 0 && (
-                <Button variant="outline" size="xs" colorPalette="red" onClick={() => setIsReportOpen(true)}>
-                  <LuFlag />
-                  {t("Report Navigator")}
-                </Button>
-              )}
-            </HStack>
+      <VStack gap={3} align="stretch">
+        <HStack justify="flex-end" gap={1}>
+          {!isOwnPage && infractions.length > 0 && (
+            <Button variant="outline" size="xs" colorPalette="red" onClick={() => setIsReportOpen(true)}>
+              <LuFlag />
+              {t("Report Navigator")}
+            </Button>
+          )}
+          <IconButton
+            hideBelow="md"
+            className={prevClass}
+            variant="ghost"
+            size="xs"
+            rounded="full"
+            aria-label={t("Previous")}
+            _disabled={{ opacity: 0.3, cursor: "not-allowed" }}>
+            <LuChevronLeft />
+          </IconButton>
+          <IconButton
+            hideBelow="md"
+            className={nextClass}
+            variant="ghost"
+            size="xs"
+            rounded="full"
+            aria-label={t("Next")}
+            _disabled={{ opacity: 0.3, cursor: "not-allowed" }}>
+            <LuChevronRight />
+          </IconButton>
+        </HStack>
 
-            <VStack gap={2} align="stretch">
-              {visibleRounds.map(round => (
-                <RoundCard
-                  key={round.roundId}
-                  round={round}
-                  isExpanded={expandedRounds.has(round.roundId)}
-                  onToggle={() =>
-                    setExpandedRounds(prev => {
-                      const next = new Set(prev)
-                      if (next.has(round.roundId)) next.delete(round.roundId)
-                      else next.add(round.roundId)
-                      return next
-                    })
-                  }
-                  onViewReport={setViewReportURI}
-                  slashed={slashedByRound?.get(round.roundId)?.slashed ?? false}
-                  penaltyAmount={penaltyAmount}
-                />
-              ))}
-            </VStack>
-
-            {hasMore && (
-              <Button
-                variant="link"
-                size="sm"
-                fontWeight="semibold"
-                onClick={() => setVisibleCount(prev => prev + PREVIEW_ROUNDS)}>
-                {t("Show more")}
-              </Button>
-            )}
-          </VStack>
-        </Card.Body>
-      </Card.Root>
+        <Box position="relative" w="full">
+          <Swiper
+            modules={[A11y, Navigation]}
+            breakpoints={SWIPER_BREAKPOINTS}
+            navigation={{ prevEl: `.${prevClass}`, nextEl: `.${nextClass}` }}
+            style={{ width: "100%" }}>
+            {rounds.map(round => (
+              <SwiperSlide key={round.roundId} style={{ height: "auto" }}>
+                <Box h="full">
+                  <RoundCard
+                    round={round}
+                    onViewReport={setViewReportURI}
+                    slashed={slashedByRound?.get(round.roundId)?.slashed ?? false}
+                    penaltyAmount={penaltyAmount}
+                  />
+                </Box>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </Box>
+      </VStack>
 
       <ViewReportModal isOpen={!!viewReportURI} onClose={() => setViewReportURI(null)} reportURI={viewReportURI} />
-      <TasksHistoryInfoModal isOpen={isTasksHistoryInfoOpen} onClose={() => setIsTasksHistoryInfoOpen(false)} />
       <ReportNavigatorModal
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
@@ -367,14 +359,12 @@ const statusColor = (status: ReportRowStatus) => {
 
 type RoundCardProps = {
   round: RoundCompliance
-  isExpanded: boolean
-  onToggle: () => void
   onViewReport: (uri: string) => void
   slashed: boolean
   penaltyAmount: number
 }
 
-const RoundCard = ({ round, isExpanded, onToggle, onViewReport, slashed, penaltyAmount }: RoundCardProps) => {
+const RoundCard = ({ round, onViewReport, slashed, penaltyAmount }: RoundCardProps) => {
   const { t } = useTranslation()
 
   const issueCount = round.isRoundStillOpen
@@ -394,66 +384,67 @@ const RoundCard = ({ round, isExpanded, onToggle, onViewReport, slashed, penalty
         : "notDue"
 
   return (
-    <VStack gap={0} borderRadius="lg" border="sm" borderColor="border.secondary" align="stretch">
-      <HStack gap={3} p={3} cursor="pointer" _hover={{ bg: "bg.subtle" }} onClick={onToggle}>
-        <Icon color="text.subtle">{isExpanded ? <LuChevronUp /> : <LuChevronDown />}</Icon>
-        <Text textStyle="sm" fontWeight="semibold" flex={1}>
-          {t("Round #{{round}}", { round: round.roundId })}
-        </Text>
-        {slashed ? (
-          <Badge colorPalette="purple" size="sm">
-            {t("Slashed")}
-            {" -"}
-            {formatter.format(penaltyAmount)}
-            {" B3TR"}
-          </Badge>
-        ) : round.isRoundStillOpen ? (
-          <Badge colorPalette="blue" size="sm">
-            {t("Round in progress")}
-          </Badge>
-        ) : issueCount > 0 ? (
-          <Badge colorPalette="red" size="sm">
-            {issueCount} {issueCount === 1 ? t("issue") : t("issues")}
-          </Badge>
-        ) : (
-          <Badge colorPalette="green" size="sm">
-            {t("All good")}
-          </Badge>
-        )}
-      </HStack>
-
-      {isExpanded && (
-        <VStack gap={1} px={3} pb={3} align="stretch">
-          <TaskRow icon={<LuVote />} label={t("Allocation vote")} status={round.allocationStatus} />
-
-          {round.proposals.map(p => (
-            <TaskRow key={p.proposalId} icon={<LuGavel />} label={p.title} status={p.status} />
-          ))}
-
-          <HStack gap={3} p={2} borderRadius="md">
-            <Icon boxSize={4} color={statusColor(reportStatus)}>
-              {statusIcon(reportStatus)}
-            </Icon>
-            <HStack gap={2} flex={1}>
-              <Icon boxSize={4} color="text.subtle">
-                <LuFileText />
-              </Icon>
-              <Text textStyle="sm" fontWeight="medium">
-                {t("Report")}
-              </Text>
-            </HStack>
-            {round.reportSubmitted && round.reportURI ? (
-              <Button variant="ghost" size="xs" onClick={() => onViewReport(round.reportURI!)}>
-                <LuEye />
-                {t("View")}
-              </Button>
+    <Card.Root variant="outline" borderRadius="xl" h="full">
+      <Card.Body p={3}>
+        <VStack gap={2} align="stretch">
+          <HStack justify="space-between">
+            <Text textStyle="sm" fontWeight="semibold">
+              {t("Round #{{round}}", { round: round.roundId })}
+            </Text>
+            {slashed ? (
+              <Badge colorPalette="purple" size="sm">
+                {t("Slashed")}
+                {" -"}
+                {formatter.format(penaltyAmount)}
+                {" B3TR"}
+              </Badge>
+            ) : round.isRoundStillOpen ? (
+              <Badge colorPalette="blue" size="sm">
+                {t("Round in progress")}
+              </Badge>
+            ) : issueCount > 0 ? (
+              <Badge colorPalette="red" size="sm">
+                {issueCount} {issueCount === 1 ? t("issue") : t("issues")}
+              </Badge>
             ) : (
-              <StatusBadge status={reportStatus} />
+              <Badge colorPalette="green" size="sm">
+                {t("All good")}
+              </Badge>
             )}
           </HStack>
+
+          <VStack gap={1} align="stretch">
+            <TaskRow icon={<LuVote />} label={t("Allocation vote")} status={round.allocationStatus} />
+
+            {round.proposals.map(p => (
+              <TaskRow key={p.proposalId} icon={<LuGavel />} label={p.title} status={p.status} />
+            ))}
+
+            <HStack gap={3} p={2} borderRadius="md">
+              <Icon boxSize={4} color={statusColor(reportStatus)}>
+                {statusIcon(reportStatus)}
+              </Icon>
+              <HStack gap={2} flex={1}>
+                <Icon boxSize={4} color="text.subtle">
+                  <LuFileText />
+                </Icon>
+                <Text textStyle="sm" fontWeight="medium">
+                  {t("Report")}
+                </Text>
+              </HStack>
+              {round.reportSubmitted && round.reportURI ? (
+                <Button variant="ghost" size="xs" onClick={() => onViewReport(round.reportURI!)}>
+                  <LuEye />
+                  {t("View")}
+                </Button>
+              ) : (
+                <StatusBadge status={reportStatus} />
+              )}
+            </HStack>
+          </VStack>
         </VStack>
-      )}
-    </VStack>
+      </Card.Body>
+    </Card.Root>
   )
 }
 
