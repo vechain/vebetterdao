@@ -66,17 +66,6 @@ export const StakeStep = () => {
         </Text>
       </VStack>
 
-      <Alert.Root status="info" size="sm" rounded="lg">
-        <Alert.Indicator>
-          <InfoCircle />
-        </Alert.Indicator>
-        <Alert.Content>
-          <Alert.Description>
-            {t("Your staked B3TR is converted to VOT3 under the hood and counts as your personal voting power.")}
-          </Alert.Description>
-        </Alert.Content>
-      </Alert.Root>
-
       <HStack justify="space-between">
         <Text textStyle="sm" color="fg.muted">
           {t("Minimum stake")}
@@ -205,6 +194,17 @@ export const StakeStep = () => {
           </HStack>
         </HStack>
       </VStack>
+
+      <Alert.Root status="info" size="sm" rounded="lg">
+        <Alert.Indicator>
+          <InfoCircle />
+        </Alert.Indicator>
+        <Alert.Content>
+          <Alert.Description>
+            {t("Your staked B3TR is converted to VOT3 under the hood and counts as your personal voting power.")}
+          </Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
     </VStack>
   )
 }
