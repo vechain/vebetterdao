@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -53,6 +54,9 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
   const { t } = useTranslation()
   const statusTime = useChallengeStatusTime(challenge)
   const actions = useChallengeActions()
+  const { account } = useWallet()
+  const { open: openWalletModal } = useWalletModal()
+  const isGuest = !account?.address
   const { onOpen: onShareOpen, onClose: onShareClose, open: isShareOpen } = useDisclosure()
   const { onOpen: onClaimOpen, onClose: onClaimClose, open: isClaimOpen } = useDisclosure()
   const { onOpen: onAcceptOpen, onClose: onAcceptClose, open: isAcceptOpen } = useDisclosure()
@@ -136,7 +140,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
                       onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
                       onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
                       onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
-                      onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
+                      onJoinClick={challenge.canJoin ? (isGuest ? openWalletModal : onJoinOpen) : undefined}
                       onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
                       onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
                       onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}
@@ -185,7 +189,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
                 onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
                 onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
                 onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
-                onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
+                onJoinClick={challenge.canJoin ? (isGuest ? openWalletModal : onJoinOpen) : undefined}
                 onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
                 onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
                 onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}

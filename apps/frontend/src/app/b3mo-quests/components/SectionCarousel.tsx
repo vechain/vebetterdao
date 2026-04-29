@@ -20,6 +20,7 @@ interface SectionCarouselProps {
   /** Override for section.items (e.g. after cross-section dedup). Falls back to section.items. */
   items?: ChallengeView[]
   hideWhenEmpty?: boolean
+  onCardJoinOverride?: () => void
 }
 
 const BREAKPOINTS = {
@@ -32,7 +33,13 @@ const BREAKPOINTS = {
 const SKELETON_SLIDES = 1
 const INITIAL_SKELETON_SLIDES = 3
 
-export const SectionCarousel = ({ title, section, items, hideWhenEmpty = true }: SectionCarouselProps) => {
+export const SectionCarousel = ({
+  title,
+  section,
+  items,
+  hideWhenEmpty = true,
+  onCardJoinOverride,
+}: SectionCarouselProps) => {
   const displayItems = items ?? section.items
   const uid = useId().replace(/:/g, "")
   const prevClass = `swiper-prev-${uid}`
@@ -80,7 +87,7 @@ export const SectionCarousel = ({ title, section, items, hideWhenEmpty = true }:
           {displayItems.map(challenge => (
             <SwiperSlide key={challenge.challengeId} style={{ height: "auto" }}>
               <Box h="full">
-                <ChallengeCard challenge={challenge} />
+                <ChallengeCard challenge={challenge} onJoinOverride={onCardJoinOverride} />
               </Box>
             </SwiperSlide>
           ))}
