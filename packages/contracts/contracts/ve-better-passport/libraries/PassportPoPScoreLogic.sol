@@ -286,6 +286,12 @@ library PassportPoPScoreLogic {
 
     require(self.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
 
+    // Skip apps that are blacklisted or no longer endorsed: their actions must not contribute to passport scores,
+    // round action counts, or downstream consumers (e.g. B3TR Challenges leaderboard / settlement).
+    if (self.x2EarnApps.isBlacklisted(appId)) {
+      return;
+    }
+
     // If app was just added and the security level is not set, set it to LOW by default
     if (self.appSecurity[appId] == PassportTypes.APP_SECURITY.NONE) {
       return;
