@@ -27,6 +27,8 @@ import { formatEther } from "viem"
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { Transaction } from "@/api/indexer/transactions/useTransactions"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
@@ -212,6 +214,13 @@ const VotingPowerContent = ({
     account?.address,
   )
   const { data: currentDelegated } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
+  const { data: isNavigator } = useIsNavigator(account?.address)
+  const { data: navigatorStake } = useGetStake(isNavigator ? (account?.address ?? "") : "")
+
+  const stakedFormatted = useMemo(() => {
+    if (!isNavigator || !navigatorStake?.raw || navigatorStake.raw === 0n) return null
+    return FormattingUtils.humanNumber(navigatorStake.scaled)
+  }, [isNavigator, navigatorStake])
 
   const vot3BalanceOnly = useMemo(() => {
     if (!currentVot3Balance) return "0"
@@ -292,6 +301,7 @@ const VotingPowerContent = ({
           {depositsFormatted && (
             <CompositionLine label={t("Deposited for proposal support")} value={`${depositsFormatted} VOT3`} />
           )}
+          {stakedFormatted && <CompositionLine label={t("From staking")} value={`${stakedFormatted} VOT3`} />}
         </VStack>
 
         {isDelegated && Number(vot3BalanceScaled) > 0 && (

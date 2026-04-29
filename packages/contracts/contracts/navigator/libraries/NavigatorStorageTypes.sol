@@ -13,8 +13,9 @@ library NavigatorStorageTypes {
 
   struct NavigatorStorage {
     // ======================== Staking ======================== //
-    // navigator => staked B3TR amount
-    mapping(address => uint256) stakedAmount;
+    // navigator => checkpointed staked amount (B3TR converted to VOT3 under the hood)
+    // Current via latest(), past via upperLookupRecent
+    mapping(address => Checkpoints.Trace208) stakedAmount;
     // minimum B3TR to register as navigator (default: 50000e18)
     uint256 minStake;
     // max stake as basis points of VOT3 total supply (default: 100 = 1%)

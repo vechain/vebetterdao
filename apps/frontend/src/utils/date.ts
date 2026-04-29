@@ -97,5 +97,9 @@ export const blockNumberToDate = (
   const blockDifference = blockNumber - currentBlock
   const timeOffsetSeconds = blockDifference * BigInt(VECHAIN_BLOCK_TIME_SECONDS)
 
-  return new Date((Number(blockTs) + Number(timeOffsetSeconds)) * 1000)
+  // For future blocks anchor to wall-clock time: on Thor solo (--on-demand) block
+  // timestamps drift ahead of real time, which would inflate countdowns.
+  const anchorSeconds = blockDifference > 0n ? Math.floor(Date.now() / 1000) : Number(blockTs)
+
+  return new Date((anchorSeconds + Number(timeOffsetSeconds)) * 1000)
 }

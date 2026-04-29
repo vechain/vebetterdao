@@ -1,6 +1,18 @@
-import { Button, Separator, Field, Heading, HStack, Icon, NumberInput, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Separator,
+  Field,
+  Heading,
+  HStack,
+  Icon,
+  NumberInput,
+  Skeleton,
+  Text,
+  VStack,
+  Alert,
+} from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { WarningTriangle } from "iconoir-react"
+import { WarningTriangle, InfoCircle } from "iconoir-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
@@ -182,6 +194,17 @@ export const StakeStep = () => {
           </HStack>
         </HStack>
       </VStack>
+
+      <Alert.Root status="info" size="sm" rounded="lg">
+        <Alert.Indicator>
+          <InfoCircle />
+        </Alert.Indicator>
+        <Alert.Content>
+          <Alert.Description>
+            {t("Your staked B3TR is converted to VOT3 under the hood and counts as your personal voting power.")}
+          </Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
     </VStack>
   )
 }

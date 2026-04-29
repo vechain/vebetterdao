@@ -161,7 +161,8 @@ library GovernorVotesLogic {
    * @dev If citizen had a navigator at the snapshot and that navigator is still alive (not deactivated/exiting),
    *      returns the delegated amount (their effective participation via navigator).
    *      If navigator is dead, delegation is void and citizen has full VOT3 balance.
-   *      If not delegated, returns full VOT3 balance.
+   *      If not delegated, returns full VOT3 balance + staked B3TR (converted to VOT3) for navigators.
+   *      The staked amount is checkpointed in NavigatorRegistry and returns 0 for non-navigators.
    * @param account The address of the account.
    * @param timepoint The specific timepoint.
    * @return The effective voting power at the given timepoint.
@@ -172,8 +173,14 @@ library GovernorVotesLogic {
 
     if (address($.navigatorRegistry) == address(0)) return totalVotes;
     // getNavigatorAtTimepoint returns address(0) if not delegated or navigator was dead
-    if ($.navigatorRegistry.getNavigatorAtTimepoint(account, timepoint) == address(0)) return totalVotes;
-    return $.navigatorRegistry.getDelegatedAmountAtTimepoint(account, timepoint);
+    if ($.navigatorRegistry.getNavigatorAtTimepoint(account, timepoint) != address(0)) {
+      return $.navigatorRegistry.getDelegatedAmountAtTimepoint(account, timepoint);
+    }
+
+    // Include staked amount for navigators (B3TR converted to VOT3 under the hood)
+    // Returns 0 for non-navigators (no checkpoints)
+    totalVotes += $.navigatorRegistry.getStakedAmountAtTimepoint(account, timepoint);
+    return totalVotes;
   }
 
   /**
@@ -264,7 +271,7 @@ library GovernorVotesLogic {
       revert GovernorPersonhoodVerificationFailed(voter, explanation);
     }
 
-    uint256 weight = $.vot3.getPastVotes(voter, proposalSnapshot); // aka voting power without quadratic voting
+    uint256 weight = getVotes(voter, proposalSnapshot); // voting power including staked B3TR for navigators
     uint256 power = Math.sqrt(weight) * 1e9;
     GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(
       GovernorProposalLogic.proposalType(proposalId)

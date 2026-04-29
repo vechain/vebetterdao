@@ -468,6 +468,14 @@ interface INavigatorRegistry {
   /// @return The maximum stake amount
   function getMaxStake() external view returns (uint256);
 
+  /// @notice Get the staked amount for a navigator at a past block (checkpointed)
+  /// @dev Used by VotesUtils and GovernorVotesLogic to include staked amount in voting power.
+  /// Returns 0 for non-navigators (no checkpoints).
+  /// @param navigator The navigator address
+  /// @param timepoint The block number to query
+  /// @return The staked amount at the given block
+  function getStakedAmountAtTimepoint(address navigator, uint256 timepoint) external view returns (uint256);
+
   // -- Delegation --
 
   /// @notice Get the navigator a citizen is delegated to

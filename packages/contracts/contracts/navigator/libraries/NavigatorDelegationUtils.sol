@@ -412,13 +412,14 @@ library NavigatorDelegationUtils {
     if (NavigatorLifecycleUtils.getStatus(navigator) != uint8(INavigatorRegistry.NavigatorStatus.ACTIVE)) {
       revert NavigatorCannotAcceptDelegations(navigator);
     }
-    if ($.stakedAmount[navigator] < $.minStake) {
+    uint256 stake = uint256($.stakedAmount[navigator].latest());
+    if (stake < $.minStake) {
       revert NavigatorCannotAcceptDelegations(navigator);
     }
     uint256 currentTotal = _currentTotalDelegated($, navigator);
     uint256 totalAfter = currentTotal + amount;
-    if ($.stakedAmount[navigator] * 10 < totalAfter) {
-      uint256 maxCapacity = $.stakedAmount[navigator] * 10;
+    if (stake * 10 < totalAfter) {
+      uint256 maxCapacity = stake * 10;
       uint256 remaining = maxCapacity > currentTotal ? maxCapacity - currentTotal : 0;
       revert ExceedsNavigatorCapacity(navigator, amount, remaining);
     }

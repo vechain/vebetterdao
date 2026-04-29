@@ -57,7 +57,8 @@ library VotesUtils {
 
   /**
    * @notice Returns the effective voting power of an account at a given timepoint.
-   * @dev For non-delegated users: VOT3 balance + deposit voting power (proposal support).
+   * @dev For non-delegated users: VOT3 balance + deposit voting power (proposal support) + staked B3TR
+   *      (converted to VOT3 under the hood, counts as voting power for navigators; returns 0 for non-navigators).
    *      For navigator-delegated citizens: delegated amount only (deposits excluded
    *      because the navigator votes with only the delegated amount).
    * @param account The address to get votes for
@@ -80,6 +81,12 @@ library VotesUtils {
     IB3TRGovernor b3trGovernor = ext._b3trGovernor;
     if (address(b3trGovernor) != address(0)) {
       totalVotes += b3trGovernor.getDepositVotingPower(account, timepoint);
+    }
+
+    // Include staked amount for navigators (B3TR converted to VOT3 under the hood)
+    // Returns 0 for non-navigators (no checkpoints)
+    if (address(navRegistry) != address(0)) {
+      totalVotes += navRegistry.getStakedAmountAtTimepoint(account, timepoint);
     }
 
     return totalVotes;

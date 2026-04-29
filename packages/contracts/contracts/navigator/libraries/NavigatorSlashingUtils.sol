@@ -2,15 +2,20 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { NavigatorStakingUtils } from "./NavigatorStakingUtils.sol";
 import { NavigatorDelegationUtils } from "./NavigatorDelegationUtils.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IVOT3 } from "../../interfaces/IVOT3.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title NavigatorSlashingUtils
 /// @notice Handles automatic minor slashing and governance-driven major slashing.
-/// @dev Minor slashing: 10% of current remaining stake (compounding).
+/// @dev Minor slashing: 5% of current remaining stake (compounding).
 /// Anyone can call the report function — contract verifies on-chain.
-/// Slashed funds sent to treasury.
+/// Slashed funds sent to treasury as B3TR (VOT3 is converted back to B3TR before transfer,
+/// since staked B3TR is held as VOT3 under the hood to count as voting power).
 ///
 /// Five minor infraction types:
 /// 1. Missed allocation vote (had citizens, didn't set preferences for a round)
@@ -19,6 +24,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// 4. Missed report (must submit every reportInterval rounds)
 /// 5. Late preferences (set after preferenceCutoffPeriod before round deadline)
 library NavigatorSlashingUtils {
+  using Checkpoints for Checkpoints.Trace208;
+
   uint256 private constant BASIS_POINTS = 10000;
   uint256 public constant FLAG_MISSED_ALLOCATION = 1 << 0;
   uint256 public constant FLAG_LATE_PREFERENCES = 1 << 1;
@@ -147,14 +154,17 @@ library NavigatorSlashingUtils {
 
     if (slashPercentage > BASIS_POINTS) revert SlashExceedsMax(slashPercentage, BASIS_POINTS);
 
-    uint256 stakeSlash = ($.stakedAmount[navigator] * slashPercentage) / BASIS_POINTS;
+    uint256 currentStake = uint256($.stakedAmount[navigator].latest());
+    uint256 stakeSlash = (currentStake * slashPercentage) / BASIS_POINTS;
 
     if (stakeSlash > 0) {
-      $.stakedAmount[navigator] -= stakeSlash;
+      uint256 newStake = currentStake - stakeSlash;
+      $.stakedAmount[navigator].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newStake));
       $.totalStaked -= stakeSlash;
       $.totalSlashed[navigator] += stakeSlash;
 
-      // Transfer slashed stake to treasury
+      // Convert VOT3 back to B3TR, then transfer to treasury
+      IVOT3($.vot3Token).convertToB3TR(stakeSlash);
       IERC20($.b3trToken).transfer($.treasury, stakeSlash);
     }
 
@@ -163,7 +173,7 @@ library NavigatorSlashingUtils {
       $.feesForfeited[navigator] = true;
     }
 
-    emit NavigatorSlashed(navigator, stakeSlash, $.stakedAmount[navigator], "majorSlash");
+    emit NavigatorSlashed(navigator, stakeSlash, uint256($.stakedAmount[navigator].latest()), "majorSlash");
   }
 
   // ======================== Getters ======================== //
@@ -194,27 +204,29 @@ library NavigatorSlashingUtils {
 
   // ======================== Internal ======================== //
 
-  /// @dev Apply a minor slash (10% of current remaining stake) and send to treasury
+  /// @dev Apply a minor slash (5% of current remaining stake) and send to treasury
   function _applyMinorSlash(
     NavigatorStorageTypes.NavigatorStorage storage $,
     address navigator,
     uint256 roundId,
     uint256 infractionFlags
   ) private {
-    uint256 currentStake = $.stakedAmount[navigator];
+    uint256 currentStake = uint256($.stakedAmount[navigator].latest());
     if (currentStake == 0) revert NoStakeToSlash(navigator);
 
     uint256 slashAmount = (currentStake * $.minorSlashPercentage) / BASIS_POINTS;
     if (slashAmount == 0) slashAmount = 1; // Slash at least 1 wei
 
-    $.stakedAmount[navigator] -= slashAmount;
+    uint256 newStake = currentStake - slashAmount;
+    $.stakedAmount[navigator].push(SafeCast.toUint48(block.number), SafeCast.toUint208(newStake));
     $.totalStaked -= slashAmount;
     $.totalSlashed[navigator] += slashAmount;
 
-    // Transfer to treasury
+    // Convert VOT3 back to B3TR, then transfer to treasury
+    IVOT3($.vot3Token).convertToB3TR(slashAmount);
     IERC20($.b3trToken).transfer($.treasury, slashAmount);
 
-    emit NavigatorMinorSlashed(navigator, slashAmount, $.stakedAmount[navigator], roundId, infractionFlags);
+    emit NavigatorMinorSlashed(navigator, slashAmount, newStake, roundId, infractionFlags);
   }
 
   /// @dev Get the snapshot block of a round from XAllocationVoting
