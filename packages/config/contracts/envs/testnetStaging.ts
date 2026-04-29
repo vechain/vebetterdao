@@ -242,7 +242,7 @@ export function createTestnetStagingConfig() {
     NAVIGATOR_EXIT_NOTICE_PERIOD: 1, // 1 round
     NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
     NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
-    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8640, // ~24hr at 10s/block
+    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8, // 8 blocks, around 80 seconds
 
     XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
     B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
