@@ -1,6 +1,6 @@
 # VeBetterDAO Monorepo
 
-![Security Checks Badge](https://github.com/vechain/vebetterdao/actions/workflows/security-checks.yml/badge.svg)
+![Security Checks Badge](https://github.com/vechain/b3tr/actions/workflows/security-checks.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ```
@@ -32,7 +32,7 @@ VeBetterDAO is the monorepo behind the [VeBetterDAO](https://governance.vebetter
 
 | Path | What it is |
 | --- | --- |
-| `apps/frontend` | Next.js 14 governance dApp |
+| `apps/frontend` | Next.js 16 governance dApp |
 | `packages/contracts` | VeBetterDAO Solidity smart contracts (Hardhat) |
 | `packages/indexer` | Docker-compose for the [VeChain indexer](https://github.com/vechain/vechain-indexer) + MongoDB + block explorer |
 | `packages/lambda` | AWS Lambda functions (round automation, relayer, NFT minting, etc.) |
@@ -90,6 +90,8 @@ yarn dev
 ```
 
 If contracts are not deployed, the script will deploy them automatically. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
+
+> **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn dev`.
 
 > **First run note:** the script compiles and deploys ~30 contracts to thor-solo. **This can take up to 5 minutes.** Log lines will appear continuously — do not Ctrl-C.
 
