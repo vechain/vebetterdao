@@ -51,7 +51,7 @@ import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/Prop
 import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
 import { UserInteractionBadges } from "../UserInteractionBadges/UserInteractionBadges"
 
-const CANCELLABLE_STATES = [ProposalState.Pending, ProposalState.Active, ProposalState.Succeeded, ProposalState.Queued]
+const CANCELLABLE_STATES = [ProposalState.Pending, ProposalState.Succeeded, ProposalState.Queued]
 
 export const ProposalInteractionCard = ({
   proposal,

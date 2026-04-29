@@ -121,11 +121,6 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
                 <LuInfo />
               </IconButton>
             </HStack>
-            {hasPendingTasks && (
-              <Badge colorPalette="orange" size="sm">
-                {t("Actions required this round")}
-              </Badge>
-            )}
           </HStack>
 
           {cutoffDate && hasPendingTasks && (

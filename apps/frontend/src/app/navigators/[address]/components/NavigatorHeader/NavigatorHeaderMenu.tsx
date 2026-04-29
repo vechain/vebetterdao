@@ -42,7 +42,7 @@ export const NavigatorHeaderMenu = ({
           <Menu.Content bg={{ base: "white", _dark: "#2D3748" }}>
             <Menu.Item value="go-to-profile" cursor="pointer" onClick={() => router.push(`/profile/${address}`)}>
               <LuUser />
-              {t("Go to Profile")}
+              {t("View Profile")}
             </Menu.Item>
             <Menu.Item value="share" cursor="pointer" onClick={onShareClick}>
               <LuShare2 />
@@ -51,7 +51,7 @@ export const NavigatorHeaderMenu = ({
             {isOwnPage && (
               <Menu.Item value="edit-profile" cursor="pointer" onClick={onEditProfile}>
                 <LuPencil />
-                {t("Edit Profile")}
+                {t("Update")}
               </Menu.Item>
             )}
             {isDelegatedHere && (

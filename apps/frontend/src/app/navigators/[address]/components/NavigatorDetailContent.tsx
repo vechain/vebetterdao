@@ -33,7 +33,7 @@ import { NavigatorDetailSkeleton } from "./NavigatorDetailSkeleton"
 import { NavigatorGovernanceActivity } from "./NavigatorGovernanceActivity"
 import { NavigatorHeader } from "./NavigatorHeader/NavigatorHeader"
 import { NavigatorRewardsCard } from "./NavigatorRewardsCard"
-import { NavigatorRoundHistory } from "./NavigatorRoundHistory"
+import { NavigatorRoundHistory } from "./NavigatorRoundHistory/NavigatorRoundHistory"
 import { NavigatorStatsGrid } from "./NavigatorStatsGrid"
 import { NavigatorStatusAlerts } from "./NavigatorStatusAlerts"
 import { NavigatorTaskList } from "./NavigatorTaskList"
@@ -175,7 +175,7 @@ export const NavigatorDetailContent = () => {
       {isOwnPage && (
         <>
           <Heading size="lg">{t("Tasks & Rewards")}</Heading>
-          <Stack direction={{ base: "column", md: "row" }} gap={6} align="stretch" w="full">
+          <Stack direction={{ base: "column", md: "row" }} gap={4} align="stretch" w="full">
             {(status === "ACTIVE" || status === "EXITING") && (
               <NavigatorTaskList address={address} onSubmitReport={() => setIsReportOpen(true)} />
             )}

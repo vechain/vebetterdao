@@ -51,9 +51,7 @@ export const NavigatorVotedProposalsCard = ({ address }: Props) => {
           <Card.Body>
             <HStack w="full" justify="space-between" align="center" mb={{ base: 2, md: 4 }}>
               <HStack gap={2} align="center">
-                <Heading size="md" mb={{ base: 2, md: 4 }}>
-                  {t("Voted proposals")}
-                </Heading>
+                <Heading size="md">{t("Voted proposals")}</Heading>
                 <Badge variant="neutral" size="sm" rounded="sm">
                   {votedProposalsWithDescription.length}
                 </Badge>
