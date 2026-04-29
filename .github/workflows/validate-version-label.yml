@@ -8,6 +8,6 @@ on:
 
 jobs:
   validate:
-    uses: vechain/github-actions/.github/workflows/validate-pr-label.yaml@3cd16b776655eeeb18f22c820ec5f79aca0f437d # v.1.13.2
+    uses: vechain/github-actions-public/.github/workflows/validate-pr-label.yaml@b3ab84727d2c8fe86a6a7ce6963c82486afbaa49 # v.2.1.1
     with:
       FAIL_IF_MISSING_LABEL: true
