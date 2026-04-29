@@ -41,7 +41,7 @@ export const ChallengeEligibleAppsRow = ({ challenge }: Props) => {
   const singleAppName = isSingleApp ? appNames.get(appIds[0]?.toLowerCase() ?? "") : null
   const visibleIds = appIds.slice(0, MAX_VISIBLE)
   const overflowCount = Math.max(appIds.length - MAX_VISIBLE, 0)
-  const totalAppsCount = challenge.allApps ? (appsData?.allApps?.length ?? 0) : appIds.length
+  const totalAppsCount = challenge.allApps ? mostVoted.length : appIds.length
 
   if (!challenge.allApps && appIds.length === 0) return null
 
