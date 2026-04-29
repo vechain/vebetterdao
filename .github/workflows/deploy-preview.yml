@@ -90,7 +90,7 @@ jobs:
             exit 1
           fi
 
-  # Post initial "deploying" comment
+  # Post initial "deploying" comment in PR
   preview-start-comment:
     name: Preview start comment
     needs: [setup, preview-relevant]
