@@ -239,6 +239,8 @@ jobs:
             label: Navigator - Integration
           - shard: shard19h
             label: Navigator - Security
+          - shard: shard19i
+            label: Navigator - Staked Voting Power
           - shard: shard20e2e
             label: Navigator - Relayer E2E
     steps:

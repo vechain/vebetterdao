@@ -288,12 +288,17 @@ NEXT_PUBLIC_APP_ENV=local npx hardhat test --network hardhat test/YourTest.test.
 
 ### CI Unit Test Shards
 
+**CRITICAL: Every new test file MUST be registered in the GHA workflow or CI will silently skip it.**
+
 Unit tests run in parallel via shards in `.github/workflows/unit-tests.yml`. Each shard has a `label` and runs tests matched by `grep` on that label. Test describe blocks use `@shard15x` (or similar) in their name to match.
 
-**When adding a new test shard** (e.g. for a new feature or coverage-focused suite):
+**When creating a new test file, ALWAYS do all 3 steps:**
 
-1. Add `@shard15x` (or next available) to the describe block name in the test file
-2. **Add the shard to `.github/workflows/unit-tests.yml`** in the `strategy.matrix` - otherwise CI will not run it
+1. Add `@shardXXx` (next available) to the `describe()` block name in the test file
+2. Add the shard entry to `.github/workflows/unit-tests.yml` `strategy.matrix`
+3. Add the shard description to `packages/contracts/test/README.md`
+
+If you skip step 2, the test will pass locally but **never run in CI** — a silent gap in coverage.
 
 Example matrix entry:
 
