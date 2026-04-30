@@ -83,7 +83,8 @@ export const NavigatorDetailContent = () => {
 
   const currentRoundReportURI = useMemo(() => {
     if (!reportEventsForEdit || !currentRoundId) return undefined
-    return reportEventsForEdit.find(e => e.roundId === currentRoundId)?.reportURI
+    // Events are ascending; pick the latest matching one so re-submissions overwrite older entries.
+    return reportEventsForEdit.findLast(e => e.roundId === currentRoundId)?.reportURI
   }, [reportEventsForEdit, currentRoundId])
   const { data: currentReportData } = useIpfsMetadata<{ link?: string; text?: string }>(currentRoundReportURI)
 

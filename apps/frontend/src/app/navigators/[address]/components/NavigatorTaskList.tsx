@@ -87,7 +87,8 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
 
   const currentRoundReportURI = useMemo(() => {
     if (!roundId) return undefined
-    return reportEvents?.find(ev => ev.roundId === roundId)?.reportURI
+    // Events are ascending; pick the latest matching one so re-submissions overwrite older entries.
+    return reportEvents?.findLast(ev => ev.roundId === roundId)?.reportURI
   }, [reportEvents, roundId])
 
   if (!roundId) return null
