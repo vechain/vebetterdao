@@ -30,7 +30,7 @@ Turborepo monorepo with:
 
 ## Frontend (`apps/frontend`)
 
-- Next.js 14 App Router with file-based routing
+- Next.js 16 App Router with file-based routing
 - API layer: `src/api/` - contract hooks in `src/api/contracts/`, indexer queries in `src/api/indexer/`
 - State: React Query for server state, Zustand for client state
 - VeChain integration: `@vechain/vechain-kit` with `useThor` hook (not deprecated `useConnex`)

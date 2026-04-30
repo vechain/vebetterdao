@@ -87,8 +87,8 @@ ENV NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=${NEXT_PUBLIC_DATADOG_CLIENT_TOKEN}
 # Set NODE_OPTIONS with increased memory (8GB heap) - can be overridden by build arg
 ENV NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=8192}"
 
-# Generate local.ts config (normally done by turbo prepare-contracts task)
-RUN cd packages/config && yarn check-or-generate-local-config
+# Generate local.ts and e2e.ts config (normally done by turbo prepare-contracts task)
+RUN cd packages/config && yarn check-or-generate-local-config && yarn check-or-generate-e2e-config
 
 # Build the application (no Hardhat cache needed - using npm contracts)
 RUN --mount=type=cache,target=/app/node_modules/.cache/turbo,id=turbo-cache \

@@ -128,6 +128,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
       onLanguageChange={handleLanguageChange}
       network={{
         type: networkType,
+        nodeUrl: getConfig().nodeUrl,
       }}
       allowCustomTokens={allowCustomTokens}
       contractAddresses={{

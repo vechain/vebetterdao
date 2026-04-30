@@ -44,9 +44,10 @@ import { useChallengeDescription } from "../shared/useChallengeDescription"
 
 interface ChallengeCardProps {
   challenge: ChallengeView
+  onJoinOverride?: () => void
 }
 
-export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
+export const ChallengeCard = ({ challenge, onJoinOverride }: ChallengeCardProps) => {
   const { t } = useTranslation()
   const router = useRouter()
   const actions = useChallengeActions()
@@ -278,7 +279,7 @@ export const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
                     onDeclineClick={challenge.canDecline ? onDeclineOpen : undefined}
                     onCancelClick={challenge.canCancel ? onCancelOpen : undefined}
                     onRefundClick={challenge.canRefund ? onRefundOpen : undefined}
-                    onJoinClick={challenge.canJoin ? onJoinOpen : undefined}
+                    onJoinClick={challenge.canJoin ? (onJoinOverride ?? onJoinOpen) : undefined}
                     onLeaveClick={challenge.canLeave ? onLeaveOpen : undefined}
                     onCompleteClick={challenge.canComplete ? onCompleteOpen : undefined}
                     onClaimSplitWinClick={challenge.canClaimSplitWin ? onSplitWinClaimOpen : undefined}

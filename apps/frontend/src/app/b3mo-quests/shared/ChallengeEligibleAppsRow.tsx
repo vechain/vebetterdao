@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { ChallengeView } from "@/api/challenges/types"
 import { useChallengeSelectedApps } from "@/api/challenges/useChallengeSelectedApps"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useMostVotedAppsInRound } from "@/api/contracts/xApps/hooks/useMostVotedAppsInRound"
+import { useRoundXApps } from "@/api/contracts/xApps/hooks/useRoundXApps"
 import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { AppImage } from "@/components/AppImage/AppImage"
 
@@ -19,7 +19,7 @@ export const ChallengeEligibleAppsRow = ({ challenge }: Props) => {
   const { t } = useTranslation()
   const { data: appsData } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: mostVoted } = useMostVotedAppsInRound(challenge.allApps ? currentRoundId : undefined)
+  const { data: roundApps } = useRoundXApps(challenge.allApps ? currentRoundId : undefined)
 
   const { data: selectedApps } = useChallengeSelectedApps(
     challenge.challengeId,
@@ -32,8 +32,8 @@ export const ChallengeEligibleAppsRow = ({ challenge }: Props) => {
   )
 
   const allAppsIds = useMemo(
-    () => (challenge.allApps ? mostVoted.slice(0, MAX_VISIBLE).map(a => a.id) : []),
-    [challenge.allApps, mostVoted],
+    () => (challenge.allApps ? (roundApps ?? []).slice(0, MAX_VISIBLE).map(a => a.id) : []),
+    [challenge.allApps, roundApps],
   )
 
   const appIds = challenge.allApps ? allAppsIds : (selectedApps ?? [])
@@ -41,7 +41,7 @@ export const ChallengeEligibleAppsRow = ({ challenge }: Props) => {
   const singleAppName = isSingleApp ? appNames.get(appIds[0]?.toLowerCase() ?? "") : null
   const visibleIds = appIds.slice(0, MAX_VISIBLE)
   const overflowCount = Math.max(appIds.length - MAX_VISIBLE, 0)
-  const totalAppsCount = challenge.allApps ? (appsData?.allApps?.length ?? 0) : appIds.length
+  const totalAppsCount = challenge.allApps ? (roundApps?.length ?? 0) : appIds.length
 
   if (!challenge.allApps && appIds.length === 0) return null
 

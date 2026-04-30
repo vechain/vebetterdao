@@ -8,11 +8,11 @@ import { baseUrl, repoRoot } from "./src/config"
 const envFilePath = existsSync(path.join(repoRoot, ".env"))
   ? path.join(repoRoot, ".env")
   : path.join(repoRoot, ".env.example")
-const appPort = new URL(baseUrl).port || "3000"
+const appPort = new URL(baseUrl).port || "3001"
 
 const webServerCommand = [
-  `dotenv -v NEXT_PUBLIC_APP_ENV=e2e -e "${envFilePath}" -- yarn workspace @repo/config check-or-generate-local-config`,
-  `dotenv -v NEXT_PUBLIC_APP_ENV=e2e -v ENDORSE_XAPPS=true -v PORT=${appPort} -e "${envFilePath}" -- yarn workspace frontend dev`,
+  `dotenv -v NEXT_PUBLIC_APP_ENV=e2e -e "${envFilePath}" -- node packages/e2e/scripts/checkOrDeployE2EConfig.mjs`,
+  `dotenv -v NEXT_PUBLIC_APP_ENV=e2e -v NEXT_PUBLIC_E2E_DISABLE_TYPING=true -v ENDORSE_XAPPS=true -v PORT=${appPort} -e "${envFilePath}" -- yarn workspace frontend dev`,
 ].join(" && ")
 
 export default defineConfig({
@@ -26,7 +26,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
@@ -37,7 +37,7 @@ export default defineConfig({
           command: webServerCommand,
           cwd: repoRoot,
           url: baseUrl,
-          timeout: 240_000,
+          timeout: 600_000,
           reuseExistingServer: !process.env.CI,
           stdout: "pipe",
           stderr: "pipe",

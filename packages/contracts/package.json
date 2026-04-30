@@ -56,6 +56,7 @@
     "compile:slither": "npx --node-options=\"--max-old-space-size=8192\" hardhat compile && npx --node-options=\"--max-old-space-size=8192\" tsc -b ./tsconfig.esm.json ./tsconfig.cjs.json",
     "deploy:hardhat": "npx hardhat run scripts/deploy --network hardhat",
     "deploy:local": "npx hardhat run scripts/deploy --network vechain_solo",
+    "deploy:e2e": "NEXT_PUBLIC_APP_ENV=e2e npx hardhat run scripts/deploy --network vechain_solo",
     "deploy:testnet-staging": "npx hardhat run scripts/deploy --network vechain_testnet",
     "deploy:testnet": "npx hardhat run scripts/deploy --network vechain_testnet",
     "deploy:mainnet": "npx hardhat run scripts/deploy --network vechain_mainnet",

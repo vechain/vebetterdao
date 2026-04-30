@@ -97,6 +97,9 @@ export async function overrideLocalConfigWithNewContracts(contracts: Awaited<Ret
     case AppEnv.LOCAL:
       fileToWrite = "local.ts"
       break
+    case AppEnv.E2E:
+      fileToWrite = "e2e.ts"
+      break
     case AppEnv.TESTNET_STAGING:
       fileToWrite = "testnet-staging.ts"
       break
