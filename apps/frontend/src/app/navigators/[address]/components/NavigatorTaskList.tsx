@@ -3,7 +3,18 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
-import { LuCheck, LuCircle, LuClock, LuEye, LuFileText, LuGavel, LuInfo, LuTriangleAlert, LuVote } from "react-icons/lu"
+import {
+  LuCheck,
+  LuCircle,
+  LuClock,
+  LuEye,
+  LuFileText,
+  LuGavel,
+  LuInfo,
+  LuPencil,
+  LuTriangleAlert,
+  LuVote,
+} from "react-icons/lu"
 
 import { useGetLastReportRound } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
 import { useGetPreferenceCutoffPeriod } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferenceCutoffPeriod"
@@ -190,10 +201,16 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
               onClick={onSubmitReport}
               doneAction={
                 hasReportThisRound && currentRoundReportURI ? (
-                  <Button variant="ghost" size="xs" onClick={() => setViewReportURI(currentRoundReportURI)}>
-                    <LuEye />
-                    {t("View")}
-                  </Button>
+                  <HStack gap={1}>
+                    <Button variant="ghost" size="xs" onClick={() => setViewReportURI(currentRoundReportURI)}>
+                      <LuEye />
+                      {t("View")}
+                    </Button>
+                    <Button variant="ghost" size="xs" onClick={onSubmitReport}>
+                      <LuPencil />
+                      {t("Edit")}
+                    </Button>
+                  </HStack>
                 ) : undefined
               }
             />

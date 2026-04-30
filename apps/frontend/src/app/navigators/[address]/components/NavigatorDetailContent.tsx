@@ -11,12 +11,14 @@ import { LuCompass } from "react-icons/lu"
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetMetadataURI } from "@/api/contracts/navigatorRegistry/hooks/useGetMetadataURI"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useAllocationsRoundsEvents } from "@/api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
 import { useEvents } from "@/hooks/useEvents"
@@ -56,6 +58,8 @@ export const NavigatorDetailContent = () => {
   const [isWithdrawStakeOpen, setIsWithdrawStakeOpen] = useState(false)
   const [isReportOpen, setIsReportOpen] = useState(false)
 
+  const { data: reportEventsForEdit } = useNavigatorReportEvents(address)
+
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(address, { waitForIndexer })
   // Read metadataURI directly from the contract so edits reflect immediately on refresh
   // without waiting for the indexer to pick up MetadataURIUpdated events.
@@ -76,6 +80,12 @@ export const NavigatorDetailContent = () => {
   })
   const { data: roundsData } = useAllocationsRoundsEvents()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
+  const currentRoundReportURI = useMemo(() => {
+    if (!reportEventsForEdit || !currentRoundId) return undefined
+    return reportEventsForEdit.find(e => e.roundId === currentRoundId)?.reportURI
+  }, [reportEventsForEdit, currentRoundId])
+  const { data: currentReportData } = useIpfsMetadata<{ link?: string; text?: string }>(currentRoundReportURI)
 
   // Round active at the time of registration: latest round whose voteStart <= registrationBlock.
   // Rounds are returned in ascending order, so the last match is the active one.
@@ -219,7 +229,12 @@ export const NavigatorDetailContent = () => {
           metadata={metadata}
         />
       )}
-      <NavigatorReportModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} />
+      <NavigatorReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        initialLink={currentReportData?.link}
+        initialText={currentReportData?.text}
+      />
     </VStack>
   )
 }

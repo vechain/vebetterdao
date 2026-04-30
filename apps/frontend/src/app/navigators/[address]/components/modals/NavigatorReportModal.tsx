@@ -1,5 +1,5 @@
-import { Button, Input, Text, Textarea, VStack, Heading } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { Button, Input, Text, Textarea, VStack, Heading, HStack, Badge } from "@chakra-ui/react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
@@ -11,6 +11,8 @@ import { uploadBlobToIPFS } from "@/utils/ipfs"
 type Props = {
   isOpen: boolean
   onClose: () => void
+  initialLink?: string
+  initialText?: string
 }
 
 const isValidUrl = (value: string): boolean => {
@@ -22,13 +24,22 @@ const isValidUrl = (value: string): boolean => {
   }
 }
 
-export const NavigatorReportModal = ({ isOpen, onClose }: Props) => {
+export const NavigatorReportModal = ({ isOpen, onClose, initialLink, initialText }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { data: reportInterval } = useGetReportInterval()
-  const [link, setLink] = useState("")
-  const [text, setText] = useState("")
+  const [link, setLink] = useState(initialLink ?? "")
+  const [text, setText] = useState(initialText ?? "")
   const [isUploading, setIsUploading] = useState(false)
+
+  const isEditMode = !!initialLink || !!initialText
+
+  useEffect(() => {
+    if (isOpen) {
+      setLink(initialLink ?? "")
+      setText(initialText ?? "")
+    }
+  }, [isOpen, initialLink, initialText])
 
   const submitReport = useSubmitNavigatorReport({
     onSuccess: () => {
@@ -72,21 +83,48 @@ export const NavigatorReportModal = ({ isOpen, onClose }: Props) => {
     <BaseModal
       showCloseButton
       isCloseable
-      ariaTitle="Submit Navigator Report"
+      ariaTitle={isEditMode ? t("Edit Report") : t("Submit Report")}
       isOpen={isOpen && !isTxModalOpen}
       onClose={onClose}>
       <VStack w="full" align="stretch" gap={4}>
-        <Heading size="lg">{t("Submit Report")}</Heading>
+        <Heading size="lg">{isEditMode ? t("Edit Report") : t("Submit Report")}</Heading>
         <Text textStyle="sm" color="text.subtle">
           {t("Provide a link, a note, or both.")}{" "}
           {t("Required each {{interval}} rounds, otherwise optional.", { interval: reportInterval ?? 2 })}
         </Text>
 
         <VStack align="stretch" gap={1}>
-          <Text textStyle="xs" fontWeight="semibold">
-            {t("Link (optional)")}
+          <HStack justify="space-between">
+            <Text textStyle="xs" fontWeight="semibold">
+              {t("Note")}
+            </Text>
+            <Badge size="xs" variant="outline">
+              {t("Markdown")}
+            </Badge>
+          </HStack>
+          <Textarea
+            placeholder={t("Write your report or add additional context")}
+            value={text}
+            onChange={e => setText(e.target.value)}
+            resize="vertical"
+            rows={6}
+            fontSize="16px"
+          />
+          <Text textStyle="xs" color="text.subtle">
+            {t("Supports markdown formatting: **bold**, *italic*, [links](url), lists, and more.")}
           </Text>
-          <Input placeholder={t("https://...")} value={link} onChange={e => setLink(e.target.value)} fontSize="16px" />
+        </VStack>
+
+        <VStack align="stretch" gap={1}>
+          <Text textStyle="xs" fontWeight="semibold">
+            {t("Link")}
+          </Text>
+          <Input
+            placeholder={t("Link to a twitter, reddit or blog post")}
+            value={link}
+            onChange={e => setLink(e.target.value)}
+            fontSize="16px"
+          />
           {linkError && (
             <Text textStyle="xs" color="status.negative.primary">
               {t("Invalid URL")}
@@ -94,22 +132,8 @@ export const NavigatorReportModal = ({ isOpen, onClose }: Props) => {
           )}
         </VStack>
 
-        <VStack align="stretch" gap={1}>
-          <Text textStyle="xs" fontWeight="semibold">
-            {t("Note (optional)")}
-          </Text>
-          <Textarea
-            placeholder={t("Write your report or add additional context")}
-            value={text}
-            onChange={e => setText(e.target.value)}
-            resize="none"
-            rows={4}
-            fontSize="16px"
-          />
-        </VStack>
-
         <Button variant="primary" w="full" disabled={!canSubmit} onClick={handleSubmit}>
-          {isUploading ? t("Uploading...") : t("Submit Report")}
+          {isUploading ? t("Uploading...") : isEditMode ? t("Update Report") : t("Submit Report")}
         </Button>
       </VStack>
     </BaseModal>

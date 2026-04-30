@@ -1,11 +1,12 @@
 "use client"
 
-import { Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Heading, Text, VStack, Skeleton } from "@chakra-ui/react"
+import MDEditor from "@uiw/react-md-editor"
 import { useTranslation } from "react-i18next"
-import { LuExternalLink } from "react-icons/lu"
 
 import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { BaseModal } from "@/components/BaseModal"
+import { LinkPreview } from "@/components/LinkPreview/LinkPreview"
 
 type ReportData = {
   link?: string
@@ -29,9 +30,10 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
         <Heading size="md">{t("Navigator Report")}</Heading>
 
         {isLoading ? (
-          <VStack gap={2} align="stretch">
+          <VStack gap={3} align="stretch">
             <Skeleton h="4" w="40%" />
-            <Skeleton h="20" w="full" />
+            <Skeleton h="120px" w="full" borderRadius="lg" />
+            <Skeleton h="60px" w="full" />
           </VStack>
         ) : report ? (
           <>
@@ -46,29 +48,33 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
                 })}
               </Text>
             )}
-            {report.link && (
-              <Link
-                href={report.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="underline"
-                aria-label={t("Open link")}
-                lineClamp={1}>
-                <HStack gap={1}>
-                  <Text textStyle="sm" truncate>
-                    {report.link}
-                  </Text>
-                  <Icon flexShrink={0}>
-                    <LuExternalLink />
-                  </Icon>
-                </HStack>
-              </Link>
-            )}
+
             {report.text && (
-              <Text textStyle="sm" whiteSpace="pre-wrap">
-                {report.text}
-              </Text>
+              <Box
+                css={{
+                  "& .wmde-markdown": {
+                    backgroundColor: "transparent",
+                    color: "inherit",
+                    fontSize: "var(--chakra-font-sizes-sm)",
+                  },
+                  "& .wmde-markdown pre": {
+                    backgroundColor: "var(--chakra-colors-bg-subtle)",
+                    borderRadius: "var(--chakra-radii-md)",
+                  },
+                }}>
+                <MDEditor.Markdown
+                  source={report.text}
+                  style={{
+                    maxWidth: "100%",
+                    wordBreak: "break-word",
+                    backgroundColor: "transparent",
+                    overflow: "auto",
+                  }}
+                />
+              </Box>
             )}
+
+            {report.link && <LinkPreview url={report.link} />}
           </>
         ) : (
           <Text textStyle="sm" color="text.subtle">
