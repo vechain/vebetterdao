@@ -1,12 +1,24 @@
-import { Badge, Card, Heading, HStack, Icon, IconButton, Image, Skeleton, Stat, Text, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Card,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Image,
+  Separator,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { LuCheck, LuCircle, LuClock, LuTriangleAlert } from "react-icons/lu"
+import { LuClock, LuFileText, LuGavel, LuTriangleAlert, LuUsers, LuVote } from "react-icons/lu"
 
 import { useGetLastReportRound } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
@@ -14,6 +26,7 @@ import { useGetTotalDelegatedAtTimepoint } from "@/api/contracts/navigatorRegist
 import { useHasSetDecisions } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecisions"
 import { useHasSetPreferences } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
+import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import {
   type NavigatorStatusValue,
   useNavigatorStatus,
@@ -25,6 +38,10 @@ import { useIsNavigatorRegistrationRound } from "@/hooks/navigator/useIsNavigato
 import { useNavigatorCutoffDeadline } from "@/hooks/navigator/useNavigatorCutoffDeadline"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { ViewReportModal } from "../navigators/[address]/components/modals/ViewReportModal"
+import { TaskRow } from "../navigators/[address]/components/NavigatorRoundHistory/TaskRow"
+import { type ReportRowStatus } from "../navigators/[address]/components/NavigatorRoundHistory/types"
 
 const formatter = getCompactFormatter(2)
 
@@ -51,6 +68,14 @@ export const NavigatorDashboardCard = () => {
   const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
   const isRegistrationRound = useIsNavigatorRegistrationRound(account?.address)
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { data: reportEvents } = useNavigatorReportEvents(account?.address)
+
+  const currentRoundReportURI = useMemo(() => {
+    if (!reportEvents || !roundId) return undefined
+    return reportEvents.find(e => e.roundId === roundId)?.reportURI
+  }, [reportEvents, roundId])
+
+  const [isViewReportOpen, setIsViewReportOpen] = useState(false)
 
   const activeProposals = useMemo(
     () => enrichedProposals.filter(p => p.state === ProposalState.Active),
@@ -66,8 +91,6 @@ export const NavigatorDashboardCard = () => {
     reportInterval != null && reportInterval > 0 && currentRound > 0
       ? currentRound >= lastReport + reportInterval
       : false
-  const hasUnvotedProposals = activeProposals.some(p => !decisionsMap?.[p.id])
-  const hasPendingTasks = !hasSetPrefs || (isReportMandatory && !hasReportThisRound) || hasUnvotedProposals
 
   const delegationChange = useMemo(() => {
     if (!nav || !delegatedAtSnapshot) return null
@@ -80,93 +103,116 @@ export const NavigatorDashboardCard = () => {
   if (!isNavigator || !account?.address) return null
   if (status === "DEACTIVATED" && Number(nav?.stakeFormatted ?? 0) === 0) return null
 
-  const capacity = formatter.format(Number(nav?.stakeFormatted ?? 0) * 10)
-  const delegated = formatter.format(Number(nav?.totalDelegatedFormatted ?? 0))
   const staked = formatter.format(Number(nav?.stakeFormatted ?? 0))
+  const delegated = formatter.format(Number(nav?.totalDelegatedFormatted ?? 0))
+  const capacity = formatter.format(Number(nav?.stakeFormatted ?? 0) * 10)
   const citizens = nav?.citizenCount ?? 0
 
+  const showTasks = (status === "ACTIVE" || status === "EXITING") && !isRegistrationRound
+
+  const allProposalsDone = activeProposals.length === 0 || activeProposals.every(p => decisionsMap?.[p.id])
+  const proposalsDoneCount = activeProposals.filter(p => decisionsMap?.[p.id]).length
+  const hasPendingTasks = !hasSetPrefs || !allProposalsDone || (isReportMandatory && !hasReportThisRound)
+
+  const allocationStatus = hasSetPrefs ? "done" : "pending"
+  const reportStatus: ReportRowStatus = hasReportThisRound ? "done" : isReportMandatory ? "pending" : "optionalOpen"
+
   return (
-    <Card.Root w="full" variant="primary">
-      <Card.Body>
-        <VStack gap="4" align="flex-start" w="full">
-          <HStack justifyContent="space-between" w="full">
-            <HStack gap={2}>
-              <Heading size="xl">{t("Navigator")}</Heading>
-              {(status === "EXITING" || status === "DEACTIVATED") && (
-                <Badge colorPalette={statusColor[status]} size="sm">
-                  {status}
-                </Badge>
-              )}
+    <>
+      <Card.Root w="full" variant="primary">
+        <Card.Body>
+          <VStack gap={4} align="stretch">
+            <HStack justify="space-between">
+              <HStack gap={2}>
+                <Heading size="xl">{t("Navigator")}</Heading>
+                {(status === "EXITING" || status === "DEACTIVATED") && (
+                  <Badge colorPalette={statusColor[status]} size="sm">
+                    {status}
+                  </Badge>
+                )}
+              </HStack>
+              <IconButton
+                rounded="full"
+                variant="surface"
+                aria-label={t("Go to Navigator")}
+                width="6"
+                onClick={() => router.push(`/navigators/${account.address}`)}>
+                <FiArrowUpRight />
+              </IconButton>
             </HStack>
 
-            <IconButton
-              rounded="full"
-              variant="surface"
-              aria-label="Go to Navigator"
-              width="6"
-              onClick={() => router.push(`/navigators/${account.address}`)}>
-              <FiArrowUpRight />
-            </IconButton>
-          </HStack>
-
-          <VStack gap="4" w="full" align="flex-start">
-            <Skeleton loading={navLoading} w="full">
-              <Stat.Root>
-                <Stat.Label>{t("Total Staked")}</Stat.Label>
-                <Stat.ValueText>
-                  <HStack>
-                    <Image aspectRatio="square" w="6" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-                    <Heading size="2xl" color="text.default">
-                      {staked}
-                    </Heading>
-                  </HStack>
-                </Stat.ValueText>
-              </Stat.Root>
-            </Skeleton>
-
-            <Skeleton loading={navLoading} w="full">
-              <Stat.Root>
-                <Stat.Label>{t("Delegated")}</Stat.Label>
-                <HStack alignItems="center" justifyContent="space-between">
-                  <Stat.ValueText textStyle="md">
-                    {`${delegated} ${t("VOT3")} (${t("cap")}: ${capacity})`}
-                  </Stat.ValueText>
-                  {delegationChange !== null && (
-                    <Stat.HelpText
-                      color={delegationChange >= 0 ? "status.positive.primary" : "status.negative.primary"}>
-                      {delegationChange >= 0 ? "+" : ""}
-                      {formatter.format(delegationChange)}
-                      {"% "}
-                      {t("in this round")}
-                    </Stat.HelpText>
-                  )}
+            <Skeleton loading={navLoading}>
+              <HStack gap={4} flexWrap="wrap">
+                <HStack gap={1}>
+                  <Image aspectRatio="square" w="5" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
+                  <Text textStyle="md" fontWeight="semibold">
+                    {staked}
+                  </Text>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("Stake")}
+                  </Text>
                 </HStack>
-              </Stat.Root>
+
+                <HStack gap={1}>
+                  <Icon boxSize={3} color="text.subtle">
+                    <LuUsers />
+                  </Icon>
+                  <Text textStyle="md" fontWeight="semibold">
+                    {citizens}
+                  </Text>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("citizens")}
+                  </Text>
+                </HStack>
+              </HStack>
             </Skeleton>
 
-            <Skeleton loading={navLoading} w="full">
-              <Stat.Root>
-                <Stat.Label>{t("Citizens")}</Stat.Label>
-                <Stat.ValueText textStyle="md">{citizens}</Stat.ValueText>
-              </Stat.Root>
+            <Skeleton loading={navLoading}>
+              <HStack justify="space-between">
+                <Text textStyle="xs" color="text.subtle">
+                  {`${delegated} ${t("VOT3")} ${t("delegated")} (${t("cap")}: ${capacity})`}
+                </Text>
+                {delegationChange !== null && (
+                  <Text
+                    textStyle="xs"
+                    fontWeight="semibold"
+                    color={delegationChange >= 0 ? "status.positive.primary" : "status.negative.primary"}>
+                    {delegationChange >= 0 ? "+" : ""}
+                    {formatter.format(delegationChange)}
+                    {"%"}
+                  </Text>
+                )}
+              </HStack>
             </Skeleton>
 
             {(status === "ACTIVE" || status === "EXITING") && isRegistrationRound && (
-              <VStack gap={2} w="full" align="stretch" pt={2} borderTop="1px solid" borderColor="border.secondary">
+              <HStack gap={2} p={2} borderRadius="md" bg="bg.subtle">
+                <Icon boxSize={4} color="text.subtle">
+                  <LuClock />
+                </Icon>
                 <Text textStyle="xs" color="text.subtle">
                   {t("Currently you do not have any tasks to complete. Your tasks will begin next round.")}
                 </Text>
-              </VStack>
+              </HStack>
             )}
 
-            {(status === "ACTIVE" || status === "EXITING") && !isRegistrationRound && (
-              <VStack gap={2} w="full" align="stretch" pt={2} borderTop="1px solid" borderColor="border.secondary">
+            {showTasks && (
+              <>
+                <Separator />
+
                 {cutoffDate && hasPendingTasks && (
-                  <HStack gap={1}>
-                    <Icon boxSize={3} color={isPastCutoff ? "status.negative.primary" : "status.warning.primary"}>
+                  <HStack
+                    gap={2}
+                    p={2}
+                    borderRadius="md"
+                    bg={isPastCutoff ? "status.negative.subtle" : "status.warning.subtle"}>
+                    <Icon boxSize={4} color={isPastCutoff ? "status.negative.primary" : "status.warning.primary"}>
                       {isPastCutoff ? <LuTriangleAlert /> : <LuClock />}
                     </Icon>
-                    <Text textStyle="xs" color={isPastCutoff ? "status.negative.primary" : "text.subtle"}>
+                    <Text
+                      textStyle="xs"
+                      color={isPastCutoff ? "status.negative.primary" : "text.subtle"}
+                      fontWeight="medium">
                       {isPastCutoff ? (
                         t("Cutoff Expired")
                       ) : (
@@ -190,52 +236,53 @@ export const NavigatorDashboardCard = () => {
                   </HStack>
                 )}
 
-                <HStack gap={2} flexWrap="wrap">
-                  <HStack gap={1}>
-                    <Icon boxSize={3} color={hasSetPrefs ? "status.positive.primary" : "status.warning.primary"}>
-                      {hasSetPrefs ? <LuCheck /> : <LuCircle />}
-                    </Icon>
-                    <Text textStyle="xs">{hasSetPrefs ? t("Preferences Set") : t("Preferences Pending")}</Text>
-                  </HStack>
+                <VStack gap={1} align="stretch">
+                  <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
+                    {t("Round #{{round}}", { round: currentRound })}
+                  </Text>
+
+                  <TaskRow
+                    icon={<LuVote />}
+                    label={hasSetPrefs ? t("Preferences Set") : t("Preferences Pending")}
+                    status={allocationStatus}
+                  />
+
                   {activeProposals.length > 0 && (
-                    <HStack gap={1}>
-                      <Icon
-                        boxSize={3}
-                        color={
-                          activeProposals.every(p => decisionsMap?.[p.id])
-                            ? "status.positive.primary"
-                            : "status.warning.primary"
-                        }>
-                        {activeProposals.every(p => decisionsMap?.[p.id]) ? <LuCheck /> : <LuCircle />}
-                      </Icon>
-                      <Text textStyle="xs">
-                        {t("Proposals")}{" "}
-                        {`${activeProposals.filter(p => decisionsMap?.[p.id]).length}/${activeProposals.length}`}
-                      </Text>
-                    </HStack>
+                    <TaskRow
+                      icon={<LuGavel />}
+                      label={
+                        allProposalsDone
+                          ? t("All proposals voted")
+                          : `${proposalsDoneCount}/${activeProposals.length} ${t("Proposals")}`
+                      }
+                      status={allProposalsDone ? "done" : "pending"}
+                    />
                   )}
-                  <HStack gap={1}>
-                    <Icon
-                      boxSize={3}
-                      color={
-                        hasReportThisRound
-                          ? "status.positive.primary"
-                          : isReportMandatory
-                            ? "status.warning.primary"
-                            : "text.subtle"
-                      }>
-                      {hasReportThisRound ? <LuCheck /> : <LuCircle />}
-                    </Icon>
-                    <Text textStyle="xs">
-                      {hasReportThisRound ? t("Report Submitted") : isReportMandatory ? t("Report Due") : t("Optional")}
-                    </Text>
-                  </HStack>
-                </HStack>
-              </VStack>
+
+                  <TaskRow
+                    icon={<LuFileText />}
+                    label={
+                      hasReportThisRound
+                        ? t("Report Submitted")
+                        : isReportMandatory
+                          ? t("Report Due")
+                          : t("Report optional")
+                    }
+                    status={reportStatus}
+                    onClick={hasReportThisRound || currentRoundReportURI ? () => setIsViewReportOpen(true) : undefined}
+                  />
+                </VStack>
+              </>
             )}
           </VStack>
-        </VStack>
-      </Card.Body>
-    </Card.Root>
+        </Card.Body>
+      </Card.Root>
+
+      <ViewReportModal
+        isOpen={isViewReportOpen}
+        onClose={() => setIsViewReportOpen(false)}
+        reportURI={currentRoundReportURI ?? null}
+      />
+    </>
   )
 }
