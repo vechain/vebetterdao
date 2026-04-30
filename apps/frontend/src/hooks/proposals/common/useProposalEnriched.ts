@@ -11,7 +11,7 @@ import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
 export const useProposalEnriched = () => {
   // Step 1: Fetch events
-  const { grantProposals, standardProposals, allProposals } = useProposalCreatedEvents()
+  const { grantProposals, standardProposals, allProposals, isLoading: isEventsLoading } = useProposalCreatedEvents()
   // Step 2: Get proposal IDs
   const grantProposalsIds = useMemo(() => {
     return grantProposals?.map(event => event.id) || []
@@ -25,7 +25,7 @@ export const useProposalEnriched = () => {
       grantProposalsDetailsMap: {},
       standardProposalsDetailsMap: {},
     },
-    isLoading: isDetailsLoading,
+    isLoading: isMetadataLoading,
   } = useStandardOrGrantProposalDetails({ standardProposals, grantProposals })
   const {
     data: { grantsProposalStates, standardProposalStates } = {
@@ -93,7 +93,15 @@ export const useProposalEnriched = () => {
     )
   }, [enrichedGrantProposals])
 
-  // Return both basic and enriched data - this gives maximum flexibility
+  // Return both basic and enriched data - this gives maximum flexibility.
+  //
+  // NOTE: `isLoading` intentionally excludes IPFS metadata loading. With many
+  // proposals (e.g. on testnet), per-proposal IPFS requests pile up against the
+  // browser's per-origin connection cap and can stall for a long time. Gating
+  // the page render on them produced an "infinite spinner" that blocked the
+  // create-proposal CTA. Cards already render with placeholder titles and
+  // re-render reactively as metadata arrives, so we expose `isMetadataLoading`
+  // separately for callers that care.
   return {
     data: {
       // Basic proposal events (fast, no dependencies)
@@ -107,6 +115,7 @@ export const useProposalEnriched = () => {
       enrichedProposals: proposals,
       totalGrantAmount,
     },
-    isLoading: isDetailsLoading || isStatesLoading,
+    isLoading: isEventsLoading || isStatesLoading,
+    isMetadataLoading,
   }
 }

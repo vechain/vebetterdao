@@ -139,7 +139,7 @@ export const TransactionsContent = ({ address }: Props) => {
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {transactions.map((transaction: any) => (
-                      <TransactionCard key={transaction.txId} transaction={transaction} />
+                      <TransactionCard key={transaction.id} transaction={transaction} />
                     ))}
                   </VStack>
                 ))

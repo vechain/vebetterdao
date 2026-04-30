@@ -40,7 +40,10 @@ export const NavigatorHeaderMenu = ({
       <Portal>
         <Menu.Positioner>
           <Menu.Content bg={{ base: "white", _dark: "#2D3748" }}>
-            <Menu.Item value="go-to-profile" cursor="pointer" onClick={() => router.push(`/profile/${address}`)}>
+            <Menu.Item
+              value="go-to-profile"
+              cursor="pointer"
+              onClick={() => router.push(`/profile/${address}?tab=governance`)}>
               <LuUser />
               {t("View Profile")}
             </Menu.Item>

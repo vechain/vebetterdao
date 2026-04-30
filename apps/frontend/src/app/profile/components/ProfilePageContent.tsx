@@ -1,7 +1,6 @@
 import { VStack, Icon, Text, Tabs, Button } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import NextLink from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useCallback, useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -122,13 +121,11 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
-        <Button asChild w="max-content" variant="link">
-          <NextLink href="/">
-            <Icon as={FaAngleLeft} boxSize={3} />
-            <Text color="inherit" textStyle="sm" fontWeight="semibold">
-              {t("Go back")}
-            </Text>
-          </NextLink>
+        <Button w="max-content" variant="link" onClick={() => router.back()}>
+          <Icon as={FaAngleLeft} boxSize={3} />
+          <Text color="inherit" textStyle="sm" fontWeight="semibold">
+            {t("Go back")}
+          </Text>
         </Button>
       )}
       <ProfileHeader address={parsedAddress} />

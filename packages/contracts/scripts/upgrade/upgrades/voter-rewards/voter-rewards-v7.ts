@@ -116,7 +116,7 @@ async function main() {
   // check that navigator registry was correctly set
   const navigatorRegistry = await voterRewardsV7.navigatorRegistry()
   console.log(`Navigator registry: ${navigatorRegistry}`)
-  if (navigatorRegistry !== envConfig.navigatorRegistryContractAddress) {
+  if (navigatorRegistry.toLowerCase() !== envConfig.navigatorRegistryContractAddress.toLowerCase()) {
     throw new Error("Navigator registry was not correctly set")
   }
 

@@ -36,62 +36,21 @@ const DetailStatsSkeleton = () => (
   </SimpleGrid>
 )
 
-const RoundVotesCardSkeleton = () => (
-  <Card.Root w="full" variant="primary">
-    <Card.Body>
-      <Skeleton height={{ base: "3", md: "4" }} width="20" rounded="sm" mb={{ base: 2, md: 4 }} />
-      <VStack gap={3} w="full" align="stretch">
-        {[1, 2, 3].map(i => (
-          <Card.Root key={i} variant="subtle" p={3}>
-            <Card.Body flexDirection="row" justifyContent="space-between" alignItems="center" p={0}>
-              <VStack align="start" gap={0.5}>
-                <Skeleton height="4" width="24" rounded="md" />
-                <Skeleton height="3" width="14" rounded="sm" />
-              </VStack>
-              <HStack gap={-1}>
-                {[1, 2, 3].map(j => (
-                  <Skeleton key={j} boxSize="7" rounded="full" ml="-1.5" />
-                ))}
-              </HStack>
-            </Card.Body>
-          </Card.Root>
-        ))}
-      </VStack>
-    </Card.Body>
-  </Card.Root>
-)
-
-const ProposalsCardSkeleton = () => (
-  <Card.Root w="full" variant="primary" h="full">
-    <Card.Body justifyContent="flex-start">
-      <HStack w="full" justify="space-between" align="center" mb={{ base: 2, md: 4 }}>
-        <HStack gap={2} align="center">
-          <Skeleton height={{ base: "3", md: "4" }} width="24" rounded="sm" />
-          <Skeleton height="5" width="6" rounded="sm" />
-        </HStack>
-      </HStack>
-      <VStack w="full" gap={3}>
-        {[1, 2, 3].map(i => (
-          <Card.Root key={i} variant="subtle" p={3} w="full">
-            <Card.Body p={0}>
-              <VStack align="start" gap={1}>
-                <Skeleton height="4" width="80%" rounded="md" />
-                <Skeleton height="3" width="60%" rounded="sm" />
-              </VStack>
-            </Card.Body>
-          </Card.Root>
-        ))}
-      </VStack>
-    </Card.Body>
-  </Card.Root>
-)
-
-const GovernanceActivitySkeleton = () => (
-  <VStack gap={4} w="full">
+const RoundHistorySkeleton = () => (
+  <VStack gap={3} w="full" align="stretch">
+    <Skeleton height="6" width="24" rounded="md" />
     <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} w="full" alignItems="stretch">
-      <RoundVotesCardSkeleton />
-      <ProposalsCardSkeleton />
-      <ProposalsCardSkeleton />
+      {[1, 2, 3].map(i => (
+        <Card.Root key={i} w="full" variant="primary">
+          <Card.Body>
+            <VStack align="stretch" gap={3}>
+              <Skeleton height="5" width="20" rounded="md" />
+              <Skeleton height="3" width="60%" rounded="sm" />
+              <Skeleton height="3" width="40%" rounded="sm" />
+            </VStack>
+          </Card.Body>
+        </Card.Root>
+      ))}
     </SimpleGrid>
   </VStack>
 )
@@ -107,8 +66,6 @@ export const NavigatorDetailSkeleton = () => (
 
     <DetailHeaderSkeleton />
     <DetailStatsSkeleton />
-
-    {/* Activity */}
-    <GovernanceActivitySkeleton />
+    <RoundHistorySkeleton />
   </VStack>
 )

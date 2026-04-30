@@ -11,6 +11,7 @@ export const useProposalCreatedEvents = (): {
   standardProposals: ProposalCreatedEvent[]
   grantProposals: ProposalCreatedEvent[]
   allProposals: ProposalCreatedEvent[]
+  isLoading: boolean
 } => {
   const proposalEvents = useEvents({
     abi,
@@ -70,5 +71,10 @@ export const useProposalCreatedEvents = (): {
     }
   }, [proposalEvents.data, proposalTypeEvents.data])
 
-  return { standardProposals, grantProposals, allProposals }
+  return {
+    standardProposals,
+    grantProposals,
+    allProposals,
+    isLoading: proposalEvents.isLoading || proposalTypeEvents.isLoading,
+  }
 }

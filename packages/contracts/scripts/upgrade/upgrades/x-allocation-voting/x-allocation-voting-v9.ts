@@ -61,7 +61,7 @@ async function main() {
   // check that navigator registry was correctly set by accessing directly the storage slot
   const navigatorRegistry = await xAllocationVoting.navigatorRegistry()
   console.log(`Navigator registry: ${navigatorRegistry}`)
-  if (navigatorRegistry !== config.navigatorRegistryContractAddress) {
+  if (navigatorRegistry.toLowerCase() !== config.navigatorRegistryContractAddress.toLowerCase()) {
     throw new Error("Navigator registry was not correctly set")
   }
 

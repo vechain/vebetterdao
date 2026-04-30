@@ -1,5 +1,27 @@
 import { NextRequest, NextResponse } from "next/server"
 
+// Realistic browser UA. Many sites (Reddit in particular) return a blocked or
+// login-wall HTML with no OG meta when the UA looks like a bot/crawler, so we
+// impersonate a modern desktop Chrome.
+const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+// New Reddit (www.reddit.com) is a JS-heavy SPA and frequently serves an
+// interstitial without usable OG tags. old.reddit.com renders the same content
+// server-side with a clean <head> containing OG meta.
+const normalizeUrl = (raw: string): string => {
+  try {
+    const u = new URL(raw)
+    if (u.hostname === "www.reddit.com" || u.hostname === "reddit.com") {
+      u.hostname = "old.reddit.com"
+      return u.toString()
+    }
+    return raw
+  } catch {
+    return raw
+  }
+}
+
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url")
   if (!url) return NextResponse.json({ error: "Missing url param" }, { status: 400 })
@@ -11,8 +33,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const res = await fetch(url, {
-      headers: { "User-Agent": "bot" },
+    const res = await fetch(normalizeUrl(url), {
+      headers: {
+        "User-Agent": BROWSER_USER_AGENT,
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      redirect: "follow",
       signal: AbortSignal.timeout(5000),
     })
     const html = await res.text()

@@ -11,7 +11,7 @@ type Props = {
 export const NavigatorGovernanceActivity = ({ address }: Props) => {
   return (
     <VStack gap={4} w="full">
-      <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} w="full" alignItems="stretch">
+      <SimpleGrid columns={{ base: 1, md: 1 }} gap={4} w="full" alignItems="stretch">
         <NavigatorRoundVotesCard address={address} />
         <NavigatorVotedProposalsCard address={address} />
         <NavigatorCreatedProposalsCard address={address} />
