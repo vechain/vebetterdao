@@ -28,7 +28,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get token history */
+        /**
+         * Get token history (deprecated)
+         * @deprecated
+         * @description Deprecated: this endpoint scopes history by tokenId and optional emitter contract only, which is not safe for contract-ambiguous NFT domains such as Stargate. Use /api/v1/stargate/tokens/{tokenId}/history for Stargate token timelines.
+         */
         get: operations["getTokenHistory"];
         put?: never;
         post?: never;
@@ -148,6 +152,205 @@ export interface paths {
         };
         /** Fetch all historic proposals */
         get: operations["getAllProposals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get validators with optional filters
+         * @description This endpoint retrieves validator stats.
+         *
+         *                 You can filter the results by:
+         *                 - `validatorId`: (deprecated - use GET /api/v1/validators/{validatorId} instead)
+         *                 - `status`: validator status
+         *                 - `endorser`: endorser address
+         *
+         *                 You can also sort the results by one of the supported fields and paginate.
+         *
+         *                 - `sortBy`: Choose between `validatorTvl`, `totalTvl`, `blockProbability`, `delegatorTvl`, or `nft:<Level>` (projected next-cycle yield if that NFT were delegated, e.g. `nft:Strength`)
+         *                 - `page` and `size`: Controls pagination
+         *                 - `direction`: Either `asc` or `desc`
+         */
+        get: operations["getValidators"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/{validatorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single validator by ID
+         * @description Returns a single validator's stats by their address.
+         */
+        get: operations["getValidatorById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/delegations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get delegations with optional filters
+         * @description This endpoint retrieves delegation records.
+         *
+         *                 You can filter by:
+         *                 - `validator`: delegations for a specific validator
+         *                 - `tokenId`: delegations for a specific NFT tokenId
+         *                 - `statuses`: array of statuses of interest
+         *
+         *                 You can also sort and paginate.
+         */
+        get: operations["getDelegations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/delegations/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get delegation counts by status for all validators
+         * @description Returns the count of delegations grouped by status (QUEUED, ACTIVE, EXITING) for all validators, or optionally filtered to a specific validator.
+         */
+        get: operations["getDelegationCounts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/blocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get validator block records (deprecated)
+         * @deprecated
+         * @description Note: the original description was inaccurate. This endpoint does not return cumulative rewards 'up to the latest block'. It returns a paginated list of individual block reward/miss records, optionally filtered by an exact block number, validator, or status. Deprecated: use /api/v1/validators/block-rewards for paginated listing or /api/v1/validators/block-rewards/{blockNumber} for lookup by block.
+         */
+        get: operations["getValidatorBlocks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/blocks/missed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get missed blocks percentage for validators
+         * @description Returns missed block percentages for all validators or a specific validator within a specified timeframe. Timeframe options: DAY (last 24h), WEEK (last 7 days), MONTH (last 30 days), YEAR (last 365 days).
+         */
+        get: operations["getMissedBlocksPercentage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/blocks/historic/{validator}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get historic VTHO rewards in a custom time range
+         * @description Returns a time series of VTHO rewards between the given timestamps. Granularity (hourly/daily/weekly/monthly) is automatically chosen based on the time range. For sampled ranges, the response includes the nearest records at or before the requested boundaries. You can filter by validator address.
+         */
+        get: operations["getHistoricValidatorRewardsRange"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/block-rewards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get paginated validator block reward records
+         * @description Returns a paginated list of validator block reward and performance records. You can filter by validator address and/or block status (VALIDATED or MISSED). Results are sorted by block number (default: descending).
+         */
+        get: operations["getValidatorBlockRewards"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validators/block-rewards/{blockNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get validator block records for a specific block number
+         * @description Returns all validator block reward records for a specific block number. You can optionally filter by validator address to narrow to a single record.
+         */
+        get: operations["getBlockByBlockNumber"];
         put?: never;
         post?: never;
         delete?: never;
@@ -284,6 +487,30 @@ export interface paths {
         };
         /** Get all delegated transactions by a delegator address */
         get: operations["getDelegatedTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get cumulative transaction, clause, and reverted totals on VeChain
+         * @description Returns the cumulative number of transactions, clauses, reverted transactions, and
+         *                 reverted clauses observed on VeChain up to the most recently indexed block. Clause
+         *                 totals are included because clauses are a property of transactions, and reverted totals
+         *                 cover reverted transactions plus the clauses contained within those reverted
+         *                 transactions.
+         */
+        get: operations["getTransactionCount"];
         put?: never;
         post?: never;
         delete?: never;
@@ -643,6 +870,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/stargate/tokens/{tokenId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stargate token history
+         * @description Retrieve the Stargate lifecycle timeline for a token, including Stargate protocol events, synthetic delegation lifecycle events, Stargate NFT transfers, NFT sales, and VeVote casts.
+         */
+        get: operations["getStargateTokenHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stargate/token-rewards/{tokenId}": {
         parameters: {
             query?: never;
@@ -759,6 +1006,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/nfts/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get NFT token history
+         * @description Retrieve NFT transfer and sale history for a specific contract and token ID. If eventName is omitted, the response includes both TRANSFER_NFT and NFT_SALE events.
+         */
+        get: operations["getNftHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nfts/contracts": {
         parameters: {
             query?: never;
@@ -865,6 +1132,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/contracts/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retrieve a contract by address */
+        get: operations["getContract"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contracts/by-master/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get contracts where address is master */
+        get: operations["getContractsByMaster"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/b3tr/xallocations/{roundId}/results": {
         parameters: {
             query?: never;
@@ -914,6 +1215,26 @@ export interface paths {
         };
         /** Get the comments made by a user on proposals. */
         get: operations["getUserProposalComments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/users/{wallet}/challenges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get indexed B3TR challenges bucketed for a wallet.
+         * @description Returns challenges bucketed by a semantic `filter` that encodes both a challenge status set and the wallet's relationship to the challenge. See the `filter` parameter for the full list of buckets.
+         */
+        get: operations["getWalletChallenges"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1022,86 +1343,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/b3tr/navigators": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get navigators
-         * @description Returns a paginated list of navigators with their current state including stake, citizen count, and delegation totals. Supports filtering by status and address, and ordering by various fields.
-         */
-        get: operations["getNavigators"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/b3tr/navigators/overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get navigator overview
-         * @description Returns aggregate statistics across all active navigators: total count, total B3TR staked, total citizens delegating, and total VOT3 delegated.
-         */
-        get: operations["getOverview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/b3tr/navigators/delegations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get delegation event history
-         * @description Returns the full chronological history of delegation events (created, updated, removed) for a navigator or citizen. Each event includes the absolute amount and a delta field showing the change (positive for increases, negative for decreases).
-         */
-        get: operations["getDelegations"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/b3tr/navigators/citizens": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get citizens delegated to a navigator
-         * @description Returns a paginated list of active citizen delegations for a specific navigator. Each entry includes the citizen address, delegated VOT3 amount, and delegation start date.
-         */
-        get: operations["getCitizens"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/b3tr/galaxy-members/level-overview": {
         parameters: {
             query?: never;
@@ -1114,6 +1355,43 @@ export interface paths {
          * @description Returns the current overview (holders, B3TR donated, etc.) for each Galaxy Member level.
          */
         get: operations["getLevelOverviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/challenges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get public indexed B3TR challenges.
+         * @description Returns public challenges across the network. Use `/api/v1/b3tr/users/{wallet}/challenges` for wallet-scoped views.
+         */
+        get: operations["getChallenges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/challenges/{challengeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a single indexed B3TR challenge. */
+        get: operations["getChallenge"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1351,32 +1629,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/accounts/totals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Retrieve total unique accounts overview (deprecated)
-         * @deprecated
-         * @description Retrieves historical totals of unique VeChain accounts tracked per time frame (DAY, WEEK, MONTH, YEAR).
-         *                 The "ALL" account aggregates totals across all time frames.
-         *
-         *                 If no `timeFrame` is provided, the response defaults to showing the full cumulative totals (ALL).
-         *
-         *                 Deprecated: use `GET /api/v2/accounts/totals` for cumulative time-series responses.
-         */
-        get: operations["getTotalAccounts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/accounts/overview/{address}": {
         parameters: {
             query?: never;
@@ -1393,7 +1645,7 @@ export interface paths {
          *
          *                 The response includes individual breakdowns and a computed total.
          */
-        get: operations["getOverview_1"];
+        get: operations["getOverview"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1507,7 +1759,7 @@ export interface components {
             contractAddress?: string;
             tokenId?: string;
             /** @enum {string} */
-            eventName: "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST";
+            eventName: "B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST";
             to?: string;
             from?: string;
             value?: string;
@@ -1527,7 +1779,6 @@ export interface components {
             outputToken?: string;
             inputValue?: string;
             outputValue?: string;
-            tokenAddress?: string;
             levelId?: string;
             owner?: string;
             vetGeneratedVthoRewards?: string;
@@ -1643,6 +1894,135 @@ export interface components {
             data: components["schemas"]["HistoricProposals"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
+        PaginatedResponseValidator: {
+            data: components["schemas"]["Validator"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        TokenLevelDecimalValues: {
+            Strength?: number;
+            Thunder?: number;
+            Mjolnir?: number;
+            VeThorX?: number;
+            StrengthX?: number;
+            ThunderX?: number;
+            MjolnirX?: number;
+            Dawn?: number;
+            Lightning?: number;
+            Flash?: number;
+        };
+        Validator: {
+            id: string;
+            endorser?: string;
+            beneficiary?: string;
+            /** @enum {string} */
+            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+            vetStaked?: number;
+            validatorVetStaked?: number;
+            delegatorVetStaked?: number;
+            queuedVetStaked?: number;
+            validatorQueuedVetStaked?: number;
+            delegatorQueuedVetStaked?: number;
+            validatorExitingVetStaked?: number;
+            delegatorExitingVetStaked?: number;
+            exitingVetStaked?: number;
+            /** Format: int64 */
+            cycleEndBlock?: number;
+            totalRewards?: number;
+            blockProbability?: number;
+            blocksPerEpoch?: number;
+            totalTvl?: number;
+            validatorTvl?: number;
+            delegatorTvl?: number;
+            validatorTvlPercentage?: number;
+            tvlBasedYield?: number;
+            validatorYield?: number;
+            avgDelegatorYield?: number;
+            nextCycleTvlBasedYield?: number;
+            nextCycleValidatorYield?: number;
+            nextCycleAvgDelegatorYield?: number;
+            nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"];
+            nftYields?: components["schemas"]["TokenLevelDecimalValues"];
+            totalWeight?: number;
+            online?: boolean;
+            /** Format: int64 */
+            completedPeriods?: number;
+            /** Format: int64 */
+            startBlock?: number;
+            /** Format: int64 */
+            cyclePeriodLength?: number;
+            blocksPerYear?: number;
+            percentageOffline?: number;
+            /** Format: int64 */
+            offlineBlocks?: number;
+            /** Format: int64 */
+            exitBlock?: number;
+            /** Format: int64 */
+            queuePosition?: number;
+            /** Format: int64 */
+            availableStartBlock?: number;
+        };
+        Delegation: {
+            id: string;
+            validator: string;
+            tokenId: string;
+            owner: string;
+            /** @enum {string} */
+            status: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+            /** @enum {string} */
+            tokenLevel: "All" | "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
+            stakedAmount: string;
+            totalRewardsClaimed: number;
+        };
+        PaginatedResponseDelegation: {
+            data: components["schemas"]["Delegation"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        DelegationCountsResponse: {
+            validator: string;
+            /** Format: int64 */
+            queued: number;
+            /** Format: int64 */
+            active: number;
+            /** Format: int64 */
+            exiting: number;
+        };
+        PaginatedResponseValidatorBlock: {
+            data: components["schemas"]["ValidatorBlock"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        ValidatorBlock: {
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            validator: string;
+            blockReward?: number;
+            priorityReward?: number;
+            total?: number;
+            /** @enum {string} */
+            status: "VALIDATED" | "MISSED";
+            delegatorRewards?: number;
+            validatorRewards?: number;
+            /** Format: int64 */
+            blocksOffline?: number;
+            /** Format: int64 */
+            onlineBlock?: number;
+        };
+        AllValidatorsMissedBlocksResponse: {
+            /** @enum {string} */
+            timeframe: "DAY" | "WEEK" | "MONTH" | "YEAR";
+            /** Format: int64 */
+            startBlock: number;
+            /** Format: int64 */
+            endBlock: number;
+            validators: components["schemas"]["ValidatorMissedBlocksPercentage"][];
+        };
+        ValidatorMissedBlocksPercentage: {
+            validator: string;
+            /** Format: double */
+            missedPercentage: number;
+        };
         IndexedTransferEvent: {
             id: string;
             blockId: string;
@@ -1729,6 +2109,12 @@ export interface components {
             sender: string;
             recipient: string;
             amount: string;
+        };
+        TransactionCountSummary: {
+            totalTransactions: number;
+            totalClauses: number;
+            totalRevertedTransactions: number;
+            totalRevertedClauses: number;
         };
         PaginatedResponseTotalByPeriodDto: {
             data: components["schemas"]["TotalByPeriodDto"][];
@@ -1920,7 +2306,6 @@ export interface components {
             outputToken?: string;
             inputValue?: string;
             outputValue?: string;
-            tokenAddress?: string;
             levelId?: string;
             owner?: string;
             vetGeneratedVthoRewards?: string;
@@ -1959,6 +2344,22 @@ export interface components {
             dailyActiveUsers?: number;
             averageFeesPerUser?: number;
         };
+        Contract: {
+            address: string;
+            /** Format: int64 */
+            createdOn: number;
+            deploymentTxId: string;
+            /** Format: int64 */
+            deploymentClauseIndex: number;
+            master: string;
+            isErc20?: boolean;
+            isErc721?: boolean;
+            isErc1155?: boolean;
+        };
+        PaginatedResponseContract: {
+            data: components["schemas"]["Contract"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
         XAllocResultResponse: {
             /** Format: int32 */
             roundId: number;
@@ -1992,6 +2393,56 @@ export interface components {
             weight: number;
             power: number;
             reason: string;
+        };
+        ChallengeSummaryResponse: {
+            /** Format: int64 */
+            challengeId: number;
+            /** Format: int64 */
+            createdAt: number;
+            /** @enum {string} */
+            kind: "Stake" | "Sponsored";
+            /** @enum {string} */
+            visibility: "Public" | "Private";
+            /** @enum {string} */
+            challengeType: "MaxActions" | "SplitWin";
+            /** @enum {string} */
+            status: "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid";
+            /** @enum {string} */
+            settlementMode: "None" | "TopWinners" | "CreatorRefund" | "SplitWinCompleted";
+            creator: string;
+            title: string;
+            description: string;
+            imageURI: string;
+            metadataURI: string;
+            stakeAmount: string;
+            totalPrize: string;
+            /** Format: int32 */
+            startRound: number;
+            /** Format: int32 */
+            endRound: number;
+            /** Format: int32 */
+            duration: number;
+            threshold: string;
+            /** Format: int32 */
+            numWinners: number;
+            /** Format: int32 */
+            winnersClaimed: number;
+            prizePerWinner: string;
+            allApps: boolean;
+            /** Format: int32 */
+            participantCount: number;
+            /** Format: int32 */
+            invitedCount: number;
+            /** Format: int32 */
+            declinedCount: number;
+            /** Format: int32 */
+            selectedAppsCount: number;
+            /** Format: int32 */
+            winnersCount: number;
+        };
+        PaginatedResponseChallengeSummaryResponse: {
+            data: components["schemas"]["ChallengeSummaryResponse"][];
+            pagination: components["schemas"]["PaginationDetail"];
         };
         PaginatedResponseTreasuryTransfer: {
             data: components["schemas"]["TreasuryTransfer"][];
@@ -2038,65 +2489,71 @@ export interface components {
             totalWeight: number;
             totalPower: number;
         };
-        Navigator: {
-            address: string;
-            /** @enum {string} */
-            status: "ACTIVE" | "EXITING" | "DEACTIVATED";
-            stake: number;
-            /** Format: int32 */
-            citizenCount: number;
-            totalDelegated: number;
-            metadataURI?: string;
-            /** Format: int64 */
-            registeredAt: number;
-            exitAnnouncedRound?: string;
-            exitEffectiveRound?: string;
-            lastReportRound?: string;
-            lastReportURI?: string;
-        };
-        PaginatedResponseNavigator: {
-            data: components["schemas"]["Navigator"][];
-            pagination: components["schemas"]["PaginationDetail"];
-        };
-        NavigatorOverview: {
-            /** Format: int64 */
-            activeNavigators: number;
-            totalStaked: number;
-            /** Format: int64 */
-            totalCitizens: number;
-            totalDelegated: number;
-        };
-        NavigatorDelegationEvent: {
-            /** Format: int64 */
-            blockTimestamp: number;
-            txId: string;
-            navigator: string;
-            citizen: string;
-            eventType: string;
-            amount?: number;
-            delta?: number;
-        };
-        PaginatedResponseNavigatorDelegationEvent: {
-            data: components["schemas"]["NavigatorDelegationEvent"][];
-            pagination: components["schemas"]["PaginationDetail"];
-        };
-        NavigatorCitizen: {
-            address: string;
-            navigator: string;
-            amount: number;
-            /** Format: int64 */
-            delegatedAt: number;
-            active: boolean;
-        };
-        PaginatedResponseNavigatorCitizen: {
-            data: components["schemas"]["NavigatorCitizen"][];
-            pagination: components["schemas"]["PaginationDetail"];
-        };
         GMLevelOverview: {
             /** @enum {string} */
             level: "ALL" | "EARTH" | "MOON" | "MERCURY" | "VENUS" | "MARS" | "JUPITER" | "SATURN" | "URANUS" | "NEPTUNE" | "GALAXY";
             /** Format: int64 */
             totalNFTs: number;
+        };
+        ChallengeDetailResponse: {
+            /** Format: int64 */
+            challengeId: number;
+            /** Format: int64 */
+            createdAt: number;
+            /** @enum {string} */
+            kind: "Stake" | "Sponsored";
+            /** @enum {string} */
+            visibility: "Public" | "Private";
+            /** @enum {string} */
+            challengeType: "MaxActions" | "SplitWin";
+            /** @enum {string} */
+            status: "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid";
+            /** @enum {string} */
+            settlementMode: "None" | "TopWinners" | "CreatorRefund" | "SplitWinCompleted";
+            creator: string;
+            title: string;
+            description: string;
+            imageURI: string;
+            metadataURI: string;
+            stakeAmount: string;
+            totalPrize: string;
+            /** Format: int32 */
+            startRound: number;
+            /** Format: int32 */
+            endRound: number;
+            /** Format: int32 */
+            duration: number;
+            threshold: string;
+            /** Format: int32 */
+            numWinners: number;
+            /** Format: int32 */
+            winnersClaimed: number;
+            prizePerWinner: string;
+            allApps: boolean;
+            /** Format: int32 */
+            participantCount: number;
+            /** Format: int32 */
+            invitedCount: number;
+            /** Format: int32 */
+            declinedCount: number;
+            /** Format: int32 */
+            selectedAppsCount: number;
+            /** Format: int32 */
+            winnersCount: number;
+            bestScore: string;
+            /** Format: int32 */
+            bestCount: number;
+            /** Format: int32 */
+            payoutsClaimed: number;
+            participants: string[];
+            invited: string[];
+            declined: string[];
+            selectedApps: string[];
+            winners: string[];
+            eligibleInvitees: string[];
+            claimedBy: string[];
+            refundedBy: string[];
+            creatorRefunded: boolean;
         };
         Action: {
             /** Format: int64 */
@@ -2232,24 +2689,6 @@ export interface components {
             /** Format: int64 */
             totalUniqueUserInteractions: number;
         };
-        PaginatedResponseTotalAccounts: {
-            data: components["schemas"]["TotalAccounts"][];
-            pagination: components["schemas"]["PaginationDetail"];
-        };
-        TotalAccounts: {
-            /** Format: int64 */
-            total?: number;
-            /** @enum {string} */
-            timeFrame?: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
-            /** Format: int64 */
-            dayOfMonth?: number;
-            /** Format: int64 */
-            weekOfYear?: number;
-            /** Format: int64 */
-            month?: number;
-            /** Format: int64 */
-            year?: number;
-        };
         AccountOverviewResponse: {
             address: string;
             /** Format: int64 */
@@ -2294,7 +2733,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
+                eventName?: ("B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
                 /**
@@ -2395,7 +2834,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("STARGATE_DELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST" | "NFT_SALE" | "TRANSFER_NFT" | "B3TR_UPGRADE_GM")[];
+                eventName?: ("STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "TRANSFER_NFT" | "NFT_SALE" | "VEVOTE_VOTE_CAST" | "B3TR_UPGRADE_GM")[];
                 /**
                  * @description A valid address
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
@@ -2885,6 +3324,721 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseHistoricProposals"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidators: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Filter by endorser address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                endorser?: string;
+                /**
+                 * @deprecated
+                 * @description Deprecated: use GET /api/v1/validators/{validatorId} instead.
+                 */
+                validatorId?: string;
+                /** @description Filter by one or more validator statuses */
+                status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+                /** @description The sort by field */
+                sortBy?: "validatorTvl" | "totalTvl" | "blockProbability" | "delegatorTvl" | "nft:Strength" | "nft:Thunder" | "nft:Mjolnir" | "nft:VeThorX" | "nft:StrengthX" | "nft:ThunderX" | "nft:MjolnirX" | "nft:Dawn" | "nft:Lightning" | "nft:Flash";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseValidator"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidatorById: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description Validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Validator"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getDelegations: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Filter by validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+                /** @description A valid tokenId */
+                tokenId?: string;
+                /** @description Filter by one or more statuses */
+                statuses?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseDelegation"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getDelegationCounts: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional validator address to filter by
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DelegationCountsResponse"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidatorBlocks: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional block number. If provided, returns the total VTHO rewards as of this block.
+                 * @example 12345678
+                 */
+                blockNumber?: number;
+                /**
+                 * @description Optional validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+                /** @description Filter by block status - either VALIDATED or MISSED. */
+                status?: "VALIDATED" | "MISSED";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseValidatorBlock"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getMissedBlocksPercentage: {
+        parameters: {
+            query: {
+                /** @description Time period to calculate missed blocks for */
+                timeframe: "DAY" | "WEEK" | "MONTH" | "YEAR";
+                /**
+                 * @description Optional validator address to filter by
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AllValidatorsMissedBlocksResponse"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getHistoricValidatorRewardsRange: {
+        parameters: {
+            query: {
+                /**
+                 * @description Start timestamp in Unix seconds (inclusive)
+                 * @example 1704143600
+                 */
+                startTimestamp: number;
+                /**
+                 * @description End timestamp in Unix seconds (inclusive)
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description Validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ValidatorBlock"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidatorBlockRewards: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional validator address to filter by
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+                /**
+                 * @description Filter results by block number. When direction is 'desc' (default), returns records at or before this block. When direction is 'asc', returns records at or after this block.
+                 * @example 12345678
+                 */
+                blockNumber?: number;
+                /** @description Filter by block status - either VALIDATED or MISSED. */
+                status?: "VALIDATED" | "MISSED";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseValidatorBlock"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getBlockByBlockNumber: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Optional validator address to filter by
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validator?: string;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The block number to look up.
+                 * @example 12345678
+                 */
+                blockNumber: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ValidatorBlock"][];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -3605,6 +4759,69 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTransactionCount: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionCountSummary"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -4807,6 +6024,97 @@ export interface operations {
             };
         };
     };
+    getStargateTokenHistory: {
+        parameters: {
+            query?: {
+                /** @description Filter by Stargate token history event names. */
+                eventName?: ("STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "TRANSFER_NFT" | "NFT_SALE" | "VEVOTE_VOTE_CAST")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /** @description A valid tokenId */
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getStargateTokenRewards: {
         parameters: {
             query?: {
@@ -5218,6 +6526,101 @@ export interface operations {
             };
         };
     };
+    getNftHistory: {
+        parameters: {
+            query: {
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                contractAddress: string;
+                /** @description A valid tokenId */
+                tokenId: string;
+                /** @description Filter by NFT history event names. Defaults to TRANSFER_NFT and NFT_SALE. */
+                eventName?: ("TRANSFER_NFT" | "NFT_SALE")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getContractsByNFTOwner: {
         parameters: {
             query: {
@@ -5310,7 +6713,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
+                eventName?: ("B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
                 /**
@@ -5555,6 +6958,157 @@ export interface operations {
             };
         };
     };
+    getContract: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The address of the contract to retrieve.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Contract"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getContractsByMaster: {
+        parameters: {
+            query?: {
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The address to query as master.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseContract"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getXAllocResults: {
         parameters: {
             query?: {
@@ -5743,6 +7297,92 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseProposalComment"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getWalletChallenges: {
+        parameters: {
+            query: {
+                /**
+                 * @description - `NeededAction`: challenges that require a wallet-level action — outstanding invites you have not accepted or declined, claimable prizes on Completed MaxActions challenges you won, finalizable MaxActions challenges past their endRound, or reclaimable stake on Cancelled or Invalid challenges you were a participant in.
+                 *     - `MyChallenges`: Pending or Active challenges you created or have joined.
+                 *     - `OpenToJoin`: public Pending challenges you are not yet involved in.
+                 *     - `OthersActive`: public Active challenges you are not involved in (observation only).
+                 *     - `History`: challenges you consider 'no longer current' — terminal-state (Completed, Cancelled, Invalid) challenges you have been involved in, plus still-live (Pending, Active) challenges you have actively bowed out of (declined invitations or joined-then-left participants), so they remain visible for a possible re-accept or re-join.
+                 */
+                filter: "NeededAction" | "MyChallenges" | "OpenToJoin" | "OthersActive" | "History";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                wallet: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseChallengeSummaryResponse"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -6173,321 +7813,6 @@ export interface operations {
             };
         };
     };
-    getNavigators: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Filter by navigator address.
-                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
-                 */
-                navigator?: string;
-                /** @description Filter by navigator status. Multiple values allowed. */
-                status?: ("ACTIVE" | "EXITING" | "DEACTIVATED")[];
-                /** @description Field to order results by. */
-                orderBy?: "stake" | "totalDelegated" | "citizenCount" | "registeredAt";
-                /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-                /** @description The sort direction */
-                direction?: "ASC" | "DESC";
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseNavigator"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getOverview: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["NavigatorOverview"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getDelegations: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Filter by navigator address.
-                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
-                 */
-                navigator?: string;
-                /**
-                 * @description Filter by citizen address.
-                 * @example 0x3f90bf8b314c42005103b3c94505634fa680dcee
-                 */
-                citizen?: string;
-                /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-                /** @description The sort direction */
-                direction?: "ASC" | "DESC";
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseNavigatorDelegationEvent"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getCitizens: {
-        parameters: {
-            query: {
-                /**
-                 * @description Navigator address to list citizens for.
-                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
-                 */
-                navigator: string;
-                /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-                /** @description The sort direction */
-                direction?: "ASC" | "DESC";
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseNavigatorCitizen"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
     getLevelOverviews: {
         parameters: {
             query?: {
@@ -6554,6 +7879,148 @@ export interface operations {
             };
         };
     };
+    getChallenges: {
+        parameters: {
+            query?: {
+                status?: "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseChallengeSummaryResponse"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getChallenge: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                challengeId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChallengeDetailResponse"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getUserActions: {
         parameters: {
             query?: {
@@ -6563,12 +8030,12 @@ export interface operations {
                  */
                 appId?: string;
                 /**
-                 * @description Return records after this time (Unix time in milliseconds)
+                 * @description Return records after this time (Unix time in seconds).
                  * @example 1704143600
                  */
                 after?: number;
                 /**
-                 * @description Return records before this time (Unix time in milliseconds)
+                 * @description Return records before this time (Unix time in seconds).
                  * @example 1704153600
                  */
                 before?: number;
@@ -7203,12 +8670,12 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Return records after this time (Unix time in milliseconds)
+                 * @description Return records after this time (Unix time in seconds).
                  * @example 1704143600
                  */
                 after?: number;
                 /**
-                 * @description Return records before this time (Unix time in milliseconds)
+                 * @description Return records before this time (Unix time in seconds).
                  * @example 1704153600
                  */
                 before?: number;
@@ -7364,85 +8831,7 @@ export interface operations {
             };
         };
     };
-    getTotalAccounts: {
-        parameters: {
-            query?: {
-                /** @description Time frame to query totals for (DAY, WEEK, MONTH, YEAR, ALL). */
-                timeFrame?: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
-                /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-                /** @description The sort direction */
-                direction?: "ASC" | "DESC";
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseTotalAccounts"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getOverview_1: {
+    getOverview: {
         parameters: {
             query?: never;
             header?: {
