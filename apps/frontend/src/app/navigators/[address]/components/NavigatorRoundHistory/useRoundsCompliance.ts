@@ -35,6 +35,8 @@ export type RoundsComplianceResult = {
   slashEventsByRound: Map<string, NavigatorMinorSlashEvent> | undefined
   /** Pre-slash estimate; only used as a fallback while the slash event is loading. */
   estimatedPenaltyAmount: number
+  /** True until both the registration block and allocation rounds are resolved, so callers can avoid flashing an empty state. */
+  isLoading: boolean
 }
 
 /**
@@ -47,7 +49,7 @@ export type RoundsComplianceResult = {
  * undershoots and is used only as a transient fallback.
  */
 export const useRoundsCompliance = (address: string): RoundsComplianceResult => {
-  const { data: roundsData } = useAllocationsRoundsEvents()
+  const { data: roundsData, isLoading: roundsLoading } = useAllocationsRoundsEvents()
   const { data: prefEvents } = useNavigatorPreferenceEvents(address)
   const { data: reportEvents } = useNavigatorReportEvents(address)
   const { data: voteEvents } = useUserVotesInAllRounds(address)
@@ -59,7 +61,7 @@ export const useRoundsCompliance = (address: string): RoundsComplianceResult => 
   const { data: currentAllocationsRoundId } = useCurrentAllocationsRoundId()
   const { data: xApps } = useXApps()
 
-  const { data: regBlockData } = useEvents({
+  const { data: regBlockData, isLoading: regBlockLoading } = useEvents({
     contractAddress: getConfig().navigatorRegistryContractAddress,
     abi: NavigatorRegistry__factory.abi,
     eventName: "NavigatorRegistered",
@@ -257,5 +259,6 @@ export const useRoundsCompliance = (address: string): RoundsComplianceResult => 
     slashedByRound,
     slashEventsByRound,
     estimatedPenaltyAmount,
+    isLoading: roundsLoading || regBlockLoading,
   }
 }
