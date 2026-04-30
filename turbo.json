@@ -121,6 +121,10 @@
       "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment:mainnet"]
     },
     "@repo/config#check-or-generate-local-config": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-e2e-config"]
+    },
+    "@repo/config#check-or-generate-e2e-config": {
       "cache": false
     },
     "@vechain/vebetterdao-contracts#check-contracts-deployment": {

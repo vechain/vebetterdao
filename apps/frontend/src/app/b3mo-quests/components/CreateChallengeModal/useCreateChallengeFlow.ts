@@ -74,6 +74,10 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   )
 
   const withTyping = useCallback((fn: () => void) => {
+    if (process.env.NEXT_PUBLIC_E2E_DISABLE_TYPING === "true") {
+      fn()
+      return
+    }
     setIsTyping(true)
     const delay = 600 + Math.random() * 800
     typingTimeout.current = setTimeout(() => {

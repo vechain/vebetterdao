@@ -6,7 +6,9 @@
     "index",
     "model",
     "local",
-    "generateMockLocalConfig"
+    "e2e",
+    "generateMockLocalConfig",
+    "generateMockE2EConfig"
   ],
   "exports": {
     ".": "./index.ts",
@@ -15,6 +17,7 @@
     "./contracts/type": "./contracts/type.ts",
     "./contracts/envs/local": "./contracts/envs/local.ts",
     "./local": "./local.ts",
+    "./e2e": "./e2e.ts",
     "./testnet-staging": "./testnet-staging.ts",
     "./mainnet": "./mainnet.ts"
   },
@@ -22,7 +25,8 @@
     "@repo/constants": "*"
   },
   "scripts": {
-    "check-or-generate-local-config": "ts-node ./scripts/generateMockLocalConfig.mjs"
+    "check-or-generate-local-config": "ts-node ./scripts/generateMockLocalConfig.mjs",
+    "check-or-generate-e2e-config": "ts-node ./scripts/generateMockE2EConfig.mjs"
   },
   "devDependencies": {
     "ts-node": "^10.9.2"

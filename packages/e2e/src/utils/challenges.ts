@@ -33,21 +33,37 @@ export const waitForClearPage = async (page: Page, timeoutMs = 30_000) => {
 }
 
 export const navigateToChallenges = async (page: Page, baseUrl: string) => {
-  await page.goto(`${baseUrl}/challenges`, { waitUntil: "domcontentloaded" })
+  await page.goto(`${baseUrl}/b3mo-quests`, { waitUntil: "domcontentloaded" })
   await page.waitForLoadState("networkidle")
   await waitForClearPage(page)
 }
 
 export const openCreateChallengeModal = async (page: Page) => {
-  await page.getByRole("button", { name: /create challenge/i }).click()
+  await page
+    .getByRole("button", { name: /create b3mo quest/i })
+    .first()
+    .click()
   await page.getByRole("dialog").waitFor({ state: "visible", timeout: 10_000 })
 }
 
 export const openCreateSponsoredChallengeModal = async (page: Page) => {
-  await page.getByRole("button", { name: /create sponsored challenge/i }).click()
+  await page.getByRole("button", { name: /create sponsored b3mo quest/i }).click()
   await page.getByRole("dialog").waitFor({ state: "visible", timeout: 10_000 })
 }
 
+/**
+ * Walks the B3MO Quest create wizard ([apps/frontend/src/app/b3mo-quests/components/CreateChallengeModal](apps/frontend/src/app/b3mo-quests/components/CreateChallengeModal)).
+ *
+ * The wizard is step-driven (`STEP_ORDER` in types.ts):
+ *   kind -> visibility? -> challengeType? -> typeExplainer -> title -> amount
+ *   -> splitWin* -> startRound -> duration -> appScope -> selectedApps?
+ *   -> invitees? -> review
+ *
+ * For default Bet (Stake) kind, visibility=Private and challengeType=MaxActions are pre-filled,
+ * so visibility/challengeType/splitWin steps are skipped (`isRelevant=false`).
+ * `typeExplainer` auto-advances via `withTyping`. We click choice buttons by their inner text
+ * because the button accessible name concatenates description text too.
+ */
 export const fillCreateChallengeForm = async (
   page: Page,
   opts: {
@@ -62,38 +78,57 @@ export const fillCreateChallengeForm = async (
 ) => {
   const dialog = page.getByRole("dialog")
   const kind = opts.kind ?? "Stake"
-  const visibility = opts.visibility ?? "Public"
+  const visibility = opts.visibility ?? (kind === "Stake" ? "Private" : "Public")
 
-  await dialog.getByRole("button", { name: new RegExp(`^${kind}$`, "i") }).click()
+  const clickChoice = (label: string) => dialog.locator(`button:has(:text-is("${label}"))`).first().click()
 
-  if (opts.title) {
-    await dialog.getByLabel(/title \(optional\)/i).fill(opts.title)
-  }
-  await dialog.getByRole("button", { name: /^continue$/i }).click()
-
-  const amountLabel = kind === "Sponsored" ? /prize amount \(b3tr\)/i : /stake amount \(b3tr\)/i
-  await dialog.getByLabel(amountLabel).fill(opts.amount)
-  await dialog.getByRole("button", { name: /^continue$/i }).click()
-
-  await dialog.getByRole("button", { name: /next round/i }).click()
-  await dialog.getByRole("button", { name: new RegExp(`^${opts.duration ?? 1}$`) }).click()
+  const kindLabel = kind === "Stake" ? "Bet" : "Sponsored"
+  await clickChoice(kindLabel)
 
   if (kind === "Sponsored") {
-    if (opts.splitPrize) {
-      await dialog.getByRole("button", { name: /^split prize$/i }).click()
-      const thresholdInput = dialog.getByLabel(/minimum actions/i)
-      await thresholdInput.fill(opts.threshold ?? "1")
-      await dialog.getByRole("button", { name: /^continue$/i }).click()
-    } else {
-      await dialog.getByRole("button", { name: /^max actions$/i }).click()
-    }
+    await clickChoice(visibility)
+    const challengeTypeLabel = opts.splitPrize ? "Split win" : "Max actions"
+    await clickChoice(challengeTypeLabel)
   }
 
+  const titleStep = dialog.getByText(/^title \(optional\)$/i)
+  await titleStep.first().waitFor({ state: "visible", timeout: 15_000 })
+  if (opts.title) {
+    const titleInput = dialog.locator("input").first()
+    await titleInput.fill(opts.title)
+  }
+  await dialog.getByRole("button", { name: /^continue$/i }).click()
+
+  const amountQuickButton = dialog.getByRole("button", { name: new RegExp(`^${opts.amount}\\s*B3TR$`, "i") }).first()
+  await amountQuickButton.waitFor({ state: "visible", timeout: 15_000 })
+  await amountQuickButton.click()
+
+  if (kind === "Sponsored" && opts.splitPrize) {
+    const numWinnersContinue = dialog.getByRole("button", { name: /^continue$/i })
+    await numWinnersContinue.waitFor({ state: "visible", timeout: 15_000 })
+    await numWinnersContinue.click()
+
+    if (opts.threshold) {
+      const thresholdInput = dialog.locator('input[type="number"]').first()
+      await thresholdInput.fill(opts.threshold)
+    }
+    await dialog.getByRole("button", { name: /^continue$/i }).click()
+  }
+
+  const startRoundButton = dialog.getByRole("button", { name: /^next round$/i })
+  await startRoundButton.waitFor({ state: "visible", timeout: 15_000 })
+  await startRoundButton.click()
+
+  const duration = opts.duration ?? 1
+  const durationLabel = duration === 1 ? `${duration} round` : `${duration} rounds`
+  await dialog.getByRole("button", { name: new RegExp(`^${durationLabel}$`, "i") }).click()
+
   await dialog.getByRole("button", { name: /^all apps$/i }).click()
-  await dialog.getByRole("button", { name: new RegExp(`^${visibility}$`, "i") }).click()
 
   if (visibility === "Private") {
-    await dialog.getByRole("button", { name: /^skip$/i }).click()
+    const skip = dialog.getByRole("button", { name: /^skip$/i })
+    await skip.waitFor({ state: "visible", timeout: 15_000 })
+    await skip.click()
   }
 }
 

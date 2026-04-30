@@ -152,6 +152,8 @@ contracts/package-lock.json
 .vscode/
 
 packages/config/local.ts
+packages/config/e2e.ts
+packages/e2e/.snapshots/
 
 packages/contracts/metadata/xApps/output/
 
