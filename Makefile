@@ -11,6 +11,16 @@ solo-down: #@ Stop Thor solo
 solo-clean: #@ Clean Thor solo
 	docker compose -f packages/contracts/docker-compose.yaml down -v --remove-orphans
 
+# Thor solo for e2e (separate node on port 8670, isolated from local dev)
+e2e-solo-up: #@ Start Thor solo for e2e tests (port 8670)
+	docker compose -p b3tr-e2e -f packages/contracts/docker-compose.e2e.yaml up -d --wait
+e2e-solo-down: #@ Stop Thor solo for e2e
+	docker compose -p b3tr-e2e -f packages/contracts/docker-compose.e2e.yaml down
+e2e-solo-clean: #@ Clean Thor solo for e2e (removes volume, e2e config, snapshot)
+	docker compose -p b3tr-e2e -f packages/contracts/docker-compose.e2e.yaml down -v --remove-orphans
+	rm -f packages/config/e2e.ts
+	rm -rf packages/e2e/.snapshots
+
 # Indexer
 indexer-up: #@ Start indexer (requires deployed contracts)
 	@source scripts/extract-local-config.sh && \

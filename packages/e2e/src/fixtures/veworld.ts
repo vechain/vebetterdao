@@ -13,7 +13,19 @@ import {
   type Response,
 } from "@playwright/test"
 
-import { baseUrl, headless, localNetworkName, localNodeUrl, walletMnemonic, walletPassword } from "../config"
+import {
+  baseUrl,
+  headless,
+  localNetworkName,
+  localNodeUrl,
+  veworldAfterApproveMs,
+  veworldAfterConfirmMs,
+  veworldAfterPasswordMs,
+  veworldIdleBetweenStepsMs,
+  veworldTargetPollMs,
+  walletMnemonic,
+  walletPassword,
+} from "../config"
 import { ensureVeWorldExtensionPath } from "../utils/extension"
 
 type VeWorldFixtures = {
@@ -46,6 +58,69 @@ const getVisibleLocator = async (locators: Locator[], timeout = 500) => {
   return null
 }
 
+/**
+ * Polls all locators in parallel and returns the first one currently visible.
+ * Use this instead of `getVisibleLocator` when waits should share a single budget —
+ * the sequential variant multiplies `timeout` by `locators.length`, wasting seconds
+ * when only one candidate can appear (e.g. `#goToHomepage` vs "Continue" on the
+ * "Wallet imported!" screen).
+ */
+const findFirstVisible = async (locators: Locator[], totalTimeoutMs: number, pollMs = 100) => {
+  const deadline = Date.now() + totalTimeoutMs
+  while (true) {
+    const results = await Promise.all(
+      locators.map(locator =>
+        locator
+          .first()
+          .isVisible()
+          .catch(() => false),
+      ),
+    )
+    const idx = results.findIndex(Boolean)
+    if (idx !== -1) return locators[idx]!.first()
+    if (Date.now() >= deadline) return null
+    await new Promise(resolve => setTimeout(resolve, pollMs))
+  }
+}
+
+type ActionKind = "password" | "approve" | "confirm"
+type DetectedAction = { kind: ActionKind; locator: Locator }
+
+/**
+ * Race password / approve / confirm buttons on the same target — first match wins.
+ * Avoids the sequential per-bucket waits that previously stalled the flow when the
+ * VeWorld popup only shows one of the three.
+ */
+const detectActionButton = async (
+  target: VeWorldApprovalTarget,
+  totalTimeoutMs: number,
+  pollMs = 80,
+): Promise<DetectedAction | null> => {
+  const groups: { kind: ActionKind; locators: Locator[] }[] = [
+    { kind: "password", locators: getConnectionPasswordLocators(target) },
+    { kind: "approve", locators: getConnectionApproveLocators(target) },
+    { kind: "confirm", locators: getConnectionConfirmLocators(target) },
+  ]
+
+  const deadline = Date.now() + totalTimeoutMs
+  while (true) {
+    for (const { kind, locators } of groups) {
+      const results = await Promise.all(
+        locators.map(locator =>
+          locator
+            .first()
+            .isVisible()
+            .catch(() => false),
+        ),
+      )
+      const idx = results.findIndex(Boolean)
+      if (idx !== -1) return { kind, locator: locators[idx]!.first() }
+    }
+    if (Date.now() >= deadline) return null
+    await new Promise(resolve => setTimeout(resolve, pollMs))
+  }
+}
+
 const getOnboardingPasswordLocators = (page: Page) => [
   page.getByPlaceholder(/write your password/i),
   page.getByLabel(/^password$/i),
@@ -76,23 +151,29 @@ const getConnectionApproveLocators = (target: VeWorldApprovalTarget) => [
 ]
 
 const getConnectionConfirmLocators = (target: VeWorldApprovalTarget) => [
+  target.getByTestId("signApproveButton"),
   target.locator("#signApproveButton"),
   target.getByRole("button", { name: /sign|confirm/i }),
 ]
 
+// Strict locators only — catch-alls like `input.first()` or `input:visible` would match
+// unrelated inputs (e.g. the network-selection radios on the extension settings page),
+// causing `getVeWorldApprovalTarget` to lock onto the wrong tab and `fill()` to crash.
 const getConnectionPasswordLocators = (target: VeWorldApprovalTarget) => [
+  target.locator('form#insertPassword input[type="password"]'),
+  target.locator("#unlockWalletPassword"),
   target.locator("#enterPasswordInput"),
   target.getByTestId("password-input"),
   target.getByPlaceholder(/insert password/i),
   target.getByPlaceholder(/password/i),
   target.getByLabel(/^password$/i),
   target.locator("input[type='password']").first(),
-  target.locator("input").first(),
-  target.locator("input:visible").first(),
-  target.locator("input:visible").last(),
 ]
 
 const getConnectionPasswordSubmitLocators = (target: VeWorldApprovalTarget) => [
+  target.locator("#submitPasswordButton"),
+  target.locator('button[form="confirmPasswordForm"]'),
+  target.locator('button[form="unlockWalletForm"]'),
   target.getByTestId("submit-password"),
   target.getByTestId("unlock-button"),
   target.getByRole("button", { name: /^unlock$/i }),
@@ -101,31 +182,28 @@ const getConnectionPasswordSubmitLocators = (target: VeWorldApprovalTarget) => [
   target.locator("button:visible").last(),
 ]
 
-const getConnectionStateLocators = (target: VeWorldApprovalTarget) => [
-  target.getByText(/external app connection/i),
-  target.getByText(/welcome back to veworld/i),
-]
+type WalletState = "onboarding" | "unlock" | "dashboard"
 
-const getWalletState = async (page: Page) => {
-  const passwordInput = await getVisibleLocator(getOnboardingPasswordLocators(page), 250)
-  const confirmPasswordInput = await getVisibleLocator(getOnboardingConfirmPasswordLocators(page), 250)
+/**
+ * Polls all known landmarks in parallel within a single budget. Replaces sequential
+ * `getVisibleLocator(..., 250)` checks that wasted ~1.75s per call (3 password locators
+ * + 3 confirm-password locators + 3 testIDs, each draining their per-call timeout).
+ */
+const detectWalletState = async (page: Page, totalTimeoutMs = 15_000): Promise<WalletState | null> => {
+  // Race the three landmarks via Playwright's event-driven `waitFor`. This is faster than
+  // manual 100ms polling because the browser fires events the moment the element appears
+  // (effectively ~16ms latency).
+  const wait = (locator: Locator, state: WalletState) =>
+    locator
+      .first()
+      .waitFor({ state: "visible", timeout: totalTimeoutMs })
+      .then(() => state)
 
-  if (
-    (await waitUntilVisible(page.getByTestId("continueOnboardingButton"), 250)) ||
-    (passwordInput && confirmPasswordInput)
-  ) {
-    return "onboarding"
-  }
-
-  if (await waitUntilVisible(page.getByTestId("password-input"), 250)) {
-    return "unlock"
-  }
-
-  if (await waitUntilVisible(page.getByTestId("accountFiatBalance"), 250)) {
-    return "dashboard"
-  }
-
-  return null
+  return Promise.any([
+    wait(page.getByTestId("continueOnboardingButton"), "onboarding"),
+    wait(page.getByTestId("password-input"), "unlock"),
+    wait(page.getByTestId("accountFiatBalance"), "dashboard"),
+  ]).catch(() => null)
 }
 
 const fillMnemonic = async (page: Page) => {
@@ -145,8 +223,8 @@ const completeOnboarding = async (page: Page) => {
     await page.getByTestId("continueOnboardingButton").click()
     await page.locator("#skipButton").click()
 
-    passwordInput = await getVisibleLocator(getOnboardingPasswordLocators(page), 5_000)
-    confirmPasswordInput = await getVisibleLocator(getOnboardingConfirmPasswordLocators(page), 5_000)
+    passwordInput = await findFirstVisible(getOnboardingPasswordLocators(page), 5_000)
+    confirmPasswordInput = await findFirstVisible(getOnboardingConfirmPasswordLocators(page), 5_000)
   }
 
   if (!passwordInput || !confirmPasswordInput) {
@@ -156,14 +234,14 @@ const completeOnboarding = async (page: Page) => {
   await passwordInput.fill(walletPassword)
   await confirmPasswordInput.fill(walletPassword)
 
-  const submitPasswordButton = await getVisibleLocator(getOnboardingPasswordSubmitLocators(page), 1_000)
+  const submitPasswordButton = await findFirstVisible(getOnboardingPasswordSubmitLocators(page), 1_000)
   if (submitPasswordButton) {
     await submitPasswordButton.click()
   } else {
     await confirmPasswordInput.press("Enter")
   }
 
-  const directRecoveryPhraseButton = await getVisibleLocator(getRecoveryPhraseLocators(page), 5_000)
+  const directRecoveryPhraseButton = await findFirstVisible(getRecoveryPhraseLocators(page), 5_000)
   if (directRecoveryPhraseButton) {
     await directRecoveryPhraseButton.click()
   } else {
@@ -171,7 +249,7 @@ const completeOnboarding = async (page: Page) => {
     await page.locator("[role='goToImportWallet']").click()
     await page.locator("[role='goToImportLocalWallet']").click()
 
-    const recoveryPhraseButton = await getVisibleLocator(getRecoveryPhraseLocators(page), 5_000)
+    const recoveryPhraseButton = await findFirstVisible(getRecoveryPhraseLocators(page), 5_000)
     if (!recoveryPhraseButton) {
       throw new Error("VeWorld recovery phrase option not found")
     }
@@ -182,8 +260,8 @@ const completeOnboarding = async (page: Page) => {
   await fillMnemonic(page)
   await page.getByTestId("importLocalWalletMnemonicButton").click()
 
-  const continueAfterImport = await getVisibleLocator(
-    [page.locator("#goToHomepage"), page.getByRole("button", { name: /^continue$/i })],
+  const continueAfterImport = await findFirstVisible(
+    [page.getByTestId("goToHomepage"), page.getByRole("button", { name: /^continue$/i })],
     15_000,
   )
   if (!continueAfterImport) {
@@ -205,25 +283,10 @@ const unlockWallet = async (page: Page) => {
 const ensureWalletReady = async (page: Page) => {
   await page.bringToFront()
 
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const state = await getWalletState(page)
-
-    if (state === "onboarding") {
-      await completeOnboarding(page)
-      return
-    }
-
-    if (state === "unlock") {
-      await unlockWallet(page)
-      return
-    }
-
-    if (state === "dashboard") {
-      return
-    }
-
-    await page.waitForTimeout(500)
-  }
+  const state = await detectWalletState(page, 15_000)
+  if (state === "dashboard") return
+  if (state === "unlock") return unlockWallet(page)
+  if (state === "onboarding") return completeOnboarding(page)
 
   throw new Error("VeWorld extension is in an unknown state")
 }
@@ -238,30 +301,43 @@ const getVeWorldApprovalTarget = async (
     await page.pause()
   }
 
+  // Single instant scan — DOES NOT block, just checks current visibility across all candidates
+  // in parallel. Loops with `veworldTargetPollMs` between iterations so the poll budget is
+  // governed by `attempts`, not by sequential per-locator timeouts.
+  const hasAnyVisible = async (target: VeWorldApprovalTarget): Promise<boolean> => {
+    const locators = [
+      ...getConnectionApproveLocators(target),
+      ...getConnectionConfirmLocators(target),
+      ...getConnectionPasswordLocators(target),
+    ]
+    const results = await Promise.all(
+      locators.map(locator =>
+        locator
+          .first()
+          .isVisible()
+          .catch(() => false),
+      ),
+    )
+    return results.some(Boolean)
+  }
+
   for (let attempt = 0; attempt < attempts; attempt++) {
     if (extensionPage && !extensionPage.isClosed()) {
-      const extensionPageAction =
-        (await getVisibleLocator(getConnectionApproveLocators(extensionPage), 250)) ??
-        (await getVisibleLocator(getConnectionConfirmLocators(extensionPage), 250)) ??
-        (await getVisibleLocator(getConnectionPasswordLocators(extensionPage), 250))
-
-      if (extensionPageAction || (await getVisibleLocator(getConnectionStateLocators(extensionPage), 250))) {
-        return extensionPage
-      }
+      // Do not match dashboard "welcome back" alone — TX signing opens a separate extension popup;
+      // returning the fixture extension page would send clicks to the wrong document.
+      if (await hasAnyVisible(extensionPage)) return extensionPage
     }
 
-    const frameHandle = await page.locator("#veworld-frame").elementHandle()
-    const frame = await frameHandle?.contentFrame()
-
-    if (frame) {
-      const frameAction =
-        (await getVisibleLocator(getConnectionApproveLocators(frame), 250)) ??
-        (await getVisibleLocator(getConnectionConfirmLocators(frame), 250)) ??
-        (await getVisibleLocator(getConnectionPasswordLocators(frame), 250))
-
-      if (frameAction) {
-        return frame
-      }
+    // `elementHandle()` blocks indefinitely (timeout 0) when the frame doesn't exist; use
+    // `count()` first because it returns immediately. In headless the connection sign popup
+    // opens as a standalone chrome-extension:// page, so #veworld-frame is often absent.
+    if ((await page.locator("#veworld-frame").count()) > 0) {
+      const frameHandle = await page
+        .locator("#veworld-frame")
+        .elementHandle({ timeout: 1_000 })
+        .catch(() => null)
+      const frame = await frameHandle?.contentFrame()
+      if (frame && (await hasAnyVisible(frame))) return frame
     }
 
     const extensionPages = page
@@ -270,18 +346,11 @@ const getVeWorldApprovalTarget = async (
       .filter(contextPage => contextPage.url().startsWith("chrome-extension://"))
       .reverse()
 
-    for (const extensionPage of extensionPages) {
-      const pageAction =
-        (await getVisibleLocator(getConnectionApproveLocators(extensionPage), 250)) ??
-        (await getVisibleLocator(getConnectionConfirmLocators(extensionPage), 250)) ??
-        (await getVisibleLocator(getConnectionPasswordLocators(extensionPage), 250))
-
-      if (pageAction || (await getVisibleLocator(getConnectionStateLocators(extensionPage), 250))) {
-        return extensionPage
-      }
+    for (const candidate of extensionPages) {
+      if (await hasAnyVisible(candidate)) return candidate
     }
 
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(veworldTargetPollMs)
   }
 
   throw new Error("VeWorld approval UI not found")
@@ -296,74 +365,100 @@ export const selectVeWorldWallet = async (page: Page) => {
   await walletOption.click({ force: true })
 }
 
-export const approveConnection = async (page: Page, extensionPage?: Page, isConnected?: () => boolean) => {
+type ApproveConnectionOptions = {
+  maxSteps?: number
+}
+
+/**
+ * Returns true when the dApp shows it's connected — either explicit `wallet-connected` testID,
+ * or the post-connect "Terms and Policies" modal (handled later by `waitForClearPage`).
+ * Used to avoid waiting for a VeWorld popup that has already closed after a successful sign.
+ */
+const isAppPostConnectionVisible = async (page: Page): Promise<boolean> => {
+  const indicators = [
+    page.getByTestId("wallet-connected").first(),
+    page.getByRole("button", { name: /^accept all$/i }).first(),
+    page.getByText(/terms and policies/i).first(),
+  ]
+  const results = await Promise.all(indicators.map(l => l.isVisible().catch(() => false)))
+  return results.some(Boolean)
+}
+
+export const approveConnection = async (
+  page: Page,
+  extensionPage?: Page,
+  isConnected?: () => boolean,
+  options?: ApproveConnectionOptions,
+) => {
+  const maxSteps = options?.maxSteps ?? 20
+
   if (process.env.B3TR_E2E_PAUSE_ON_FRAME_READY === "true") {
     console.log("Paused after resolving VeWorld approval UI")
     await page.pause()
   }
 
-  for (let step = 0; step < 20; step++) {
-    if (isConnected?.()) {
-      return
-    }
+  for (let step = 0; step < maxSteps; step++) {
+    if (isConnected?.()) return
 
-    const target = await getVeWorldApprovalTarget(page, extensionPage, step === 0 ? 40 : 10)
+    let target: VeWorldApprovalTarget
+    try {
+      target = await getVeWorldApprovalTarget(page, extensionPage, step === 0 ? 40 : 10)
+    } catch (error) {
+      // The sign popup may close before our poll catches it (esp. headless). If the dApp
+      // already shows post-connection state, treat the flow as complete.
+      if (await isAppPostConnectionVisible(page)) return
+      throw error
+    }
 
     if ("bringToFront" in target) {
       await target.bringToFront()
     }
 
-    const approveButton = await getVisibleLocator(getConnectionApproveLocators(target), step === 0 ? 15_000 : 2_000)
-    if (approveButton) {
-      await approveButton.click({ force: true })
+    // Race the three known states. Password prompt may overlay the sign dialog (TX-signing
+    // path) so we still process it before approve when both are present — `detectActionButton`
+    // checks password first within each polling tick.
+    const detected = await detectActionButton(target, step === 0 ? 15_000 : 2_000)
 
+    if (detected?.kind === "password") {
+      await detected.locator.fill(walletPassword)
+
+      // Race the candidate submit buttons in parallel — sequential `click({timeout:1_000})`
+      // would burn ~1s per non-matching locator (~3s observed before the parallel switch).
+      const submitButton = await findFirstVisible(getConnectionPasswordSubmitLocators(target), 1_500)
+      if (submitButton) {
+        await submitButton.click({ force: true })
+      } else {
+        await detected.locator.press("Enter")
+      }
+
+      await page.waitForTimeout(veworldAfterPasswordMs)
+      if (isConnected?.()) return
+      continue
+    }
+
+    if (detected?.kind === "approve") {
+      await detected.locator.click({ force: true })
       if (process.env.B3TR_E2E_PAUSE_AFTER_APPROVE === "true") {
         console.log("Paused after clicking VeWorld approve")
         await page.pause()
       }
-
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(veworldAfterApproveMs)
       continue
     }
 
-    const confirmButton = await getVisibleLocator(getConnectionConfirmLocators(target), 2_000)
-    if (confirmButton) {
-      await confirmButton.click({ force: true })
-      await page.waitForTimeout(500)
+    if (detected?.kind === "confirm") {
+      await detected.locator.click({ force: true })
+      await page.waitForTimeout(veworldAfterConfirmMs)
       continue
     }
 
-    const passwordInput = await getVisibleLocator(getConnectionPasswordLocators(target), 2_000)
-    if (passwordInput) {
-      await passwordInput.fill(walletPassword)
+    if (await isAppPostConnectionVisible(page)) return
+    if (isConnected?.()) return
 
-      const passwordSubmitButton = await getVisibleLocator(getConnectionPasswordSubmitLocators(target), 1_000)
-      if (passwordSubmitButton) {
-        await passwordSubmitButton.click({ force: true })
-      } else {
-        await passwordInput.press("Enter")
-      }
-
-      await page.waitForTimeout(1_000)
-
-      if (isConnected?.()) {
-        return
-      }
-
-      continue
-    }
-
-    if (await waitUntilVisible(page.getByTestId("wallet-connected"), 1_000)) {
-      return
-    }
-
-    if (isConnected?.()) {
-      return
-    }
-
-    await page.waitForTimeout(1_000)
+    await page.waitForTimeout(veworldIdleBetweenStepsMs)
   }
 
+  if (await isAppPostConnectionVisible(page)) return
   throw new Error("VeWorld approval flow did not complete")
 }
 
@@ -510,7 +605,7 @@ export const approveVeWorldTransaction = async (page: Page, extensionPage?: Page
       confirmed = true
     })
 
-  await approveConnection(page, extensionPage, () => confirmed)
+  await approveConnection(page, extensionPage, () => confirmed, { maxSteps: 45 })
   await successModal
   await page.getByRole("button", { name: /^done$/i }).click()
 }
