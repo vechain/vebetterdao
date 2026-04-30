@@ -80,7 +80,7 @@ async function fetchAllChallenges(
   for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
     const slice = ids.slice(i, i + CHUNK_SIZE)
     const batch = await Promise.all(slice.map(id => challenges.getChallenge(id)))
-    out.push(...(batch as RawChallengeView[]))
+    out.push(...(batch as unknown as RawChallengeView[]))
   }
   return out
 }
