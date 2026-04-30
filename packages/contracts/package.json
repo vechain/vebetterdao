@@ -80,6 +80,7 @@
     "get-app-shares": "npx hardhat run scripts/xApps/getAppShares.ts --network vechain_mainnet",
     "get-all-apps-from-creator": "npx hardhat run scripts/data/getAllAppsFromCreator.ts --network vechain_mainnet",
     "get-all-apps-from-creator:staging": "npx hardhat run scripts/data/getAllAppsFromCreator.ts --network vechain_testnet",
+    "get-challenges-stats:mainnet": "npx hardhat run scripts/data/getChallengesStats.ts --network vechain_mainnet",
     "start-solo": "docker compose up -d",
     "stop-solo": "docker compose down",
     "lint": "eslint . --ext .ts",

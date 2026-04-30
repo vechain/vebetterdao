@@ -261,6 +261,10 @@
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false
     },
+    "get-challenges-stats:mainnet": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "cache": false
+    },
     "test": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]

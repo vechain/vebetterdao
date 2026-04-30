@@ -79,6 +79,7 @@
     "contracts:call:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/functionCalls/select-and-call.ts",
     "contracts:call:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/functionCalls/select-and-call.ts",
     "contracts:get-app-shares": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-app-shares --filter=@vechain/vebetterdao-contracts",
+    "contracts:get-challenges-stats:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-challenges-stats:mainnet --filter=@vechain/vebetterdao-contracts",
     "solo-up": "make solo-up",
     "solo-down": "make solo-down",
     "prepare": "husky install",
