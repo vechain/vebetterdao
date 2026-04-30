@@ -76,13 +76,13 @@ async function main() {
   // check that navigator registry was correctly set by accessing directly the storage slot
   const navigatorRegistry = await governor.navigatorRegistry()
   console.log(`Navigator registry: ${navigatorRegistry}`)
-  if (navigatorRegistry !== config.navigatorRegistryContractAddress) {
+  if (navigatorRegistry.toLowerCase() !== config.navigatorRegistryContractAddress.toLowerCase()) {
     throw new Error("Navigator registry was not correctly set")
   }
 
   const relayerRewardsPoolAddr = await governor.relayerRewardsPool()
   console.log(`Relayer rewards pool: ${relayerRewardsPoolAddr}`)
-  if (relayerRewardsPoolAddr !== config.relayerRewardsPoolContractAddress) {
+  if (relayerRewardsPoolAddr.toLowerCase() !== config.relayerRewardsPoolContractAddress.toLowerCase()) {
     throw new Error("Relayer rewards pool was not correctly set")
   }
 
