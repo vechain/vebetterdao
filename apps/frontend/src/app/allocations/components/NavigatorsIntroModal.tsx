@@ -37,6 +37,7 @@ export const NavigatorsIntroModal = ({ isOpen, onClose }: NavigatorsIntroModalPr
         </Box>
       }
       illustration="/assets/mascot/navigator-b3mo.png"
+      illustrationSize={{ base: "48", md: "48" }}
       showCloseButton={!isMobile}
       footer={
         <VStack w="full" gap="2">
