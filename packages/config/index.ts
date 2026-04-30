@@ -1,4 +1,5 @@
 import localConfig from "./local"
+import e2eConfig from "./e2e"
 import stagingConfig from "./testnet-staging"
 import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
@@ -86,9 +87,7 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
     case AppEnv.LOCAL:
       return localConfig
     case AppEnv.E2E:
-      // Lazy require: e2e.ts is generated on-demand (mock or real deploy) and may not exist
-      // in CI/Docker builds for non-e2e environments.
-      return require("./e2e").default
+      return e2eConfig
     case AppEnv.TESTNET_STAGING:
       return stagingConfig
     case AppEnv.TESTNET:
