@@ -124,7 +124,7 @@ export const NavigatorDashboardCard = () => {
           <VStack gap={4} align="stretch">
             <HStack justify="space-between">
               <HStack gap={2}>
-                <Heading size="xl">{t("Navigator")}</Heading>
+                <Heading size="xl">{t("Navigator Tasks")}</Heading>
                 {(status === "EXITING" || status === "DEACTIVATED") && (
                   <Badge colorPalette={statusColor[status]} size="sm">
                     {status}

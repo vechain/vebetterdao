@@ -8,6 +8,7 @@ import { DashboardAllocationRounds } from "../proposals/components/components/Da
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
+import { NavigatorDiscoveryCard } from "./NavigatorDiscoveryCard"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 
@@ -38,6 +39,7 @@ export const HomePageContent = () => {
               <>
                 <CantVoteCard />
                 <DashboardAllocationRounds />
+                <NavigatorDiscoveryCard />
                 <SupplyBreakdownCard />
               </>
             )}

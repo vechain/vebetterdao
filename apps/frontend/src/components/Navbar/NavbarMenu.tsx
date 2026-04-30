@@ -103,10 +103,12 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
 const MobileAccordionWithSubRoutes = ({
   route,
   selected,
+  pathname,
   onMenuClick,
 }: {
   route: Route
   selected: boolean
+  pathname: string
   onMenuClick?: () => void
 }) => {
   const { t } = useTranslation()
@@ -114,43 +116,79 @@ const MobileAccordionWithSubRoutes = ({
   const [isOpen, setIsOpen] = useState(selected)
 
   return (
-    <VStack w="full" align="stretch" p={0} ml="-5px">
+    <VStack w="full" align="stretch" gap={0}>
       <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
         <Collapsible.Trigger asChild>
-          <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
-            <HStack w="full" gap={3}>
-              <Icon as={route.icon} color="text.subtle" size={"2xl"} />
-              {/* @ts-expect-error dynamic translation key */}
-              <Text textStyle="lg">{t(route.name)}</Text>
+          <Button
+            variant="ghost"
+            size="sm"
+            w="full"
+            display="flex"
+            justifyContent="space-between"
+            bg={isOpen ? "card.hover" : "transparent"}
+            _expanded={{ bg: "card.hover" }}>
+            <HStack w="full" gap={4}>
+              <Icon as={route.icon} color="text.subtle" size="2xl" />
+              <Text textStyle="lg" fontWeight={selected ? "semibold" : "normal"}>
+                {/* @ts-expect-error dynamic translation key */}
+                {t(route.name)}
+              </Text>
             </HStack>
             <Icon
-              size="xs"
               as={FaChevronDown}
+              boxSize="14px"
+              color="text.subtle"
               transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
               transition="transform 0.2s"
               transformOrigin="center"
-              width="12px"
-              height="12px"
               flexShrink={0}
             />
           </Button>
         </Collapsible.Trigger>
-        <Collapsible.Content p="1">
-          <VStack w="full" align="stretch" pt={5} pl={12}>
+        <Collapsible.Content>
+          <VStack
+            w="full"
+            align="stretch"
+            gap={1}
+            mt={2}
+            ml={6}
+            pl={3}
+            borderLeftWidth="1px"
+            borderColor="border.primary">
             {route.subRoutes?.map(subRoute => {
+              const subRouteSelected = isSelected(subRoute, pathname)
               return (
                 <Button
                   key={subRoute.name}
                   variant="ghost"
+                  size="sm"
                   w="full"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="flex-start"
-                  flexDirection="column"
+                  justifyContent="flex-start"
                   textAlign="left"
+                  position="relative"
+                  pl={4}
+                  _before={
+                    subRouteSelected
+                      ? {
+                          content: '""',
+                          position: "absolute",
+                          left: 0,
+                          top: "20%",
+                          bottom: "20%",
+                          width: "3px",
+                          bg: "border.active",
+                          borderRadius: "full",
+                        }
+                      : undefined
+                  }
                   onClick={handleClick(subRoute, router, onMenuClick)}>
-                  {/* @ts-expect-error dynamic translation key */}
-                  <Text textStyle="sm">{t(subRoute.name)}</Text>
+                  <Text
+                    textStyle="md"
+                    fontWeight={subRouteSelected ? "semibold" : "normal"}
+                    color={subRouteSelected ? "text.default" : "text.subtle"}>
+                    {/* @ts-expect-error dynamic translation key */}
+                    {t(subRoute.name)}
+                  </Text>
                 </Button>
               )
             })}
@@ -203,7 +241,13 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
     // Mobile rendering
     if (hasSubRoutes) {
       return (
-        <MobileAccordionWithSubRoutes key={route.name} route={route} selected={selected} onMenuClick={onMenuClick} />
+        <MobileAccordionWithSubRoutes
+          key={route.name}
+          route={route}
+          selected={selected}
+          pathname={pathname}
+          onMenuClick={onMenuClick}
+        />
       )
     }
 
@@ -219,7 +263,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         onClick={onClick}
         data-testid={selected ? "current-section" : ""}
         gap={4}>
-        <Icon as={route.icon} color="text.subtle" size={"xl"} />
+        <Icon as={route.icon} color="text.subtle" size={"2xl"} />
         <Text textAlign="left" textStyle="lg">
           {/* @ts-expect-error dynamic translation key */}
           {t(route.name)}
