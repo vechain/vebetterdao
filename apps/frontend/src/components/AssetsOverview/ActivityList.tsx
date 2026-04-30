@@ -5,10 +5,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { FiAlertCircle } from "react-icons/fi"
 
 import { Transaction, TransactionEvent, useTransactions } from "@/api/indexer/transactions/useTransactions"
-import { EmptyState } from "@/components/ui/empty-state"
 
 export type ActivityItemProps = {
   label: string
@@ -68,7 +66,7 @@ export const ActivityList = ({ eventNames, getActivityProps, pageSize = 5 }: Act
 
   const transactions = useMemo(() => txData?.pages.flatMap(page => page.data) ?? [], [txData])
 
-  if (!account?.address) return null
+  if (!account?.address || (!isTxLoading && transactions.length === 0)) return null
 
   return (
     <>
@@ -77,31 +75,31 @@ export const ActivityList = ({ eventNames, getActivityProps, pageSize = 5 }: Act
       </Text>
 
       <Skeleton loading={isTxLoading} rounded="lg">
-        {transactions.length > 0 ? (
-          <VStack gap="0" align="stretch" divideY="1px" divideColor="border.secondary">
-            {transactions.map(transaction => {
-              const props = getActivityProps(transaction, account.address)
-              if (!props) return null
-              const translated = { ...props, label: t(props.label as "B3TR") }
-              return (
-                <ActivityItem key={transaction.txId} props={translated} timestamp={transaction.blockTimestamp ?? 0} />
-              )
-            })}
-            {hasNextPage && (
-              <Button
-                variant="ghost"
-                size="sm"
-                mx="auto"
-                mt="2"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}>
-                {isFetchingNextPage ? <Spinner size="sm" /> : t("View more")}
-              </Button>
-            )}
-          </VStack>
-        ) : (
-          <EmptyState bg="transparent" size="sm" title={t("No activity yet")} icon={<FiAlertCircle />} />
-        )}
+        <VStack gap="0" align="stretch" divideY="1px" divideColor="border.secondary">
+          {transactions.map((transaction, idx) => {
+            const props = getActivityProps(transaction, account.address)
+            if (!props) return null
+            const translated = { ...props, label: t(props.label as "B3TR") }
+            return (
+              <ActivityItem
+                key={`${transaction.txId}-${idx}`}
+                props={translated}
+                timestamp={transaction.blockTimestamp ?? 0}
+              />
+            )
+          })}
+          {hasNextPage && (
+            <Button
+              variant="ghost"
+              size="sm"
+              mx="auto"
+              mt="2"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}>
+              {isFetchingNextPage ? <Spinner size="sm" /> : t("View more")}
+            </Button>
+          )}
+        </VStack>
       </Skeleton>
     </>
   )

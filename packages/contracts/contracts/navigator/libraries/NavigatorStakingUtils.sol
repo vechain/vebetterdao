@@ -1,0 +1,338 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.20;
+
+import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
+import { NavigatorDelegationUtils } from "./NavigatorDelegationUtils.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IVOT3 } from "../../interfaces/IVOT3.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+
+/// @title NavigatorStakingUtils
+/// @notice Handles navigator registration, staking, and capacity management.
+/// @dev Navigators stake B3TR to register. B3TR is converted to VOT3 under the hood so it counts
+/// as voting power. Stake determines delegation capacity (10:1 ratio).
+/// - Minimum stake: configurable (default 50,000 B3TR)
+/// - Maximum stake: configurable percentage of VOT3 total supply (enforced at deposit only)
+/// - Delegation capacity: stake must be >= 10% of total delegated VOT3
+library NavigatorStakingUtils {
+  using Checkpoints for Checkpoints.Trace208;
+
+  /// @notice Basis points scale
+  uint256 private constant BASIS_POINTS = 10000;
+
+  /// @notice Delegation ratio: stake must be >= totalDelegated / DELEGATION_RATIO
+  uint256 private constant DELEGATION_RATIO = 10;
+
+  // ======================== Events ======================== //
+
+  /// @notice Emitted when a navigator registers by staking B3TR
+  event NavigatorRegistered(address indexed navigator, uint256 stakeAmount, string metadataURI);
+
+  /// @notice Emitted when a navigator adds to their stake
+  event StakeAdded(address indexed navigator, uint256 amount, uint256 newTotal);
+
+  /// @notice Emitted when a navigator withdraws stake (after exit)
+  event StakeWithdrawn(address indexed navigator, uint256 amount, uint256 remaining);
+
+  // ======================== Errors ======================== //
+
+  /// @notice Thrown when stake is below minimum
+  error StakeBelowMinimum(uint256 provided, uint256 minimum);
+
+  /// @notice Thrown when stake exceeds maximum (% of VOT3 supply)
+  error StakeExceedsMaximum(uint256 provided, uint256 maximum);
+
+  /// @notice Thrown when caller is already a registered navigator
+  error AlreadyRegistered(address navigator);
+
+  /// @notice Thrown when caller is currently delegating to a navigator
+  error DelegatorCannotRegister(address delegator, address currentNavigator);
+
+  /// @notice Thrown when caller is not a registered navigator
+  error NotRegistered(address navigator);
+
+  /// @notice Thrown when navigator is deactivated
+  error NavigatorDeactivated(address navigator);
+
+  /// @notice Thrown when trying to unstake while still active (must exit first)
+  error NavigatorStillActive(address navigator);
+
+  /// @notice Thrown when trying to withdraw before notice period has elapsed
+  error NoticePeriodNotElapsed(uint256 currentBlock, uint256 effectiveDeadline);
+
+  /// @notice Thrown when trying to withdraw more stake than is available
+  error InsufficientStake(uint256 available, uint256 requested);
+
+  /// @notice Thrown when caller has auto-voting enabled (must disable before registering)
+  error AutoVotingMustBeDisabled(address navigator);
+
+  // ======================== Registration ======================== //
+
+  /// @notice Register as a navigator by staking B3TR
+  /// @dev Permissionless — anyone can register by meeting the minimum stake.
+  /// Transfers B3TR from caller to this contract, converts to VOT3 for voting power.
+  /// @param navigator The address registering as navigator (must be msg.sender in the main contract)
+  /// @param amount The B3TR amount to stake
+  /// @param metadataURI_ The navigator's profile metadata URI (IPFS or similar)
+  function register(address navigator, uint256 amount, string calldata metadataURI_) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if ($.isRegistered[navigator]) revert AlreadyRegistered(navigator);
+
+    // Delegators must exit their delegation before becoming a navigator
+    address currentNavigator = _currentNavigatorOf($, navigator);
+    if (
+      currentNavigator != address(0) &&
+      !$.isDeactivated[currentNavigator] &&
+      $.exitAnnouncedRound[currentNavigator] == 0
+    ) {
+      revert DelegatorCannotRegister(navigator, currentNavigator);
+    }
+
+    // Auto-voting must be disabled before registering as navigator
+    if ($.xAllocationVoting != address(0)) {
+      if (IXAllocationVotingGovernor($.xAllocationVoting).isUserAutoVotingEnabled(navigator)) {
+        revert AutoVotingMustBeDisabled(navigator);
+      }
+    }
+
+    if (amount < $.minStake) revert StakeBelowMinimum(amount, $.minStake);
+
+    // Check max stake (% of VOT3 supply, enforced at deposit only)
+    uint256 maxStake = _getMaxStake($);
+    if (amount > maxStake) revert StakeExceedsMaximum(amount, maxStake);
+
+    // Transfer B3TR from navigator to this contract
+    IERC20($.b3trToken).transferFrom(navigator, address(this), amount);
+
+    // Convert B3TR to VOT3 so it counts as voting power (approval set in initialize)
+    IVOT3($.vot3Token).convertToVOT3(amount);
+
+    _pushStake($, navigator, SafeCast.toUint208(amount));
+    $.totalStaked += amount;
+    $.isRegistered[navigator] = true;
+    $.metadataURI[navigator] = metadataURI_;
+
+    emit NavigatorRegistered(navigator, amount, metadataURI_);
+  }
+
+  // ======================== Stake Management ======================== //
+
+  /// @notice Add more B3TR to an existing navigator's stake
+  /// @param navigator The navigator address
+  /// @param amount The additional B3TR to stake
+  function addStake(address navigator, uint256 amount) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if (!$.isRegistered[navigator]) revert NotRegistered(navigator);
+    if ($.isDeactivated[navigator]) revert NavigatorDeactivated(navigator);
+
+    uint256 currentStake = _getStake($, navigator);
+    uint256 newTotal = currentStake + amount;
+
+    // Check max stake at deposit time
+    uint256 maxStake = _getMaxStake($);
+    if (newTotal > maxStake) revert StakeExceedsMaximum(newTotal, maxStake);
+
+    IERC20($.b3trToken).transferFrom(navigator, address(this), amount);
+
+    // Convert B3TR to VOT3
+    IVOT3($.vot3Token).convertToVOT3(amount);
+
+    _pushStake($, navigator, SafeCast.toUint208(newTotal));
+    $.totalStaked += amount;
+
+    emit StakeAdded(navigator, amount, newTotal);
+  }
+
+  /// @notice Reduce stake while active (must stay above min stake and maintain delegation capacity)
+  /// @param navigator The navigator address
+  /// @param amount The B3TR amount to reduce
+  function reduceStake(address navigator, uint256 amount) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if (!$.isRegistered[navigator]) revert NotRegistered(navigator);
+    if ($.isDeactivated[navigator]) revert NavigatorDeactivated(navigator);
+
+    uint256 currentStake = _getStake($, navigator);
+    if (amount > currentStake) revert InsufficientStake(currentStake, amount);
+
+    uint256 newStake = currentStake - amount;
+
+    // Must stay above min stake
+    if (newStake < $.minStake) revert StakeBelowMinimum(newStake, $.minStake);
+
+    // Must maintain capacity for existing delegations (stake * 10 >= totalDelegated)
+    uint256 totalDelegated = NavigatorDelegationUtils.getTotalDelegated(navigator);
+    if (newStake * DELEGATION_RATIO < totalDelegated) {
+      revert StakeBelowMinimum(newStake, (totalDelegated + DELEGATION_RATIO - 1) / DELEGATION_RATIO);
+    }
+
+    _pushStake($, navigator, SafeCast.toUint208(newStake));
+    $.totalStaked -= amount;
+
+    // Convert VOT3 back to B3TR and transfer to navigator
+    IVOT3($.vot3Token).convertToB3TR(amount);
+    IERC20($.b3trToken).transfer(navigator, amount);
+
+    emit StakeWithdrawn(navigator, amount, newStake);
+  }
+
+  /// @notice Withdraw staked B3TR (only after notice period elapsed or governance deactivation)
+  /// @param navigator The navigator address
+  /// @param amount The B3TR amount to withdraw
+  function withdrawStake(address navigator, uint256 amount) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+
+    if (!$.isRegistered[navigator]) revert NotRegistered(navigator);
+
+    bool isExiting = $.exitAnnouncedRound[navigator] > 0;
+    bool isDeactivated = $.isDeactivated[navigator];
+    if (!isExiting && !isDeactivated) revert NavigatorStillActive(navigator);
+
+    // For exiting navigators, enforce that the notice period has elapsed
+    if (isExiting && !isDeactivated) {
+      (bool exists, uint48 effectiveDeadline, ) = $.navigatorDeactivated[navigator].latestCheckpoint();
+      if (exists && block.number < effectiveDeadline) {
+        revert NoticePeriodNotElapsed(block.number, effectiveDeadline);
+      }
+    }
+
+    uint256 currentStake = _getStake($, navigator);
+    if (amount > currentStake) revert InsufficientStake(currentStake, amount);
+
+    uint256 remaining = currentStake - amount;
+    _pushStake($, navigator, SafeCast.toUint208(remaining));
+    $.totalStaked -= amount;
+
+    // Convert VOT3 back to B3TR and transfer to navigator
+    IVOT3($.vot3Token).convertToB3TR(amount);
+    IERC20($.b3trToken).transfer(navigator, amount);
+
+    emit StakeWithdrawn(navigator, amount, remaining);
+  }
+
+  // ======================== Capacity ======================== //
+
+  /// @notice Check if a navigator has capacity for additional delegation
+  /// @param navigator The navigator address
+  /// @param additionalDelegation The VOT3 amount being delegated
+  /// @return Whether the navigator has capacity
+  function hasCapacity(address navigator, uint256 additionalDelegation) external view returns (bool) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    uint256 totalAfter = NavigatorDelegationUtils.getTotalDelegated(navigator) + additionalDelegation;
+    return _getStake($, navigator) >= totalAfter / DELEGATION_RATIO;
+  }
+
+  /// @notice Get the maximum VOT3 that can be delegated to a navigator
+  /// @param navigator The navigator address
+  /// @return The maximum delegation capacity
+  function getDelegationCapacity(address navigator) external view returns (uint256) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    return _getStake($, navigator) * DELEGATION_RATIO;
+  }
+
+  /// @notice Get the remaining delegation capacity
+  /// @param navigator The navigator address
+  /// @return The remaining capacity (0 if over-capacity due to slashing)
+  function getRemainingCapacity(address navigator) external view returns (uint256) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    uint256 maxCapacity = _getStake($, navigator) * DELEGATION_RATIO;
+    uint256 currentDelegated = NavigatorDelegationUtils.getTotalDelegated(navigator);
+    if (currentDelegated >= maxCapacity) return 0;
+    return maxCapacity - currentDelegated;
+  }
+
+  // ======================== Getters ======================== //
+
+  /// @notice Get the current staked amount for a navigator
+  /// @param navigator The navigator address
+  /// @return The staked amount
+  function getStake(address navigator) external view returns (uint256) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    return _getStake($, navigator);
+  }
+
+  /// @notice Get the staked amount for a navigator at a past timepoint (checkpointed)
+  /// @param navigator The navigator address
+  /// @param timepoint The block number to query
+  /// @return The staked amount at the given timepoint
+  function getStakedAmountAtTimepoint(address navigator, uint256 timepoint) external view returns (uint256) {
+    return uint256(
+      NavigatorStorageTypes.getNavigatorStorage().stakedAmount[navigator].upperLookupRecent(
+        SafeCast.toUint48(timepoint)
+      )
+    );
+  }
+
+  /// @notice Check if an address is a registered navigator
+  /// @param account The address to check
+  /// @return True if the address is a registered and active navigator
+  function isNavigator(address account) external view returns (bool) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    return $.isRegistered[account] && !$.isDeactivated[account];
+  }
+
+  /// @notice Check if navigator can accept new delegations
+  /// @dev Returns false if deactivated, below minimum stake, or in exit process
+  /// @param navigator The navigator address
+  /// @return True if the navigator can accept new delegations
+  function canAcceptDelegations(address navigator) external view returns (bool) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    if (!$.isRegistered[navigator]) return false;
+    if ($.isDeactivated[navigator]) return false;
+    if ($.exitAnnouncedRound[navigator] > 0) return false;
+    // Below minimum stake (due to slashing) — can't accept new delegations
+    if (_getStake($, navigator) < $.minStake) return false;
+    return true;
+  }
+
+  /// @notice Get the minimum stake required to register
+  /// @return The minimum B3TR stake amount
+  function getMinStake() external view returns (uint256) {
+    return NavigatorStorageTypes.getNavigatorStorage().minStake;
+  }
+
+  /// @notice Get the current maximum stake allowed
+  /// @return The maximum B3TR stake amount (based on VOT3 supply)
+  function getMaxStake() external view returns (uint256) {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    return _getMaxStake($);
+  }
+
+  // ======================== Internal ======================== //
+
+  /// @dev Read the current stake from the checkpoint
+  function _getStake(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address navigator
+  ) internal view returns (uint256) {
+    return uint256($.stakedAmount[navigator].latest());
+  }
+
+  /// @dev Push a new stake checkpoint
+  function _pushStake(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address navigator,
+    uint208 value
+  ) internal {
+    $.stakedAmount[navigator].push(SafeCast.toUint48(block.number), value);
+  }
+
+  /// @dev Calculate max stake based on VOT3 total supply and configured percentage
+  function _getMaxStake(NavigatorStorageTypes.NavigatorStorage storage $) private view returns (uint256) {
+    uint256 vot3Supply = IERC20($.vot3Token).totalSupply();
+    return (vot3Supply * $.maxStakePercentage) / BASIS_POINTS;
+  }
+
+  /// @dev Read the current navigator address from checkpoint
+  function _currentNavigatorOf(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address citizen
+  ) private view returns (address) {
+    if ($.citizenToNavigator[citizen].length() == 0) return address(0);
+    return address(uint160($.citizenToNavigator[citizen].latest()));
+  }
+}

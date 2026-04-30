@@ -1,6 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { ContractFactory, ContractTransactionResponse } from "ethers"
+import { ContractFactory, ContractTransactionResponse, TransactionResponse } from "ethers"
 import { ethers } from "hardhat"
 import {
   B3TR,
@@ -9,6 +9,7 @@ import {
   GalaxyMember,
   Emissions,
   XAllocationVoting,
+  XAllocationVotingV8,
   XAllocationPool,
   VoterRewards,
   Treasury,
@@ -19,6 +20,7 @@ import {
   MyERC1155,
   TokenAuction,
   B3TRGovernor,
+  B3TRGovernorV9,
   NodeManagementV3,
   VeBetterPassport,
   VeBetterPassportV1,
@@ -41,18 +43,28 @@ import {
   EndorsementUtilsV6,
   VoteEligibilityUtilsV6,
   X2EarnAppsV7,
+  VOT3V1,
   ChallengeCoreLogic,
   ChallengeSettlementLogic,
 } from "../../typechain-types"
-import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
+import {
+  deployAndUpgrade,
+  deployProxy,
+  deployProxyOnly,
+  deployProxyWithoutInitialization,
+  initializeProxy,
+  upgradeProxy,
+} from "../../scripts/helpers"
 import { challengesLibraries, governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import type { GovernanceLibraries } from "../../scripts/libraries/governanceLibraries"
 import type { PassportLibraries } from "../../scripts/libraries/passportLibraries"
 import { setWhitelistedFunctions } from "./whitelistGovernance"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import type { X2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
+import { navigatorRegistryLibraries } from "../../scripts/libraries/navigatorRegistryLibraries"
+import { NavigatorRegistry } from "../../typechain-types"
 import { APPS } from "../../scripts/deploy/setup"
-import { autoVotingLibraries } from "../../scripts/libraries"
+import { xAllocationVotingLibraries } from "../../scripts/libraries/xAllocationVotingLibraries"
 import { deployStargateMock } from "../../scripts/deploy/mocks/deployStargate"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
@@ -114,6 +126,9 @@ export interface DeployInstance
 
   // AutoVoting Libraries
   autoVotingLogic: AutoVotingLogic
+
+  // Navigator Registry
+  navigatorRegistry: NavigatorRegistry
   challengeCoreLogic: ChallengeCoreLogic
   challengeSettlementLogic: ChallengeSettlementLogic
 }
@@ -308,8 +323,27 @@ export const getOrDeployContractInstances = async ({
     VoteEligibilityUtilsV7,
   } = await x2EarnLibraries({ logOutput: false, latestVersionOnly: false })
 
-  // Deploy AutoVoting Libraries
-  const { AutoVotingLogic } = await autoVotingLibraries()
+  // Deploy XAllocationVoting Libraries
+  const AutoVotingLogicV8Lib = await (await ethers.getContractFactory("AutoVotingLogicV8")).deploy()
+  await AutoVotingLogicV8Lib.waitForDeployment()
+  const xAllocLibs = await xAllocationVotingLibraries()
+
+  // Deploy NavigatorRegistry Libraries
+  const navigatorLibs = await navigatorRegistryLibraries()
+  const navigatorLibraryAddresses: Record<string, string> = {
+    NavigatorStakingUtils: await navigatorLibs.NavigatorStakingUtils.getAddress(),
+    NavigatorDelegationUtils: await navigatorLibs.NavigatorDelegationUtils.getAddress(),
+    NavigatorVotingUtils: await navigatorLibs.NavigatorVotingUtils.getAddress(),
+    NavigatorFeeUtils: await navigatorLibs.NavigatorFeeUtils.getAddress(),
+    NavigatorSlashingUtils: await navigatorLibs.NavigatorSlashingUtils.getAddress(),
+    NavigatorLifecycleUtils: await navigatorLibs.NavigatorLifecycleUtils.getAddress(),
+  }
+
+  // Deploy NavigatorRegistry proxy only (address needed for cross-contract wiring, initialized later)
+  const navigatorRegistryProxyAddress = await deployProxyWithoutInitialization(
+    "NavigatorRegistry",
+    navigatorLibraryAddresses,
+  )
 
   const { ChallengeCoreLogic: challengeCoreLogic, ChallengeSettlementLogic: challengeSettlementLogic } =
     await challengesLibraries({ logOutput: false })
@@ -377,8 +411,15 @@ export const getOrDeployContractInstances = async ({
   const B3trContract = await ethers.getContractFactory("B3TR")
   const b3tr = await B3trContract.deploy(owner, minterAccount, owner)
 
-  // Deploy VOT3 version 1
-  let vot3 = (await deployProxy("VOT3", [owner.address, owner.address, owner.address, await b3tr.getAddress()])) as VOT3
+  // Deploy VOT3 V1 -> V2
+  let vot3 = (await deployAndUpgrade(
+    ["VOT3V1", "VOT3"],
+    [[owner.address, owner.address, owner.address, await b3tr.getAddress()], [navigatorRegistryProxyAddress]],
+    {
+      versions: [undefined, 2],
+      logOutput: false,
+    },
+  )) as VOT3
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
@@ -635,8 +676,8 @@ export const getOrDeployContractInstances = async ({
     },
   )) as Emissions
 
-  const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewardsV5", "VoterRewards"],
+  let voterRewards = (await deployAndUpgrade(
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewardsV5"],
     [
       [
         owner.address, // admin
@@ -651,11 +692,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
-      [],
-      [],
+      [[], []],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5],
     },
   )) as VoterRewards
 
@@ -672,6 +712,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV5",
       "XAllocationVotingV6",
       "XAllocationVotingV7",
+      "XAllocationVotingV8",
       "XAllocationVoting",
     ],
     [
@@ -699,9 +740,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [navigatorRegistryProxyAddress, config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS], // V9: set NavigatorRegistry + skip window
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
       libraries: [
         undefined,
         undefined,
@@ -710,7 +752,18 @@ export const getOrDeployContractInstances = async ({
         undefined,
         undefined,
         undefined,
-        { AutoVotingLogic: await AutoVotingLogic.getAddress() },
+        { AutoVotingLogicV8: await AutoVotingLogicV8Lib.getAddress() },
+        {
+          AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+          ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+          VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+          VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+          VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+          RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+          RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+          RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+          RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
+        },
       ],
       logOutput: false,
     },
@@ -866,6 +919,25 @@ export const getOrDeployContractInstances = async ({
     },
   )) as GrantsManager
 
+  const relayerRewardsPool = (await deployAndUpgrade(
+    ["RelayerRewardsPoolV1", "RelayerRewardsPoolV2", "RelayerRewardsPool"],
+    [
+      [
+        owner.address, // admin
+        owner.address, // upgrader
+        await b3tr.getAddress(), // b3trAddress
+        await emissions.getAddress(), // emissionsAddress
+        await xAllocationVoting.getAddress(), // xAllocationVotingAddress
+      ],
+      [],
+      [],
+    ],
+    {
+      versions: [undefined, 2, 3],
+      logOutput: false,
+    },
+  )) as RelayerRewardsPool
+
   const governor = (await deployAndUpgrade(
     [
       "B3TRGovernorV1",
@@ -876,6 +948,7 @@ export const getOrDeployContractInstances = async ({
       "B3TRGovernorV6",
       "B3TRGovernorV7",
       "B3TRGovernorV8",
+      "B3TRGovernorV9",
       "B3TRGovernor",
     ],
     [
@@ -920,9 +993,10 @@ export const getOrDeployContractInstances = async ({
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
       [], // Reserved for future configuration parameters; currently no values required
       [], // v9
+      [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress(), config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS], // v10
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -1005,6 +1079,16 @@ export const getOrDeployContractInstances = async ({
           GovernorVotesLogicV8: await GovernorVotesLogicLibV8.getAddress(),
         },
         {
+          GovernorClockLogicV9: await GovernorClockLogicLib.getAddress(),
+          GovernorConfiguratorV9: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV9: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV9: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV9: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV9: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV9: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV9: await GovernorVotesLogicLib.getAddress(),
+        },
+        {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
           GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
           GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
@@ -1018,23 +1102,35 @@ export const getOrDeployContractInstances = async ({
     },
   )) as B3TRGovernor
 
-  const relayerRewardsPool = (await deployAndUpgrade(
-    ["RelayerRewardsPoolV1", "RelayerRewardsPool"],
+  // Upgrade VoterRewards V5 -> V6 (needs xAllocationVoting + relayerRewardsPool)
+  voterRewards = (await upgradeProxy(
+    "VoterRewardsV5",
+    "VoterRewardsV6",
+    await voterRewards.getAddress(),
+    [await xAllocationVoting.getAddress(), await relayerRewardsPool.getAddress()],
+    {
+      version: 6,
+    },
+  )) as VoterRewards
+
+  // Upgrade VoterRewards V6 -> V7 (needs navigator params)
+  voterRewards = (await upgradeProxy(
+    "VoterRewardsV6",
+    "VoterRewards",
+    await voterRewards.getAddress(),
     [
-      [
-        owner.address, // admin
-        owner.address, // upgrader
-        await b3tr.getAddress(), // b3trAddress
-        await emissions.getAddress(), // emissionsAddress
-        await xAllocationVoting.getAddress(), // xAllocationVotingAddress
-      ],
-      [],
+      0, // roundStartTimepoint — no active round during initial deploy, 0 ensures values take effect immediately
+      10000, // freshnessT1 — x1 (neutral for existing tests; dedicated multiplier tests set their own values)
+      10000, // freshnessT2 — x1
+      10000, // freshnessT3 — x1
+      10000, // intentFA — x1
+      10000, // intentAb — x1 (neutral for existing tests)
+      navigatorRegistryProxyAddress,
     ],
     {
-      versions: [undefined, 2],
-      logOutput: false,
+      version: 7,
     },
-  )) as RelayerRewardsPool
+  )) as VoterRewards
 
   // Deploy DBAPool V1
   const dbaPoolV1 = (await deployProxy("DBAPoolV1", [
@@ -1093,6 +1189,34 @@ export const getOrDeployContractInstances = async ({
     },
   })) as X2EarnApps
 
+  // Initialize NavigatorRegistry proxy (deployed early, initialized now that all dependencies are ready)
+  const navigatorRegistry = (await initializeProxy(
+    navigatorRegistryProxyAddress,
+    "NavigatorRegistry",
+    [
+      {
+        admin: owner.address,
+        upgrader: owner.address,
+        governance: owner.address,
+        b3trToken: await b3tr.getAddress(),
+        vot3Token: await vot3.getAddress(),
+        treasury: await treasury.getAddress(),
+        minStake: config.NAVIGATOR_MIN_STAKE,
+        maxStakePercentage: config.NAVIGATOR_MAX_STAKE_PERCENTAGE,
+        feeLockPeriod: config.NAVIGATOR_FEE_LOCK_PERIOD,
+        feePercentage: config.NAVIGATOR_FEE_PERCENTAGE,
+        exitNoticePeriod: config.NAVIGATOR_EXIT_NOTICE_PERIOD,
+        reportInterval: config.NAVIGATOR_REPORT_INTERVAL,
+        minorSlashPercentage: config.NAVIGATOR_MINOR_SLASH_PERCENTAGE,
+        preferenceCutoffPeriod: config.NAVIGATOR_PREFERENCE_CUTOFF_PERIOD,
+        voterRewards: await voterRewards.getAddress(),
+        xAllocationVoting: await xAllocationVoting.getAddress(),
+        relayerRewardsPool: await relayerRewardsPool.getAddress(),
+      },
+    ],
+    navigatorLibraryAddresses,
+  )) as NavigatorRegistry
+
   const b3trChallenges = (await deployProxy(
     "B3TRChallenges",
     [
@@ -1135,6 +1259,7 @@ export const getOrDeployContractInstances = async ({
     B3TRChallenges: await b3trChallenges.getAddress(),
     StargateNFT: await stargateNftMock.getAddress(),
     DynamicBaseAllocationPool: await dynamicBaseAllocationPool.getAddress(),
+    NavigatorRegistry: await navigatorRegistry.getAddress(),
   }
 
   const libraries = {
@@ -1155,7 +1280,23 @@ export const getOrDeployContractInstances = async ({
       AppStorageUtils: await AppStorageUtils.getAddress(),
     },
     XAllocationVoting: {
-      AutoVotingLogic: await AutoVotingLogic.getAddress(),
+      AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+      ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+      VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+      VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+      VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+      RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+      RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+      RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+      RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
+    },
+    NavigatorRegistry: {
+      NavigatorStakingUtils: await navigatorLibs.NavigatorStakingUtils.getAddress(),
+      NavigatorDelegationUtils: await navigatorLibs.NavigatorDelegationUtils.getAddress(),
+      NavigatorVotingUtils: await navigatorLibs.NavigatorVotingUtils.getAddress(),
+      NavigatorFeeUtils: await navigatorLibs.NavigatorFeeUtils.getAddress(),
+      NavigatorSlashingUtils: await navigatorLibs.NavigatorSlashingUtils.getAddress(),
+      NavigatorLifecycleUtils: await navigatorLibs.NavigatorLifecycleUtils.getAddress(),
     },
     B3TRChallenges: {
       ChallengeCoreLogic: await challengeCoreLogic.getAddress(),
@@ -1213,11 +1354,11 @@ export const getOrDeployContractInstances = async ({
   await xAllocationVoting
     .connect(owner)
     .grantRole(roundStarterRole, await emissions.getAddress())
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
   await xAllocationVoting
     .connect(owner)
     .grantRole(roundStarterRole, owner.address)
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
 
   // Set up the X2EarnCreator contract
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
@@ -1227,18 +1368,21 @@ export const getOrDeployContractInstances = async ({
   await relayerRewardsPool
     .connect(owner)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await xAllocationVoting.getAddress())
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
   await relayerRewardsPool
     .connect(owner)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await governor.getAddress())
+    .then(async (tx: TransactionResponse) => await tx.wait())
+
   await xAllocationVoting
     .connect(owner)
     .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
   await xAllocationVoting.connect(owner).setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
-  await voterRewards.connect(owner).setRelayerRewardsPool(await relayerRewardsPool.getAddress())
-  await voterRewards.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
 
   // Since x2EarnApps v5, new apps => new creator != owner
   // Token id 2, 3, 4, 5 are reserved for the creator NFTs
@@ -1432,7 +1576,8 @@ export const getOrDeployContractInstances = async ({
     stargateNftMock,
     stargateMock,
     relayerRewardsPool,
-    autoVotingLogic: AutoVotingLogic,
+    autoVotingLogic: xAllocLibs.AutoVotingLogic as unknown as AutoVotingLogic,
+    navigatorRegistry,
     challengeCoreLogic,
     challengeSettlementLogic,
   }

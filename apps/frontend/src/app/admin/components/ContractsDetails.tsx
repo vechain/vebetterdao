@@ -122,6 +122,11 @@ export const ContractsDetails = () => {
         address={config.dbaPoolContractAddress}
         roles={getContractByAddress(config.dbaPoolContractAddress)?.roles}
       />
+      <ContractDetailsCard
+        title="NavigatorRegistry"
+        address={config.navigatorRegistryContractAddress}
+        roles={getContractByAddress(config.navigatorRegistryContractAddress)?.roles}
+      />
     </Grid>
   )
 }

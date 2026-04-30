@@ -108,9 +108,8 @@ export const deployProxyOnly = async (
   return await proxy.getAddress()
 }
 
-// This util is specific to StarGate
-// It is used to deploy the proxy contract without initializating StarGate contracts
-export const deployStargateProxyWithoutInitialization = async (
+// It is used to deploy the proxy contract without initializating
+export const deployProxyWithoutInitialization = async (
   contractName: string,
   libraries: { [libraryName: string]: string } = {},
   logOutput: boolean = false,
@@ -124,7 +123,7 @@ export const deployStargateProxyWithoutInitialization = async (
   logOutput && console.log(`${contractName} impl.: ${await implementation.getAddress()}`)
 
   // Deploy the proxy contract without initialization
-  const proxyFactory = await ethers.getContractFactory("StargateProxy")
+  const proxyFactory = await ethers.getContractFactory("B3TRProxy")
   const proxy = await proxyFactory.deploy(await implementation.getAddress(), "0x")
   await proxy.waitForDeployment()
   logOutput && console.log(`${contractName} proxy: ${await proxy.getAddress()}`)

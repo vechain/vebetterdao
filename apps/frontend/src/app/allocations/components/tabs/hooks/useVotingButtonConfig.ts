@@ -21,7 +21,7 @@ export interface VotingButtonConfig {
  * Hook to determine which voting button(s) to show based on state.
  * Consumes AllocationTabsContext directly.
  */
-export const useVotingButtonConfig = (): VotingButtonConfig => {
+export const useVotingButtonConfig = (): VotingButtonConfig | null => {
   const context = useContext(AllocationTabsContext)
   if (!context) throw new Error("useVotingButtonConfig must be used within AllocationTabsProvider")
 
@@ -39,13 +39,18 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
     onCancelEditAutoVote,
     onSaveAutoVote,
     onEnableAutoVoting,
+    isDelegatedToNavigator,
+    isNavigator,
   } = context
 
   const { t } = useTranslation()
 
   return useMemo(() => {
+    if (isDelegatedToNavigator) return null
+
     // Case 1: User is editing auto-vote preferences - show cancel/save buttons
-    if (isEditingAutoVote) {
+    // Navigators cannot use auto-vote so skip this entirely
+    if (isEditingAutoVote && !isNavigator) {
       return {
         type: "editing" as const,
         primaryText: t("Save"),
@@ -57,8 +62,8 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
     }
 
     // Case 2: Auto-voting active (current status OR in current round) - show edit button
-    // This includes users who disabled mid-round but were enabled at round start
-    if (isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) {
+    // Navigators cannot use auto-vote so skip this
+    if ((isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isNavigator) {
       return {
         type: "edit" as const,
         primaryText: hasExistingPreferences ? t("Edit auto-vote settings") : t("Enable auto-vote"),
@@ -86,6 +91,9 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
     }
 
     // Case 4: User has voted + auto-voting NOT enabled - show enable button
+    // Navigators cannot use auto-vote
+    if (isNavigator) return null
+
     return {
       type: "enable" as const,
       primaryText: t("Enable auto-vote"),
@@ -93,6 +101,8 @@ export const useVotingButtonConfig = (): VotingButtonConfig => {
       primaryOnClick: onEnableAutoVoting,
     }
   }, [
+    isDelegatedToNavigator,
+    isNavigator,
     hasVoted,
     isEditingAutoVote,
     isAutoVotingEnabled,

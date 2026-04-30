@@ -22,6 +22,7 @@ export type ContractName =
   | "GrantsManager"
   | "DBAPool"
   | "RelayerRewardsPool"
+  | "NavigatorRegistry"
 
 export const PROXY_ABI = ["event Upgraded(address indexed implementation)"]
 
@@ -48,6 +49,7 @@ export function getAllContracts(config: AppConfig): Array<{ proxy: string; name:
     { proxy: config.grantsManagerContractAddress, name: "GrantsManager" },
     { proxy: config.dbaPoolContractAddress, name: "DBAPool" },
     { proxy: config.relayerRewardsPoolContractAddress, name: "RelayerRewardsPool" },
+    { proxy: config.navigatorRegistryContractAddress, name: "NavigatorRegistry" },
   ]
 }
 
@@ -105,7 +107,7 @@ export function findArtifactFile(dir: string, contractName: string): string | nu
       const resolvedDir = path.resolve(dir)
       const fullPath = path.resolve(resolvedDir, entry.name)
       const relative = path.relative(resolvedDir, fullPath)
-      if (relative.startsWith('..') || path.isAbsolute(relative)) {
+      if (relative.startsWith("..") || path.isAbsolute(relative)) {
         continue
       }
 
@@ -489,17 +491,13 @@ export function copySourceFiles(metadata: any, tempDir: string, contractsBaseDir
       const possiblePath1 = path.resolve(packageDir, sourcePath)
       const possiblePath2 = path.resolve(contractsBaseDir, sourcePath)
       const possiblePath3 = sourcePath.startsWith("contracts/")
-          ? path.resolve(contractsBaseDir, sourcePath.replace(/^contracts\//, ""))
-          : null
-      const possiblePaths = [
-        possiblePath1,
-        possiblePath2,
-        possiblePath3,
-      ].filter(Boolean) as string[]
+        ? path.resolve(contractsBaseDir, sourcePath.replace(/^contracts\//, ""))
+        : null
+      const possiblePaths = [possiblePath1, possiblePath2, possiblePath3].filter(Boolean) as string[]
 
       for (const p of possiblePaths) {
         const rel = path.relative(resolvedContractsBaseDir, p)
-        if (!rel.startsWith('..') && !path.isAbsolute(rel)) {
+        if (!rel.startsWith("..") && !path.isAbsolute(rel)) {
           if (fs.existsSync(p)) {
             sourceFilePath = p
             break
@@ -549,8 +547,8 @@ export async function submitVerification(
       const base = path.resolve(tempDir)
       const target = path.resolve(base, file)
       const relative = path.relative(base, target)
-      if (relative.startsWith('..') || path.isAbsolute(relative)) {
-        throw new Error('Invalid file path')
+      if (relative.startsWith("..") || path.isAbsolute(relative)) {
+        throw new Error("Invalid file path")
       }
       if (fs.existsSync(target)) {
         sources[file] = fs.readFileSync(target, "utf8")

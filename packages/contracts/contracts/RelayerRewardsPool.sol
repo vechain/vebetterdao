@@ -50,6 +50,11 @@ import "./interfaces/IXAllocationVotingGovernor.sol";
  *
  * ------------------ Version 2 Changes ------------------
  * - Added preferred relayer functionality
+ *
+ * ------------------ Version 3 Changes ------------------
+ * - Per-user skip tracking with auto-claim-reduction when all vote actions are skipped
+ * - Governance-registered relayer vote actions (weighted via governor)
+ * - initializeV3 accepts IB3TRGovernor for active-proposals query in auto-claim logic
  */
 contract RelayerRewardsPool is
   AccessControlUpgradeable,
@@ -102,6 +107,15 @@ contract RelayerRewardsPool is
     // ------------------ Version 2 Changes ------------------
     // user => preferred relayer for early access, zero address if unset
     mapping(address => address) preferredRelayer;
+    // ------------------ Version 3 Changes ------------------
+    // round => active governance proposal IDs (cached at round start)
+    mapping(uint256 => uint256[]) activeProposalsForRound;
+    // round => user => allocation vote expectation already reduced
+    mapping(uint256 => mapping(address => bool)) userAllocationVoteReduced;
+    // round => user => proposalId => governance vote already reduced
+    mapping(uint256 => mapping(address => mapping(uint256 => bool))) userGovernanceVoteReduced;
+    // round => user => claim already reduced (auto-set when all votes skipped)
+    mapping(uint256 => mapping(address => bool)) userClaimReduced;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.RelayerRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -187,9 +201,17 @@ contract RelayerRewardsPool is
 
   /**
    * @notice Initialize version 2 of the contract
-   * @dev Reserved for the preferred relayer upgrade
+   * @dev Reserved for the preferred relayer upgrade. Required for UUPS `reinitializer(2)` ordering on older proxies.
+   * @custom:deprecated Operational target is v3; do not run standalone v2 migrations for new environments — use deploy paths and `initializeV3` after `initializeV2` when upgrading from V1.
    */
   function initializeV2() external reinitializer(2) {}
+
+  /**
+   * @notice Initialize version 3 of the contract
+   * @dev Active proposal IDs are now cached per-round via setTotalActionsForRoundWithGovernance;
+   *      no external governor reference needed.
+   */
+  function initializeV3() external reinitializer(3) {}
 
   /**
    * @notice Validate the preferred relayer constraint during early access
@@ -731,18 +753,39 @@ contract RelayerRewardsPool is
     uint256 roundId,
     uint256 totalAutoVotingUsers
   ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    setTotalActionsForRoundWithGovernance(roundId, totalAutoVotingUsers, 0, new uint256[](0));
+  }
+
+  /**
+   * @notice Sets expected actions for allocation and governance in a round
+   * @param roundId The round ID
+   * @param allocationUsers Number of users expected to perform allocation vote+claim actions
+   * @param governanceUsers Number of users expected to perform governance vote actions (citizens only)
+   * @param activeProposalIds IDs of active governance proposals for the round (cached in storage)
+   */
+  function setTotalActionsForRoundWithGovernance(
+    uint256 roundId,
+    uint256 allocationUsers,
+    uint256 governanceUsers,
+    uint256[] memory activeProposalIds
+  ) public override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
-    // Each auto-voting user requires 2 actions: 1 vote + 1 claim
-    // This means that the total number of actions required for the round is totalAutoVotingUsers * 2
-    $.totalActions[roundId] = totalAutoVotingUsers * 2;
+    uint256 governanceVoteActions = activeProposalIds.length * governanceUsers;
+    uint256 allocationActions = allocationUsers * 2;
+    $.totalActions[roundId] = allocationActions + governanceVoteActions;
 
-    // Weighted actions are the sum of the vote and claim weights
-    $.totalWeightedActions[roundId] = totalAutoVotingUsers * ($.voteWeight + $.claimWeight);
+    $.totalWeightedActions[roundId] =
+      allocationUsers *
+      ($.voteWeight + $.claimWeight) +
+      governanceVoteActions *
+      $.voteWeight;
+
+    $.activeProposalsForRound[roundId] = activeProposalIds;
 
     emit TotalAutoVotingActionsSet(
       roundId,
-      totalAutoVotingUsers,
+      allocationUsers,
       $.totalActions[roundId],
       $.totalWeightedActions[roundId],
       $.relayerAddresses.length
@@ -750,23 +793,78 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
-   * @param roundId The round ID
-   * @param userCount The number of users to remove from expected actions (typically 1)
+   * @notice Reduces the total expected actions for a round when a legacy auto-voting user cannot vote.
+   * @dev Used by castVoteOnBehalfOf when a user has auto-voting enabled but is not eligible.
+   *      Reduces both vote and claim (2 actions per user).
    */
   function reduceExpectedActionsForRound(
     uint256 roundId,
     uint256 userCount
   ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
     if (userCount == 0) revert InvalidParameter("userCount");
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    _reduceExpectedActions(roundId, userCount * 2, userCount * ($.voteWeight + $.claimWeight));
+  }
 
+  /**
+   * @notice Reduces allocation vote expectation for a specific user in a round.
+   * @dev Reverts if already reduced. After reducing, checks if all vote actions for the user
+   *      have been skipped and auto-reduces the claim if so.
+   */
+  function reduceUserAllocationVote(uint256 roundId, address user) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    if ($.userAllocationVoteReduced[roundId][user]) revert UserActionAlreadyReduced(user, roundId);
+
+    $.userAllocationVoteReduced[roundId][user] = true;
+    _reduceExpectedActions(roundId, 1, $.voteWeight);
+    _checkAndReduceClaim($, roundId, user);
+  }
+
+  /**
+   * @notice Reduces governance vote expectation for a specific user/proposal in a round.
+   * @dev Reverts if already reduced for this proposal. After reducing, checks if all vote actions
+   *      for the user have been skipped and auto-reduces the claim if so.
+   */
+  function reduceUserGovernanceVote(
+    uint256 roundId,
+    address user,
+    uint256 proposalId
+  ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    if ($.userGovernanceVoteReduced[roundId][user][proposalId])
+      revert UserGovernanceVoteAlreadyReduced(user, roundId, proposalId);
+
+    $.userGovernanceVoteReduced[roundId][user][proposalId] = true;
+    _reduceExpectedActions(roundId, 1, $.voteWeight);
+    _checkAndReduceClaim($, roundId, user);
+  }
+
+  /**
+   * @dev Checks if all vote actions for a user in a round have been skipped, and auto-reduces the claim.
+   *      Allocation vote must be reduced AND every cached governance proposal must be reduced.
+   */
+  function _checkAndReduceClaim(RelayerRewardsPoolStorage storage $, uint256 roundId, address user) private {
+    if ($.userClaimReduced[roundId][user]) return;
+    if (!$.userAllocationVoteReduced[roundId][user]) return;
+
+    uint256[] storage proposals = $.activeProposalsForRound[roundId];
+    for (uint256 i; i < proposals.length; i++) {
+      if (!$.userGovernanceVoteReduced[roundId][user][proposals[i]]) return;
+    }
+
+    $.userClaimReduced[roundId][user] = true;
+    _reduceExpectedActions(roundId, 1, $.claimWeight);
+  }
+
+  /**
+   * @notice Reduces the expected actions for a round
+   * @param roundId The round ID
+   * @param actionsToReduce The number of actions to reduce
+   * @param weightedActionsToReduce The number of weighted actions to reduce
+   */
+  function _reduceExpectedActions(uint256 roundId, uint256 actionsToReduce, uint256 weightedActionsToReduce) private {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
-    // Calculate reduction amounts
-    uint256 actionsToReduce = userCount * 2; // Each user requires 2 actions (vote + claim)
-    uint256 weightedActionsToReduce = userCount * ($.voteWeight + $.claimWeight);
-
-    // Ensure we don't reduce below zero
     require(
       $.totalActions[roundId] >= actionsToReduce,
       "RelayerRewardsPool: cannot reduce more actions than available"
@@ -776,11 +874,10 @@ contract RelayerRewardsPool is
       "RelayerRewardsPool: cannot reduce more weighted actions than available"
     );
 
-    // Reduce the totals
     $.totalActions[roundId] -= actionsToReduce;
     $.totalWeightedActions[roundId] -= weightedActionsToReduce;
 
-    emit ExpectedActionsReduced(roundId, userCount, $.totalActions[roundId], $.totalWeightedActions[roundId]);
+    emit ExpectedActionsReduced(roundId, actionsToReduce, $.totalActions[roundId], $.totalWeightedActions[roundId]);
   }
 
   /**
@@ -900,6 +997,6 @@ contract RelayerRewardsPool is
    * @return The version string
    */
   function version() external pure returns (string memory) {
-    return "2";
+    return "3";
   }
 }

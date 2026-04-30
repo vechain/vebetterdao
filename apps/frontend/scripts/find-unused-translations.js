@@ -39,7 +39,7 @@ function inferDefaultRoots(file) {
 
 function readJson(file) {
   const absPath = path.resolve(file)
-  if (path.isAbsolute(file) || file.includes('..')) {
+  if (path.isAbsolute(file) || file.includes("..")) {
     throw new Error(`Invalid file path`)
   }
   const raw = fs.readFileSync(absPath, "utf8")

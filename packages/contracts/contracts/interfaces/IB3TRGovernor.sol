@@ -12,6 +12,7 @@ import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
 import { IVeBetterPassport } from "./IVeBetterPassport.sol";
 import { IGalaxyMember } from "./IGalaxyMember.sol";
 import { IGrantsManager } from "./IGrantsManager.sol";
+import { IRelayerRewardsPool } from "./IRelayerRewardsPool.sol";
 
 /**
  * @dev Interface of the {B3TRGovernor} core.
@@ -171,6 +172,18 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
 
+  /// @dev The governance skip window has not been reached yet
+  error GovernanceSkipWindowNotReached(uint256 proposalId);
+
+  /// @dev Thrown when citizen is not delegated to any navigator
+  error NotDelegatedToNavigator(address citizen);
+
+  /// @dev Thrown when citizen is delegated to a navigator and cannot vote manually
+  error DelegatedToNavigator(address citizen);
+
+  /// @dev Thrown when navigator has not set a decision for the proposal
+  error NavigatorDecisionNotSet(address navigator, uint256 proposalId);
+
   /**
    * @dev Emitted when a proposal is created
    */
@@ -311,6 +324,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   event ProposalDevelopmentStateReset(uint256 proposalId);
 
+  /// @notice Emitted when a navigator governance vote is skipped (navigator dead or no decision set)
+  event NavigatorGovernanceVoteSkipped(address indexed citizen, address indexed navigator, uint256 indexed proposalId);
+
   /**
    * @notice module:core
    * @dev Name of the governor instance (used in building the ERC712 domain separator).
@@ -388,6 +404,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Getter for the XAllocationVoting contract
    */
   function xAllocationVoting() external view returns (IXAllocationVotingGovernor);
+
+  /**
+   * @notice module:core
+   * @dev Getter for the RelayerRewardsPool contract
+   */
+  function relayerRewardsPool() external view returns (IRelayerRewardsPool);
 
   /**
    * @notice module:core
@@ -657,6 +679,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function setGrantsManager(IGrantsManager newGrantsManager) external;
 
   /**
+   * @notice Set the RelayerRewardsPool contract
+   * @param newRelayerRewardsPool The new RelayerRewardsPool contract
+   */
+  function setRelayerRewardsPool(IRelayerRewardsPool newRelayerRewardsPool) external;
+
+  /**
    * @notice Get the GrantsManager contract
    * @return The current GrantsManager contract
    */
@@ -695,4 +723,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @return The deposit voting power
    */
   function getDepositVotingPower(address account, uint256 timepoint) external view returns (uint256);
+
+  /**
+   * @notice Returns currently active proposal IDs.
+   */
+  function getActiveProposals() external view returns (uint256[] memory);
 }

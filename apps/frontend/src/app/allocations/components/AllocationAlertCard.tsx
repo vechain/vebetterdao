@@ -29,7 +29,12 @@ export const AllocationAlertCard = ({ status, title, message, icon }: Allocation
   const StatusIcon = statusIcons[status]
 
   return (
-    <Alert.Root status={status} py={{ base: "2", md: "2.5" }} px={{ base: "3", md: "4" }}>
+    <Alert.Root
+      border="sm"
+      borderColor="border.secondary"
+      status={status}
+      py={{ base: "2", md: "2.5" }}
+      px={{ base: "3", md: "4" }}>
       <HStack alignItems="flex-start" gap="2" w="full">
         <Alert.Indicator boxSize={{ base: "4", md: "5" }} flexShrink={0} mt="0.5">
           {icon || <StatusIcon />}

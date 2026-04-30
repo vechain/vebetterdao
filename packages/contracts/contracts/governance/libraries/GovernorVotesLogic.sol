@@ -32,6 +32,8 @@ import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
+import { RelayerAction } from "../../interfaces/IRelayerRewardsPool.sol";
 
 /// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
@@ -72,6 +74,31 @@ library GovernorVotesLogic {
     string reason
   );
 
+  /// @notice Emitted when a navigator governance vote is skipped (navigator dead or no decision set)
+  event NavigatorGovernanceVoteSkipped(address indexed citizen, address indexed navigator, uint256 indexed proposalId);
+
+  /// @notice Emitted when a navigator casts a vote on behalf of a delegated citizen
+  event NavigatorGovernanceVoteCast(
+    address indexed citizen,
+    address indexed navigator,
+    uint256 indexed proposalId,
+    uint8 support,
+    uint256 weight,
+    uint256 power
+  );
+
+  /// @dev Thrown when citizen is not delegated to any navigator
+  error NotDelegatedToNavigator(address citizen);
+
+  /// @dev Thrown when citizen is delegated to a navigator and cannot vote manually
+  error DelegatedToNavigator(address citizen);
+
+  /// @dev Thrown when navigator has not set a decision for the proposal
+  error NavigatorDecisionNotSet(address navigator, uint256 proposalId);
+
+  /// @dev The governance skip window has not been reached yet
+  error GovernanceSkipWindowNotReached(uint256 proposalId);
+
   /// @notice Emits true if quadratic voting is disabled, false otherwise.
   /// @param disabled - The flag to enable or disable quadratic voting.
   event QuadraticVotingToggled(bool indexed disabled);
@@ -80,22 +107,15 @@ library GovernorVotesLogic {
 
   /**
    * @dev Internal function to count a vote for a proposal.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @param account The address of the voter.
    * @param support The support value of the vote.
    * @param weight The weight of the vote.
    * @param power The voting power of the voter.
    */
-  function _countVote(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId,
-    address account,
-    uint8 support,
-    uint256 weight,
-    uint256 power
-  ) private {
-    GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+  function _countVote(uint256 proposalId, address account, uint8 support, uint256 weight, uint256 power) private {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    GovernorTypes.ProposalVote storage proposalVote = $.proposalVotes[proposalId];
 
     if (proposalVote.hasVoted[account]) {
       revert GovernorAlreadyCastVote(account);
@@ -103,7 +123,7 @@ library GovernorVotesLogic {
     proposalVote.hasVoted[account] = true;
 
     // if quadratic voting is disabled, use the weight as the vote otherwise use the power as the vote
-    uint256 vote = isQuadraticVotingDisabledForCurrentRound(self) ? weight : power;
+    uint256 vote = isQuadraticVotingDisabledForCurrentRound() ? weight : power;
 
     if (support == uint8(GovernorTypes.VoteType.Against)) {
       proposalVote.againstVotes += vote;
@@ -115,107 +135,105 @@ library GovernorVotesLogic {
       revert GovernorInvalidVoteType();
     }
 
-    self.proposalTotalVotes[proposalId] += weight;
+    $.proposalTotalVotes[proposalId] += weight;
 
     // Save that user cast vote only the first time
-    if (!self.hasVotedOnce[account]) {
-      self.hasVotedOnce[account] = true;
+    if (!$.hasVotedOnce[account]) {
+      $.hasVotedOnce[account] = true;
     }
   }
 
   /**
    * @dev Internal function to check if the vote succeeded.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @return True if the vote succeeded, false otherwise.
    */
-  function voteSucceeded(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) internal view returns (bool) {
-    GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+  function voteSucceeded(uint256 proposalId) internal view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    GovernorTypes.ProposalVote storage proposalVote = $.proposalVotes[proposalId];
     return proposalVote.forVotes > proposalVote.againstVotes;
   }
 
   /** ------------------ GETTERS ------------------ **/
 
   /**
-   * @notice Retrieves the votes for a specific account at a given timepoint.
-   * @param self The storage reference for the GovernorStorage.
+   * @notice Retrieves the effective voting power for an account at a given timepoint.
+   * @dev If citizen had a navigator at the snapshot and that navigator is still alive (not deactivated/exiting),
+   *      returns the delegated amount (their effective participation via navigator).
+   *      If navigator is dead, delegation is void and citizen has full VOT3 balance.
+   *      If not delegated, returns full VOT3 balance + staked B3TR (converted to VOT3) for navigators.
+   *      The staked amount is checkpointed in NavigatorRegistry and returns 0 for non-navigators.
    * @param account The address of the account.
    * @param timepoint The specific timepoint.
-   * @return The votes of the account at the given timepoint.
+   * @return The effective voting power at the given timepoint.
    */
-  function getVotes(
-    GovernorStorageTypes.GovernorStorage storage self,
-    address account,
-    uint256 timepoint
-  ) internal view returns (uint256) {
-    return self.vot3.getPastVotes(account, timepoint);
+  function getVotes(address account, uint256 timepoint) internal view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    uint256 totalVotes = $.vot3.getPastVotes(account, timepoint);
+
+    if (address($.navigatorRegistry) == address(0)) return totalVotes;
+    // getNavigatorAtTimepoint returns address(0) if not delegated or navigator was dead
+    if ($.navigatorRegistry.getNavigatorAtTimepoint(account, timepoint) != address(0)) {
+      return $.navigatorRegistry.getDelegatedAmountAtTimepoint(account, timepoint);
+    }
+
+    // Include staked amount for navigators (B3TR converted to VOT3 under the hood)
+    // Returns 0 for non-navigators (no checkpoints)
+    totalVotes += $.navigatorRegistry.getStakedAmountAtTimepoint(account, timepoint);
+    return totalVotes;
   }
 
   /**
    * @notice Retrieves the quadratic voting power of an account at a given timepoint.
-   * @param self The storage reference for the GovernorStorage.
    * @param account The address of the account.
    * @param timepoint The specific timepoint.
    * @return The quadratic voting power of the account.
    */
-  function getQuadraticVotingPower(
-    GovernorStorageTypes.GovernorStorage storage self,
-    address account,
-    uint256 timepoint
-  ) external view returns (uint256) {
+  function getQuadraticVotingPower(address account, uint256 timepoint) external view returns (uint256) {
     // Scale the votes by 1e9 so that the number returned is 1e18
-    return Math.sqrt(self.vot3.getPastVotes(account, timepoint)) * 1e9;
+    return Math.sqrt(getVotes(account, timepoint)) * 1e9;
   }
 
   /**
    * @notice Checks if an account has voted on a specific proposal.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @param account The address of the account.
    * @return True if the account has voted, false otherwise.
    */
-  function hasVoted(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId,
-    address account
-  ) internal view returns (bool) {
-    return self.proposalVotes[proposalId].hasVoted[account];
+  function hasVoted(uint256 proposalId, address account) internal view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    return $.proposalVotes[proposalId].hasVoted[account];
   }
 
   /**
    * @notice Retrieves the votes for a proposal.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @return againstVotes The number of votes against the proposal.
    * @return forVotes The number of votes for the proposal.
    * @return abstainVotes The number of abstain votes.
    */
   function getProposalVotes(
-    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
-    GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    GovernorTypes.ProposalVote storage proposalVote = $.proposalVotes[proposalId];
     return (proposalVote.againstVotes, proposalVote.forVotes, proposalVote.abstainVotes);
   }
 
   /**
    * @notice Checks if a user has voted at least once.
-   * @param self The storage reference for the GovernorStorage.
    * @param user The address of the user.
    * @return True if the user has voted once, false otherwise.
    */
-  function userVotedOnce(GovernorStorageTypes.GovernorStorage storage self, address user) internal view returns (bool) {
-    return self.hasVotedOnce[user];
+  function userVotedOnce(address user) internal view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    return $.hasVotedOnce[user];
   }
 
   /** ------------------ EXTERNAL FUNCTIONS ------------------ **/
 
   /**
    * @notice Casts a vote on a proposal.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @param voter The address of the voter.
    * @param support The support value of the vote.
@@ -223,21 +241,27 @@ library GovernorVotesLogic {
    * @return The weight of the vote.
    */
   function castVote(
-    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId,
     address voter,
     uint8 support,
     string calldata reason
   ) external returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     GovernorStateLogic.validateStateBitmap(
-      self,
       proposalId,
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
     );
 
-    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
+    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
 
-    (bool isPerson, string memory explanation) = self.veBetterPassport.isPersonAtTimepoint(
+    // Citizens delegated to an alive navigator at the proposal snapshot cannot vote manually
+    if (address($.navigatorRegistry) != address(0)) {
+      if ($.navigatorRegistry.getNavigatorAtTimepoint(voter, proposalSnapshot) != address(0)) {
+        revert DelegatedToNavigator(voter);
+      }
+    }
+
+    (bool isPerson, string memory explanation) = $.veBetterPassport.isPersonAtTimepoint(
       voter,
       SafeCast.toUint48(proposalSnapshot)
     );
@@ -247,15 +271,18 @@ library GovernorVotesLogic {
       revert GovernorPersonhoodVerificationFailed(voter, explanation);
     }
 
-    uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot); // aka voting power without quadratic voting
+    uint256 weight = getVotes(voter, proposalSnapshot); // voting power including staked B3TR for navigators
     uint256 power = Math.sqrt(weight) * 1e9;
-    GovernorTypes.ProposalType proposalType = GovernorProposalLogic.proposalType(self, proposalId);
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(
+      GovernorProposalLogic.proposalType(proposalId)
+    );
 
-    _checkVotingThreshold(self, weight, proposalType);
+    _checkVotingThreshold(weight, proposalType);
 
-    _countVote(self, proposalId, voter, support, weight, power);
+    _countVote(proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(proposalId, voter, weight, Math.sqrt(weight));
+    // Apply governance intent multiplier and register vote for rewards
+    _registerVoteWithIntentMultiplier($, proposalId, voter, weight, support, proposalSnapshot);
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 
@@ -263,35 +290,100 @@ library GovernorVotesLogic {
   }
 
   /**
+   * @notice Cast a governance vote on behalf of a citizen delegated to a navigator,
+   *         or auto-skip if the navigator is dead / has not set a decision (after skip window).
+   *
+   * Decision flow:
+   *   1. Navigator dead at snapshot → revert (citizen not delegated)
+   *   2. Navigator dead NOW → skip immediately, reduce governance vote expectation
+   *   3. Navigator alive + decision set → vote normally
+   *   4. Navigator alive + no decision + skip window reached → skip
+   *   5. Navigator alive + no decision + skip window NOT reached → revert (relayer retries later)
+   */
+  function castNavigatorVote(uint256 proposalId, address citizen) external returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    GovernorStateLogic.validateStateBitmap(
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
+    );
+
+    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(proposalId);
+    address navigator = $.navigatorRegistry.getNavigatorAtTimepoint(citizen, proposalSnapshot);
+    if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
+
+    uint256 roundId = $.proposals[proposalId].roundIdVoteStart;
+
+    // Dead navigator → skip immediately
+    if ($.navigatorRegistry.isDeactivated(navigator)) {
+      if (address($.relayerRewardsPool) != address(0)) {
+        $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
+      }
+      emit NavigatorGovernanceVoteSkipped(citizen, navigator, proposalId);
+      return 0;
+    }
+
+    // Navigator alive — check decision
+    if (!$.navigatorRegistry.hasSetDecision(navigator, proposalId)) {
+      // No decision set — skip only after window
+      uint256 deadline = GovernorProposalLogic._proposalDeadline(proposalId);
+      if (block.number + GovernorConfigurator.governanceSkipWindowBlocks() < deadline) {
+        revert GovernanceSkipWindowNotReached(proposalId);
+      }
+      if (address($.relayerRewardsPool) != address(0)) {
+        $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
+      }
+      emit NavigatorGovernanceVoteSkipped(citizen, navigator, proposalId);
+      return 0;
+    }
+
+    // Decision is offset by 1 in NavigatorRegistry: 1=Against, 2=For, 3=Abstain
+    // B3TRGovernor uses: 0=Against, 1=For, 2=Abstain
+    uint8 decision = $.navigatorRegistry.getProposalDecision(navigator, proposalId);
+    uint8 support = decision - 1;
+
+    uint256 weight = $.navigatorRegistry.getDelegatedAmountAtTimepoint(citizen, proposalSnapshot);
+    uint256 power = Math.sqrt(weight) * 1e9;
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType(
+      GovernorProposalLogic.proposalType(proposalId)
+    );
+
+    _checkVotingThreshold(weight, proposalType);
+    _countVote(proposalId, citizen, support, weight, power);
+
+    _registerVoteWithIntentMultiplier($, proposalId, citizen, weight, support, proposalSnapshot);
+    _registerRelayerActionForNavigatorVote($, proposalId, citizen);
+
+    emit NavigatorGovernanceVoteCast(citizen, navigator, proposalId, support, weight, power);
+
+    return weight;
+  }
+
+  /**
    * @notice Checks if the voting threshold is met.
-   * @param self - GovernorStorage
    * @param weight - The weight of the vote.
    * @param proposalType - The type of proposal.
    */
-  function _checkVotingThreshold(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 weight,
-    GovernorTypes.ProposalType proposalType
-  ) private view {
-    uint256 threshold = GovernorConfigurator.getVotingThreshold(self, proposalType);
+  function _checkVotingThreshold(uint256 weight, GovernorTypes.ProposalType proposalType) private view {
+    uint256 threshold = GovernorConfigurator.getVotingThreshold(proposalType);
     if (weight < threshold) {
       revert GovernorVotingThresholdNotMet(threshold, weight);
     }
   }
+
   /**
    * @notice Toggle quadratic voting for a specific cycle.
    * @dev This function toggles the state of quadratic voting for a specific cycle.
-   * @param self - The storage reference for the GovernorStorage.
    * The state will flip between enabled and disabled each time the function is called.
    */
-  function toggleQuadraticVoting(GovernorStorageTypes.GovernorStorage storage self) external {
-    bool isQuadraticDisabled = self.quadraticVotingDisabled.upperLookupRecent(GovernorClockLogic.clock(self)) == 1; // 0: enabled, 1: disabled
+  function toggleQuadraticVoting() external {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    bool isQuadraticDisabled = $.quadraticVotingDisabled.upperLookupRecent(GovernorClockLogic.clock()) == 1; // 0: enabled, 1: disabled
 
     // If quadratic voting is disabled, set the new status to enabled, otherwise set it to disabled.
     uint208 newStatus = isQuadraticDisabled ? 0 : 1;
 
     // Toggle the status -> 0: enabled, 1: disabled
-    self.quadraticVotingDisabled.push(GovernorClockLogic.clock(self), newStatus);
+    $.quadraticVotingDisabled.push(GovernorClockLogic.clock(), newStatus);
 
     // Emit an event to log the new quadratic voting status.
     emit QuadraticVotingToggled(!isQuadraticDisabled);
@@ -300,33 +392,67 @@ library GovernorVotesLogic {
   /**
    * @notice Check if quadratic voting is disabled at a specific round.
    * @dev To check if quadratic voting was disabled for a round, use the block number the round started.
-   * @param self - The storage reference for the GovernorStorage.
    * @param roundId - The round ID for which to check if quadratic voting is disabled.
    * @return true if quadratic voting is disabled, false otherwise.
    */
-  function isQuadraticVotingDisabledForRound(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 roundId
-  ) external view returns (bool) {
+  function isQuadraticVotingDisabledForRound(uint256 roundId) external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     // Get the block number the round started.
-    uint48 blockNumber = SafeCast.toUint48(self.xAllocationVoting.roundSnapshot(roundId));
+    uint48 blockNumber = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(roundId));
 
     // Check if quadratic voting is enabled or disabled at the block number.
-    return self.quadraticVotingDisabled.upperLookupRecent(blockNumber) == 1; // 0: enabled, 1: disabled
+    return $.quadraticVotingDisabled.upperLookupRecent(blockNumber) == 1; // 0: enabled, 1: disabled
   }
 
   /**
    * @notice Check if quadratic voting is disabled for the current round.
-   * @param self - The storage reference for the GovernorStorage.
    * @return true if quadratic voting is disabled, false otherwise.
    */
-  function isQuadraticVotingDisabledForCurrentRound(
-    GovernorStorageTypes.GovernorStorage storage self
-  ) public view returns (bool) {
+  function isQuadraticVotingDisabledForCurrentRound() public view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     // Get the block number the emission round started.
-    uint256 roundStartBlock = self.xAllocationVoting.currentRoundSnapshot();
+    uint256 roundStartBlock = $.xAllocationVoting.currentRoundSnapshot();
 
     // Check if quadratic voting is enabled or disabled for the current round.
-    return self.quadraticVotingDisabled.upperLookupRecent(SafeCast.toUint48(roundStartBlock)) == 1; // 0: enabled, 1: disabled
+    return $.quadraticVotingDisabled.upperLookupRecent(SafeCast.toUint48(roundStartBlock)) == 1; // 0: enabled, 1: disabled
+  }
+
+  /// @dev Register a vote with governance intent multiplier applied to reward weight
+  /// @param $ The governor storage
+  /// @param proposalId The proposal ID
+  /// @param voter The voter address
+  /// @param weight The raw voting weight (unmultiplied)
+  /// @param support The vote support value (0=Against, 1=For, 2=Abstain)
+  /// @param proposalSnapshot The proposal snapshot timepoint for multiplier lookup
+  function _registerVoteWithIntentMultiplier(
+    GovernorStorageTypes.GovernorStorage storage $,
+    uint256 proposalId,
+    address voter,
+    uint256 weight,
+    uint8 support,
+    uint256 proposalSnapshot
+  ) private {
+    // Get intent multiplier based on vote support type
+    // support: 0 = Against, 1 = For, 2 = Abstain
+    (uint256 forAgainstMultiplier, uint256 abstainMultiplier) = IVoterRewards(address($.voterRewards))
+      .getIntentMultipliers(proposalSnapshot);
+    uint256 intentMultiplier = (support == 2) ? abstainMultiplier : forAgainstMultiplier;
+    uint256 rewardWeight = (weight * intentMultiplier) / 10000;
+
+    $.voterRewards.registerVote(proposalId, voter, rewardWeight, Math.sqrt(rewardWeight));
+  }
+
+  function _registerRelayerActionForNavigatorVote(
+    GovernorStorageTypes.GovernorStorage storage $,
+    uint256 proposalId,
+    address citizen
+  ) private {
+    if (address($.relayerRewardsPool) == address(0)) return;
+    $.relayerRewardsPool.registerRelayerAction(
+      msg.sender,
+      citizen,
+      $.proposals[proposalId].roundIdVoteStart,
+      RelayerAction.VOTE
+    );
   }
 }

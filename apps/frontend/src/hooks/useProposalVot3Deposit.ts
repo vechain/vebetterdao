@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
 import { VOT3__factory } from "@vechain/vebetterdao-contracts/factories/VOT3__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
@@ -16,6 +16,7 @@ import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hook
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey } from "./useGetVot3UnlockedBalance"
 
 const config = getConfig()
 const Vot3Interface = VOT3__factory.createInterface()
@@ -62,6 +63,7 @@ export const useProposalVot3Deposit = ({
       getIsDepositReachedQueryKey(proposalId),
       getProposalDepositEventsQueryKey(proposalId),
       getVot3BalanceQueryKey(account?.address ?? ""),
+      getVot3UnlockedBalanceQueryKey(account?.address ?? ""),
       getGetProposalDepositsQueryKey(proposalId),
     ],
     [account, proposalId],

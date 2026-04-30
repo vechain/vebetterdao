@@ -43,6 +43,7 @@ export function createLocalConfig() {
         "setIsFunctionRestrictionEnabled",
         "setProposalTypeDepositThresholdPercentage",
         "setProposalTypeVotingThreshold",
+        "setGovernanceSkipWindowBlocks",
       ],
       Treasury: ["transferVET", "transferB3TR"],
       XAllocationVoting: [
@@ -51,9 +52,11 @@ export function createLocalConfig() {
         "setVotingPeriod",
         "setEmissions",
         "setVotingThreshold",
+        "setCitizenSkipWindowBlocks",
       ],
       X2EarnAppsV1: ["addApp", "setVotingEligibility"],
       X2EarnApps: ["setVotingEligibility"],
+      NavigatorRegistry: ["deactivateNavigator"],
     },
 
     EMISSIONS_CYCLE_DURATION: 24, // 24 blocks - 4 minutes.
@@ -194,6 +197,13 @@ export function createLocalConfig() {
     GM_MULTIPLIERS_V2: [110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers scaled -> [1.1x, 1.2x, 1.5x, 2x, 2.5x, 3x, 5x, 10x, 25x]
     VOTER_REWARDS_LEVELS_V2: [2, 3, 4, 5, 6, 7, 8, 9, 10], // Voter rewards levels for the new GM multipliers
 
+    // Rewards Multipliers (basis points, 10000 = 1x)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1: 30000, // Updated this round (x3)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2: 20000, // Updated within 2 rounds (x2)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3: 10000, // No update >= 3 rounds (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST: 10000, // For/Against vote (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: 3000, // Abstain vote (x0.30)
+
     /*
     Level => B3TR Required (halved)
 
@@ -236,5 +246,18 @@ export function createLocalConfig() {
     X_ALLOCATION_POOL_UNALLOCATED_FUNDS_ROUND_IDS: [],
     X_ALLOCATION_POOL_UNALLOCATED_FUNDS_V7: [],
     DBA_DISTRIBUTION_START_ROUND: 1,
+
+    // Navigator Registry
+    NAVIGATOR_MIN_STAKE: 500n * 10n ** 18n, // 50,000 B3TR
+    NAVIGATOR_MAX_STAKE_PERCENTAGE: 100, // 1% of VOT3 supply
+    NAVIGATOR_FEE_LOCK_PERIOD: 4, // 4 rounds
+    NAVIGATOR_FEE_PERCENTAGE: 2000, // 20% in basis points
+    NAVIGATOR_EXIT_NOTICE_PERIOD: 1, // 1 round
+    NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
+    NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
+    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 5, // 5 blocks, around 50 seconds
+
+    XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
+    B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
   })
 }

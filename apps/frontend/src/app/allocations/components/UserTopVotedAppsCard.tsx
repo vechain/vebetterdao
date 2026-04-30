@@ -3,7 +3,7 @@
 import { Card, Icon, Flex, Heading, Text, Circle, Skeleton, Box, Float, Badge } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"

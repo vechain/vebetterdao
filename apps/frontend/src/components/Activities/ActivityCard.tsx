@@ -6,6 +6,7 @@ import { AppActivityCard } from "./AppActivityCard"
 import { EmissionsActivityCard } from "./EmissionsActivityCard"
 import { GmUpgradeActivityCard } from "./GmUpgradeActivityCard"
 import { GrantActivityCard } from "./GrantActivityCard"
+import { NavigatorActivityCard } from "./NavigatorActivityCard"
 import { ProposalActivityCard } from "./ProposalActivityCard"
 import { RoundActivityCard } from "./RoundActivityCard"
 import { UserAllocationVoteCard } from "./UserAllocationVoteCard"
@@ -48,5 +49,11 @@ export const ActivityCard: React.FC<Props> = ({ activity }) => {
       return <UserProposalVoteCard activity={activity} />
     case ActivityType.USER_PROPOSAL_SUPPORT:
       return <UserProposalSupportCard activity={activity} />
+    case ActivityType.NAVIGATOR_JOINED:
+    case ActivityType.NAVIGATOR_EXIT_ANNOUNCED:
+    case ActivityType.NAVIGATOR_EXITED:
+    case ActivityType.USER_NAVIGATOR_EXIT_ANNOUNCED:
+    case ActivityType.USER_NAVIGATOR_EXITED:
+      return <NavigatorActivityCard activity={activity} />
   }
 }

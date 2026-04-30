@@ -28,7 +28,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get token history */
+        /**
+         * Get token history (deprecated)
+         * @deprecated
+         * @description Deprecated: this endpoint scopes history by tokenId and optional emitter contract only, which is not safe for contract-ambiguous NFT domains such as Stargate. Use /api/v1/stargate/tokens/{tokenId}/history for Stargate token timelines.
+         */
         get: operations["getTokenHistory"];
         put?: never;
         post?: never;
@@ -102,6 +106,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/accounts/total": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get total accounts on VeChain
+         * @description Returns the total accounts observed on VeChain.
+         */
+        get: operations["getTotalAccountsLatest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/vevote/proposal/results": {
         parameters: {
             query?: never;
@@ -154,7 +178,7 @@ export interface paths {
          *
          *                 You can also sort the results by one of the supported fields and paginate.
          *
-         *                 - `sortBy`: Choose between `validatorTvl`, `totalTvl`, `blockProbability`, `delegatorTvl`, or `nft:<Level>` (e.g. `nft:Strength`)
+         *                 - `sortBy`: Choose between `validatorTvl`, `totalTvl`, `blockProbability`, `delegatorTvl`, or `nft:<Level>` (projected next-cycle yield if that NFT were delegated, e.g. `nft:Strength`)
          *                 - `page` and `size`: Controls pagination
          *                 - `direction`: Either `asc` or `desc`
          */
@@ -463,6 +487,30 @@ export interface paths {
         };
         /** Get all delegated transactions by a delegator address */
         get: operations["getDelegatedTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get cumulative transaction, clause, and reverted totals on VeChain
+         * @description Returns the cumulative number of transactions, clauses, reverted transactions, and
+         *                 reverted clauses observed on VeChain up to the most recently indexed block. Clause
+         *                 totals are included because clauses are a property of transactions, and reverted totals
+         *                 cover reverted transactions plus the clauses contained within those reverted
+         *                 transactions.
+         */
+        get: operations["getTransactionCount"];
         put?: never;
         post?: never;
         delete?: never;
@@ -822,6 +870,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/stargate/tokens/{tokenId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Stargate token history
+         * @description Retrieve the Stargate lifecycle timeline for a token, including Stargate protocol events, synthetic delegation lifecycle events, Stargate NFT transfers, NFT sales, and VeVote casts.
+         */
+        get: operations["getStargateTokenHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stargate/token-rewards/{tokenId}": {
         parameters: {
             query?: never;
@@ -930,6 +998,26 @@ export interface paths {
         };
         /** Get all NFTs owned by an address */
         get: operations["getOwnedNFTs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/nfts/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get NFT token history
+         * @description Retrieve NFT transfer and sale history for a specific contract and token ID. If eventName is omitted, the response includes both TRANSFER_NFT and NFT_SALE events.
+         */
+        get: operations["getNftHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1135,6 +1223,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/b3tr/users/{wallet}/challenges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get indexed B3TR challenges bucketed for a wallet.
+         * @description Returns challenges bucketed by a semantic `filter` that encodes both a challenge status set and the wallet's relationship to the challenge. See the `filter` parameter for the full list of buckets.
+         */
+        get: operations["getWalletChallenges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/b3tr/treasury/transfers": {
         parameters: {
             query?: never;
@@ -1247,6 +1355,43 @@ export interface paths {
          * @description Returns the current overview (holders, B3TR donated, etc.) for each Galaxy Member level.
          */
         get: operations["getLevelOverviews"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/challenges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get public indexed B3TR challenges.
+         * @description Returns public challenges across the network. Use `/api/v1/b3tr/users/{wallet}/challenges` for wallet-scoped views.
+         */
+        get: operations["getChallenges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/challenges/{challengeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a single indexed B3TR challenge. */
+        get: operations["getChallenge"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1484,32 +1629,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/accounts/totals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Retrieve total unique accounts overview (deprecated)
-         * @deprecated
-         * @description Retrieves historical totals of unique VeChain accounts tracked per time frame (DAY, WEEK, MONTH, YEAR).
-         *                 The "ALL" account aggregates totals across all time frames.
-         *
-         *                 If no `timeFrame` is provided, the response defaults to showing the full cumulative totals (ALL).
-         *
-         *                 Deprecated: use `GET /api/v2/accounts/totals` for cumulative time-series responses.
-         */
-        get: operations["getTotalAccounts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/accounts/overview/{address}": {
         parameters: {
             query?: never;
@@ -1640,7 +1759,7 @@ export interface components {
             contractAddress?: string;
             tokenId?: string;
             /** @enum {string} */
-            eventName: "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST";
+            eventName: "B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST";
             to?: string;
             from?: string;
             value?: string;
@@ -1660,7 +1779,6 @@ export interface components {
             outputToken?: string;
             inputValue?: string;
             outputValue?: string;
-            tokenAddress?: string;
             levelId?: string;
             owner?: string;
             vetGeneratedVthoRewards?: string;
@@ -1780,6 +1898,18 @@ export interface components {
             data: components["schemas"]["Validator"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
+        TokenLevelDecimalValues: {
+            Strength?: number;
+            Thunder?: number;
+            Mjolnir?: number;
+            VeThorX?: number;
+            StrengthX?: number;
+            ThunderX?: number;
+            MjolnirX?: number;
+            Dawn?: number;
+            Lightning?: number;
+            Flash?: number;
+        };
         Validator: {
             id: string;
             endorser?: string;
@@ -1810,9 +1940,8 @@ export interface components {
             nextCycleTvlBasedYield?: number;
             nextCycleValidatorYield?: number;
             nextCycleAvgDelegatorYield?: number;
-            nftYieldsNextCycle?: {
-                [key: string]: number;
-            };
+            nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"];
+            nftYields?: components["schemas"]["TokenLevelDecimalValues"];
             totalWeight?: number;
             online?: boolean;
             /** Format: int64 */
@@ -1980,6 +2109,12 @@ export interface components {
             sender: string;
             recipient: string;
             amount: string;
+        };
+        TransactionCountSummary: {
+            totalTransactions: number;
+            totalClauses: number;
+            totalRevertedTransactions: number;
+            totalRevertedClauses: number;
         };
         PaginatedResponseTotalByPeriodDto: {
             data: components["schemas"]["TotalByPeriodDto"][];
@@ -2171,7 +2306,6 @@ export interface components {
             outputToken?: string;
             inputValue?: string;
             outputValue?: string;
-            tokenAddress?: string;
             levelId?: string;
             owner?: string;
             vetGeneratedVthoRewards?: string;
@@ -2260,6 +2394,56 @@ export interface components {
             power: number;
             reason: string;
         };
+        ChallengeSummaryResponse: {
+            /** Format: int64 */
+            challengeId: number;
+            /** Format: int64 */
+            createdAt: number;
+            /** @enum {string} */
+            kind: "Stake" | "Sponsored";
+            /** @enum {string} */
+            visibility: "Public" | "Private";
+            /** @enum {string} */
+            challengeType: "MaxActions" | "SplitWin";
+            /** @enum {string} */
+            status: "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid";
+            /** @enum {string} */
+            settlementMode: "None" | "TopWinners" | "CreatorRefund" | "SplitWinCompleted";
+            creator: string;
+            title: string;
+            description: string;
+            imageURI: string;
+            metadataURI: string;
+            stakeAmount: string;
+            totalPrize: string;
+            /** Format: int32 */
+            startRound: number;
+            /** Format: int32 */
+            endRound: number;
+            /** Format: int32 */
+            duration: number;
+            threshold: string;
+            /** Format: int32 */
+            numWinners: number;
+            /** Format: int32 */
+            winnersClaimed: number;
+            prizePerWinner: string;
+            allApps: boolean;
+            /** Format: int32 */
+            participantCount: number;
+            /** Format: int32 */
+            invitedCount: number;
+            /** Format: int32 */
+            declinedCount: number;
+            /** Format: int32 */
+            selectedAppsCount: number;
+            /** Format: int32 */
+            winnersCount: number;
+        };
+        PaginatedResponseChallengeSummaryResponse: {
+            data: components["schemas"]["ChallengeSummaryResponse"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
         PaginatedResponseTreasuryTransfer: {
             data: components["schemas"]["TreasuryTransfer"][];
             pagination: components["schemas"]["PaginationDetail"];
@@ -2310,6 +2494,66 @@ export interface components {
             level: "ALL" | "EARTH" | "MOON" | "MERCURY" | "VENUS" | "MARS" | "JUPITER" | "SATURN" | "URANUS" | "NEPTUNE" | "GALAXY";
             /** Format: int64 */
             totalNFTs: number;
+        };
+        ChallengeDetailResponse: {
+            /** Format: int64 */
+            challengeId: number;
+            /** Format: int64 */
+            createdAt: number;
+            /** @enum {string} */
+            kind: "Stake" | "Sponsored";
+            /** @enum {string} */
+            visibility: "Public" | "Private";
+            /** @enum {string} */
+            challengeType: "MaxActions" | "SplitWin";
+            /** @enum {string} */
+            status: "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid";
+            /** @enum {string} */
+            settlementMode: "None" | "TopWinners" | "CreatorRefund" | "SplitWinCompleted";
+            creator: string;
+            title: string;
+            description: string;
+            imageURI: string;
+            metadataURI: string;
+            stakeAmount: string;
+            totalPrize: string;
+            /** Format: int32 */
+            startRound: number;
+            /** Format: int32 */
+            endRound: number;
+            /** Format: int32 */
+            duration: number;
+            threshold: string;
+            /** Format: int32 */
+            numWinners: number;
+            /** Format: int32 */
+            winnersClaimed: number;
+            prizePerWinner: string;
+            allApps: boolean;
+            /** Format: int32 */
+            participantCount: number;
+            /** Format: int32 */
+            invitedCount: number;
+            /** Format: int32 */
+            declinedCount: number;
+            /** Format: int32 */
+            selectedAppsCount: number;
+            /** Format: int32 */
+            winnersCount: number;
+            bestScore: string;
+            /** Format: int32 */
+            bestCount: number;
+            /** Format: int32 */
+            payoutsClaimed: number;
+            participants: string[];
+            invited: string[];
+            declined: string[];
+            selectedApps: string[];
+            winners: string[];
+            eligibleInvitees: string[];
+            claimedBy: string[];
+            refundedBy: string[];
+            creatorRefunded: boolean;
         };
         Action: {
             /** Format: int64 */
@@ -2445,24 +2689,6 @@ export interface components {
             /** Format: int64 */
             totalUniqueUserInteractions: number;
         };
-        PaginatedResponseTotalAccounts: {
-            data: components["schemas"]["TotalAccounts"][];
-            pagination: components["schemas"]["PaginationDetail"];
-        };
-        TotalAccounts: {
-            /** Format: int64 */
-            total?: number;
-            /** @enum {string} */
-            timeFrame?: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
-            /** Format: int64 */
-            dayOfMonth?: number;
-            /** Format: int64 */
-            weekOfYear?: number;
-            /** Format: int64 */
-            month?: number;
-            /** Format: int64 */
-            year?: number;
-        };
         AccountOverviewResponse: {
             address: string;
             /** Format: int64 */
@@ -2507,7 +2733,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
+                eventName?: ("B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
                 /**
@@ -2608,7 +2834,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("STARGATE_DELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST" | "NFT_SALE" | "TRANSFER_NFT" | "B3TR_UPGRADE_GM")[];
+                eventName?: ("STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "TRANSFER_NFT" | "NFT_SALE" | "VEVOTE_VOTE_CAST" | "B3TR_UPGRADE_GM")[];
                 /**
                  * @description A valid address
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
@@ -2877,6 +3103,69 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AccountTotalsSeries"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTotalAccountsLatest: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": number;
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -3555,12 +3844,12 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description Start timestamp (inclusive)
+                 * @description Start timestamp in Unix seconds (inclusive)
                  * @example 1704143600
                  */
                 startTimestamp: number;
                 /**
-                 * @description End timestamp (inclusive)
+                 * @description End timestamp in Unix seconds (inclusive)
                  * @example 1704153600
                  */
                 endTimestamp: number;
@@ -4470,6 +4759,69 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTransactionCount: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TransactionCountSummary"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -5672,6 +6024,97 @@ export interface operations {
             };
         };
     };
+    getStargateTokenHistory: {
+        parameters: {
+            query?: {
+                /** @description Filter by Stargate token history event names. */
+                eventName?: ("STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "TRANSFER_NFT" | "NFT_SALE" | "VEVOTE_VOTE_CAST")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /** @description A valid tokenId */
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getStargateTokenRewards: {
         parameters: {
             query?: {
@@ -6083,6 +6526,101 @@ export interface operations {
             };
         };
     };
+    getNftHistory: {
+        parameters: {
+            query: {
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                contractAddress: string;
+                /** @description A valid tokenId */
+                tokenId: string;
+                /** @description Filter by NFT history event names. Defaults to TRANSFER_NFT and NFT_SALE. */
+                eventName?: ("TRANSFER_NFT" | "NFT_SALE")[];
+                /**
+                 * @description Return records after this time (Unix time in seconds).
+                 * @example 1704143600
+                 */
+                after?: number;
+                /**
+                 * @description Return records before this time (Unix time in seconds).
+                 * @example 1704153600
+                 */
+                before?: number;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getContractsByNFTOwner: {
         parameters: {
             query: {
@@ -6175,7 +6713,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filter by specific transaction names. */
-                eventName?: ("B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
+                eventName?: ("B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST")[];
                 /** @description Array of fields to search by. */
                 searchBy?: ("to" | "from" | "origin" | "gasPayer")[];
                 /**
@@ -6803,6 +7341,92 @@ export interface operations {
             };
         };
     };
+    getWalletChallenges: {
+        parameters: {
+            query: {
+                /**
+                 * @description - `NeededAction`: challenges that require a wallet-level action — outstanding invites you have not accepted or declined, claimable prizes on Completed MaxActions challenges you won, finalizable MaxActions challenges past their endRound, or reclaimable stake on Cancelled or Invalid challenges you were a participant in.
+                 *     - `MyChallenges`: Pending or Active challenges you created or have joined.
+                 *     - `OpenToJoin`: public Pending challenges you are not yet involved in.
+                 *     - `OthersActive`: public Active challenges you are not involved in (observation only).
+                 *     - `History`: challenges you consider 'no longer current' — terminal-state (Completed, Cancelled, Invalid) challenges you have been involved in, plus still-live (Pending, Active) challenges you have actively bowed out of (declined invitations or joined-then-left participants), so they remain visible for a possible re-accept or re-join.
+                 */
+                filter: "NeededAction" | "MyChallenges" | "OpenToJoin" | "OthersActive" | "History";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                wallet: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseChallengeSummaryResponse"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getTreasuryTransfers: {
         parameters: {
             query?: {
@@ -7255,6 +7879,148 @@ export interface operations {
             };
         };
     };
+    getChallenges: {
+        parameters: {
+            query?: {
+                status?: "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseChallengeSummaryResponse"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getChallenge: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                challengeId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChallengeDetailResponse"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getUserActions: {
         parameters: {
             query?: {
@@ -7264,12 +8030,12 @@ export interface operations {
                  */
                 appId?: string;
                 /**
-                 * @description Return records after this time (Unix time in milliseconds)
+                 * @description Return records after this time (Unix time in seconds).
                  * @example 1704143600
                  */
                 after?: number;
                 /**
-                 * @description Return records before this time (Unix time in milliseconds)
+                 * @description Return records before this time (Unix time in seconds).
                  * @example 1704153600
                  */
                 before?: number;
@@ -7904,12 +8670,12 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Return records after this time (Unix time in milliseconds)
+                 * @description Return records after this time (Unix time in seconds).
                  * @example 1704143600
                  */
                 after?: number;
                 /**
-                 * @description Return records before this time (Unix time in milliseconds)
+                 * @description Return records before this time (Unix time in seconds).
                  * @example 1704153600
                  */
                 before?: number;
@@ -8021,84 +8787,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AppOverview"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getTotalAccounts: {
-        parameters: {
-            query?: {
-                /** @description Time frame to query totals for (DAY, WEEK, MONTH, YEAR, ALL). */
-                timeFrame?: "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
-                /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-                /** @description The sort direction */
-                direction?: "ASC" | "DESC";
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseTotalAccounts"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */

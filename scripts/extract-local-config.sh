@@ -36,5 +36,6 @@ export VOTER_REWARDS_CONTRACT="$(extract voterRewardsContractAddress)"
 export TREASURY_CONTRACT="$(extract treasuryContractAddress)"
 export STARGATE_NFT_CONTRACT="$(extract stargateNFTContractAddress)"
 export STARGATE_DELEGATION_CONTRACT="$(extract stargateContractAddress)"
+export NAVIGATOR_REGISTRY_CONTRACT="$(extract navigatorRegistryContractAddress)"
 
 echo "Extracted contract addresses from $LOCAL_CONFIG"

@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
 import { useWallet } from "@vechain/vechain-kit"
 
 import { useEvents } from "@/hooks/useEvents"
@@ -24,17 +24,19 @@ export const mapSupportToVoteType = (support: number): VoteType | undefined => {
 export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "VOTES", user]
 /**
  * Custom hook that retrieves the vote events of a specific user for all proposals.
+ * @param voterAddress Optional address to query. Falls back to connected wallet.
  * @returns An object containing information about the vote event.
  */
-export const useUserProposalsVoteEvents = () => {
+export const useUserProposalsVoteEvents = (voterAddress?: string) => {
   const { account } = useWallet()
+  const address = voterAddress ?? account?.address ?? ""
   return useEvents({
     abi,
     contractAddress,
     eventName: "VoteCast",
-    filterParams: { voter: (account?.address ?? "") as `0x${string}` },
+    filterParams: { voter: address as `0x${string}` },
     select: events => events.map(event => event.decodedData.args),
-    enabled: !!account?.address,
+    enabled: !!address,
   })
 }
 

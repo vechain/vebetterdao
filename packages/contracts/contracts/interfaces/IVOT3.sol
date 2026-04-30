@@ -171,5 +171,9 @@ interface IVOT3 {
   function getPastQuadraticVotingPower(address account, uint256 timepoint) external view returns (uint256);
 
   function version() external view returns (string memory);
-}
 
+  // V2: Navigator delegation lock (reads from NavigatorRegistry)
+  function getNavigatorLockedAmount(address account) external view returns (uint256);
+
+  function unlockedBalance(address account) external view returns (uint256);
+}

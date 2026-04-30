@@ -153,4 +153,9 @@ export const CONTRACT_LIST = [
     contractAddress: config.dbaPoolContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "DISTRIBUTOR_ROLE"],
   },
+  {
+    name: "Navigator Registry",
+    contractAddress: config.navigatorRegistryContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"],
+  },
 ]

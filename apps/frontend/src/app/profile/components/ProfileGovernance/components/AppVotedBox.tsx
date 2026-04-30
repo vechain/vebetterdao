@@ -38,7 +38,7 @@ export const AppVotedBox = ({ appVoted }: Props) => {
             <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
               <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
             </Skeleton>
-            <Text textStyle="sm" fontWeight="semibold">
+            <Text textStyle="sm" fontWeight="semibold" wordBreak="break-word" whiteSpace="normal">
               {appVoted.appName}
             </Text>
           </HStack>

@@ -2,8 +2,8 @@ import { AppConfig } from "."
 const config: AppConfig = {
   environment: "testnet-staging",
   basePath: "https://b3tr-frontend.vercel.app",
-  ipfsPinningService: "https://api.dev.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
-  ipfsFetchingService: "https://api.dev.gateway-proxy.vechain.org/ipfs",
+  ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
+  ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
   b3trContractAddress: "0x95761346d18244bb91664181bf91193376197088",
   vot3ContractAddress: "0x6e8b4a88d37897fc11f6ba12c805695f1c41f40e",
   b3trGovernorAddress: "0xc30b4d0837f7e3706749655d8bde0c0f265dd81b",
@@ -27,6 +27,7 @@ const config: AppConfig = {
   grantsManagerContractAddress: "0x005af71e9b2d629c0c6e2f9d39fdfd1bb967c0ea",
   relayerRewardsPoolContractAddress: "0x92b5a7484970d9b2ad981e8135ff14e6f996dc04",
   dbaPoolContractAddress: "0x328710f4925c3e4c04961882b96c50cc7cd9d958",
+  navigatorRegistryContractAddress: "0x15a38b65f26bdbca50addf3865732613a45bbc00",
   veDelegateAutoDepositContractAddress: "0xf5DcEfC27461480A75c328402F1633c462Bece6c",
   indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",

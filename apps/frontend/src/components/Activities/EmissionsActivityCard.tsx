@@ -2,7 +2,7 @@ import { Text, Card, VStack, HStack, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import React from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import { LuTrendingDown } from "react-icons/lu"
 
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
@@ -42,18 +42,25 @@ export const EmissionsActivityCard: React.FC<Props> = ({ activity }) => {
                 {t("Emissions decreased")}
               </Text>
               <Text textStyle="sm" color="text.subtle">
-                <Trans
-                  i18nKey="emissions_decreased_description"
-                  values={{
-                    percentage: Math.abs(percentageChange).toFixed(1),
-                    previous: fmtPrevious,
-                    current: fmtCurrent,
-                    apps: fmtApps,
-                    treasury: fmtTreasury,
-                    voters: fmtVoters,
-                  }}
-                  components={{ bold: <Text as="span" fontWeight="bold" /> }}
-                />
+                {t("emissions_decreased_description", {
+                  percentage: Math.abs(percentageChange).toFixed(1),
+                  previous: fmtPrevious,
+                  current: fmtCurrent,
+                  apps: fmtApps,
+                  treasury: fmtTreasury,
+                  voters: fmtVoters,
+                })
+                  .split(/(<bold>.*?<\/bold>)/g)
+                  .map((segment, i) => {
+                    const match = segment.match(/^<bold>(.*)<\/bold>$/)
+                    if (match)
+                      return (
+                        <Text as="span" fontWeight="bold" key={i}>
+                          {match[1]}
+                        </Text>
+                      )
+                    return <React.Fragment key={i}>{segment}</React.Fragment>
+                  })}
               </Text>
             </VStack>
             <Text textStyle="xs" color="text.subtle" flexShrink={0}>

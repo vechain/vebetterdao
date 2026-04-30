@@ -4,11 +4,14 @@
  * Formula from _calculateRawReward:
  * reward = (voterTotal * emissionsAmount) / cycleTotal
  *
- * With fees applied:
- * netReward = rawReward - ((fee * rawReward) / totalReward)
+ * Fee deduction order (matches _getRewardsAndFees):
+ * 1. Navigator fee deducted first from gross reward (basis points / 10000)
+ * 2. Relayer fee deducted from remainder (applies to auto-voters AND navigator citizens)
+ * 3. Remaining distributed proportionally between reward pools
  */
 
 const SCALING_FACTOR = 1e6
+const NAVIGATOR_FEE_BASIS_POINTS = 10000n
 
 interface RewardCalculationInput {
   /** User's total weighted votes in cycle */
@@ -29,6 +32,10 @@ interface RewardCalculationInput {
   feeCap?: bigint
   /** Whether user had auto-voting enabled (determines if fees apply) */
   hadAutoVotingEnabled?: boolean
+  /** Whether user is delegated to a navigator */
+  isDelegating?: boolean
+  /** Navigator fee percentage in basis points (e.g., 2000 = 20%) */
+  navigatorFeePercentage?: bigint
 }
 
 export interface RewardCalculationResult {
@@ -36,6 +43,7 @@ export interface RewardCalculationResult {
   rawGmReward: bigint
   totalRawReward: bigint
   fee: bigint
+  navigatorFee: bigint
   netReward: bigint
   netGmReward: bigint
   netTotal: bigint
@@ -79,48 +87,53 @@ export function calculatePotentialRewards({
   relayerFeePercentage = 10n,
   feeCap,
   hadAutoVotingEnabled = false,
+  isDelegating = false,
+  navigatorFeePercentage = 0n,
 }: RewardCalculationInput): RewardCalculationResult {
-  // Calculate raw rewards
   const rawReward = calculateRawReward(voterTotal, vote2EarnAmount, cycleTotal)
   const rawGmReward = calculateRawReward(gmWeightTotal, gmEmissionsAmount, cycleGMTotal)
 
   const totalRawReward = rawReward + rawGmReward
 
-  // If no rewards, return zeros
   if (totalRawReward === 0n) {
     return {
       rawReward: 0n,
       rawGmReward: 0n,
       totalRawReward: 0n,
       fee: 0n,
+      navigatorFee: 0n,
       netReward: 0n,
       netGmReward: 0n,
       netTotal: 0n,
     }
   }
 
-  // Calculate fees if auto-voting was enabled
-  let fee = 0n
-  let netReward = rawReward
-  let netGmReward = rawGmReward
-
-  if (hadAutoVotingEnabled) {
-    fee = calculateRelayerFee(totalRawReward, relayerFeePercentage, feeCap)
-
-    // Apply proportional fee distribution with underflow protection
-    const feePortionForReward = (fee * rawReward) / totalRawReward
-    const feePortionForGmReward = (fee * rawGmReward) / totalRawReward
-
-    // Ensure we don't underflow (fee portions should never exceed raw rewards)
-    netReward = rawReward >= feePortionForReward ? rawReward - feePortionForReward : 0n
-    netGmReward = rawGmReward >= feePortionForGmReward ? rawGmReward - feePortionForGmReward : 0n
+  // 1. Navigator fee deducted first (basis points / 10000)
+  let navigatorFee = 0n
+  let afterNavFee = totalRawReward
+  if (isDelegating && navigatorFeePercentage > 0n) {
+    navigatorFee = (totalRawReward * navigatorFeePercentage) / NAVIGATOR_FEE_BASIS_POINTS
+    afterNavFee = totalRawReward - navigatorFee
   }
+
+  // 2. Relayer fee on remainder (applies to auto-voters AND navigator citizens)
+  let fee = 0n
+  let afterAllFees = afterNavFee
+  if (hadAutoVotingEnabled || isDelegating) {
+    fee = calculateRelayerFee(afterNavFee, relayerFeePercentage, feeCap)
+    afterAllFees = afterNavFee - fee
+  }
+
+  // 3. Distribute remaining proportionally between reward pools
+  const netReward = totalRawReward > 0n ? (afterAllFees * rawReward) / totalRawReward : 0n
+  const netGmReward = afterAllFees - netReward
 
   return {
     rawReward,
     rawGmReward,
     totalRawReward,
     fee,
+    navigatorFee,
     netReward,
     netGmReward,
     netTotal: netReward + netGmReward,

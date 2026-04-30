@@ -1,7 +1,4 @@
-import { FaUser } from "react-icons/fa"
-import { LiaBalanceScaleSolid, LiaChartPieSolid } from "react-icons/lia"
-import { LuCrown, LuHouse, LuSettings, LuStar, LuTrophy } from "react-icons/lu"
-import { PiSquaresFour } from "react-icons/pi"
+import { LuHouse, LuLandmark, LuLayoutGrid, LuSettings, LuTrophy, LuUser } from "react-icons/lu"
 
 export interface Route {
   name: string
@@ -14,7 +11,7 @@ export interface Route {
 }
 export const Routes: Route[] = [
   {
-    name: "Dashboard",
+    name: "Home",
     onClick: "/",
     isVisible: true,
     icon: LuHouse,
@@ -24,29 +21,33 @@ export const Routes: Route[] = [
     name: "Apps",
     onClick: "/apps",
     isVisible: true,
-    icon: PiSquaresFour,
+    icon: LuLayoutGrid,
     description: "Explore apps where you can earn B3TR tokens doing better actions.",
-  },
-  {
-    name: "Allocations",
-    onClick: "/allocations",
-    isVisible: true,
-    icon: LiaChartPieSolid,
-    description: "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
-  },
-  {
-    name: "B3MO Quests",
-    onClick: "/b3mo-quests",
-    isVisible: true,
-    icon: LuTrophy,
+    subRoutes: [
+      {
+        name: "Explore",
+        description: "Explore apps where you can earn B3TR tokens doing better actions.",
+        onClick: "/apps",
+      },
+      {
+        name: "Allocation Rounds",
+        description: "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
+        onClick: "/allocations",
+      },
+    ],
   },
   {
     name: "Governance",
     onClick: "/proposals",
     isVisible: true,
-    icon: LiaBalanceScaleSolid,
+    icon: LuLandmark,
     description: "Create and vote on proposals with your VOT3 tokens to make changes on the ecosystem.",
     subRoutes: [
+      {
+        name: "Navigators",
+        description: "Browse and delegate to professional voting delegates.",
+        onClick: "/navigators",
+      },
       {
         name: "Proposals",
         description: "Propose your ideas and let the community decide!",
@@ -64,8 +65,22 @@ export const Routes: Route[] = [
       },
     ],
   },
-  { name: "Profile", onClick: "/profile", isVisible: true, icon: FaUser },
-  { name: "GM", onClick: "/galaxy-member", isVisible: true, icon: LuCrown },
-  { name: "Nodes", onClick: "/nodes", isVisible: true, icon: LuStar },
+  {
+    name: "B3MO Quests",
+    onClick: "/b3mo-quests",
+    isVisible: true,
+    icon: LuTrophy,
+  },
+  {
+    name: "Profile",
+    onClick: "/profile",
+    isVisible: true,
+    icon: LuUser,
+    subRoutes: [
+      { name: "My Profile", description: "View your profile, activity and stats", onClick: "/profile" },
+      { name: "GM", description: "Manage your Galaxy Member NFT for extra rewards", onClick: "/galaxy-member" },
+      { name: "Nodes", description: "Manage your VeChain nodes and endorse apps", onClick: "/nodes" },
+    ],
+  },
   { name: "Admin", onClick: "/admin", isVisible: true, icon: LuSettings },
 ]

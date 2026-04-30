@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress as `0x${string}`

@@ -22,6 +22,11 @@ export enum ActivityType {
   USER_ALLOCATION_VOTE_CAST = "USER_ALLOCATION_VOTE_CAST",
   USER_PROPOSAL_VOTE_CAST = "USER_PROPOSAL_VOTE_CAST",
   USER_PROPOSAL_SUPPORT = "USER_PROPOSAL_SUPPORT",
+  NAVIGATOR_JOINED = "NAVIGATOR_JOINED",
+  NAVIGATOR_EXIT_ANNOUNCED = "NAVIGATOR_EXIT_ANNOUNCED",
+  NAVIGATOR_EXITED = "NAVIGATOR_EXITED",
+  USER_NAVIGATOR_EXIT_ANNOUNCED = "USER_NAVIGATOR_EXIT_ANNOUNCED",
+  USER_NAVIGATOR_EXITED = "USER_NAVIGATOR_EXITED",
 }
 
 export type ProposalActivityMeta = {
@@ -91,6 +96,18 @@ export type UserProposalSupportMeta = {
   proposalTitle: string
   amount: string
   proposalType: "grant" | "proposal"
+}
+
+export type NavigatorGlobalActivityMeta = {
+  count: number
+  navigators: { address: string }[]
+  totalStake?: string
+  effectiveDeadlineRoundId?: string
+}
+
+export type NavigatorPersonalActivityMeta = {
+  navigatorAddress: string
+  effectiveDeadlineRoundId?: string
 }
 
 export type ActivityItem =
@@ -178,4 +195,20 @@ export type ActivityItem =
       title: string
       description?: string
       metadata: UserProposalSupportMeta
+    }
+  | {
+      type: ActivityType.NAVIGATOR_JOINED | ActivityType.NAVIGATOR_EXIT_ANNOUNCED | ActivityType.NAVIGATOR_EXITED
+      date: number
+      roundId: string
+      title: string
+      description?: string
+      metadata: NavigatorGlobalActivityMeta
+    }
+  | {
+      type: ActivityType.USER_NAVIGATOR_EXIT_ANNOUNCED | ActivityType.USER_NAVIGATOR_EXITED
+      date: number
+      roundId: string
+      title: string
+      description?: string
+      metadata: NavigatorPersonalActivityMeta
     }

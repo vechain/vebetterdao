@@ -7,6 +7,8 @@ on:
       - main
       - testnet
       - feat/reduce-contracts-size
+      - feat/navigators
+      - feat/phase-2
   push:
     branches:
       - main
@@ -221,6 +223,26 @@ jobs:
             label: X-Apps Additional Tests B
           - shard: shard18
             label: RelayerRewardsPool
+          - shard: shard19a
+            label: Navigator Registry - Core
+          - shard: shard19b
+            label: Navigator - Delegation
+          - shard: shard19c
+            label: Navigator - Voting
+          - shard: shard19d
+            label: Navigator - Fees
+          - shard: shard19e
+            label: Navigator - Slashing
+          - shard: shard19f
+            label: Navigator - Lifecycle
+          - shard: shard19g
+            label: Navigator - Integration
+          - shard: shard19h
+            label: Navigator - Security
+          - shard: shard19i
+            label: Navigator - Staked Voting Power
+          - shard: shard20e2e
+            label: Navigator - Relayer E2E
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

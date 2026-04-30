@@ -37,6 +37,7 @@ export const generateMockE2EConfig = () => {
     tokenAuctionContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     x2EarnRewardsPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     dbaPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    navigatorRegistryContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "nodeManagementContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "veBetterPassportContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "challengesContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",

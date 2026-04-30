@@ -15,6 +15,8 @@ export enum BannerStorageKey {
   SHOW_DELEGATING = "SHOW_DELEGATING",
   SHOW_DO_ACTION = "SHOW_DO_ACTION",
   SHOW_ENDORSEMENT = "SHOW_ENDORSEMENT",
+  SHOW_FRESHNESS_MULTIPLIER = "SHOW_FRESHNESS_MULTIPLIER",
+  SHOW_NAVIGATORS = "SHOW_NAVIGATORS",
 }
 
 type BannerVariant = "default" | "b3mo"
@@ -58,6 +60,7 @@ type GenericBannerProps = {
   illustrationDimensions?: {
     width?: BoxProps["width"]
     height?: BoxProps["height"]
+    right?: BoxProps["right"]
   }
 } & ({ variant?: "default"; illustration?: string } | { variant: "b3mo"; illustration?: B3MOIllustration })
 
@@ -100,7 +103,7 @@ export const GenericBanner = ({
 
       <Flex
         position="absolute"
-        right={{ base: "4", md: "16" }}
+        right={illustrationDimensions?.right || { base: "4", md: "16" }}
         top="50%"
         transform="translateY(-50%)"
         w={illustrationDimensions?.width || (variant === "b3mo" ? "150px" : "128px")}
@@ -137,7 +140,7 @@ export const GenericBanner = ({
             {title}
           </Heading>
           {typeof description === "string" ? (
-            <Text textStyle={{ base: "sm", lg: "md" }} color="text.subtle">
+            <Text textStyle={{ base: "sm", lg: "md" }} color="text.subtle" lineClamp={{ base: 3, md: undefined }}>
               {description}
             </Text>
           ) : (

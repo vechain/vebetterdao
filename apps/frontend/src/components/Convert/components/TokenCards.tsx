@@ -6,7 +6,7 @@ import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
-import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "../../../hooks/useGetVot3UnlockedBalance"
 import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
@@ -25,7 +25,7 @@ export const TokenCards = ({
 }: Props) => {
   const { account } = useWallet()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: vot3Balance } = useGetVot3UnlockedBalance(account?.address ?? undefined)
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
   }, [b3trBalance?.scaled])

@@ -54,7 +54,7 @@ async function verifySingleContract(
     const tempDirName = `temp-verify-${contractAddress}`
     const tempDir = path.resolve(baseDir, tempDirName)
     const relativePath = path.relative(baseDir, tempDir)
-    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+    if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
       console.log(`   ✗ Invalid path`)
       return false
     }

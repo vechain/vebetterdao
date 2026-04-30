@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts/factories/B3TR__factory"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
 import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/factories/GalaxyMember__factory"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
 import { VOT3__factory } from "@vechain/vebetterdao-contracts/factories/VOT3__factory"
 import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"

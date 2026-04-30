@@ -17,7 +17,7 @@ import { useVotingThreshold } from "./useVotingThreshold"
 export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const { account } = useWallet()
   const parsedAccount = user ?? account?.address
-  const { data: roundId } = useCurrentAllocationsRoundId()
+  const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
   const { data: roundSnapshot, isLoading: roundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
@@ -46,6 +46,7 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   return {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,
     isLoading:
+      roundIdLoading ||
       isRoundDataPending ||
       roundInfoLoading ||
       hasVotedLoading ||

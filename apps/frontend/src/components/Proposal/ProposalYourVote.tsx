@@ -6,9 +6,9 @@ import { useTranslation } from "react-i18next"
 
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
+import { useGovernorVotesOnBlock } from "../../api/contracts/governance/hooks/useGovernorVotesOnBlock"
 import { useProposalSnapshot } from "../../api/contracts/governance/hooks/useProposalSnapshot"
 import { useUserSingleProposalVoteEvent } from "../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
-import { useGetVotesOnBlock } from "../../api/contracts/governance/hooks/useVotesOnBlock"
 import { useVotingThreshold } from "../../api/contracts/governance/hooks/useVotingThreshold"
 
 const forColor = "#3DBA67"
@@ -140,7 +140,7 @@ const NoVoteAndActiveCheckVotingPower = ({
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: snapshotBlock, isLoading: snapshotBlockloading } = useProposalSnapshot(proposalId)
-  const { data: userSnapshot, isLoading: userSnapshotLoading } = useGetVotesOnBlock(
+  const { data: userSnapshot, isLoading: userSnapshotLoading } = useGovernorVotesOnBlock(
     snapshotBlock ? Number(snapshotBlock) : undefined,
     account?.address ?? undefined,
   )

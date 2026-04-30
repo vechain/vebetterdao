@@ -1,4 +1,4 @@
-import { B3TR, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
+import { B3TR, NavigatorRegistry, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
 import { moveBlocks } from "../../test/helpers"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { distributeEmissions, startEmissions, toggleQuadraticRewarding } from "../helpers/emissions"
@@ -6,6 +6,7 @@ import { airdropB3trFromTreasury, airdropVTHO, transferErc20 } from "../helpers/
 import { convertB3trForVot3 } from "../helpers/swap"
 import { castVotesToXDapps } from "../helpers/xApp"
 import { claimVoterRewards } from "../helpers/voterRewards"
+import { seedNavigators } from "../helpers/navigators"
 import { getConfig } from "@repo/config"
 import { ethers } from "hardhat"
 import { whitelist } from "../helpers/ve-better-passport"
@@ -105,6 +106,9 @@ export const simulateRounds = async () => {
     // Convert B3TR for VOT3
     await convertB3trForVot3(b3tr, vot3, seedAccounts)
   }
+
+  // Seed navigators using the first 2 non-admin accounts
+  await seedNavigators(b3tr, vot3, accounts, config)
 
   const end = performance.now()
   console.log(`Simulation complete in ${end - start}ms`)

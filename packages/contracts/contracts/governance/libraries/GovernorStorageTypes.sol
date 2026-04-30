@@ -34,10 +34,22 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
+import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
+import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
 
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
 library GovernorStorageTypes {
+  // keccak256(abi.encode(uint256(keccak256("GovernorStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant GovernorStorageLocation = 0xd09a0aaf4ab3087bae7fa25ef74ddd4e5a4950980903ce417e66228cf7dc7b00;
+
+  /// @dev Returns the governor storage slot.
+  function getGovernorStorage() internal pure returns (GovernorStorage storage $) {
+    assembly {
+      $.slot := GovernorStorageLocation
+    }
+  }
+
   struct GovernorStorage {
     // ------------------------------- Version 1 -------------------------------
 
@@ -126,5 +138,13 @@ library GovernorStorageTypes {
     // - InDevelopment: Development phase is in progress
     // - Completed: Development phase is completed
     mapping(uint256 proposalId => GovernorTypes.ProposalDevelopmentState) proposalDevelopmentState;
+    // ------------------------------- Version 10 (navigator + relayer integration) -------------------------------
+    // NavigatorRegistry (navigator delegation voting); RelayerRewardsPool (governance vote action registration)
+    INavigatorRegistry navigatorRegistry;
+    IRelayerRewardsPool relayerRewardsPool;
+    // roundId => proposal IDs targeting that round (set at proposal creation)
+    mapping(uint256 => uint256[]) proposalsForRound;
+    // V10: configurable skip window for navigator governance vote skipping (blocks before proposal deadline)
+    uint256 governanceSkipWindowBlocks;
   }
 }

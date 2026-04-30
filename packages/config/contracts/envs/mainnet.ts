@@ -31,6 +31,7 @@ export function createMainnetConfig() {
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       Treasury: ["transferB3TR"],
       B3TRGovernor: ["upgradeToAndCall"],
+      NavigatorRegistry: ["deactivateNavigator"],
     },
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
@@ -159,6 +160,13 @@ export function createMainnetConfig() {
     GM_MULTIPLIERS_V2: [110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers according
     VOTER_REWARDS_LEVELS_V2: [2, 3, 4, 5, 6, 7, 8, 9, 10], // Voter rewards levels for the new GM multipliers
 
+    // Rewards Multipliers (basis points, 10000 = 1x)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1: 30000, // Updated this round (x3)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2: 20000, // Updated within 2 rounds (x2)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3: 10000, // No update >= 3 rounds (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST: 10000, // For/Against vote (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: 3000, // Abstain vote (x0.30)
+
     /*
       Level => B3TR Required (halved)
 
@@ -201,5 +209,18 @@ export function createMainnetConfig() {
       179381993472000000000000n,
     ],
     DBA_DISTRIBUTION_START_ROUND: 66,
+
+    // Navigator Registry
+    NAVIGATOR_MIN_STAKE: 50000n * 10n ** 18n, // 50,000 B3TR
+    NAVIGATOR_MAX_STAKE_PERCENTAGE: 100, // 1% of VOT3 supply
+    NAVIGATOR_FEE_LOCK_PERIOD: 4, // 4 rounds
+    NAVIGATOR_FEE_PERCENTAGE: 2000, // 20% in basis points
+    NAVIGATOR_EXIT_NOTICE_PERIOD: 1, // 1 round
+    NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
+    NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
+    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8640, // ~24hr at 10s/block
+
+    XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: 720, // 720 blocks (~2hr at 10s/block)
+    B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: 720, // 720 blocks (~2hr at 10s/block)
   })
 }

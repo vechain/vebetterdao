@@ -1,8 +1,8 @@
 import { ethers } from "hardhat"
 
 export const autoVotingLibraries = async () => {
-  const AutoVotingLogicFactory = await ethers.getContractFactory("AutoVotingLogic")
-  const AutoVotingLogic = await AutoVotingLogicFactory.deploy()
+  const AutoVotingLogicV8Factory = await ethers.getContractFactory("AutoVotingLogicV8")
+  const AutoVotingLogic = await AutoVotingLogicV8Factory.deploy()
   await AutoVotingLogic.waitForDeployment()
 
   return {

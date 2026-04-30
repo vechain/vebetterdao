@@ -2,7 +2,7 @@
 
 import { Box, HStack, Icon, Text, VStack, Badge, useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { Gift, Check, Xmark, StarSolid, Flash, RefreshDouble, InfoCircle, NavArrowRight } from "iconoir-react"
+import { Gift, Check, Xmark, StarSolid, Flash, RefreshDouble, InfoCircle, NavArrowRight, UserStar } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,7 +24,10 @@ type Props = {
   hadAutoVotingEnabled: boolean
   relayerFeePercentage: bigint
   unvotedProposalCount: number
+  totalProposalCount: number
   roundEndTimestamp: import("dayjs").Dayjs | null
+  isDelegating: boolean
+  navigatorFeePercentage: bigint
 }
 
 const REWARDS_EVENT_NAMES = ["B3TR_CLAIM_REWARD"] as const
@@ -66,7 +69,10 @@ const RewardsContent = ({
   hadAutoVotingEnabled,
   relayerFeePercentage,
   unvotedProposalCount,
+  totalProposalCount,
   roundEndTimestamp,
+  isDelegating,
+  navigatorFeePercentage,
 }: Omit<Props, "isOpen">) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -89,7 +95,8 @@ const RewardsContent = ({
     },
     [t],
   )
-  const hasVotedOnAllProposals = unvotedProposalCount === 0
+  const hasProposals = totalProposalCount > 0
+  const hasVotedOnAllProposals = hasProposals && unvotedProposalCount === 0
   const timeLeft = roundEndTimestamp ? timestampToTimeLeftCompact(roundEndTimestamp.valueOf()) : null
 
   return (
@@ -109,7 +116,12 @@ const RewardsContent = ({
             {reward.netGmReward > 0n && (
               <RewardLine label={t("From Galaxy Member NFT")} amount={fmt(reward.netGmReward)} />
             )}
-            {reward.fee > 0n && <RewardLine label={t("Auto-voting fee")} amount={fmt(reward.fee)} variant="fee" />}
+            {isDelegating && reward.navigatorFee > 0n && (
+              <RewardLine label={t("Navigator fee")} amount={fmt(reward.navigatorFee)} variant="fee" />
+            )}
+            {!isDelegating && reward.fee > 0n && (
+              <RewardLine label={t("Auto-voting fee")} amount={fmt(reward.fee)} variant="fee" />
+            )}
           </Box>
         </Box>
       )}
@@ -131,9 +143,11 @@ const RewardsContent = ({
 
       <VStack gap="1.5" align="stretch">
         <CheckItem label={t("Voted this round")} checked={hasVoted} />
-        <CheckItem label={t("Voted on all proposals")} checked={hasVotedOnAllProposals} />
+        {hasProposals && <CheckItem label={t("Voted on all proposals")} checked={hasVotedOnAllProposals} />}
         <CheckItem label={t("Own a Galaxy Member NFT")} checked={hasGmNft} />
       </VStack>
+
+      <ActivityList eventNames={[...REWARDS_EVENT_NAMES]} getActivityProps={getRewardsActivityProps} />
 
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle" mt="1">
         {t("How it works")}
@@ -198,7 +212,7 @@ const RewardsContent = ({
           </Icon>
         </HStack>
 
-        {hadAutoVotingEnabled && (
+        {hadAutoVotingEnabled && !isDelegating && (
           <HStack gap="3" p="3" rounded="lg" bg="card.subtle" align="start">
             <Icon boxSize="5" color="text.subtle" mt="0.5">
               <RefreshDouble />
@@ -210,6 +224,24 @@ const RewardsContent = ({
               <Text textStyle="xs" color="text.subtle">
                 {t("A {{fee}}% fee is deducted for the auto-voting service.", {
                   fee: relayerFeePercentage.toString(),
+                })}
+              </Text>
+            </VStack>
+          </HStack>
+        )}
+
+        {isDelegating && (
+          <HStack gap="3" p="3" rounded="lg" bg="card.subtle" align="start">
+            <Icon boxSize="5" color="text.subtle" mt="0.5">
+              <UserStar />
+            </Icon>
+            <VStack align="start" gap="0.5" flex={1}>
+              <Text textStyle="sm" fontWeight="semibold">
+                {t("Navigator fee")}
+              </Text>
+              <Text textStyle="xs" color="text.subtle">
+                {t("A {{fee}}% fee is deducted for the navigator service.", {
+                  fee: (navigatorFeePercentage / 100n).toString(),
                 })}
               </Text>
             </VStack>
@@ -239,8 +271,6 @@ const RewardsContent = ({
           </VStack>
         </HStack>
       </VStack>
-
-      <ActivityList eventNames={[...REWARDS_EVENT_NAMES]} getActivityProps={getRewardsActivityProps} />
     </VStack>
   )
 }

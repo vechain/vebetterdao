@@ -50,34 +50,33 @@ library GovernorGovernanceLogic {
   /**
    * @notice Get the address through which the governor executes actions.
    * @dev Returns the timelock address used by the governor.
-   * @param self The storage reference for the GovernorStorage.
    * @return The executor address.
    */
-  function executor(GovernorStorageTypes.GovernorStorage storage self) internal view returns (address) {
-    return address(self.timelock);
+  function executor() internal view returns (address) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    return address($.timelock);
   }
 
   /**
    * @notice Validates that the `msg.sender` is the executor.
    * @dev Reverts if the `msg.sender` is not the executor. If the executor is not the calling contract itself, it verifies that the `msg.data` is whitelisted.
-   * @param self The storage reference for the GovernorStorage.
    * @param sender The address of the sender.
    * @param data The calldata to be validated.
    * @param contractAddress The address of the calling governance contract.
    */
   function checkGovernance(
-    GovernorStorageTypes.GovernorStorage storage self,
     address sender,
     bytes calldata data,
     address contractAddress
   ) internal {
-    if (executor(self) != sender) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    if (executor() != sender) {
       revert GovernorOnlyExecutor(sender);
     }
-    if (executor(self) != contractAddress) {
+    if (executor() != contractAddress) {
       bytes32 msgDataHash = keccak256(data);
       // Loop until popping the expected operation, revert if deque is empty (operation not authorized)
-      while (self.governanceCall.popFront() != msgDataHash) {}
+      while ($.governanceCall.popFront() != msgDataHash) {}
     }
   }
 }

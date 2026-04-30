@@ -63,6 +63,7 @@ export async function overrideLocalConfigWithNewContracts(contracts: Awaited<Ret
     stargateNFTContractAddress: await contracts.stargateNFT.getAddress(),
     tokenAuctionContractAddress: await contracts.vechainNodesMock.getAddress(),
     relayerRewardsPoolContractAddress: await contracts.relayerRewardsPool.getAddress(),
+    navigatorRegistryContractAddress: await contracts.navigatorRegistry.getAddress(),
     b3trGovernorLibraries: {
       governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
       governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),

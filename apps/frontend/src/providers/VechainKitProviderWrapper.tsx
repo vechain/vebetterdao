@@ -131,6 +131,10 @@ export function VechainKitProviderWrapper({ children }: Props) {
         nodeUrl: getConfig().nodeUrl,
       }}
       allowCustomTokens={allowCustomTokens}
+      contractAddresses={{
+        b3trContractAddress: getConfig().b3trContractAddress,
+        vot3ContractAddress: getConfig().vot3ContractAddress,
+      }}
       legalDocuments={{
         termsAndConditions: [
           {

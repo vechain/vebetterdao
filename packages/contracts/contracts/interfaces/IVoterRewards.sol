@@ -315,4 +315,22 @@ interface IVoterRewards {
   /// @notice Disables quadratic rewarding
   /// @param _disableQuadraticRewarding The disable flag
   function disableQuadraticRewarding(bool _disableQuadraticRewarding) external;
+
+  // ======================== Rewards Multipliers (V7) ======================== //
+
+  /// @notice Returns freshness multiplier values at a given timepoint
+  /// @param timepoint The block number to query (typically round snapshot)
+  /// @return tier1 Basis points for "updated this round"
+  /// @return tier2 Basis points for "updated within 2 rounds"
+  /// @return tier3 Basis points for "no update >= 3 rounds"
+  function getFreshnessMultipliers(uint256 timepoint) external view returns (uint256 tier1, uint256 tier2, uint256 tier3);
+
+  /// @notice Returns governance intent multiplier values at a given timepoint
+  /// @param timepoint The block number to query (typically proposal snapshot)
+  /// @return forAgainst Basis points for For/Against votes
+  /// @return abstain Basis points for Abstain votes
+  function getIntentMultipliers(uint256 timepoint) external view returns (uint256 forAgainst, uint256 abstain);
+
+  /// @notice Returns the basis points scale constant (10000 = 1x)
+  function MULTIPLIER_SCALE() external view returns (uint256);
 }

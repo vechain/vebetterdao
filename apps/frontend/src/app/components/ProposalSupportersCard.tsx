@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { humanAddress, humanDomain, humanNumber } from "@repo/utils/FormattingUtils"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
 import dayjs from "dayjs"
 import { NavArrowDown, NavArrowLeft, NavArrowRight, NavArrowUp, SortDown, SortUp } from "iconoir-react"
 import { useMemo, useState } from "react"

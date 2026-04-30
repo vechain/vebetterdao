@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
 import { useThor } from "@vechain/vechain-kit"
 
 import { fetchContractEvents } from "../fetchContractEvents"

@@ -70,6 +70,7 @@ export type AppConfig = {
   stargateContractAddress: string
   grantsManagerContractAddress: string
   dbaPoolContractAddress: string
+  navigatorRegistryContractAddress: string
   veDelegateAutoDepositContractAddress: string
   nodeUrl: string
   indexerUrl?: string
