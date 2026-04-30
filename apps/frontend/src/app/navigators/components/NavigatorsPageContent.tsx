@@ -55,7 +55,7 @@ export const NavigatorsPageContent = () => {
   // useState initializer reads `isMobile` from useMediaQuery before it has hydrated,
   // which kept the card closed on desktop first-visit.
   const [stepsOpen, setStepsOpen] = useState<boolean | null>(null)
-  const open = stepsOpen !== null ? stepsOpen : !isMobile
+  const open = stepsOpen ?? false
 
   const onOpen = useCallback(() => setStepsOpen(true), [])
   const onClose = useCallback(() => {
@@ -74,12 +74,8 @@ export const NavigatorsPageContent = () => {
     } catch {
       // ignore
     }
-    if (dismissed) {
-      setStepsOpen(false)
-    } else {
-      setStepsOpen(!isMobile)
-    }
-  }, [isMobile])
+    setStepsOpen(!dismissed)
+  }, [])
 
   return (
     <VStack w="full" gap={8} pb={8}>
