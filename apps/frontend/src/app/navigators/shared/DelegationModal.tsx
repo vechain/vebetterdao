@@ -463,7 +463,8 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
               onCheckedChange={e => setAckAll(!!e.checked)}
               colorPalette="blue"
               alignItems="flex-start"
-              gap={3}>
+              gap={3}
+              pl={5}>
               <Checkbox.HiddenInput />
               <Checkbox.Control mt="0.5" />
               <Checkbox.Label>
