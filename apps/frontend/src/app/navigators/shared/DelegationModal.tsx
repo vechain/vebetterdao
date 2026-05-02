@@ -59,10 +59,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
 
   const [amount, setAmount] = useState("")
-  const [ackVoting, setAckVoting] = useState(false)
-  const [ackLocked, setAckLocked] = useState(false)
-  const [ackFee, setAckFee] = useState(false)
-  const [ackEligibility, setAckEligibility] = useState(false)
+  const [ackAll, setAckAll] = useState(false)
 
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = isDelegated && currentNavigator?.toLowerCase() === nav.address.toLowerCase()
@@ -75,10 +72,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
   useEffect(() => {
     if (!isOpen) return
-    setAckVoting(false)
-    setAckLocked(false)
-    setAckFee(false)
-    setAckEligibility(false)
+    setAckAll(false)
 
     if (mode === "manage") {
       setAmount(exitMode ? "0" : currentDelegatedNum.toString())
@@ -139,8 +133,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     if (mode === "new" || mode === "switch") {
       if (!amount || amount === "." || amountNum === 0) return false
       if (mode === "new") {
-        const allAcked = ackVoting && ackLocked && ackFee && ackEligibility
-        return allAcked
+        return ackAll
       }
       return true
     }
@@ -153,10 +146,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     exceedsCapacity,
     exceedsBalance,
     violatesMinDelegation,
-    ackVoting,
-    ackLocked,
-    ackFee,
-    ackEligibility,
+    ackAll,
     manageValidation.hasChanged,
   ])
 
@@ -421,73 +411,64 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           />
         )}
 
-        {/* Acknowledgment checkboxes for first-time delegators */}
+        {/* Acknowledgment for first-time delegators */}
         {mode === "new" && (
           <VStack gap={3} align="stretch" w="full">
-            <Checkbox.Root
-              checked={ackVoting}
-              onCheckedChange={e => setAckVoting(!!e.checked)}
-              colorPalette="blue"
-              alignItems="flex-start"
-              gap={3}>
-              <Checkbox.HiddenInput />
-              <Checkbox.Control mt="1" />
-              <Checkbox.Label>
-                <Text textStyle="xs" lineHeight="1.2">
-                  {t(
-                    "I acknowledge that the navigator will vote on governance proposals and app allocation rounds on my behalf. I will not be able to vote manually while delegated.",
-                  )}
+            <Card.Root w="full" p={4} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+              <VStack align="start" gap={2}>
+                <Text textStyle="xs" fontWeight="semibold">
+                  {t("By delegating, you agree that:")}
                 </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
+                <VStack align="start" gap={1.5} pl={1}>
+                  <HStack gap={2} align="flex-start">
+                    <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                      {"1."}
+                    </Text>
+                    <Text textStyle="xs" color="fg.muted">
+                      {t("The navigator votes on your behalf. You cannot vote manually while delegated.")}
+                    </Text>
+                  </HStack>
+                  <HStack gap={2} align="flex-start">
+                    <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                      {"2."}
+                    </Text>
+                    <Text textStyle="xs" color="fg.muted">
+                      {t("Your delegated VOT3 is locked until you undelegate. It never leaves your wallet.")}
+                    </Text>
+                  </HStack>
+                  <HStack gap={2} align="flex-start">
+                    <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                      {"3."}
+                    </Text>
+                    <Text textStyle="xs" color="fg.muted">
+                      {t("The navigator receives 20% of your earned rewards as a fee.")}
+                    </Text>
+                  </HStack>
+                  <HStack gap={2} align="flex-start">
+                    <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                      {"4."}
+                    </Text>
+                    <Text textStyle="xs" color="fg.muted">
+                      {t(
+                        "You must remain eligible for voting (e.g. by performing sustainable actions) or your vote will be skipped.",
+                      )}
+                    </Text>
+                  </HStack>
+                </VStack>
+              </VStack>
+            </Card.Root>
 
             <Checkbox.Root
-              checked={ackLocked}
-              onCheckedChange={e => setAckLocked(!!e.checked)}
+              checked={ackAll}
+              onCheckedChange={e => setAckAll(!!e.checked)}
               colorPalette="blue"
               alignItems="flex-start"
               gap={3}>
               <Checkbox.HiddenInput />
-              <Checkbox.Control mt="1" />
+              <Checkbox.Control mt="0.5" />
               <Checkbox.Label>
-                <Text textStyle="xs" lineHeight="1.2">
-                  {t(
-                    "I acknowledge that my delegated VOT3 cannot be transferred or converted back to B3TR until I undelegate. My VOT3 never leaves my wallet.",
-                  )}
-                </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
-
-            <Checkbox.Root
-              checked={ackFee}
-              onCheckedChange={e => setAckFee(!!e.checked)}
-              colorPalette="blue"
-              alignItems="flex-start"
-              gap={3}>
-              <Checkbox.HiddenInput />
-              <Checkbox.Control mt="1" />
-              <Checkbox.Label>
-                <Text textStyle="xs" lineHeight="1.2">
-                  {t(
-                    "I acknowledge that the navigator receives 20% of my earned rewards as a fee, deducted automatically when rewards are claimed.",
-                  )}
-                </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
-
-            <Checkbox.Root
-              checked={ackEligibility}
-              onCheckedChange={e => setAckEligibility(!!e.checked)}
-              colorPalette="blue"
-              alignItems="flex-start"
-              gap={3}>
-              <Checkbox.HiddenInput />
-              <Checkbox.Control mt="1" />
-              <Checkbox.Label>
-                <Text textStyle="xs" lineHeight="1.2">
-                  {t(
-                    "I acknowledge that I must remain eligible for voting (e.g. by performing sustainable actions) otherwise my vote will be skipped and I will not earn rewards for that round.",
-                  )}
+                <Text textStyle="xs" fontWeight="semibold">
+                  {t("I understand and agree to the above")}
                 </Text>
               </Checkbox.Label>
             </Checkbox.Root>
