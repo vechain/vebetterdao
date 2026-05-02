@@ -527,6 +527,115 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
     })
   })
 
+  // ======================== Passport validation for castNavigatorVote ======================== //
+
+  describe("castNavigatorVote passport validation", function () {
+    it("XAllocationVoting: skips vote when citizen has no valid passport", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      await navigatorRegistry.connect(navigator).setAllocationPreferences(roundId, [app1Id, app2Id], [6000, 4000])
+
+      // Remove citizen from whitelist so they fail personhood
+      await veBetterPassport.removeFromWhitelist(citizen.address)
+
+      const totalActionsBefore = await relayerRewardsPool.totalActions(roundId)
+
+      // Should skip (emit NavigatorVoteSkipped), not revert
+      await expect(xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)).to.emit(
+        xAllocationVoting,
+        "NavigatorVoteSkipped",
+      )
+
+      // Citizen should NOT have voted
+      expect(await xAllocationVoting.hasVoted(roundId, citizen.address)).to.be.false
+
+      // Expected actions reduced (vote + auto-claim)
+      expect(await relayerRewardsPool.totalActions(roundId)).to.be.lt(totalActionsBefore)
+    })
+
+    it("B3TRGovernor: skips vote when citizen has no valid passport", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      await getVot3Tokens(owner, "300000")
+      await waitForNextBlock()
+
+      const tx = await createProposal(b3tr, await ethers.getContractFactory("B3TR"), owner, "Passport test proposal")
+      const proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId.toString(), owner)
+      await waitForProposalToBeActive(proposalId as any)
+
+      await navigatorRegistry.connect(navigator).setProposalDecision(proposalId, 2)
+
+      // Remove citizen from whitelist so they fail personhood
+      await veBetterPassport.removeFromWhitelist(citizen.address)
+
+      // Should skip (emit NavigatorGovernanceVoteSkipped), not revert
+      const voteTx = await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
+      const receipt = await voteTx.wait()
+
+      const libraryInterface = GovernorVotesLogic__factory.createInterface()
+      const event = receipt?.logs
+        .map(log => {
+          try {
+            return libraryInterface.parseLog({ topics: [...log.topics], data: log.data })
+          } catch {
+            return null
+          }
+        })
+        .find(e => e?.name === "NavigatorGovernanceVoteSkipped")
+
+      expect(event).to.not.be.undefined
+
+      // Citizen should NOT have voted
+      expect(await governor.hasVoted(proposalId, citizen.address)).to.be.false
+    })
+
+    it("relayer is not penalized when citizen passport is invalid", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      await navigatorRegistry.connect(navigator).setAllocationPreferences(roundId, [app1Id, app2Id], [6000, 4000])
+
+      // Remove citizen from whitelist
+      await veBetterPassport.removeFromWhitelist(citizen.address)
+
+      // Relayer can still call castNavigatorVote without reverting
+      // (skip reduces expected actions so relayer doesn't lose rewards for unperformable actions)
+      await expect(xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)).to.not.be.reverted
+    })
+
+    it("citizen with valid passport can still vote normally via navigator", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      await navigatorRegistry.connect(navigator).setAllocationPreferences(roundId, [app1Id, app2Id], [6000, 4000])
+
+      // Citizen is whitelisted (from setupFullEcosystem) — should vote normally
+      await xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)
+
+      expect(await xAllocationVoting.hasVoted(roundId, citizen.address)).to.be.true
+      expect(await xAllocationVoting.totalVotes(roundId)).to.equal(DELEGATE_AMOUNT)
+    })
+  })
+
   // ======================== 3. VoterRewards: fee deduction ======================== //
 
   describe("VoterRewards fee deduction", function () {

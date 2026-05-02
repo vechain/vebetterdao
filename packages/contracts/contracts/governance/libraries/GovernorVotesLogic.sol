@@ -295,10 +295,11 @@ library GovernorVotesLogic {
    *
    * Decision flow:
    *   1. Navigator dead at snapshot → revert (citizen not delegated)
-   *   2. Navigator dead NOW → skip immediately, reduce governance vote expectation
-   *   3. Navigator alive + decision set → vote normally
-   *   4. Navigator alive + no decision + skip window reached → skip
-   *   5. Navigator alive + no decision + skip window NOT reached → revert (relayer retries later)
+   *   2. Citizen not a person at snapshot → skip, reduce governance vote expectation
+   *   3. Navigator dead NOW → skip immediately, reduce governance vote expectation
+   *   4. Navigator alive + decision set → vote normally
+   *   5. Navigator alive + no decision + skip window reached → skip
+   *   6. Navigator alive + no decision + skip window NOT reached → revert (relayer retries later)
    */
   function castNavigatorVote(uint256 proposalId, address citizen) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
@@ -312,6 +313,19 @@ library GovernorVotesLogic {
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
     uint256 roundId = $.proposals[proposalId].roundIdVoteStart;
+
+    // Citizen without valid passport → skip (same pattern as auto-voting)
+    (bool isPerson, ) = $.veBetterPassport.isPersonAtTimepoint(
+      citizen,
+      SafeCast.toUint48(proposalSnapshot)
+    );
+    if (!isPerson) {
+      if (address($.relayerRewardsPool) != address(0)) {
+        $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
+      }
+      emit NavigatorGovernanceVoteSkipped(citizen, navigator, proposalId);
+      return 0;
+    }
 
     // Dead navigator → skip immediately
     if ($.navigatorRegistry.isDeactivated(navigator)) {

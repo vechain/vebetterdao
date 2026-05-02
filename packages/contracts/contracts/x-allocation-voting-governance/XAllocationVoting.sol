@@ -280,10 +280,11 @@ contract XAllocationVoting is
    *
    * Decision flow:
    *   1. Navigator dead at snapshot → revert (citizen not delegated)
-   *   2. Navigator dead NOW → skip immediately, reduce allocation vote expectation
-   *   3. Navigator alive + preferences set → vote normally
-   *   4. Navigator alive + no preferences + skip window reached → skip
-   *   5. Navigator alive + no preferences + skip window NOT reached → revert (relayer retries later)
+   *   2. Citizen not a person at snapshot → skip, reduce allocation vote expectation
+   *   3. Navigator dead NOW → skip immediately, reduce allocation vote expectation
+   *   4. Navigator alive + preferences set → vote normally
+   *   5. Navigator alive + no preferences + skip window reached → skip
+   *   6. Navigator alive + no preferences + skip window NOT reached → revert (relayer retries later)
    */
   function castNavigatorVote(address citizen, uint256 roundId) public {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
@@ -298,6 +299,17 @@ contract XAllocationVoting is
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
     IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
+
+    // Citizen without valid passport → skip (same pattern as auto-voting)
+    (bool isPerson, ) = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._veBetterPassport
+      .isPersonAtTimepoint(citizen, SafeCast.toUint48(snapshot));
+    if (!isPerson) {
+      pool.reduceUserAllocationVote(roundId, citizen);
+      emit NavigatorVoteSkipped(citizen, navigator, roundId);
+      return;
+    }
 
     // Dead navigator → skip immediately
     if (_isNavigatorDead(navigator)) {

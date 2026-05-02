@@ -62,6 +62,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const [ackVoting, setAckVoting] = useState(false)
   const [ackLocked, setAckLocked] = useState(false)
   const [ackFee, setAckFee] = useState(false)
+  const [ackEligibility, setAckEligibility] = useState(false)
 
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = isDelegated && currentNavigator?.toLowerCase() === nav.address.toLowerCase()
@@ -77,6 +78,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     setAckVoting(false)
     setAckLocked(false)
     setAckFee(false)
+    setAckEligibility(false)
 
     if (mode === "manage") {
       setAmount(exitMode ? "0" : currentDelegatedNum.toString())
@@ -137,7 +139,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     if (mode === "new" || mode === "switch") {
       if (!amount || amount === "." || amountNum === 0) return false
       if (mode === "new") {
-        const allAcked = ackVoting && ackLocked && ackFee
+        const allAcked = ackVoting && ackLocked && ackFee && ackEligibility
         return allAcked
       }
       return true
@@ -154,6 +156,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     ackVoting,
     ackLocked,
     ackFee,
+    ackEligibility,
     manageValidation.hasChanged,
   ])
 
@@ -467,6 +470,23 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                 <Text textStyle="xs" lineHeight="1.2">
                   {t(
                     "I acknowledge that the navigator receives 20% of my earned rewards as a fee, deducted automatically when rewards are claimed.",
+                  )}
+                </Text>
+              </Checkbox.Label>
+            </Checkbox.Root>
+
+            <Checkbox.Root
+              checked={ackEligibility}
+              onCheckedChange={e => setAckEligibility(!!e.checked)}
+              colorPalette="blue"
+              alignItems="flex-start"
+              gap={3}>
+              <Checkbox.HiddenInput />
+              <Checkbox.Control mt="1" />
+              <Checkbox.Label>
+                <Text textStyle="xs" lineHeight="1.2">
+                  {t(
+                    "I acknowledge that I must remain eligible for voting (e.g. by performing sustainable actions) otherwise my vote will be skipped and I will not earn rewards for that round.",
                   )}
                 </Text>
               </Checkbox.Label>
