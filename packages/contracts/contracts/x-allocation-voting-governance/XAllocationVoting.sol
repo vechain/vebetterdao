@@ -280,11 +280,11 @@ contract XAllocationVoting is
    *
    * Decision flow:
    *   1. Navigator dead at snapshot → revert (citizen not delegated)
-   *   2. Citizen not a person at snapshot → skip, reduce allocation vote expectation
-   *   3. Navigator dead NOW → skip immediately, reduce allocation vote expectation
-   *   4. Navigator alive + preferences set → vote normally
-   *   5. Navigator alive + no preferences + skip window reached → skip
-   *   6. Navigator alive + no preferences + skip window NOT reached → revert (relayer retries later)
+   *   2. Navigator dead NOW → skip immediately, reduce allocation vote expectation
+   *   3. Navigator alive + no preferences + skip window NOT reached → revert (relayer retries later)
+   *   4. Navigator alive + no preferences + skip window reached → skip
+   *   5. Navigator alive + preferences set + citizen not a person → skip
+   *   6. Navigator alive + preferences set + citizen is a person → vote normally
    */
   function castNavigatorVote(address citizen, uint256 roundId) public {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
@@ -300,18 +300,7 @@ contract XAllocationVoting is
 
     IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
 
-    // Citizen without valid passport → skip (same pattern as auto-voting)
-    (bool isPerson, ) = XAllocationVotingStorageTypes
-      ._getExternalContractsStorage()
-      ._veBetterPassport
-      .isPersonAtTimepoint(citizen, SafeCast.toUint48(snapshot));
-    if (!isPerson) {
-      pool.reduceUserAllocationVote(roundId, citizen);
-      emit NavigatorVoteSkipped(citizen, navigator, roundId);
-      return;
-    }
-
-    // Dead navigator → skip immediately
+    // Dead navigator → skip immediately (navigator can't act, personhood irrelevant)
     if (_isNavigatorDead(navigator)) {
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
@@ -320,7 +309,19 @@ contract XAllocationVoting is
 
     // Navigator alive — check preferences
     if (!navigatorRegistryContract.hasSetPreferences(navigator, roundId)) {
+      // No preferences → skip only after window (navigator failed to act, personhood irrelevant)
       _validateSkipWindow(roundId);
+      pool.reduceUserAllocationVote(roundId, citizen);
+      emit NavigatorVoteSkipped(citizen, navigator, roundId);
+      return;
+    }
+
+    // Preferences set — check personhood before casting the actual vote
+    (bool isPerson, ) = XAllocationVotingStorageTypes
+      ._getExternalContractsStorage()
+      ._veBetterPassport
+      .isPersonAtTimepoint(citizen, SafeCast.toUint48(snapshot));
+    if (!isPerson) {
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
       return;

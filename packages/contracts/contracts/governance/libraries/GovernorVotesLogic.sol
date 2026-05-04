@@ -295,11 +295,11 @@ library GovernorVotesLogic {
    *
    * Decision flow:
    *   1. Navigator dead at snapshot → revert (citizen not delegated)
-   *   2. Citizen not a person at snapshot → skip, reduce governance vote expectation
-   *   3. Navigator dead NOW → skip immediately, reduce governance vote expectation
-   *   4. Navigator alive + decision set → vote normally
-   *   5. Navigator alive + no decision + skip window reached → skip
-   *   6. Navigator alive + no decision + skip window NOT reached → revert (relayer retries later)
+   *   2. Navigator dead NOW → skip immediately, reduce governance vote expectation
+   *   3. Navigator alive + no decision + skip window NOT reached → revert (relayer retries later)
+   *   4. Navigator alive + no decision + skip window reached → skip
+   *   5. Navigator alive + decision set + citizen not a person → skip
+   *   6. Navigator alive + decision set + citizen is a person → vote normally
    */
   function castNavigatorVote(uint256 proposalId, address citizen) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
@@ -314,17 +314,7 @@ library GovernorVotesLogic {
 
     uint256 roundId = $.proposals[proposalId].roundIdVoteStart;
 
-    // Citizen without valid passport → skip (same pattern as auto-voting)
-    (bool isPerson, ) = $.veBetterPassport.isPersonAtTimepoint(citizen, SafeCast.toUint48(proposalSnapshot));
-    if (!isPerson) {
-      if (address($.relayerRewardsPool) != address(0)) {
-        $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
-      }
-      emit NavigatorGovernanceVoteSkipped(citizen, navigator, proposalId);
-      return 0;
-    }
-
-    // Dead navigator → skip immediately
+    // Dead navigator → skip immediately (navigator can't act, personhood irrelevant)
     if ($.navigatorRegistry.isDeactivated(navigator)) {
       if (address($.relayerRewardsPool) != address(0)) {
         $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
@@ -335,11 +325,21 @@ library GovernorVotesLogic {
 
     // Navigator alive — check decision
     if (!$.navigatorRegistry.hasSetDecision(navigator, proposalId)) {
-      // No decision set — skip only after window
+      // No decision set — skip only after window (navigator failed to act, personhood irrelevant)
       uint256 deadline = GovernorProposalLogic._proposalDeadline(proposalId);
       if (block.number + GovernorConfigurator.governanceSkipWindowBlocks() < deadline) {
         revert GovernanceSkipWindowNotReached(proposalId);
       }
+      if (address($.relayerRewardsPool) != address(0)) {
+        $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
+      }
+      emit NavigatorGovernanceVoteSkipped(citizen, navigator, proposalId);
+      return 0;
+    }
+
+    // Decision set — check personhood before casting the actual vote
+    (bool isPerson, ) = $.veBetterPassport.isPersonAtTimepoint(citizen, SafeCast.toUint48(proposalSnapshot));
+    if (!isPerson) {
       if (address($.relayerRewardsPool) != address(0)) {
         $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
       }
