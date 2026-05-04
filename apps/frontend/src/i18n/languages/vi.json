@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "Tối thiểu: {{min}} B3TR",
   "Mine": "Của tôi",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Cần tối thiểu {{min}} B3TR để duy trì dung lượng ủy quyền",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "Chưa đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Đạt <Link>quorum</Link> tối thiểu ({{quorumNumerator}}%)",
   "Minimum actions": "Hành động tối thiểu",
   "Minimum actions must be greater than 0": "Hành động tối thiểu phải lớn hơn 0",

@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "最低：{{min}} B3TR",
   "Mine": "我的",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "維持委託容量需最低 {{min}} B3TR",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "未達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)",
   "Minimum actions": "最少操作數",
   "Minimum actions must be greater than 0": "最少操作數必須大於0",

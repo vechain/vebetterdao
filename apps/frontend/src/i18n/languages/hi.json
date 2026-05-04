@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "न्यूनतम: {{min}} B3TR",
   "Mine": "मेरे",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "डेलिगेशन क्षमता बनाए रखने के लिए न्यूनतम {{min}} B3TR आवश्यक है",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "न्यूनतम <Link>कोरम</Link> ({{quorumNumerator}}%) पूरा नहीं हुआ",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "न्यूनतम <Link>कोरम</Link> ({{quorumNumerator}}%) पूरा हुआ",
   "Minimum actions": "न्यूनतम क्रियाएं",
   "Minimum actions must be greater than 0": "न्यूनतम क्रियाएं 0 से अधिक होनी चाहिए",

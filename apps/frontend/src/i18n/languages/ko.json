@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "최소: {{min}} B3TR",
   "Mine": "내 것",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "위임 용량을 유지하려면 최소 {{min}} B3TR이 필요합니다",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "최소 <Link>정족수</Link> ({{quorumNumerator}}%) 미달성",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "최소 <Link>정족수</Link> ({{quorumNumerator}}%) 달성",
   "Minimum actions": "최소 액션",
   "Minimum actions must be greater than 0": "최소 액션은 0보다 커야 합니다",

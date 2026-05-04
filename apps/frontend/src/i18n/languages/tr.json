@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "Min: {{min}} B3TR",
   "Mine": "Benimkiler",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Delegasyon kapasitesini korumak için en az {{min}} B3TR gereklidir",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlanmadı",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı",
   "Minimum actions": "Minimum eylemler",
   "Minimum actions must be greater than 0": "Minimum eylemler 0'dan büyük olmalıdır",

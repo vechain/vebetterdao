@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "Min: {{min}} B3TR",
   "Mine": "Le mie",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Minimo {{min}} B3TR richiesti per mantenere la capacità di delega",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "<Link>Quorum</Link> minimo ({{quorumNumerator}}%) non raggiunto",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Raggiunto il <Link>quorum</Link> minimo ({{quorumNumerator}}%)",
   "Minimum actions": "Azioni minime",
   "Minimum actions must be greater than 0": "Le azioni minime devono essere maggiori di 0",

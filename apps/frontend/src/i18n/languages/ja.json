@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "最小: {{min}} B3TR",
   "Mine": "自分の",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "委任容量を維持するには最低 {{min}} B3TR が必要です",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達していません",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達しました",
   "Minimum actions": "最小アクション数",
   "Minimum actions must be greater than 0": "最小アクション数は0より大きくなければなりません",

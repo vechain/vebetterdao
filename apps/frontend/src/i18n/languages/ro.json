@@ -1362,6 +1362,7 @@
   "Min: {{min}} B3TR": "Min: {{min}} B3TR",
   "Mine": "Ale mele",
   "Minimum {{min}} B3TR required to maintain delegation capacity": "Minimum {{min}} B3TR necesar pentru a mentine capacitatea de delegare",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached": "<Link>Cvorumul</Link> minim ({{quorumNumerator}}%) neatins",
   "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>Cvorumul</Link> minim ({{quorumNumerator}}%) atins",
   "Minimum actions": "Acțiuni minime",
   "Minimum actions must be greater than 0": "Acțiunile minime trebuie să fie mai mari de 0",

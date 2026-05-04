@@ -1,29 +1,40 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
 import { ProposalType } from "@/hooks/proposals/grants/types"
 
 const address = getConfig().b3trGovernorAddress as `0x${string}`
-const abi = B3TRGovernor__factory.abi
+const abi = [
+  {
+    inputs: [
+      { internalType: "uint256", name: "timepoint", type: "uint256" },
+      { internalType: "enum GovernorTypes.ProposalType", name: "proposalTypeValue", type: "uint8" },
+    ],
+    name: "quorumNumeratorByProposalType",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const
 const method = "quorumNumeratorByProposalType" as const
 
-export const getProposalQuorumNumeratorByTypeQueryKey = (proposalType: ProposalType) =>
-  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [proposalType] })
+export const getProposalQuorumNumeratorByTypeQueryKey = (blockNumber: number, proposalType: ProposalType) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [blockNumber, proposalType] })
 
 /**
- * @dev This hook is used to get the proposal quorum numerator by proposal type, which is the percentage of votes required to pass a proposal.
- * Returns the query key for fetching the proposal quorum numerator by proposal type.
+ * @dev Gets the quorum numerator (%) for a proposal type at a specific timepoint (block number).
+ * Uses the checkpoint-based overload so the value reflects governance settings at that block.
+ * @param blockNumber The block number (proposal.voteStart / snapshot)
  * @param proposalType The type of proposal
- * @returns The query key for fetching the proposal quorum numerator by proposal type.
  */
-export const useProposalQuorumNumeratorByType = (proposalType: ProposalType) => {
+export const useProposalQuorumNumeratorByType = (blockNumber: number, proposalType: ProposalType) => {
   return useCallClause({
     abi,
     address,
     method,
-    args: [proposalType],
+    args: [blockNumber, proposalType],
     queryOptions: {
+      enabled: !!blockNumber,
       select: data => data[0],
     },
   })
