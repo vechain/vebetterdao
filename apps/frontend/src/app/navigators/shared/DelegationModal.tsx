@@ -311,9 +311,10 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
             <HStack gap={3} align="flex-start">
               <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
               <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
-                {t("This navigator cannot receive new delegations until he/she stakes above {{amount}} B3TR.", {
-                  amount: formatter.format(Number(minStakeData?.scaled ?? 0)),
-                })}
+                {t(
+                  "This navigator's stake is below the minimum required amount of {{amount}} B3TR. They cannot receive new delegations and may be penalized.",
+                  { amount: formatter.format(Number(minStakeData?.scaled ?? 0)) },
+                )}
               </Text>
             </HStack>
           </Card.Root>

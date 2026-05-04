@@ -7,10 +7,12 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { LuFileText, LuGavel, LuShieldAlert, LuTriangleAlert, LuUsers, LuVote } from "react-icons/lu"
+import { LuCoins, LuFileText, LuGavel, LuShieldAlert, LuTriangleAlert, LuUsers, LuVote } from "react-icons/lu"
 
 import { useGetFeePercentage } from "@/api/contracts/navigatorRegistry/hooks/useGetFeePercentage"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
@@ -54,6 +56,9 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const { data: status } = useNavigatorStatus(navigatorAddress)
   const { data: delegationInfo } = useMyDelegationInfo(navigatorAddress)
   const { data: fee } = useGetFeePercentage()
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(navigatorAddress)
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
 
   const { rounds, roundVotesMap, slashedByRound } = useRoundsCompliance(navigatorAddress)
 
@@ -146,6 +151,19 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
                 </Icon>
                 <Text textStyle="xs" color="status.negative.primary" fontWeight="medium">
                   {t("This navigator was recently penalized for not fulfilling their duties.")}
+                </Text>
+              </HStack>
+            )}
+
+            {isBelowMinStake && (
+              <HStack gap={2} p={2} borderRadius="md" bg="status.warning.subtle">
+                <Icon boxSize={4} color="status.warning.primary">
+                  <LuCoins />
+                </Icon>
+                <Text textStyle="xs" color="status.warning.primary" fontWeight="medium">
+                  {t(
+                    "Your navigator's stake is below the minimum required. They may be penalized if it's not resolved.",
+                  )}
                 </Text>
               </HStack>
             )}

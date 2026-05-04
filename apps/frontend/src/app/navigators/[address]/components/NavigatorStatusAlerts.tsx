@@ -14,6 +14,7 @@ type Props = {
   isDelegatedHere: boolean
   isAtCapacity: boolean
   isBelowMinStake: boolean
+  wasBelowMinAtRoundStart: boolean
   minStakeScaled: string
   currentDelegatedNum: number
   displayName: string
@@ -26,6 +27,7 @@ export const NavigatorStatusAlerts = ({
   isDelegatedHere,
   isAtCapacity,
   isBelowMinStake,
+  wasBelowMinAtRoundStart,
   minStakeScaled,
   currentDelegatedNum,
   displayName,
@@ -79,13 +81,24 @@ export const NavigatorStatusAlerts = ({
           </Alert.Indicator>
           <Alert.Title textStyle="sm">
             {isOwnPage
-              ? t(
-                  "Your stake is below the minimum required amount of {{amount}} B3TR. You cannot receive new delegations until you increase your stake.",
-                  { amount: formatter.format(Number(minStakeScaled)) },
-                )
-              : t("This navigator cannot receive new delegations until he/she stakes above {{amount}} B3TR.", {
-                  amount: formatter.format(Number(minStakeScaled)),
-                })}
+              ? wasBelowMinAtRoundStart
+                ? t(
+                    "Your stake is below the minimum required amount of {{amount}} B3TR. You cannot receive new delegations and will be penalized at the end of the round if not resolved.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )
+                : t(
+                    "Your stake is below the minimum required amount of {{amount}} B3TR. You cannot receive new delegations until you increase your stake.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )
+              : wasBelowMinAtRoundStart
+                ? t(
+                    "This navigator's stake is below the minimum required amount of {{amount}} B3TR. They cannot receive new delegations and may be penalized.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )
+                : t(
+                    "This navigator's stake is below the minimum required amount of {{amount}} B3TR. They cannot receive new delegations.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )}
           </Alert.Title>
         </Alert.Root>
       )}

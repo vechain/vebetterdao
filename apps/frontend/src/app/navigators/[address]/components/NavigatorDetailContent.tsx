@@ -11,9 +11,11 @@ import { useGetMetadataURI } from "@/api/contracts/navigatorRegistry/hooks/useGe
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useGetStakedAmountAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetStakedAmountAtTimepoint"
 import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
@@ -71,6 +73,8 @@ export const NavigatorDetailContent = () => {
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(address)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: currentSnapshot } = useCurrentRoundSnapshot()
+  const { data: stakeAtSnapshot } = useGetStakedAmountAtTimepoint(address, currentSnapshot ?? undefined)
 
   const currentRoundReportURI = useMemo(() => {
     if (!reportEventsForEdit || !currentRoundId) return undefined
@@ -105,6 +109,8 @@ export const NavigatorDetailContent = () => {
   const isAtCapacity = Number(nav.stakeFormatted ?? 0) * 10 <= Number(nav.totalDelegatedFormatted ?? 0)
   const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
   const minStakeScaled = minStakeData?.scaled ?? "0"
+  const wasBelowMinAtRoundStart =
+    minStakeData && stakeAtSnapshot ? stakeAtSnapshot.raw > 0n && stakeAtSnapshot.raw < minStakeData.raw : false
 
   return (
     <VStack w="full" gap={6} align="stretch">
@@ -121,6 +127,7 @@ export const NavigatorDetailContent = () => {
         isDelegatedHere={isDelegatedHere}
         isAtCapacity={isAtCapacity}
         isBelowMinStake={isBelowMinStake}
+        wasBelowMinAtRoundStart={wasBelowMinAtRoundStart}
         minStakeScaled={minStakeScaled}
         currentDelegatedNum={currentDelegatedNum}
         displayName={displayName}
@@ -167,7 +174,11 @@ export const NavigatorDetailContent = () => {
           <Heading size="lg">{t("Tasks & Rewards")}</Heading>
           <Stack direction={{ base: "column", md: "row" }} gap={4} align="stretch" w="full">
             {(status === "ACTIVE" || status === "EXITING") && (
-              <NavigatorTaskList address={address} onSubmitReport={() => setIsReportOpen(true)} />
+              <NavigatorTaskList
+                address={address}
+                onSubmitReport={() => setIsReportOpen(true)}
+                onManageStakeClick={() => setIsManageStakeOpen(true)}
+              />
             )}
             <NavigatorRewardsCard address={address} />
           </Stack>

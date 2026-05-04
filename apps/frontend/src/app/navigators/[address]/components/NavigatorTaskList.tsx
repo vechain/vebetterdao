@@ -7,6 +7,7 @@ import {
   LuCheck,
   LuCircle,
   LuClock,
+  LuCoins,
   LuEye,
   LuFileText,
   LuGavel,
@@ -17,14 +18,18 @@ import {
 } from "react-icons/lu"
 
 import { useGetLastReportRound } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetPreferenceCutoffPeriod } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferenceCutoffPeriod"
 import { useGetPreferencesSetBlock } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferencesSetBlock"
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useGetStakedAmountAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetStakedAmountAtTimepoint"
 import { useHasSetDecisions } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecisions"
 import { useHasSetPreferences } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
 import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { useCurrentAllocationsRoundDeadline } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useIsNavigatorRegistrationRound } from "@/hooks/navigator/useIsNavigatorRegistrationRound"
 import { useNavigatorCutoffDeadline } from "@/hooks/navigator/useNavigatorCutoffDeadline"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
@@ -36,9 +41,10 @@ import { ViewReportModal } from "./modals/ViewReportModal"
 type Props = {
   address: string
   onSubmitReport: () => void
+  onManageStakeClick: () => void
 }
 
-export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
+export const NavigatorTaskList = ({ address, onSubmitReport, onManageStakeClick }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const [isInfoOpen, setIsInfoOpen] = useState(false)
@@ -51,8 +57,16 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
   const { data: lastReportRound } = useGetLastReportRound()
   const { data: reportInterval } = useGetReportInterval()
   const { data: reportEvents } = useNavigatorReportEvents(address)
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(address)
+  const { data: snapshot } = useCurrentRoundSnapshot()
+  const { data: stakeAtSnapshot } = useGetStakedAmountAtTimepoint(address, snapshot ?? undefined)
   const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
   const isRegistrationRound = useIsNavigatorRegistrationRound(address)
+  // Show stake task only if navigator was below min at round start
+  const wasBelowMinAtRoundStart =
+    minStakeData && stakeAtSnapshot ? stakeAtSnapshot.raw > 0n && stakeAtSnapshot.raw < minStakeData.raw : false
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
 
   const preferenceCutoffBlock = useMemo(() => {
     if (roundDeadlineBlock == null || preferenceCutoffPeriod == null) return null
@@ -83,7 +97,11 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
       : false
 
   const hasUnvotedProposals = activeProposals.some(p => !decisionsMap?.[p.id])
-  const hasPendingTasks = !hasSetPrefs || (isReportMandatory && !hasReportThisRound) || hasUnvotedProposals
+  const hasPendingTasks =
+    !hasSetPrefs ||
+    (isReportMandatory && !hasReportThisRound) ||
+    hasUnvotedProposals ||
+    (wasBelowMinAtRoundStart && isBelowMinStake)
 
   const currentRoundReportURI = useMemo(() => {
     if (!roundId) return undefined
@@ -191,6 +209,18 @@ export const NavigatorTaskList = ({ address, onSubmitReport }: Props) => {
                 onClick={() => router.push(`/proposals/${proposal.id}`)}
               />
             ))}
+
+            {wasBelowMinAtRoundStart && (
+              <TaskItem
+                done={!isBelowMinStake}
+                overdue={isBelowMinStake}
+                icon={<LuCoins />}
+                label={isBelowMinStake ? t("Stake below minimum") : t("Stake above minimum")}
+                doneLabel={t("Stake OK")}
+                pendingLabel={t("Action Required")}
+                onClick={isBelowMinStake ? onManageStakeClick : undefined}
+              />
+            )}
 
             <TaskItem
               done={hasReportThisRound}

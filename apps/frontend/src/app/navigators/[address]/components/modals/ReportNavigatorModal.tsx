@@ -1,10 +1,10 @@
 "use client"
 
-import { Button, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuFileText, LuFlag, LuGavel, LuTriangleAlert, LuVote } from "react-icons/lu"
+import { LuCoins, LuFileText, LuFlag, LuGavel, LuTriangleAlert, LuVote } from "react-icons/lu"
 
 import { useGetMinorSlashPercentage } from "@/api/contracts/navigatorRegistry/hooks/useGetMinorSlashPercentage"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
@@ -30,6 +30,7 @@ const INFRACTION_ICON: Record<InfractionType, React.ReactNode> = {
   stalePreferences: <LuVote />,
   missedGovernanceVote: <LuGavel />,
   missedReport: <LuFileText />,
+  belowMinStake: <LuCoins />,
 }
 
 type Props = {
@@ -42,10 +43,13 @@ type Props = {
 export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infractions }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-  const { data: stake } = useGetStake(navigatorAddress)
-  const { data: slashBps } = useGetMinorSlashPercentage()
+  const { data: stake, isLoading: stakeLoading } = useGetStake(navigatorAddress)
+  const { data: slashBps, isLoading: slashBpsLoading } = useGetMinorSlashPercentage()
   const roundId = infractions[0]?.roundId
-  const { data: slashedByRound } = useIsSlashedFor(navigatorAddress, roundId ? [roundId] : [])
+  const { data: slashedByRound, isLoading: slashedLoading } = useIsSlashedFor(
+    navigatorAddress,
+    roundId ? [roundId] : [],
+  )
 
   const { sendTransaction } = useReportNavigatorInfraction({
     navigatorAddress,
@@ -69,10 +73,17 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
     [infractions],
   )
 
-  const { data: snapshotBlock } = useAllocationRoundSnapshot(roundId ?? "")
-  const { data: delegatedAtSnapshot } = useGetTotalDelegatedAtTimepoint(navigatorAddress, snapshotBlock ?? undefined)
+  const { data: snapshotBlock, isLoading: snapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
+  const { data: delegatedAtSnapshot, isLoading: delegatedLoading } = useGetTotalDelegatedAtTimepoint(
+    navigatorAddress,
+    snapshotBlock ?? undefined,
+  )
   const hadDelegations = delegatedAtSnapshot ? delegatedAtSnapshot.raw > 0n : false
+  // belowMinStake infraction doesn't require delegations
+  const hasBelowMinStakeOnly = infractions.length > 0 && infractions.every(inf => inf.type === "belowMinStake")
+  const canReport = hadDelegations || hasBelowMinStakeOnly
 
+  const isLoading = stakeLoading || slashBpsLoading || slashedLoading || snapshotLoading || delegatedLoading
   const isReported = roundId ? (slashedByRound?.get(roundId)?.slashed ?? false) : false
 
   // After the slash, current stake no longer matches pre-slash stake, so the
@@ -99,6 +110,8 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
         return t("Missed Report")
       case "missedGovernanceVote":
         return inf.proposalTitle ?? t("Missed Governance Vote")
+      case "belowMinStake":
+        return t("Below Minimum Stake")
     }
   }
 
@@ -107,7 +120,15 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
       <VStack gap={4} align="stretch" py={4} px={2}>
         <Heading size="md">{t("Navigator infractions")}</Heading>
 
-        {infractions.length === 0 ? (
+        {isLoading ? (
+          <VStack gap={3} align="stretch">
+            <Skeleton height="14" borderRadius="lg" />
+            {infractions.map((_, i) => (
+              <Skeleton key={i} height="16" borderRadius="lg" />
+            ))}
+            <Skeleton height="8" width="28" alignSelf="end" borderRadius="md" />
+          </VStack>
+        ) : infractions.length === 0 ? (
           <Text textStyle="sm" color="text.subtle">
             {t("No reportable infractions in the latest completed allocation round.")}
           </Text>
@@ -124,7 +145,7 @@ export const ReportNavigatorModal = ({ isOpen, onClose, navigatorAddress, infrac
             labelForType={labelForType}
             penaltyPct={penaltyPct}
             penaltyAmount={estimatedPenaltyAmount}
-            hadDelegations={hadDelegations}
+            hadDelegations={canReport}
             onReport={handleReport}
           />
         )}

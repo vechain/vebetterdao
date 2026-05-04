@@ -28,6 +28,7 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
   const FLAG_STALE_PREFERENCES = 4n
   const FLAG_MISSED_REPORT = 8n
   const FLAG_MISSED_GOVERNANCE = 16n
+  const FLAG_BELOW_MIN_STAKE = 32n
 
   // Helper: fund account with B3TR (via owner) and approve NavigatorRegistry
   const fundAndApprove = async (account: HardhatEthersSigner, amount: bigint) => {
@@ -216,6 +217,218 @@ describe("NavigatorRegistry Slashing - @shard19e", function () {
       const expectedSlash = (stakeBefore * 500n) / 10000n
       const treasuryAfter = await b3tr.balanceOf(treasuryAddress)
       expect(treasuryAfter - treasuryBefore).to.equal(expectedSlash)
+    })
+  })
+
+  describe("FLAG_BELOW_MIN_STAKE", function () {
+    // Set minStake to STAKE_AMOUNT so slashing drops navigator below it
+    beforeEach(async function () {
+      await navigatorRegistry.connect(owner).setMinStake(STAKE_AMOUNT)
+    })
+
+    it("slashes navigator below minStake with delegations — includes belowMinStake flag alongside other infractions", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+
+      // Round 1: slash to drop stake below minStake (50000 -> 47500)
+      const round1 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round1))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("47500"))
+
+      // Round 2: now below minStake — should include FLAG_BELOW_MIN_STAKE
+      await emissions.distribute()
+      const round2 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round2))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round2, [])
+
+      const [slashed, flags] = await navigatorRegistry.isSlashedForRound(navigator1.address, round2)
+      expect(slashed).to.equal(true)
+      expect(flags & FLAG_BELOW_MIN_STAKE).to.equal(FLAG_BELOW_MIN_STAKE)
+      expect(flags & FLAG_MISSED_ALLOCATION).to.equal(FLAG_MISSED_ALLOCATION)
+    })
+
+    it("slashes navigator below minStake without delegations — only belowMinStake flag", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+
+      // Round 1: slash to drop below minStake
+      const round1 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round1))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("47500"))
+
+      // Citizen undelegates — navigator now has no delegations
+      await navigatorRegistry.connect(citizen1).undelegate()
+
+      // Round 2: below minStake + no delegations — still slashable
+      await emissions.distribute()
+      const round2 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round2))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round2, [])
+
+      const [slashed, flags] = await navigatorRegistry.isSlashedForRound(navigator1.address, round2)
+      expect(slashed).to.equal(true)
+      expect(flags).to.equal(FLAG_BELOW_MIN_STAKE)
+    })
+
+    it("does not set belowMinStake flag when stake equals minStake", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(roundId))
+
+      // Stake is exactly 50,000 = minStake, so belowMinStake should NOT be set
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, [])
+      const [, flags] = await navigatorRegistry.isSlashedForRound(navigator1.address, roundId)
+      expect(flags & FLAG_BELOW_MIN_STAKE).to.equal(0n)
+    })
+
+    it("navigator at minStake without delegations still reverts NoInfractionFound", async function () {
+      await bootstrapAndStartEmissions()
+      const roundId = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(roundId))
+
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, roundId, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
+    })
+
+    it("navigator recovers above minStake — belowMinStake flag clears on next round", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+
+      // Round 1: slash to 47,500
+      const round1 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round1))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
+
+      // Navigator tops up stake back above minStake
+      await fundAndApprove(navigator1, ethers.parseEther("5000"))
+      await navigatorRegistry.connect(navigator1).addStake(ethers.parseEther("5000"))
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("52500"))
+
+      // Round 2: navigator does their duties
+      await emissions.distribute()
+      const round2 = await xAllocationVoting.currentRoundId()
+      await navigatorRegistry.connect(navigator1).setAllocationPreferences(round2, [app1], [10000])
+      await navigatorRegistry.connect(navigator1).submitReport("ipfs://report")
+      await waitForRoundToEnd(Number(round2))
+
+      // Report should revert — no infractions (above minStake + duties done)
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, round2, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
+    })
+  })
+
+  describe("FLAG_BELOW_MIN_STAKE timing", function () {
+    beforeEach(async function () {
+      await navigatorRegistry.connect(owner).setMinStake(STAKE_AMOUNT)
+    })
+
+    it("topping up during a round prevents belowMinStake — navigator recovered before round end", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+
+      // Round 1: slash drops 50k -> 47.5k
+      const round1 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round1))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("47500"))
+
+      // Round 2 starts — snapshot captures 47.5k (below 50k min)
+      await emissions.distribute()
+      const round2 = await xAllocationVoting.currentRoundId()
+
+      // Navigator tops up DURING round 2 — recovers before round ends
+      await fundAndApprove(navigator1, ethers.parseEther("5000"))
+      await navigatorRegistry.connect(navigator1).addStake(ethers.parseEther("5000"))
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("52500"))
+
+      // Navigator also does duties
+      await navigatorRegistry.connect(navigator1).setAllocationPreferences(round2, [app1], [10000])
+      await navigatorRegistry.connect(navigator1).submitReport("ipfs://report")
+      await waitForRoundToEnd(Number(round2))
+
+      // belowMinStake should NOT fire — navigator was below at start but recovered by end
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, round2, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
+    })
+
+    it("mid-round slash: navigator slashed in round N is NOT below-min for round N, only for round N+1", async function () {
+      // Navigator starts at exactly minStake (50k)
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+
+      // Round 1: navigator misses duties → slashed (50k -> 47.5k)
+      // At round 1 snapshot, stake was 50k (= minStake) → NOT below min for round 1
+      const round1 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round1))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
+
+      const [, flagsR1] = await navigatorRegistry.isSlashedForRound(navigator1.address, round1)
+      expect(flagsR1 & FLAG_BELOW_MIN_STAKE).to.equal(
+        0n,
+        "should NOT have belowMinStake for round where slash happened",
+      )
+
+      // Round 2: snapshot captures 47.5k → below min
+      await emissions.distribute()
+      const round2 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round2))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round2, [])
+
+      const [, flagsR2] = await navigatorRegistry.isSlashedForRound(navigator1.address, round2)
+      expect(flagsR2 & FLAG_BELOW_MIN_STAKE).to.equal(FLAG_BELOW_MIN_STAKE, "should have belowMinStake for next round")
+    })
+
+    it("navigator has full round to recover — slashed only if still below at round end", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+
+      // Round 1: slash drops 50k -> 47.5k
+      const round1 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round1))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
+
+      // Round 2: starts at 47.5k, navigator does NOT top up → still 47.5k at end
+      await emissions.distribute()
+      const round2 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round2))
+
+      // Should be slashed: below min at start AND at end
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round2, [])
+      const [, flagsR2] = await navigatorRegistry.isSlashedForRound(navigator1.address, round2)
+      expect(flagsR2 & FLAG_BELOW_MIN_STAKE).to.equal(FLAG_BELOW_MIN_STAKE)
+    })
+
+    it("topping up BEFORE next round starts prevents belowMinStake flag", async function () {
+      await delegateCitizen(citizen1, navigator1)
+      await bootstrapAndStartEmissions()
+
+      // Round 1: slash to 47.5k
+      const round1 = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(round1))
+      await navigatorRegistry.reportRoundInfractions(navigator1.address, round1, [])
+
+      // Navigator tops up BEFORE round 2 starts (between rounds)
+      await fundAndApprove(navigator1, ethers.parseEther("5000"))
+      await navigatorRegistry.connect(navigator1).addStake(ethers.parseEther("5000"))
+      expect(await navigatorRegistry.getStake(navigator1.address)).to.equal(ethers.parseEther("52500"))
+
+      // Start round 2 — snapshot captures 52.5k (above 50k min)
+      await emissions.distribute()
+      const round2 = await xAllocationVoting.currentRoundId()
+      await navigatorRegistry.connect(navigator1).setAllocationPreferences(round2, [app1], [10000])
+      await navigatorRegistry.connect(navigator1).submitReport("ipfs://report")
+      await waitForRoundToEnd(Number(round2))
+
+      // No belowMinStake infraction
+      await expect(
+        navigatorRegistry.reportRoundInfractions(navigator1.address, round2, []),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "NoInfractionFound")
     })
   })
 

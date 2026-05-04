@@ -14,6 +14,7 @@ export type ProposalTask = {
 
 export type RoundCompliance = {
   roundId: string
+  voteStart: number
   voteEnd: number
   /** Matches XAllocation `state`: Active while `currentBlock <= voteEnd`. */
   isRoundStillOpen: boolean
