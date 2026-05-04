@@ -315,10 +315,7 @@ library GovernorVotesLogic {
     uint256 roundId = $.proposals[proposalId].roundIdVoteStart;
 
     // Citizen without valid passport → skip (same pattern as auto-voting)
-    (bool isPerson, ) = $.veBetterPassport.isPersonAtTimepoint(
-      citizen,
-      SafeCast.toUint48(proposalSnapshot)
-    );
+    (bool isPerson, ) = $.veBetterPassport.isPersonAtTimepoint(citizen, SafeCast.toUint48(proposalSnapshot));
     if (!isPerson) {
       if (address($.relayerRewardsPool) != address(0)) {
         $.relayerRewardsPool.reduceUserGovernanceVote(roundId, citizen, proposalId);
@@ -368,6 +365,7 @@ library GovernorVotesLogic {
     _registerRelayerActionForNavigatorVote($, proposalId, citizen);
 
     emit NavigatorGovernanceVoteCast(citizen, navigator, proposalId, support, weight, power);
+    emit VoteCast(citizen, proposalId, support, weight, power, "");
 
     return weight;
   }
