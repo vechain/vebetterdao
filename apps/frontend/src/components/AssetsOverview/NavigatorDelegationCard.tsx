@@ -155,9 +155,14 @@ export const NavigatorDelegationCard = ({ accountAddress, onClose }: NavigatorDe
             </Text>
           </HStack>
         )}
+        {statusBadge && (
+          <Box hideFrom="md" mt="1">
+            {statusBadge}
+          </Box>
+        )}
       </VStack>
       <HStack>
-        {statusBadge}
+        {statusBadge && <Box hideBelow="md">{statusBadge}</Box>}
         <Icon boxSize="4" color="text.subtle" mt="1">
           <NavArrowRight />
         </Icon>
