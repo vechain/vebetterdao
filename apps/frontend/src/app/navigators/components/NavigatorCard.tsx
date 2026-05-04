@@ -112,7 +112,7 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
                   {formatter.format(Number(nav.stakeFormatted))}
                 </Text>
                 <Text textStyle="xs" color="fg.muted">
-                  {t("B3TR staked")}
+                  {t("staked")}
                 </Text>
               </HStack>
               <Separator orientation="vertical" height="50%" />
@@ -124,7 +124,7 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
                   {formatter.format(Number(nav.totalDelegatedFormatted))}
                 </Text>
                 <Text textStyle="xs" color="fg.muted">
-                  {t("VOT3 delegated")}
+                  {t("delegated")}
                 </Text>
               </HStack>
             </HStack>
