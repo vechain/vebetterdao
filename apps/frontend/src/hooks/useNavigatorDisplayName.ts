@@ -21,7 +21,17 @@ const defaults: Required<Options> = {
  * 2. VET domain (human-truncated)
  * 3. Truncated address
  */
-export const useNavigatorDisplayName = (address: string | undefined, options?: Options) => {
+export const useNavigatorDisplayName = (
+  address: string | undefined,
+  options?: Options,
+): {
+  displayName: string | undefined
+  domainData:
+    | { address?: string; domain?: string; isValidAddressOrDomain: boolean; isPrimaryDomain: boolean }
+    | undefined
+  domainLoading: boolean
+  textRecords: ReturnType<typeof useGetTextRecords>["data"]
+} => {
   const opts = { ...defaults, ...options }
   const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
