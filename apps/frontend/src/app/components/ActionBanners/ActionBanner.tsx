@@ -5,6 +5,7 @@ import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useNeededActionsSection } from "@/api/challenges/useChallengeSections"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
@@ -30,6 +31,7 @@ import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "../../../hooks/useGetVot3UnlockedBalance"
 import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 import { ProposalFilter } from "../../../store/useProposalFilters"
 import { BannerStorageKey } from "../Banners/GenericBanner"
@@ -50,6 +52,7 @@ import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
 import { NavigatorsBanner } from "./components/NavigatorsBanner"
 import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
+import { UndelegatedVot3Banner } from "./components/UndelegatedVot3Banner"
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 import { NodeUpgradeModal } from "./modals/NodeUpgradeModal"
 
@@ -70,6 +73,8 @@ export const ActionBanner = () => {
   const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
   const { data: currentRoundSnapshotBlock } = useCurrentRoundSnapshot()
   const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, currentRoundSnapshotBlock)
+  const { data: isCurrentlyDelegated } = useIsDelegated(account?.address)
+  const { data: unlockedVot3Balance } = useGetVot3UnlockedBalance(account?.address)
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
 
@@ -209,6 +214,9 @@ export const ActionBanner = () => {
   const showCastVoteInProposalBanners =
     !!account?.address && hasProposals && userCanVoteInProposals && !isDelegatedToNavigator
 
+  const showUndelegatedVot3Banner =
+    !!account?.address && isCurrentlyDelegated && Number(unlockedVot3Balance?.scaled ?? "0") > 0
+
   //Show one of the banners explainining why the user can't vote
   // Only one of the following banners can be shown at a time
   // The order of the banners is as follows:
@@ -269,6 +277,7 @@ export const ActionBanner = () => {
         />,
       )
     if (showClaimTokensBanner) bannerComponents.push(<ClaimDepositsBanner key="claim-deposits" />)
+    if (showUndelegatedVot3Banner) bannerComponents.push(<UndelegatedVot3Banner key="undelegated-vot3" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showChallengesNeededActionsBanner)
@@ -288,6 +297,7 @@ export const ActionBanner = () => {
     votingRewardsQuery.data?.roundsRewards,
     votingRewardsQuery.data?.claimableTotalFormatted,
     gmRewards,
+    showUndelegatedVot3Banner,
     showClaimTokensBanner,
     showCastVoteBanner,
     showCastVoteInProposalBanners,
