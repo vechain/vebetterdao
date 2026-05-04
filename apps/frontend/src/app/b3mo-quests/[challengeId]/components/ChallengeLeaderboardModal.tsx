@@ -6,7 +6,7 @@ import { Group, SendDiagonal } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { type ChallengeDetail, ChallengeStatus } from "@/api/challenges/types"
+import { type ChallengeDetail, ChallengeStatus, ChallengeType } from "@/api/challenges/types"
 import type { ChallengeParticipantActionsEntry } from "@/api/challenges/useChallengeParticipantActions"
 import { BaseModal } from "@/components/BaseModal"
 
@@ -47,7 +47,12 @@ export const ChallengeLeaderboardModal = ({
   const [selectedParticipant, setSelectedParticipant] = useState<ChallengeUserActionsParticipant | null>(null)
 
   const isPending = challenge.status === ChallengeStatus.Pending
-  const showTrophy = !isPending
+  const isCompleted = challenge.status === ChallengeStatus.Completed
+  const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
+
+  const winnersSet = useMemo(() => new Set((challenge.winners ?? []).map(w => w.toLowerCase())), [challenge.winners])
+  const isWinnerAddress = (addr: string, position: number) =>
+    isSplitWin ? winnersSet.has(addr.toLowerCase()) : isCompleted && position === 1
 
   const rankings = useMemo(
     () =>
@@ -72,9 +77,9 @@ export const ChallengeLeaderboardModal = ({
             <ChallengeActionsRow
               key={ranking.address}
               {...ranking}
-              position={isPending ? 0 : ranking.position}
+              position={isPending || isSplitWin ? 0 : ranking.position}
               tag={isPending ? t("Joined") : undefined}
-              showTrophy={showTrophy}
+              isWinner={isWinnerAddress(ranking.address, ranking.position)}
               hideScore={isPending}
               isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
               onClick={() => setSelectedParticipant(ranking)}
@@ -92,7 +97,7 @@ export const ChallengeLeaderboardModal = ({
             address={account.address}
             score={0}
             isYou
-            showTrophy={showTrophy}
+            isWinner={isWinnerAddress(account.address, 0)}
             hideScore={isPending}
             onClick={() => setSelectedParticipant({ address: account.address!, position: 0, score: 0 })}
           />
