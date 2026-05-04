@@ -1,8 +1,8 @@
 "use client"
 
 import { Button, Card, Heading, HStack, Icon, SimpleGrid, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
-import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -17,6 +17,7 @@ import {
 import { AddressIcon } from "@/components/AddressIcon"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
+import { useNavigatorDisplayName } from "@/hooks/useNavigatorDisplayName"
 
 const formatter = getCompactFormatter(2)
 
@@ -120,10 +121,13 @@ const StatTile = ({ icon, value, label }: { icon: ReactNode; value: ReactNode; l
 
 const NavigatorRow = ({ nav }: { nav: NavigatorEntityFormatted }) => {
   const router = useRouter()
-  const { data: domainData } = useVechainDomain(nav.address)
+  const { displayName } = useNavigatorDisplayName(nav.address, {
+    domainPrefix: 12,
+    domainSuffix: 8,
+    addressPrefix: 6,
+    addressSuffix: 4,
+  })
   const { data: metadata } = useNavigatorMetadata(nav.metadataURI)
-
-  const displayName = domainData?.domain ? humanDomain(domainData.domain, 12, 8) : humanAddress(nav.address, 6, 4)
 
   return (
     <HStack

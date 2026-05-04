@@ -1,8 +1,7 @@
 "use client"
 
 import { Card, Heading, HStack, Icon, IconButton, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -18,6 +17,7 @@ import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useN
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
+import { useNavigatorDisplayName } from "@/hooks/useNavigatorDisplayName"
 
 import { NavigatorProposalVoteModal } from "../navigators/[address]/components/modals/NavigatorProposalVoteModal"
 import { NavigatorRoundVotesModal } from "../navigators/[address]/components/modals/NavigatorRoundVotesModal"
@@ -52,7 +52,12 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const router = useRouter()
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(navigatorAddress)
-  const { data: domainData } = useVechainDomain(navigatorAddress)
+  const { displayName } = useNavigatorDisplayName(navigatorAddress, {
+    domainPrefix: 15,
+    domainSuffix: 10,
+    addressPrefix: 6,
+    addressSuffix: 4,
+  })
   const { data: status } = useNavigatorStatus(navigatorAddress)
   const { data: delegationInfo } = useMyDelegationInfo(navigatorAddress)
   const { data: fee } = useGetFeePercentage()
@@ -66,7 +71,6 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const [selectedRoundVote, setSelectedRoundVote] = useState<RoundVote | null>(null)
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null)
 
-  const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(navigatorAddress, 6, 4)
   const citizens = nav?.citizenCount ?? 0
 
   const delegatedSince = useMemo(() => {

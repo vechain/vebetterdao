@@ -1,6 +1,5 @@
 import { Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -22,6 +21,7 @@ import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
+import { useNavigatorDisplayName } from "@/hooks/useNavigatorDisplayName"
 
 import { AnnounceExitModal } from "./modals/AnnounceExitModal"
 import { EditNavigatorProfileModal } from "./modals/EditNavigatorProfileModal"
@@ -64,7 +64,12 @@ export const NavigatorDetailContent = () => {
   // without waiting for the indexer to pick up MetadataURIUpdated events.
   const { data: metadataURI } = useGetMetadataURI(address)
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(metadataURI)
-  const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
+  const { displayName, domainLoading } = useNavigatorDisplayName(address, {
+    domainPrefix: 20,
+    domainSuffix: 10,
+    addressPrefix: 10,
+    addressSuffix: 8,
+  })
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: status } = useNavigatorStatus(address)
@@ -82,8 +87,6 @@ export const NavigatorDetailContent = () => {
     return reportEventsForEdit.findLast(e => e.roundId === currentRoundId)?.reportURI
   }, [reportEventsForEdit, currentRoundId])
   const { data: currentReportData } = useIpfsMetadata<{ link?: string; text?: string }>(currentRoundReportURI)
-
-  const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
 
   if (navLoading || (waitForIndexer && !nav)) {
     return <NavigatorDetailSkeleton />

@@ -1,8 +1,6 @@
 "use client"
 
 import { Badge, Box, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain } from "@vechain/vechain-kit"
 import { NavArrowRight } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -15,6 +13,7 @@ import { useGetNavigatorAtTimepoint } from "@/api/contracts/navigatorRegistry/ho
 import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
+import { useNavigatorDisplayName } from "@/hooks/useNavigatorDisplayName"
 
 export type DelegationStatus = "stable" | "exiting" | "changing" | "pending" | "none"
 
@@ -90,12 +89,8 @@ export const NavigatorDelegationCard = ({ accountAddress, onClose }: NavigatorDe
     return ""
   }, [delegationStatus, snapshotNavigator, currentNavigatorAddress])
 
-  const { data: activeDomain } = useVechainDomain(activeNavigatorAddress)
+  const { displayName: activeDisplayName } = useNavigatorDisplayName(activeNavigatorAddress)
   const { data: activeNavigatorIndexer } = useNavigatorByAddress(activeNavigatorAddress)
-
-  const activeDisplayName = useMemo(() => {
-    return activeDomain?.domain ? humanDomain(activeDomain.domain, 15, 10) : humanAddress(activeNavigatorAddress, 8, 6)
-  }, [activeNavigatorAddress, activeDomain?.domain])
 
   const navigateTo = useCallback(
     (addr: string) => {
