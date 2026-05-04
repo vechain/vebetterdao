@@ -1,4 +1,4 @@
-import { Badge, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Badge, HStack, Icon, Link, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { LuArrowDownLeft, LuArrowUpRight, LuExternalLink, LuCompass, LuShieldAlert } from "react-icons/lu"
@@ -95,7 +95,10 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
                       )}
                     </HStack>
                     <VStack gap={0} align="start">
-                      <HStack gap={2}>
+                      <Stack
+                        direction={{ base: "column", md: "row" }}
+                        gap={{ base: 1, md: 2 }}
+                        align={{ base: "start", md: "center" }}>
                         <Text textStyle="sm" fontWeight="semibold">
                           {entry.type === "registered"
                             ? t("Initial Stake")
@@ -115,7 +118,7 @@ export const NavigatorStakeHistoryModal = ({ address, isOpen, onClose }: Props) 
                             {entry.reason}
                           </Badge>
                         )}
-                      </HStack>
+                      </Stack>
                       {!address && entry.navigator && <AddressWithProfilePicture address={entry.navigator} />}
                       <HStack gap={1}>
                         <Text textStyle="xs" color="fg.muted">
