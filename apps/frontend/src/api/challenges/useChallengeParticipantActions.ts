@@ -28,12 +28,14 @@ type Page = {
   nextOffset: number | undefined
 }
 
-export const getChallengeParticipantActionsQueryKey = (challengeId: number, totalParticipants: number) => [
-  "challenges",
-  "participant-actions",
-  challengeId,
-  totalParticipants,
-]
+const normalizeWinners = (winners: string[] | undefined): string[] =>
+  (winners ?? []).map(w => w.toLowerCase()).filter(w => w.length > 0)
+
+export const getChallengeParticipantActionsQueryKey = (
+  challengeId: number,
+  totalParticipants: number,
+  winners?: string[],
+) => ["challenges", "participant-actions", challengeId, totalParticipants, normalizeWinners(winners).join(",")]
 
 export const getChallengeParticipantActionRequestKey = ({
   challengeId,
@@ -53,16 +55,33 @@ const toBigIntValue = (value: unknown) => {
   return 0n
 }
 
-export const useChallengeParticipantActions = (challengeId: number, participants: string[]) => {
+export const useChallengeParticipantActions = (challengeId: number, participants: string[], winners?: string[]) => {
   const thor = useThor()
-  const total = participants.length
   const contractOk = !!address && address.toLowerCase() !== ZERO_ADDR
 
+  // Winners may sit past the first page in the contract's `participants[]` (ordered by
+  // join order, not by claim). Move them to the front of the list we slice from so they
+  // always land in the first paginated multicall — otherwise the winner-first sort below
+  // can't see them until the user manually loads more pages.
+  const orderedParticipants = useMemo(() => {
+    const winnersLower = normalizeWinners(winners)
+    if (winnersLower.length === 0) return participants
+    const winnersSet = new Set(winnersLower)
+    const winnersOrder = new Map(winnersLower.map((a, i) => [a, i]))
+    const winnerEntries = participants
+      .filter(p => winnersSet.has(p.toLowerCase()))
+      .sort((a, b) => (winnersOrder.get(a.toLowerCase()) ?? 0) - (winnersOrder.get(b.toLowerCase()) ?? 0))
+    const nonWinnerEntries = participants.filter(p => !winnersSet.has(p.toLowerCase()))
+    return [...winnerEntries, ...nonWinnerEntries]
+  }, [participants, winners])
+
+  const total = orderedParticipants.length
+
   const query = useInfiniteQuery({
-    queryKey: getChallengeParticipantActionsQueryKey(challengeId, total),
+    queryKey: getChallengeParticipantActionsQueryKey(challengeId, total, winners),
     queryFn: async ({ pageParam }): Promise<Page> => {
       const offset = pageParam as number
-      const slice = participants.slice(offset, offset + PARTICIPANT_ACTIONS_PAGE_SIZE)
+      const slice = orderedParticipants.slice(offset, offset + PARTICIPANT_ACTIONS_PAGE_SIZE)
       if (slice.length === 0) return { items: [], nextOffset: undefined }
 
       const results = await executeMultipleClausesCall({
@@ -94,13 +113,39 @@ export const useChallengeParticipantActions = (challengeId: number, participants
   // top-scorers are surfaced as winners by downstream UI. Sort is computed on
   // currently-loaded pages only — in active challenges the leaderboard grows
   // as the user loads more pages.
+  //
+  // When `winners` is provided (SplitWin), items whose address is in `winners`
+  // are pulled to the top in claim order (the order of the `winners[]` array);
+  // the remaining participants keep the actions-desc order. Position keeps the
+  // actions-based competition-rank semantics — SplitWin consumers ignore it.
   const leaderboard = useMemo<ChallengeParticipantActionsEntry[]>(() => {
-    const sorted = [...loadedItems].sort((a, b) => b.actions - a.actions)
-    return sorted.map(entry => ({
+    const winnersLower = normalizeWinners(winners)
+    const winnersSet = new Set(winnersLower)
+    const winnersOrder = new Map(winnersLower.map((a, i) => [a, i]))
+
+    const rankedByActions = [...loadedItems].sort((a, b) => b.actions - a.actions)
+
+    const ordered =
+      winnersSet.size === 0
+        ? rankedByActions
+        : [
+            ...loadedItems
+              .filter(e => winnersSet.has(e.participant.toLowerCase()))
+              .sort(
+                (a, b) =>
+                  (winnersOrder.get(a.participant.toLowerCase()) ?? 0) -
+                  (winnersOrder.get(b.participant.toLowerCase()) ?? 0),
+              ),
+            ...loadedItems
+              .filter(e => !winnersSet.has(e.participant.toLowerCase()))
+              .sort((a, b) => b.actions - a.actions),
+          ]
+
+    return ordered.map(entry => ({
       ...entry,
-      position: sorted.findIndex(e => e.actions === entry.actions) + 1,
+      position: rankedByActions.findIndex(e => e.actions === entry.actions) + 1,
     }))
-  }, [loadedItems])
+  }, [loadedItems, winners])
 
   const totalActions = useMemo(() => leaderboard.reduce((sum, entry) => sum + entry.actions, 0), [leaderboard])
 

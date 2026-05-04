@@ -13,7 +13,7 @@ interface ChallengeActionsRowProps {
   address: string
   score: number
   isYou?: boolean
-  showTrophy?: boolean
+  isWinner?: boolean
   tag?: string
   hideScore?: boolean
   onClick?: () => void
@@ -24,7 +24,7 @@ export const ChallengeActionsRow = ({
   address,
   score,
   isYou,
-  showTrophy,
+  isWinner,
   tag,
   hideScore,
   onClick,
@@ -33,11 +33,12 @@ export const ChallengeActionsRow = ({
   const domain = vnsData?.domain
 
   const positionLabel = useMemo(() => {
-    if (showTrophy && position === 1) return `🏆 #${position}`
-    return `#${position}`
-  }, [position, showTrophy])
+    if (position === 0) return null
+    return isWinner ? `🏆 #${position}` : `#${position}`
+  }, [position, isWinner])
 
-  const borderColor = showTrophy && position === 1 ? "#FFD700" : "border.secondary"
+  const showTrophyOnly = isWinner && position === 0
+  const borderColor = isWinner ? "#FFD700" : "border.secondary"
 
   const content = (
     <HStack w="full" justify="space-between">
@@ -75,7 +76,12 @@ export const ChallengeActionsRow = ({
             {tag}
           </Badge>
         )}
-        {position !== 0 && (
+        {showTrophyOnly && (
+          <Text color={isYou ? "white" : "text.default"} textStyle="xl" fontWeight="semibold">
+            {"🏆"}
+          </Text>
+        )}
+        {positionLabel && (
           <Text color={isYou ? "white" : "text.default"} textStyle="xl" fontWeight="semibold">
             {positionLabel}
           </Text>

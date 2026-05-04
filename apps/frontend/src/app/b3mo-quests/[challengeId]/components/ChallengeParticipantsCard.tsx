@@ -49,10 +49,16 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   const [selectedParticipant, setSelectedParticipant] = useState<ChallengeUserActionsParticipant | null>(null)
 
   const isPending = challenge.status === ChallengeStatus.Pending
+  const isCompleted = challenge.status === ChallengeStatus.Completed
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isSplitWin = challenge.challengeType === ChallengeType.SplitWin
   const threshold = Number(challenge.threshold)
-  const showTrophy = !isPending
+
+  const winnersSet = useMemo(() => new Set((challenge.winners ?? []).map(w => w.toLowerCase())), [challenge.winners])
+  // SplitWin: trophy iff the viewer claimed (in winners[]).
+  // MaxActions: trophy only once the challenge is finalized (Completed) and the participant is at rank 1 (ties share rank 1).
+  const isWinnerAddress = (addr: string, position: number) =>
+    isSplitWin ? winnersSet.has(addr.toLowerCase()) : isCompleted && position === 1
 
   const showPrizeProgress =
     isSplitWin &&
@@ -78,7 +84,11 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   }, [isSponsored, isSplitWin, threshold, t])
 
   const { leaderboard, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage, loadedCount, totalCount } =
-    useChallengeParticipantActions(challenge.challengeId, challenge.participants)
+    useChallengeParticipantActions(
+      challenge.challengeId,
+      challenge.participants,
+      isSplitWin ? challenge.winners : undefined,
+    )
 
   const rankings = useMemo(
     () =>
@@ -175,7 +185,7 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
             </Text>
           </VStack>
           {MOCK_ROWS.map(row => (
-            <ChallengeActionsRow key={row.position} {...row} />
+            <ChallengeActionsRow key={row.position} {...row} position={isSplitWin ? 0 : row.position} />
           ))}
         </VStack>
       )
@@ -187,9 +197,9 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
           <ChallengeActionsRow
             key={ranking.address}
             {...ranking}
-            position={isPending ? 0 : ranking.position}
+            position={isPending || isSplitWin ? 0 : ranking.position}
             tag={isPending ? t("Joined") : undefined}
-            showTrophy={showTrophy}
+            isWinner={isWinnerAddress(ranking.address, ranking.position)}
             hideScore={isPending}
             isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
             onClick={() => setSelectedParticipant(ranking)}
@@ -261,10 +271,10 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
                 <Separator w="full" h={1} color="border.secondary" />
                 <ChallengeActionsRow
                   {...viewerRanking}
-                  position={isPending ? 0 : viewerRanking.position}
+                  position={isPending || isSplitWin ? 0 : viewerRanking.position}
                   tag={isPending ? t("Joined") : undefined}
                   isYou
-                  showTrophy={showTrophy}
+                  isWinner={isWinnerAddress(viewerRanking.address, viewerRanking.position)}
                   hideScore={isPending}
                   onClick={() => setSelectedParticipant(viewerRanking)}
                 />
