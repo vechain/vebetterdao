@@ -49,6 +49,8 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
               </Text>
             )}
 
+            {report.link && <LinkPreview url={report.link} />}
+
             {report.text && (
               <Box
                 css={{
@@ -73,8 +75,6 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
                 />
               </Box>
             )}
-
-            {report.link && <LinkPreview url={report.link} />}
           </>
         ) : (
           <Text textStyle="sm" color="text.subtle">

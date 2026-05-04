@@ -94,6 +94,23 @@ export const NavigatorReportModal = ({ isOpen, onClose, initialLink, initialText
         </Text>
 
         <VStack align="stretch" gap={1}>
+          <Text textStyle="xs" fontWeight="semibold">
+            {t("Link")}
+          </Text>
+          <Input
+            placeholder={t("Link to a twitter, reddit or blog post")}
+            value={link}
+            onChange={e => setLink(e.target.value)}
+            fontSize="16px"
+          />
+          {linkError && (
+            <Text textStyle="xs" color="status.negative.primary">
+              {t("Invalid URL")}
+            </Text>
+          )}
+        </VStack>
+
+        <VStack align="stretch" gap={1}>
           <HStack justify="space-between">
             <Text textStyle="xs" fontWeight="semibold">
               {t("Note")}
@@ -113,23 +130,6 @@ export const NavigatorReportModal = ({ isOpen, onClose, initialLink, initialText
           <Text textStyle="xs" color="text.subtle">
             {t("Supports markdown formatting: **bold**, *italic*, [links](url), lists, and more.")}
           </Text>
-        </VStack>
-
-        <VStack align="stretch" gap={1}>
-          <Text textStyle="xs" fontWeight="semibold">
-            {t("Link")}
-          </Text>
-          <Input
-            placeholder={t("Link to a twitter, reddit or blog post")}
-            value={link}
-            onChange={e => setLink(e.target.value)}
-            fontSize="16px"
-          />
-          {linkError && (
-            <Text textStyle="xs" color="status.negative.primary">
-              {t("Invalid URL")}
-            </Text>
-          )}
         </VStack>
 
         <Button variant="primary" w="full" disabled={!canSubmit} onClick={handleSubmit}>
