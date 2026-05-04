@@ -298,9 +298,7 @@ const VotingPowerContent = ({
             <CompositionLine label={t("Delegated")} value={`${delegatedFormatted} VOT3`} />
           )}
           <CompositionLine label={t("Balance")} value={`${vot3BalanceOnly} VOT3`} />
-          {depositsFormatted && (
-            <CompositionLine label={t("Deposited for proposal support")} value={`${depositsFormatted} VOT3`} />
-          )}
+          {depositsFormatted && <CompositionLine label={t("Proposal support")} value={`${depositsFormatted} VOT3`} />}
           {stakedFormatted && <CompositionLine label={t("From staking")} value={`${stakedFormatted} VOT3`} />}
         </VStack>
 
