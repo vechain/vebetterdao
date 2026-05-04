@@ -1,7 +1,7 @@
 import { Alert } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { LuDoorOpen, LuGauge, LuUserCheck } from "react-icons/lu"
+import { LuDoorOpen, LuGauge, LuCircleAlert, LuUserCheck } from "react-icons/lu"
 
 import { type NavigatorStatusValue } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 type DelegationInfo = { delegatedAt: number } | undefined
@@ -13,6 +13,8 @@ type Props = {
   isOwnPage: boolean
   isDelegatedHere: boolean
   isAtCapacity: boolean
+  isBelowMinStake: boolean
+  minStakeScaled: string
   currentDelegatedNum: number
   displayName: string
   delegationInfo: DelegationInfo
@@ -23,6 +25,8 @@ export const NavigatorStatusAlerts = ({
   isOwnPage,
   isDelegatedHere,
   isAtCapacity,
+  isBelowMinStake,
+  minStakeScaled,
   currentDelegatedNum,
   displayName,
   delegationInfo,
@@ -64,6 +68,24 @@ export const NavigatorStatusAlerts = ({
           </Alert.Indicator>
           <Alert.Title textStyle="sm">
             {t("This navigator has reached its delegation capacity and cannot receive new delegations.")}
+          </Alert.Title>
+        </Alert.Root>
+      )}
+
+      {isBelowMinStake && status === "ACTIVE" && (
+        <Alert.Root status="warning" borderRadius="xl">
+          <Alert.Indicator>
+            <LuCircleAlert />
+          </Alert.Indicator>
+          <Alert.Title textStyle="sm">
+            {isOwnPage
+              ? t(
+                  "Your stake is below the minimum required amount of {{amount}} B3TR. You cannot receive new delegations until you increase your stake.",
+                  { amount: formatter.format(Number(minStakeScaled)) },
+                )
+              : t("This navigator cannot receive new delegations until he/she stakes above {{amount}} B3TR.", {
+                  amount: formatter.format(Number(minStakeScaled)),
+                })}
           </Alert.Title>
         </Alert.Root>
       )}

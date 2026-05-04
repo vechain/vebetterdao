@@ -20,7 +20,9 @@ import { useTranslation } from "react-i18next"
 import { LuArrowLeftRight, LuUsers } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -57,12 +59,15 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(nav.address)
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
 
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = isDelegated && currentNavigator?.toLowerCase() === nav.address.toLowerCase()
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
 
   const mode: DelegationMode = useMemo(() => {
     if (!isDelegated) return "new"
@@ -131,6 +136,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     if (exceedsCapacity || exceedsBalance || violatesMinDelegation) return false
 
     if (mode === "new" || mode === "switch") {
+      if (isBelowMinStake) return false
       if (!amount || amount === "." || amountNum === 0) return false
       if (mode === "new") {
         return ackAll
@@ -138,6 +144,8 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
       return true
     }
 
+    // manage mode: allow reduce/undelegate, block increase when below minStake
+    if (manageValidation.isIncreasing && isBelowMinStake) return false
     return manageValidation.hasChanged && amountNum >= 0
   }, [
     mode,
@@ -146,8 +154,10 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     exceedsCapacity,
     exceedsBalance,
     violatesMinDelegation,
+    isBelowMinStake,
     ackAll,
     manageValidation.hasChanged,
+    manageValidation.isIncreasing,
   ])
 
   // --- Transaction hooks ---
@@ -288,6 +298,26 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
             </Text>
           </VStack>
         </HStack>
+
+        {/* Below min stake warning */}
+        {isBelowMinStake && (mode !== "manage" || manageValidation.isIncreasing) && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.warning.subtle"
+            border="1px solid"
+            borderColor="status.warning.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
+                {t("This navigator cannot receive new delegations until he/she stakes above {{amount}} B3TR.", {
+                  amount: formatter.format(Number(minStakeData?.scaled ?? 0)),
+                })}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
 
         {/* Capacity warning */}
         {showCapacityWarning && (

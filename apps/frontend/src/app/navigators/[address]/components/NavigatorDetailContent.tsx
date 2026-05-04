@@ -8,7 +8,9 @@ import { LuCompass } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetMetadataURI } from "@/api/contracts/navigatorRegistry/hooks/useGetMetadataURI"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
@@ -66,6 +68,8 @@ export const NavigatorDetailContent = () => {
   const { data: status } = useNavigatorStatus(address)
   const { data: delegationInfo } = useMyDelegationInfo(address)
 
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(address)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const currentRoundReportURI = useMemo(() => {
@@ -99,6 +103,8 @@ export const NavigatorDetailContent = () => {
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = currentNavigator?.toLowerCase() === address.toLowerCase() && currentDelegatedNum > 0
   const isAtCapacity = Number(nav.stakeFormatted ?? 0) * 10 <= Number(nav.totalDelegatedFormatted ?? 0)
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
+  const minStakeScaled = minStakeData?.scaled ?? "0"
 
   return (
     <VStack w="full" gap={6} align="stretch">
@@ -114,6 +120,8 @@ export const NavigatorDetailContent = () => {
         isOwnPage={isOwnPage}
         isDelegatedHere={isDelegatedHere}
         isAtCapacity={isAtCapacity}
+        isBelowMinStake={isBelowMinStake}
+        minStakeScaled={minStakeScaled}
         currentDelegatedNum={currentDelegatedNum}
         displayName={displayName}
         delegationInfo={delegationInfo}
@@ -131,6 +139,7 @@ export const NavigatorDetailContent = () => {
         isOwnPage={isOwnPage}
         hasStake={Number(nav.stakeFormatted ?? 0) > 0}
         isAtCapacity={isAtCapacity}
+        isBelowMinStake={isBelowMinStake}
         onDelegationClick={() => {
           setIsExitMode(false)
           setIsDelegationOpen(true)

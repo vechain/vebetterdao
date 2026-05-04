@@ -27,6 +27,7 @@ type Props = {
   isOwnPage: boolean
   hasStake: boolean
   isAtCapacity: boolean
+  isBelowMinStake: boolean
   onDelegationClick: () => void
   onManageStakeClick: () => void
   onWithdrawStakeClick: () => void
@@ -65,6 +66,7 @@ export const NavigatorHeader = ({
   isOwnPage,
   hasStake,
   isAtCapacity,
+  isBelowMinStake,
   onDelegationClick,
   onManageStakeClick,
   onWithdrawStakeClick,
@@ -121,7 +123,7 @@ export const NavigatorHeader = ({
                   size="sm"
                   flex={{ base: 1, md: "initial" }}
                   onClick={onClick}
-                  disabled={mainAction === "delegate" && isAtCapacity}>
+                  disabled={mainAction === "delegate" && (isAtCapacity || isBelowMinStake)}>
                   {mainAction === "share" && <LuShare2 />}
                   {label}
                 </Button>
