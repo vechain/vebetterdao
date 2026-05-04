@@ -63,7 +63,8 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const { data: fee } = useGetFeePercentage()
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(navigatorAddress)
-  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
+  const isBelowMinStake =
+    status === "ACTIVE" && minStakeData && stakeData ? stakeData.raw > 0n && stakeData.raw < minStakeData.raw : false
 
   const { rounds, roundVotesMap, slashedByRound } = useRoundsCompliance(navigatorAddress)
 
