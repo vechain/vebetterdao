@@ -128,7 +128,7 @@ const MobileAccordionWithSubRoutes = ({
             bg={isOpen ? "card.hover" : "transparent"}
             _expanded={{ bg: "card.hover" }}>
             <HStack w="full" gap={4}>
-              <Icon as={route.icon} color="text.subtle" size="2xl" />
+              <Icon as={route.icon} color="text.subtle" boxSize="24px" />
               <Text textStyle="lg" fontWeight={selected ? "semibold" : "normal"}>
                 {/* @ts-expect-error dynamic translation key */}
                 {t(route.name)}
@@ -261,13 +261,14 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         alignItems="center"
         key={route.name}
         onClick={onClick}
-        data-testid={selected ? "current-section" : ""}
-        gap={4}>
-        <Icon as={route.icon} color="text.subtle" size={"2xl"} />
-        <Text textAlign="left" textStyle="lg">
-          {/* @ts-expect-error dynamic translation key */}
-          {t(route.name)}
-        </Text>
+        data-testid={selected ? "current-section" : ""}>
+        <HStack w="full" gap={4}>
+          <Icon as={route.icon} color="text.subtle" boxSize="24px" />
+          <Text textAlign="left" textStyle="lg">
+            {/* @ts-expect-error dynamic translation key */}
+            {t(route.name)}
+          </Text>
+        </HStack>
       </Button>
     )
   }
