@@ -11,7 +11,7 @@ import { LuUsers } from "react-icons/lu"
 import { zeroAddress } from "viem"
 
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
-import { useGetRawNavigatorAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetRawNavigatorAtTimepoint"
+import { useGetNavigatorAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigatorAtTimepoint"
 import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -44,7 +44,10 @@ export const NavigatorDelegationCard = ({ accountAddress, onClose }: NavigatorDe
   const router = useRouter()
   const { data: snapshotBlock, isLoading: isRoundSnapshotLoading } = useCurrentRoundSnapshot()
   const { data: currentNavigatorAddress = "" } = useGetNavigator(accountAddress)
-  const { data: snapshotNavigatorRaw, isLoading: isSnapshotNavLoading } = useGetRawNavigatorAtTimepoint(
+  // Uses the alive-checked variant: returns address(0) if the navigator was already
+  // deactivated at the snapshot, so a stale checkpoint to a dead navigator does not
+  // surface as a fake "exiting next round" delegation.
+  const { data: snapshotNavigator, isLoading: isSnapshotNavLoading } = useGetNavigatorAtTimepoint(
     accountAddress,
     snapshotBlock,
   )
@@ -54,7 +57,7 @@ export const NavigatorDelegationCard = ({ accountAddress, onClose }: NavigatorDe
     if (isRoundSnapshotLoading) return "none"
     if (isPositiveSnapshotBlock(snapshotBlock) && isSnapshotNavLoading) return "none"
     const cur = normalizeNavigatorAddress(currentNavigatorAddress)
-    const snap = isPositiveSnapshotBlock(snapshotBlock) ? normalizeNavigatorAddress(snapshotNavigatorRaw) : ""
+    const snap = isPositiveSnapshotBlock(snapshotBlock) ? normalizeNavigatorAddress(snapshotNavigator) : ""
 
     if (!isPositiveSnapshotBlock(snapshotBlock)) {
       return cur ? "stable" : "none"
@@ -68,7 +71,7 @@ export const NavigatorDelegationCard = ({ accountAddress, onClose }: NavigatorDe
   }, [
     accountAddress,
     currentNavigatorAddress,
-    snapshotNavigatorRaw,
+    snapshotNavigator,
     snapshotBlock,
     isRoundSnapshotLoading,
     isSnapshotNavLoading,
@@ -82,10 +85,10 @@ export const NavigatorDelegationCard = ({ accountAddress, onClose }: NavigatorDe
       return normalizeNavigatorAddress(currentNavigatorAddress)
     }
     if (delegationStatus === "exiting" || delegationStatus === "stable") {
-      return normalizeNavigatorAddress(snapshotNavigatorRaw) || normalizeNavigatorAddress(currentNavigatorAddress)
+      return normalizeNavigatorAddress(snapshotNavigator) || normalizeNavigatorAddress(currentNavigatorAddress)
     }
     return ""
-  }, [delegationStatus, snapshotNavigatorRaw, currentNavigatorAddress])
+  }, [delegationStatus, snapshotNavigator, currentNavigatorAddress])
 
   const { data: activeDomain } = useVechainDomain(activeNavigatorAddress)
   const { data: activeNavigatorIndexer } = useNavigatorByAddress(activeNavigatorAddress)
