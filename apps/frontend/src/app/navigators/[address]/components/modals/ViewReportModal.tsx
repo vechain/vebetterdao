@@ -53,6 +53,7 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
 
             {report.text && (
               <Box
+                className="wmde-markdown-var"
                 css={{
                   "& .wmde-markdown": {
                     backgroundColor: "transparent",

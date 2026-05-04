@@ -1,4 +1,4 @@
-import { VStack, Heading, Field, Input, Textarea } from "@chakra-ui/react"
+import { Box, VStack, Heading, Field, Input, Textarea } from "@chakra-ui/react"
 import { decodeFunctionCalldata, DecodedFunctionData, encodeFunctionCalldata } from "@repo/utils/ContractUtils"
 import MDEditor from "@uiw/react-md-editor"
 import { ethers } from "ethers"
@@ -189,25 +189,27 @@ export const NewProposalForm: React.FC<Props> = ({
             <Field.Label>
               <Heading size="md">{t("Your proposal")}</Heading>
             </Field.Label>
-            <Controller
-              data-testid="proposal-markdown-description-input"
-              name="markdownDescription"
-              control={control}
-              render={({ field }) => (
-                <MDEditor
-                  style={{
-                    marginTop: "1rem",
-                  }}
-                  {...field}
-                  height={"100%"}
-                  value={field.value}
-                  onChange={field.onChange}
-                  previewOptions={{
-                    rehypePlugins: [[rehypeSanitize]],
-                  }}
-                />
-              )}
-            />
+            <Box w="full" h="full" className="wmde-markdown-var">
+              <Controller
+                data-testid="proposal-markdown-description-input"
+                name="markdownDescription"
+                control={control}
+                render={({ field }) => (
+                  <MDEditor
+                    style={{
+                      marginTop: "1rem",
+                    }}
+                    {...field}
+                    height={"100%"}
+                    value={field.value}
+                    onChange={field.onChange}
+                    previewOptions={{
+                      rehypePlugins: [[rehypeSanitize]],
+                    }}
+                  />
+                )}
+              />
+            </Box>
             {errors.markdownDescription && (
               <Field.ErrorText data-testid="newproposal-form-markdown-error-message">
                 {errors.markdownDescription.message}

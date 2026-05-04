@@ -1,5 +1,5 @@
 "use client"
-import { Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
 import MDEditor from "@uiw/react-md-editor"
 import "@uiw/react-md-editor/markdown-editor.css"
 import { ethers } from "ethers"
@@ -107,13 +107,15 @@ export const PublishAndPreviewPageContent = () => {
       <Card.Body py={8}>
         <VStack gap={8} align="flex-start" separator={<Separator />}>
           <Heading size={["xl", "2xl"]}>{t("Check your proposal before publishing")}</Heading>
-          <MDEditor.Markdown
-            source={markdownDescription}
-            style={{
-              width: "100%",
-              wordBreak: "break-word",
-            }}
-          />
+          <Box w="full" className="wmde-markdown-var">
+            <MDEditor.Markdown
+              source={markdownDescription}
+              style={{
+                width: "100%",
+                wordBreak: "break-word",
+              }}
+            />
+          </Box>
           {!!actions.length && (
             <NewProposalForm
               renderTitle={false}

@@ -194,7 +194,7 @@ export const NavigatorTaskList = ({ address, onSubmitReport, onManageStakeClick 
               icon={<LuVote />}
               label={t("Set allocation preferences")}
               doneLabel={t("Preferences Set")}
-              pendingLabel={t("Preferences Pending")}
+              pendingLabel={t("Pending")}
               onClick={() => router.push("/allocations/vote")}
             />
 

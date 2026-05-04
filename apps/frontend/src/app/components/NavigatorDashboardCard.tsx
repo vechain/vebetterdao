@@ -256,7 +256,7 @@ export const NavigatorDashboardCard = () => {
 
                   <TaskRow
                     icon={<LuVote />}
-                    label={hasSetPrefs ? t("Preferences Set") : t("Preferences Pending")}
+                    label={hasSetPrefs ? t("Preferences Set") : t("Pending")}
                     status={allocationStatus}
                   />
 

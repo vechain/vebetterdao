@@ -277,6 +277,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
         <VStack gap={8} align="flex-start" w="full">
           {/* Markdown content */}
           <Box
+            className="wmde-markdown-var"
             px={0}
             m={0}
             gap={0}

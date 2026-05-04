@@ -1,0 +1,102 @@
+/*
+ * Override @uiw/react-md-editor color variables with our design system tokens.
+ * The editor reads --color-canvas-*, --color-fg-*, --color-border-*, --color-accent-*
+ * from the nearest .wmde-markdown-var ancestor or body.
+ */
+
+[data-color-mode="light"] .wmde-markdown-var,
+.wmde-markdown-var[data-color-mode="light"] {
+  --color-canvas-default: var(--chakra-colors-bg-primary);
+  --color-canvas-subtle: var(--chakra-colors-bg-secondary);
+  --color-fg-default: var(--chakra-colors-text-default);
+  --color-fg-muted: var(--chakra-colors-text-subtle);
+  --color-fg-subtle: var(--chakra-colors-text-subtle);
+  --color-border-default: var(--chakra-colors-border-primary);
+  --color-border-muted: var(--chakra-colors-border-secondary);
+  --color-accent-fg: var(--chakra-colors-actions-primary-default);
+  --color-accent-emphasis: var(--chakra-colors-actions-primary-default);
+}
+
+[data-color-mode="dark"] .wmde-markdown-var,
+.wmde-markdown-var[data-color-mode="dark"] {
+  --color-canvas-default: var(--chakra-colors-bg-primary);
+  --color-canvas-subtle: var(--chakra-colors-bg-secondary);
+  --color-fg-default: var(--chakra-colors-text-default);
+  --color-fg-muted: var(--chakra-colors-text-subtle);
+  --color-fg-subtle: var(--chakra-colors-text-subtle);
+  --color-border-default: var(--chakra-colors-border-primary);
+  --color-border-muted: var(--chakra-colors-border-secondary);
+  --color-accent-fg: var(--chakra-colors-actions-primary-default);
+  --color-accent-emphasis: var(--chakra-colors-actions-primary-default);
+}
+
+/* Match Chakra Input recipe: bg.primary background, border.primary border, md radius */
+.wmde-markdown-var .w-md-editor {
+  --md-editor-background-color: var(--chakra-colors-bg-primary) !important;
+  --md-editor-box-shadow-color: var(--chakra-colors-border-primary) !important;
+  background-color: var(--chakra-colors-bg-primary) !important;
+  border: 1px solid var(--chakra-colors-border-primary) !important;
+  border-radius: var(--chakra-radii-md) !important;
+  color: var(--chakra-colors-text-default) !important;
+  box-shadow: none !important;
+}
+
+.wmde-markdown-var .w-md-editor-toolbar {
+  border-bottom: 1px solid !important;
+  border-bottom-color: var(--color-border-default) !important;
+  background-color: var(--chakra-colors-bg-secondary) !important;
+  border-radius: var(--chakra-radii-md) var(--chakra-radii-md) 0 0 !important;
+}
+
+.wmde-markdown-var .w-md-editor-toolbar li > button {
+  color: var(--chakra-colors-text-subtle) !important;
+ 
+}
+
+.wmde-markdown-var .w-md-editor-toolbar li > button:hover {
+  color: var(--chakra-colors-text-default) !important;
+  background-color: var(--chakra-colors-bg-primary) !important;
+}
+
+.wmde-markdown-var .w-md-editor-content {
+  background-color: var(--chakra-colors-bg-primary) !important;
+}
+
+.wmde-markdown-var .w-md-editor-text {
+  font-size: 16px !important;
+  line-height: 24px !important;
+}
+
+.wmde-markdown-var .w-md-editor-text-pre > code {
+  font-size: 16px !important;
+  line-height: 24px !important;
+}
+
+.wmde-markdown-var .w-md-editor-preview {
+  border-left: 1px solid !important;
+  border-left-color: var(--color-border-default) !important;
+}
+
+.wmde-markdown-var .w-md-editor-text-input::placeholder {
+  color: var(--chakra-colors-text-subtle) !important;
+  opacity: 0.5 !important;
+}
+
+/* Markdown preview area within the editor */
+.wmde-markdown-var .wmde-markdown {
+  background-color: var(--chakra-colors-bg-primary) !important;
+  color: var(--chakra-colors-text-default) !important;
+}
+
+/* Fullscreen mode — editor becomes position:fixed, still needs background */
+.w-md-editor-fullscreen {
+  background-color: var(--color-canvas-default, var(--chakra-colors-bg-primary)) !important;
+}
+
+.w-md-editor-fullscreen .w-md-editor-toolbar {
+  background-color: var(--color-canvas-subtle, var(--chakra-colors-bg-secondary)) !important;
+}
+
+.w-md-editor-fullscreen .w-md-editor-content {
+  background-color: var(--color-canvas-default, var(--chakra-colors-bg-primary)) !important;
+}
