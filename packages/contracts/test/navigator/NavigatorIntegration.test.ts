@@ -634,6 +634,131 @@ describe("NavigatorRegistry Integration - @shard19g", function () {
       expect(await xAllocationVoting.hasVoted(roundId, citizen.address)).to.be.true
       expect(await xAllocationVoting.totalVotes(roundId)).to.equal(DELEGATE_AMOUNT)
     })
+
+    it("XAllocationVoting: non-person citizen reverts before skip window when navigator has no preferences", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator does NOT set preferences
+      // Remove citizen from whitelist so they fail personhood
+      await veBetterPassport.removeFromWhitelist(citizen.address)
+
+      // Before skip window → should revert, not skip prematurely
+      await expect(
+        xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "SkipWindowNotReached")
+    })
+
+    it("XAllocationVoting: non-person citizen skips after skip window when navigator has no preferences", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Navigator does NOT set preferences
+      // Remove citizen from whitelist so they fail personhood
+      await veBetterPassport.removeFromWhitelist(citizen.address)
+
+      // Advance past the skip window
+      const skipWindow = await xAllocationVoting.citizenSkipWindowBlocks()
+      const deadline = await xAllocationVoting.roundDeadline(roundId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
+
+      // After skip window → should skip (navigator failed to act, personhood irrelevant)
+      await expect(xAllocationVoting.connect(relayer).castNavigatorVote(citizen.address, roundId)).to.emit(
+        xAllocationVoting,
+        "NavigatorVoteSkipped",
+      )
+    })
+
+    it("B3TRGovernor: non-person citizen reverts before skip window when navigator has no decision", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+
+      await getVot3Tokens(owner, "300000")
+      await waitForNextBlock()
+
+      const tx = await createProposal(
+        b3tr,
+        await ethers.getContractFactory("B3TR"),
+        owner,
+        "Non-person no-decision proposal",
+      )
+      const proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId.toString(), owner)
+      await waitForProposalToBeActive(proposalId as any)
+
+      // Navigator does NOT set a decision
+      // Remove citizen from whitelist so they fail personhood
+      await veBetterPassport.removeFromWhitelist(citizen.address)
+
+      // Before skip window → should revert, not skip prematurely
+      await expect(
+        governor.connect(relayer).castNavigatorVote(proposalId, citizen.address),
+      ).to.be.revertedWithCustomError(governorVotesLogicLib, "GovernanceSkipWindowNotReached")
+    })
+
+    it("B3TRGovernor: non-person citizen skips after skip window when navigator has no decision", async function () {
+      await setupFullEcosystem()
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      await waitForRoundToEnd(Number(currentRound))
+      await emissions.distribute()
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      await getVot3Tokens(owner, "300000")
+      await waitForNextBlock()
+
+      const tx = await createProposal(
+        b3tr,
+        await ethers.getContractFactory("B3TR"),
+        owner,
+        "Non-person skip-window proposal",
+      )
+      const proposalId = await getProposalIdFromTx(tx)
+      await payDeposit(proposalId.toString(), owner)
+      await waitForProposalToBeActive(proposalId as any)
+
+      // Navigator does NOT set a decision
+      // Remove citizen from whitelist so they fail personhood
+      await veBetterPassport.removeFromWhitelist(citizen.address)
+
+      // Advance past the governance skip window (uses proposal deadline, not round deadline)
+      const skipWindow = await governor.governanceSkipWindowBlocks()
+      const deadline = await governor.proposalDeadline(proposalId)
+      const currentBlock = BigInt(await ethers.provider.getBlockNumber())
+      const blocksToMine = deadline - currentBlock - skipWindow
+      if (blocksToMine > 0n) await moveBlocks(Number(blocksToMine))
+
+      // After skip window → should skip (navigator failed to act, personhood irrelevant)
+      const voteTx = await governor.connect(relayer).castNavigatorVote(proposalId, citizen.address)
+      const receipt = await voteTx.wait()
+
+      const libraryInterface = GovernorVotesLogic__factory.createInterface()
+      const event = receipt?.logs
+        .map(log => {
+          try {
+            return libraryInterface.parseLog({ topics: [...log.topics], data: log.data })
+          } catch {
+            return null
+          }
+        })
+        .find(e => e?.name === "NavigatorGovernanceVoteSkipped")
+
+      expect(event).to.not.be.undefined
+      expect(await governor.hasVoted(proposalId, citizen.address)).to.be.false
+    })
   })
 
   // ======================== 3. VoterRewards: fee deduction ======================== //
