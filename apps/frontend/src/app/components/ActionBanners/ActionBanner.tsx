@@ -5,11 +5,14 @@ import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
 import { useNeededActionsSection } from "@/api/challenges/useChallengeSections"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { useUserPreferences } from "@/hooks/useUserPreferences"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
@@ -75,6 +78,9 @@ export const ActionBanner = () => {
   const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, currentRoundSnapshotBlock)
   const { data: isCurrentlyDelegated } = useIsDelegated(account?.address)
   const { data: unlockedVot3Balance } = useGetVot3UnlockedBalance(account?.address)
+  const { data: currentNavigatorAddress = "" } = useGetNavigator(account?.address)
+  const { data: currentNavigatorData } = useNavigatorByAddress(currentNavigatorAddress ?? "")
+  const { data: minStakeData } = useGetMinStake()
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
 
@@ -215,7 +221,12 @@ export const ActionBanner = () => {
     !!account?.address && hasProposals && userCanVoteInProposals && !isDelegatedToNavigator
 
   const showUndelegatedVot3Banner =
-    !!account?.address && isCurrentlyDelegated && Number(unlockedVot3Balance?.scaled ?? "0") > 0
+    !!account?.address &&
+    isCurrentlyDelegated &&
+    Number(unlockedVot3Balance?.scaled ?? "0") >= 1 &&
+    currentNavigatorData?.status === "ACTIVE" &&
+    minStakeData != null &&
+    BigInt(currentNavigatorData?.stake ?? 0) >= minStakeData.raw
 
   //Show one of the banners explainining why the user can't vote
   // Only one of the following banners can be shown at a time
