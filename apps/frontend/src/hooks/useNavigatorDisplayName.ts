@@ -1,4 +1,4 @@
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain, sanitizeDisplayName } from "@repo/utils/FormattingUtils"
 import { useGetTextRecords, useVechainDomain } from "@vechain/vechain-kit"
 
 type Options = {
@@ -37,7 +37,7 @@ export const useNavigatorDisplayName = (
   const { data: textRecords } = useGetTextRecords(domainData?.domain)
 
   const displayName =
-    textRecords?.display ||
+    sanitizeDisplayName(textRecords?.display, opts.domainPrefix, opts.domainSuffix) ||
     (domainData?.domain ? humanDomain(domainData.domain, opts.domainPrefix, opts.domainSuffix) : undefined) ||
     (address ? humanAddress(address, opts.addressPrefix, opts.addressSuffix) : "")
 
