@@ -302,7 +302,7 @@ const VotingPowerContent = ({
           {stakedFormatted && <CompositionLine label={t("From staking")} value={`${stakedFormatted} VOT3`} />}
         </VStack>
 
-        {isDelegated && Number(vot3BalanceScaled) > 0 && (
+        {isDelegated && Number(vot3BalanceScaled) > 1 && (
           <HStack
             gap="2"
             justify="space-between"
