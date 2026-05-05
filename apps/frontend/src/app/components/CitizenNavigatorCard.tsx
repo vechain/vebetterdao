@@ -2,6 +2,7 @@
 
 import { Card, Heading, HStack, Icon, IconButton, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import { Sparks } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -235,10 +236,10 @@ const CurrentRoundTasks = ({
         : "notDue"
 
   const allocationLabel = {
-    done: t("Cast round vote"),
-    late: t("Cast round vote late"),
-    missed: t("Did not cast round vote"),
-    pending: t("Needs to cast round vote"),
+    done: t("Voted on your behalf"),
+    late: t("Voted on your behalf (late)"),
+    missed: t("Missed voting on your behalf"),
+    pending: t("Waiting to vote on your behalf"),
   }[round.allocationStatus]
 
   const reportLabel = {
@@ -253,6 +254,15 @@ const CurrentRoundTasks = ({
   const canClickAllocation = round.allocationStatus === "done" || round.allocationStatus === "late"
   const canClickReport = round.reportSubmitted && !!round.reportURI
 
+  const freshnessExtra = roundVote?.freshnessLabel ? (
+    <HStack gap={0.5}>
+      <Icon as={Sparks} boxSize={3} color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"} />
+      <Text textStyle="xs" fontWeight="semibold" color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"}>
+        {roundVote.freshnessLabel}
+      </Text>
+    </HStack>
+  ) : null
+
   return (
     <VStack gap={1} align="stretch">
       <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
@@ -264,6 +274,7 @@ const CurrentRoundTasks = ({
         label={allocationLabel}
         status={round.allocationStatus}
         onClick={canClickAllocation && roundVote ? () => onSelectAllocationVote(roundVote) : undefined}
+        extra={freshnessExtra}
       />
 
       {round.proposals.map((p, i) => {

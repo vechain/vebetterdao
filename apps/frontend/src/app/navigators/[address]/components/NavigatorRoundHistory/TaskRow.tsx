@@ -12,9 +12,10 @@ type TaskRowProps = {
   label: string
   status: ReportRowStatus
   onClick?: () => void
+  extra?: React.ReactNode
 }
 
-export const TaskRow = ({ icon, label, status, onClick }: TaskRowProps) => {
+export const TaskRow = ({ icon, label, status, onClick, extra }: TaskRowProps) => {
   const { t } = useTranslation()
 
   const showBadge = status !== "done"
@@ -44,6 +45,7 @@ export const TaskRow = ({ icon, label, status, onClick }: TaskRowProps) => {
         <Text textStyle="sm" fontWeight="medium">
           {label}
         </Text>
+        {extra}
       </HStack>
       {showBadge && badgeConfig[status] && (
         <Text textStyle="xs" color={badgeConfig[status].palette}>
