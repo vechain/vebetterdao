@@ -1,7 +1,7 @@
 import { Alert } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { LuDoorOpen, LuGauge, LuUserCheck } from "react-icons/lu"
+import { LuDoorOpen, LuGauge, LuCircleAlert, LuUserCheck } from "react-icons/lu"
 
 import { type NavigatorStatusValue } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 type DelegationInfo = { delegatedAt: number } | undefined
@@ -13,6 +13,9 @@ type Props = {
   isOwnPage: boolean
   isDelegatedHere: boolean
   isAtCapacity: boolean
+  isBelowMinStake: boolean
+  wasBelowMinAtRoundStart: boolean
+  minStakeScaled: string
   currentDelegatedNum: number
   displayName: string
   delegationInfo: DelegationInfo
@@ -23,6 +26,9 @@ export const NavigatorStatusAlerts = ({
   isOwnPage,
   isDelegatedHere,
   isAtCapacity,
+  isBelowMinStake,
+  wasBelowMinAtRoundStart,
+  minStakeScaled,
   currentDelegatedNum,
   displayName,
   delegationInfo,
@@ -64,6 +70,35 @@ export const NavigatorStatusAlerts = ({
           </Alert.Indicator>
           <Alert.Title textStyle="sm">
             {t("This navigator has reached its delegation capacity and cannot receive new delegations.")}
+          </Alert.Title>
+        </Alert.Root>
+      )}
+
+      {isBelowMinStake && status === "ACTIVE" && (
+        <Alert.Root status="warning" borderRadius="xl">
+          <Alert.Indicator>
+            <LuCircleAlert />
+          </Alert.Indicator>
+          <Alert.Title textStyle="sm">
+            {isOwnPage
+              ? wasBelowMinAtRoundStart
+                ? t(
+                    "Your stake is below the minimum required amount of {{amount}} B3TR. You cannot receive new delegations and will be penalized at the end of the round if not resolved.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )
+                : t(
+                    "Your stake is below the minimum required amount of {{amount}} B3TR. You cannot receive new delegations until you increase your stake.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )
+              : wasBelowMinAtRoundStart
+                ? t(
+                    "This navigator's stake is below the minimum required amount of {{amount}} B3TR. They cannot receive new delegations and may be penalized.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )
+                : t(
+                    "This navigator's stake is below the minimum required amount of {{amount}} B3TR. They cannot receive new delegations.",
+                    { amount: formatter.format(Number(minStakeScaled)) },
+                  )}
           </Alert.Title>
         </Alert.Root>
       )}

@@ -89,6 +89,7 @@ export const ProposalInteractionCard = ({
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
   const { data: proposalQuorumNumerator } = useProposalQuorumNumeratorByType(
+    Number(roundSnapshot ?? 0),
     proposal?.type ?? GrantsProposalType.Standard,
   )
   const { data: proposalQuorum } = useProposalQuorumByType(

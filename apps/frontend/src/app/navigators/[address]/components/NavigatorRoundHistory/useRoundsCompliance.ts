@@ -8,6 +8,7 @@ import { useGetMinorSlashPercentage } from "@/api/contracts/navigatorRegistry/ho
 import { useGetPreferenceCutoffPeriod } from "@/api/contracts/navigatorRegistry/hooks/useGetPreferenceCutoffPeriod"
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useIsBelowMinStakeForRounds } from "@/api/contracts/navigatorRegistry/hooks/useIsBelowMinStakeForRounds"
 import { useIsSlashedFor, type SlashedRoundResult } from "@/api/contracts/navigatorRegistry/hooks/useIsSlashedFor"
 import { useNavigatorDecisionEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorDecisionEvents"
 import {
@@ -57,6 +58,7 @@ export const useRoundsCompliance = (address: string): RoundsComplianceResult => 
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { data: cutoffPeriod } = useGetPreferenceCutoffPeriod()
   const { data: reportInterval } = useGetReportInterval()
+  const { data: stake } = useGetStake(address)
   const { data: currentBlock } = useCurrentBlock()
   const { data: currentAllocationsRoundId } = useCurrentAllocationsRoundId()
   const { data: xApps } = useXApps()
@@ -192,6 +194,7 @@ export const useRoundsCompliance = (address: string): RoundsComplianceResult => 
 
         return {
           roundId: round.roundId,
+          voteStart: Number(round.voteStart),
           voteEnd,
           isRoundStillOpen,
           allocationStatus,
@@ -216,6 +219,16 @@ export const useRoundsCompliance = (address: string): RoundsComplianceResult => 
     currentAllocationsRoundId,
   ])
 
+  // Check which closed rounds had the navigator below minStake at both start AND end (on-chain)
+  const closedRoundCheckpoints = useMemo(
+    () =>
+      rounds
+        .filter(r => !r.isRoundStillOpen)
+        .map(r => ({ roundId: r.roundId, snapshot: r.voteStart, deadline: r.voteEnd })),
+    [rounds],
+  )
+  const { data: belowMinStakeRounds } = useIsBelowMinStakeForRounds(address, closedRoundCheckpoints)
+
   /** Build infractions for every closed round that has issues. */
   const infractionsByRound = useMemo(() => {
     const map = new Map<string, ReportableInfraction[]>()
@@ -238,15 +251,17 @@ export const useRoundsCompliance = (address: string): RoundsComplianceResult => 
       if (reportDue && !reportSubmitted) {
         result.push({ type: "missedReport", roundId })
       }
+      if (belowMinStakeRounds?.has(roundId)) {
+        result.push({ type: "belowMinStake", roundId })
+      }
 
       if (result.length > 0) map.set(roundId, result)
     }
     return map
-  }, [rounds])
+  }, [rounds, belowMinStakeRounds])
 
   const infractionRoundIds = useMemo(() => Array.from(infractionsByRound.keys()), [infractionsByRound])
   const { data: slashedByRound } = useIsSlashedFor(address, infractionRoundIds)
-  const { data: stake } = useGetStake(address)
   const { data: slashBps } = useGetMinorSlashPercentage()
   const stakeNum = stake ? Number(stake.scaled) : 0
   const estimatedPenaltyAmount = slashBps != null ? (stakeNum * slashBps) / 10_000 : 0

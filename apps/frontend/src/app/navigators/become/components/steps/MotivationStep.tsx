@@ -25,6 +25,7 @@ export const MotivationStep = () => {
           rows={4}
           maxLength={1000}
         />
+        <Field.HelperText ms="auto">{`${data.votingStrategy.length}/1000`}</Field.HelperText>
       </Field.Root>
 
       <Field.Root required>
@@ -36,6 +37,7 @@ export const MotivationStep = () => {
           rows={4}
           maxLength={1000}
         />
+        <Field.HelperText ms="auto">{`${data.motivation.length}/1000`}</Field.HelperText>
       </Field.Root>
 
       <Field.Root required>
@@ -47,6 +49,7 @@ export const MotivationStep = () => {
           rows={4}
           maxLength={1000}
         />
+        <Field.HelperText ms="auto">{`${data.qualifications.length}/1000`}</Field.HelperText>
       </Field.Root>
     </VStack>
   )

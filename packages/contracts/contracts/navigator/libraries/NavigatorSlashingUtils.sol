@@ -2,7 +2,6 @@
 pragma solidity 0.8.20;
 
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
-import { NavigatorStakingUtils } from "./NavigatorStakingUtils.sol";
 import { NavigatorDelegationUtils } from "./NavigatorDelegationUtils.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -17,12 +16,13 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 /// Slashed funds sent to treasury as B3TR (VOT3 is converted back to B3TR before transfer,
 /// since staked B3TR is held as VOT3 under the hood to count as voting power).
 ///
-/// Five minor infraction types:
+/// Six minor infraction types:
 /// 1. Missed allocation vote (had citizens, didn't set preferences for a round)
 /// 2. Missed governance proposal vote (had citizens, didn't set decision during voting period)
 /// 3. Stale allocation preferences (no update >= 3 rounds)
 /// 4. Missed report (must submit every reportInterval rounds)
 /// 5. Late preferences (set after preferenceCutoffPeriod before round deadline)
+/// 6. Below minimum stake (stake was below minStake at round snapshot)
 library NavigatorSlashingUtils {
   using Checkpoints for Checkpoints.Trace208;
 
@@ -32,6 +32,7 @@ library NavigatorSlashingUtils {
   uint256 public constant FLAG_STALE_PREFERENCES = 1 << 2;
   uint256 public constant FLAG_MISSED_REPORT = 1 << 3;
   uint256 public constant FLAG_MISSED_GOVERNANCE = 1 << 4;
+  uint256 public constant FLAG_BELOW_MIN_STAKE = 1 << 5;
 
   // ======================== Events ======================== //
 
@@ -88,44 +89,14 @@ library NavigatorSlashingUtils {
       revert AlreadySlashed(navigator, roundId);
     }
 
-    // Navigator must have had delegations at round snapshot
     uint256 snapshot = _getRoundSnapshot($, roundId);
-    bool hadDelegations = NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0;
-    if (!hadDelegations) {
-      revert NoInfractionFound(navigator, roundId);
-    }
-
-    uint256 infractionFlags = 0;
     uint256 roundDeadline = xAllocationVoting.roundDeadline(roundId);
 
-    if (!$.preferencesSet[navigator][roundId]) {
-      infractionFlags |= FLAG_MISSED_ALLOCATION;
-    } else {
-      uint256 setBlock = $.preferencesSetBlock[navigator][roundId];
-      uint256 cutoff = roundDeadline > $.preferenceCutoffPeriod ? roundDeadline - $.preferenceCutoffPeriod : 0;
-      if (setBlock > cutoff) {
-        infractionFlags |= FLAG_LATE_PREFERENCES;
-      }
-    }
+    uint256 infractionFlags = _checkStakeInfraction($, navigator, snapshot, roundDeadline);
 
-    bool stalePreferences = !$.preferencesSet[navigator][roundId]
-      && (roundId < 2 || !$.preferencesSet[navigator][roundId - 1])
-      && (roundId < 3 || !$.preferencesSet[navigator][roundId - 2]);
-    if (stalePreferences) {
-      infractionFlags |= FLAG_STALE_PREFERENCES;
-    }
-
-    uint256 lastReport = $.lastReportRound[navigator];
-    // Example: interval=2, last report in round 8 → rounds 9 still OK; round 10+ without a new report is a miss (roundId >= 8+2).
-    if (roundId >= lastReport + $.reportInterval) {
-      infractionFlags |= FLAG_MISSED_REPORT;
-    }
-
-    for (uint256 i = 0; i < proposalIds.length; i++) {
-      if ($.proposalDecision[navigator][proposalIds[i]] == 0) {
-        infractionFlags |= FLAG_MISSED_GOVERNANCE;
-        break;
-      }
+    // Delegation-dependent infractions: only check if navigator had citizens at round snapshot
+    if (NavigatorDelegationUtils.getTotalDelegatedAtTimepoint(navigator, snapshot) > 0) {
+      infractionFlags |= _checkDelegationInfractions($, navigator, roundId, roundDeadline, proposalIds);
     }
 
     if (infractionFlags == 0) {
@@ -203,6 +174,65 @@ library NavigatorSlashingUtils {
   }
 
   // ======================== Internal ======================== //
+
+  /// @dev Check if stake was below minStake for the full round.
+  /// Navigator is only penalized if they were below min at round start AND still below at round end,
+  /// giving them one full round to recover after a slash drops their stake.
+  function _checkStakeInfraction(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address navigator,
+    uint256 snapshot,
+    uint256 roundDeadline
+  ) private view returns (uint256 flags) {
+    uint256 stakeAtStart = $.stakedAmount[navigator].length() == 0
+      ? 0
+      : uint256($.stakedAmount[navigator].upperLookupRecent(SafeCast.toUint48(snapshot)));
+
+    if (stakeAtStart > 0 && stakeAtStart < $.minStake) {
+      uint256 stakeAtEnd = uint256($.stakedAmount[navigator].upperLookupRecent(SafeCast.toUint48(roundDeadline)));
+      if (stakeAtEnd < $.minStake) {
+        flags = FLAG_BELOW_MIN_STAKE;
+      }
+    }
+  }
+
+  /// @dev Check all delegation-dependent infractions (allocation, preferences, report, governance).
+  function _checkDelegationInfractions(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address navigator,
+    uint256 roundId,
+    uint256 roundDeadline,
+    uint256[] calldata proposalIds
+  ) private view returns (uint256 flags) {
+    if (!$.preferencesSet[navigator][roundId]) {
+      flags |= FLAG_MISSED_ALLOCATION;
+    } else {
+      uint256 setBlock = $.preferencesSetBlock[navigator][roundId];
+      uint256 cutoff = roundDeadline > $.preferenceCutoffPeriod ? roundDeadline - $.preferenceCutoffPeriod : 0;
+      if (setBlock > cutoff) {
+        flags |= FLAG_LATE_PREFERENCES;
+      }
+    }
+
+    bool stalePreferences = !$.preferencesSet[navigator][roundId]
+      && (roundId < 2 || !$.preferencesSet[navigator][roundId - 1])
+      && (roundId < 3 || !$.preferencesSet[navigator][roundId - 2]);
+    if (stalePreferences) {
+      flags |= FLAG_STALE_PREFERENCES;
+    }
+
+    // Example: interval=2, last report in round 8 → rounds 9 still OK; round 10+ without a new report is a miss (roundId >= 8+2).
+    if (roundId >= $.lastReportRound[navigator] + $.reportInterval) {
+      flags |= FLAG_MISSED_REPORT;
+    }
+
+    for (uint256 i = 0; i < proposalIds.length; i++) {
+      if ($.proposalDecision[navigator][proposalIds[i]] == 0) {
+        flags |= FLAG_MISSED_GOVERNANCE;
+        break;
+      }
+    }
+  }
 
   /// @dev Apply a minor slash (5% of current remaining stake) and send to treasury
   function _applyMinorSlash(

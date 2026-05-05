@@ -8,23 +8,25 @@ export const HowRegistrationWorks = () => {
   const howItWorks = useMemo(
     () => [
       {
-        heading: t("Fill in your profile"),
+        heading: t("Motivation"),
         description: t("Share your motivation, qualifications, and voting strategy so delegators can evaluate you."),
       },
       {
-        heading: t("Disclose conflicts"),
+        heading: t("Disclosures"),
         description: t(
-          "Transparency builds trust. Declare any affiliations with apps, foundation roles, or conflicts of interest.",
+          "Declare any conflicts of interest and link your social profiles so the community can verify your identity.",
         ),
-      },
-      {
-        heading: t("Add your socials"),
-        description: t("Link your Twitter, Discord, and website so the community can verify your identity."),
       },
       {
         heading: t("Stake B3TR"),
         description: t(
           "Stake at least 50,000 B3TR to register. Your stake determines your delegation capacity (10:1 ratio).",
+        ),
+      },
+      {
+        heading: t("Accept terms"),
+        description: t(
+          "Acknowledge the protocol-enforced penalties for missed votes, late reports, and undisclosed conflicts.",
         ),
       },
     ],

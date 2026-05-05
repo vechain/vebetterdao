@@ -34,12 +34,12 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
           <Text color={"text.subtle"}>{dayjs(vote.blockTimestamp * 1000).fromNow()}</Text>
         </HStack>
         {vote.reason && <Text>{vote.reason}</Text>}
-        <HStack color="text.subtle" w="full" gap={4}>
+        <HStack color="text.subtle" w="full" gap={4} flexWrap="wrap">
           <HStack>
             <Text>{t("By :")}</Text>
             <AddressWithProfilePicture address={vote.voter} />
           </HStack>
-          <Separator orientation="vertical" h="4" />
+          <Separator orientation="vertical" h="4" hideBelow="md" />
           <Text>
             {t("Voting Power: {{votingPower}}", {
               votingPower: compactFormatter.format(Number(votePower)),

@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Card, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useGetTextRecords, useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
@@ -12,6 +12,7 @@ import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators
 import { AddressIcon } from "@/components/AddressIcon"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
+import { useNavigatorDisplayName } from "@/hooks/useNavigatorDisplayName"
 
 const formatter = getCompactFormatter(2)
 
@@ -24,13 +25,11 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
   const router = useRouter()
   const { account } = useWallet()
   const { data: isNavigator } = useIsNavigator()
-  const { data: domainData, isLoading: domainLoading } = useVechainDomain(nav.address)
-  const { data: textRecords } = useGetTextRecords(domainData?.domain)
+  const { displayName, domainLoading, textRecords } = useNavigatorDisplayName(nav.address)
   const { data: metadata } = useNavigatorMetadata(nav.metadataURI)
   const isActive = nav.status === "ACTIVE"
   const isOwnCard = account?.address?.toLowerCase() === nav.address.toLowerCase()
 
-  const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 8, 6)
   const twitterHandle = textRecords?.["com.x"]
 
   const actionButton = (() => {
@@ -112,7 +111,7 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
                   {formatter.format(Number(nav.stakeFormatted))}
                 </Text>
                 <Text textStyle="xs" color="fg.muted">
-                  {t("B3TR staked")}
+                  {t("staked")}
                 </Text>
               </HStack>
               <Separator orientation="vertical" height="50%" />
@@ -124,7 +123,7 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
                   {formatter.format(Number(nav.totalDelegatedFormatted))}
                 </Text>
                 <Text textStyle="xs" color="fg.muted">
-                  {t("VOT3 delegated")}
+                  {t("delegated")}
                 </Text>
               </HStack>
             </HStack>

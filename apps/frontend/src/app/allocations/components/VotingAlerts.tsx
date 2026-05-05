@@ -5,7 +5,7 @@ import { useContext, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
-import { useGetRawNavigatorAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetRawNavigatorAtTimepoint"
+import { useGetNavigatorAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigatorAtTimepoint"
 import { useAllocationRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useAllocationRoundSnapshot"
 
 import { AllocationAlertCard } from "./AllocationAlertCard"
@@ -38,7 +38,7 @@ export const VotingAlerts = () => {
   const { data: roundSnapshotBlock } = useAllocationRoundSnapshot(roundId)
   // Resolve the navigator that holds the user's voting power for this round, so the link points
   // to the navigator actually voting on their behalf (relevant when delegation is exiting/changing).
-  const { data: snapshotNavigatorAddress } = useGetRawNavigatorAtTimepoint(account?.address, roundSnapshotBlock)
+  const { data: snapshotNavigatorAddress } = useGetNavigatorAtTimepoint(account?.address, roundSnapshotBlock)
   const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
 
   const shouldShowInsufficientPowerAlert = useMemo(

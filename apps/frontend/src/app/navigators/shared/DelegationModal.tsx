@@ -20,7 +20,9 @@ import { useTranslation } from "react-i18next"
 import { LuArrowLeftRight, LuUsers } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -57,12 +59,15 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(nav.address)
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
 
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = isDelegated && currentNavigator?.toLowerCase() === nav.address.toLowerCase()
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
 
   const mode: DelegationMode = useMemo(() => {
     if (!isDelegated) return "new"
@@ -131,6 +136,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     if (exceedsCapacity || exceedsBalance || violatesMinDelegation) return false
 
     if (mode === "new" || mode === "switch") {
+      if (isBelowMinStake) return false
       if (!amount || amount === "." || amountNum === 0) return false
       if (mode === "new") {
         return ackAll
@@ -138,6 +144,8 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
       return true
     }
 
+    // manage mode: allow reduce/undelegate, block increase when below minStake
+    if (manageValidation.isIncreasing && isBelowMinStake) return false
     return manageValidation.hasChanged && amountNum >= 0
   }, [
     mode,
@@ -146,8 +154,10 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     exceedsCapacity,
     exceedsBalance,
     violatesMinDelegation,
+    isBelowMinStake,
     ackAll,
     manageValidation.hasChanged,
+    manageValidation.isIncreasing,
   ])
 
   // --- Transaction hooks ---
@@ -289,6 +299,27 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           </VStack>
         </HStack>
 
+        {/* Below min stake warning */}
+        {isBelowMinStake && (mode !== "manage" || manageValidation.isIncreasing) && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.warning.subtle"
+            border="1px solid"
+            borderColor="status.warning.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
+                {t(
+                  "This navigator's stake is below the minimum required amount of {{amount}} B3TR. They cannot receive new delegations and may be penalized.",
+                  { amount: formatter.format(Number(minStakeData?.scaled ?? 0)) },
+                )}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
+
         {/* Capacity warning */}
         {showCapacityWarning && (
           <Card.Root
@@ -397,18 +428,11 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
             isFullRemoval={manageValidation.isFullRemoval}
             summaryColor={summaryColor}
             currentDelegatedNum={currentDelegatedNum}
-            maxCapacity={remainingCapacity}
             newAmountNum={amountNum}
             isValid={isValid}
           />
         ) : (
-          <NewDelegationSummary
-            amountNum={amountNum}
-            totalDelegatedToNav={Number(nav.totalDelegatedFormatted)}
-            currentDelegationNum={currentDelegatedNum}
-            remainingCapacity={remainingCapacity}
-            isSwitch={mode === "switch"}
-          />
+          <NewDelegationSummary currentDelegationNum={currentDelegatedNum} isSwitch={mode === "switch"} />
         )}
 
         {/* Acknowledgment for first-time delegators */}
@@ -425,7 +449,9 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                       {"1."}
                     </Text>
                     <Text textStyle="xs" color="fg.muted">
-                      {t("The navigator votes on your behalf. You cannot vote manually while delegated.")}
+                      {t(
+                        "The navigator votes on your behalf from the next round. You cannot vote manually while delegated.",
+                      )}
                     </Text>
                   </HStack>
                   <HStack gap={2} align="flex-start">
@@ -462,14 +488,13 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
               checked={ackAll}
               onCheckedChange={e => setAckAll(!!e.checked)}
               colorPalette="blue"
-              alignItems="flex-start"
-              gap={3}
-              pl={5}>
+              alignItems="center"
+              gap={3}>
               <Checkbox.HiddenInput />
-              <Checkbox.Control mt="0.5" />
+              <Checkbox.Control />
               <Checkbox.Label>
                 <Text textStyle="xs" fontWeight="semibold">
-                  {t("I understand and agree to the above")}
+                  {t("I understand and agree to the above conditions")}
                 </Text>
               </Checkbox.Label>
             </Checkbox.Root>
@@ -492,21 +517,14 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 // --- Sub-components ---
 
 type NewDelegationSummaryProps = {
-  amountNum: number
-  totalDelegatedToNav: number
   currentDelegationNum: number
-  remainingCapacity: number
   isSwitch: boolean
 }
 
-const NewDelegationSummary = ({
-  amountNum,
-  totalDelegatedToNav,
-  currentDelegationNum,
-  remainingCapacity,
-  isSwitch,
-}: NewDelegationSummaryProps) => {
+const NewDelegationSummary = ({ currentDelegationNum, isSwitch }: NewDelegationSummaryProps) => {
   const { t } = useTranslation()
+
+  if (!isSwitch || currentDelegationNum <= 0) return null
 
   return (
     <Card.Root
@@ -516,47 +534,14 @@ const NewDelegationSummary = ({
       border="1px solid"
       borderColor="status.positive.strong"
       rounded="2xl">
-      <VStack align="start" gap={2}>
-        <Text textStyle="xs" color="text.subtle" fontStyle="italic">
-          {t("Voting Power delegated from next round")}
+      <HStack w="full" justifyContent="space-between">
+        <Text textStyle="xs" color="text.subtle">
+          {t("Your current delegation (will be moved)")}
         </Text>
-
-        <Text textStyle="3xl" fontWeight="bold" color="status.positive.strong">
-          {"+"}
-          {formatter.format(amountNum)}
-          {" VOT3"}
+        <Text textStyle="xs" fontWeight="semibold">
+          {formatter.format(currentDelegationNum)} {"VOT3"}
         </Text>
-
-        <Separator w="full" borderColor="status.positive.strong/30" />
-        <VStack align="start" gap={1} w="full">
-          <HStack w="full" justifyContent="space-between">
-            <Text textStyle="xs" color="text.subtle">
-              {t("Currently delegated to navigator")}
-            </Text>
-            <Text textStyle="xs" fontWeight="semibold">
-              {formatter.format(totalDelegatedToNav)} {"VOT3"}
-            </Text>
-          </HStack>
-          {isSwitch && currentDelegationNum > 0 && (
-            <HStack w="full" justifyContent="space-between">
-              <Text textStyle="xs" color="text.subtle">
-                {t("Your current delegation (will be moved)")}
-              </Text>
-              <Text textStyle="xs" fontWeight="semibold">
-                {formatter.format(currentDelegationNum)} {"VOT3"}
-              </Text>
-            </HStack>
-          )}
-          <HStack w="full" justifyContent="space-between">
-            <Text textStyle="xs" color="text.subtle">
-              {t("Navigator capacity remaining")}
-            </Text>
-            <Text textStyle="xs" fontWeight="semibold">
-              {formatter.format(remainingCapacity)} {"VOT3"}
-            </Text>
-          </HStack>
-        </VStack>
-      </VStack>
+      </HStack>
     </Card.Root>
   )
 }
@@ -568,7 +553,6 @@ type ManageSummaryProps = {
   isFullRemoval: boolean
   summaryColor: string
   currentDelegatedNum: number
-  maxCapacity: number
   newAmountNum: number
   isValid: boolean
 }
@@ -580,7 +564,6 @@ const ManageSummary = ({
   isFullRemoval,
   summaryColor,
   currentDelegatedNum,
-  maxCapacity,
   newAmountNum,
   isValid,
 }: ManageSummaryProps) => {
@@ -619,14 +602,6 @@ const ManageSummary = ({
                   {formatter.format(currentDelegatedNum)} {"→"} {formatter.format(newAmountNum)} {"VOT3"}
                 </Text>
               </HStack>
-              <HStack w="full" justifyContent="space-between">
-                <Text textStyle="xs" color="text.subtle">
-                  {t("Navigator capacity remaining")}
-                </Text>
-                <Text textStyle="xs" fontWeight="semibold">
-                  {formatter.format(Math.max(0, maxCapacity - newAmountNum))} {"VOT3"}
-                </Text>
-              </HStack>
             </VStack>
           </VStack>
         </Card.Root>
@@ -645,12 +620,10 @@ const ManageSummary = ({
                 </Text>
               </HStack>
             )}
-            <HStack gap={3} align="flex-start">
-              <Icon as={InfoCircle} boxSize="5" color="text.subtle" mt="0.5" flexShrink={0} />
+            <HStack gap={3} align="center">
+              <Icon as={InfoCircle} boxSize="5" color="text.subtle" flexShrink={0} />
               <Text textStyle="xs" color="text.subtle">
-                {t(
-                  "Changes take effect at the start of the next round. Until then, your current delegation remains active for voting and rewards.",
-                )}
+                {t("Changes take effect at the start of the next round.")}
               </Text>
             </HStack>
           </VStack>

@@ -1,21 +1,24 @@
 "use client"
 
 import { Card, Heading, HStack, Icon, IconButton, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
+import { Sparks } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { LuFileText, LuGavel, LuShieldAlert, LuTriangleAlert, LuUsers, LuVote } from "react-icons/lu"
+import { LuCoins, LuFileText, LuGavel, LuShieldAlert, LuTriangleAlert, LuUsers, LuVote } from "react-icons/lu"
 
 import { useGetFeePercentage } from "@/api/contracts/navigatorRegistry/hooks/useGetFeePercentage"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
+import { useNavigatorDisplayName } from "@/hooks/useNavigatorDisplayName"
 
 import { NavigatorProposalVoteModal } from "../navigators/[address]/components/modals/NavigatorProposalVoteModal"
 import { NavigatorRoundVotesModal } from "../navigators/[address]/components/modals/NavigatorRoundVotesModal"
@@ -50,10 +53,19 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const router = useRouter()
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(navigatorAddress)
-  const { data: domainData } = useVechainDomain(navigatorAddress)
+  const { displayName } = useNavigatorDisplayName(navigatorAddress, {
+    domainPrefix: 15,
+    domainSuffix: 10,
+    addressPrefix: 6,
+    addressSuffix: 4,
+  })
   const { data: status } = useNavigatorStatus(navigatorAddress)
   const { data: delegationInfo } = useMyDelegationInfo(navigatorAddress)
   const { data: fee } = useGetFeePercentage()
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(navigatorAddress)
+  const isBelowMinStake =
+    status === "ACTIVE" && minStakeData && stakeData ? stakeData.raw > 0n && stakeData.raw < minStakeData.raw : false
 
   const { rounds, roundVotesMap, slashedByRound } = useRoundsCompliance(navigatorAddress)
 
@@ -61,7 +73,6 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const [selectedRoundVote, setSelectedRoundVote] = useState<RoundVote | null>(null)
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null)
 
-  const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(navigatorAddress, 6, 4)
   const citizens = nav?.citizenCount ?? 0
 
   const delegatedSince = useMemo(() => {
@@ -150,6 +161,19 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
               </HStack>
             )}
 
+            {isBelowMinStake && (
+              <HStack gap={2} p={2} borderRadius="md" bg="status.warning.subtle">
+                <Icon boxSize={4} color="status.warning.strong">
+                  <LuCoins />
+                </Icon>
+                <Text textStyle="xs" color="status.warning.strong" fontWeight="medium">
+                  {t(
+                    "Your navigator's stake is below the minimum required. They may be penalized if it's not resolved.",
+                  )}
+                </Text>
+              </HStack>
+            )}
+
             {currentRound && (
               <>
                 <Separator />
@@ -212,10 +236,10 @@ const CurrentRoundTasks = ({
         : "notDue"
 
   const allocationLabel = {
-    done: t("Cast round vote"),
-    late: t("Cast round vote late"),
-    missed: t("Did not cast round vote"),
-    pending: t("Needs to cast round vote"),
+    done: t("Voted on your behalf"),
+    late: t("Voted on your behalf (late)"),
+    missed: t("Missed voting on your behalf"),
+    pending: t("Waiting to vote on your behalf"),
   }[round.allocationStatus]
 
   const reportLabel = {
@@ -230,6 +254,15 @@ const CurrentRoundTasks = ({
   const canClickAllocation = round.allocationStatus === "done" || round.allocationStatus === "late"
   const canClickReport = round.reportSubmitted && !!round.reportURI
 
+  const freshnessExtra = roundVote?.freshnessLabel ? (
+    <HStack gap={0.5}>
+      <Icon as={Sparks} boxSize={3} color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"} />
+      <Text textStyle="xs" fontWeight="semibold" color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"}>
+        {roundVote.freshnessLabel}
+      </Text>
+    </HStack>
+  ) : null
+
   return (
     <VStack gap={1} align="stretch">
       <Text textStyle="xs" fontWeight="semibold" color="text.subtle">
@@ -241,6 +274,7 @@ const CurrentRoundTasks = ({
         label={allocationLabel}
         status={round.allocationStatus}
         onClick={canClickAllocation && roundVote ? () => onSelectAllocationVote(roundVote) : undefined}
+        extra={freshnessExtra}
       />
 
       {round.proposals.map((p, i) => {

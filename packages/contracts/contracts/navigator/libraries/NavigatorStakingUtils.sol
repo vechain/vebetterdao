@@ -272,7 +272,13 @@ library NavigatorStakingUtils {
   /// @return True if the address is a registered and active navigator
   function isNavigator(address account) external view returns (bool) {
     NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
-    return $.isRegistered[account] && !$.isDeactivated[account];
+    if (!$.isRegistered[account] || $.isDeactivated[account]) return false;
+    // Voluntary exit: check if exit deadline has passed
+    if ($.exitAnnouncedRound[account] > 0) {
+      (bool exists, uint48 effectiveDeadline, ) = $.navigatorDeactivated[account].latestCheckpoint();
+      if (exists && block.number >= effectiveDeadline) return false;
+    }
+    return true;
   }
 
   /// @notice Check if navigator can accept new delegations

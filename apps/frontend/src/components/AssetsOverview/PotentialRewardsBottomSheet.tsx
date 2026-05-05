@@ -2,7 +2,18 @@
 
 import { Box, HStack, Icon, Text, VStack, Badge, useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { Gift, Check, Xmark, StarSolid, Flash, RefreshDouble, InfoCircle, NavArrowRight, UserStar } from "iconoir-react"
+import {
+  Gift,
+  Check,
+  Xmark,
+  StarSolid,
+  Flash,
+  RefreshDouble,
+  InfoCircle,
+  NavArrowRight,
+  UserStar,
+  Sparks,
+} from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -28,12 +39,13 @@ type Props = {
   roundEndTimestamp: import("dayjs").Dayjs | null
   isDelegating: boolean
   navigatorFeePercentage: bigint
+  freshnessLabel: string | null
 }
 
 const REWARDS_EVENT_NAMES = ["B3TR_CLAIM_REWARD"] as const
 const compactFormatter = getCompactFormatter(2)
 
-const CheckItem = ({ label, checked }: { label: string; checked: boolean }) => (
+const CheckItem = ({ label, checked, extra }: { label: string; checked: boolean; extra?: React.ReactNode }) => (
   <HStack gap="2" p="2" rounded="md" bg="card.subtle">
     <Icon boxSize="4" color={checked ? "status.positive.strong" : "status.negative.strong"}>
       {checked ? <Check /> : <Xmark />}
@@ -41,6 +53,7 @@ const CheckItem = ({ label, checked }: { label: string; checked: boolean }) => (
     <Text textStyle="sm" flex={1}>
       {label}
     </Text>
+    {extra}
     <Badge variant={checked ? "positive" : "negative"} size="sm">
       {checked ? "Done" : "Missing"}
     </Badge>
@@ -73,6 +86,7 @@ const RewardsContent = ({
   roundEndTimestamp,
   isDelegating,
   navigatorFeePercentage,
+  freshnessLabel,
 }: Omit<Props, "isOpen">) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -111,7 +125,7 @@ const RewardsContent = ({
             {" B3TR"}
           </Text>
 
-          <Box mt="3" pt="3" borderTopWidth="1px" borderColor="border.secondary">
+          <Box mt="3" pt="3" borderTopWidth="1px" borderColor="border.primary">
             <RewardLine label={t("From voting")} amount={fmt(reward.netReward)} />
             {reward.netGmReward > 0n && (
               <RewardLine label={t("From Galaxy Member NFT")} amount={fmt(reward.netGmReward)} />
@@ -142,7 +156,18 @@ const RewardsContent = ({
       </Text>
 
       <VStack gap="1.5" align="stretch">
-        <CheckItem label={t("Voted this round")} checked={hasVoted} />
+        <CheckItem
+          label={t("Voted this round")}
+          checked={hasVoted}
+          extra={
+            freshnessLabel ? (
+              <Badge variant={freshnessLabel === "x1" ? "warning" : "positive"} size="sm" gap="0.5">
+                <Icon as={Sparks} boxSize="3" />
+                {freshnessLabel}
+              </Badge>
+            ) : undefined
+          }
+        />
         {hasProposals && <CheckItem label={t("Voted on all proposals")} checked={hasVotedOnAllProposals} />}
         <CheckItem label={t("Own a Galaxy Member NFT")} checked={hasGmNft} />
       </VStack>

@@ -5,6 +5,7 @@ import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import { useColorMode } from "@/components/ui/color-mode"
 import { Toaster } from "@/components/ui/toaster"
 
 import { Footer } from "../components/Footer/Footer"
@@ -15,6 +16,23 @@ import { Providers } from "./providers"
 
 import "@/i18n"
 import "./theme/vechain-kit-fixes.css"
+import "./theme/md-editor-overrides.css"
+
+// Keeps @uiw/react-md-editor in sync with Chakra color mode.
+// Must live inside <Providers> (below ColorModeProvider) to access useColorMode().
+function MdEditorColorModeSync() {
+  const { colorMode } = useColorMode()
+
+  useEffect(() => {
+    if (!colorMode) return
+    document.documentElement.setAttribute("data-color-mode", colorMode)
+    return () => {
+      document.documentElement.removeAttribute("data-color-mode")
+    }
+  }, [colorMode])
+
+  return null
+}
 
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
@@ -39,14 +57,6 @@ console.error = (...args: any) => {
 }
 
 export function ClientWrapper({ children }: { children: React.ReactNode }) {
-  // set color mode of @uiw/react-md-editor
-  useEffect(() => {
-    document.documentElement.setAttribute("data-color-mode", "light")
-    return () => {
-      document.documentElement.removeAttribute("data-color-mode")
-    }
-  }, [])
-
   // Defer analytics initialization until after page load
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -85,6 +95,7 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <Providers>
+      <MdEditorColorModeSync />
       {isProduction && <FreshDeskWidget widgetId={103000007852} />}
       <VStack minH="100vh" gap={0} align="stretch">
         <Navbar />

@@ -18,10 +18,13 @@ import { useMemo, useState } from "react"
 import Countdown from "react-countdown"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { LuClock, LuFileText, LuGavel, LuTriangleAlert, LuUsers, LuVote } from "react-icons/lu"
+import { LuClock, LuCoins, LuFileText, LuGavel, LuTriangleAlert, LuUsers, LuVote } from "react-icons/lu"
 
 import { useGetLastReportRound } from "@/api/contracts/navigatorRegistry/hooks/useGetLastReportRound"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useGetStakedAmountAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetStakedAmountAtTimepoint"
 import { useGetTotalDelegatedAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetTotalDelegatedAtTimepoint"
 import { useHasSetDecisions } from "@/api/contracts/navigatorRegistry/hooks/useHasSetDecisions"
 import { useHasSetPreferences } from "@/api/contracts/navigatorRegistry/hooks/useHasSetPreferences"
@@ -67,6 +70,12 @@ export const NavigatorDashboardCard = () => {
   const { data: reportInterval } = useGetReportInterval()
   const { cutoffDate, isPastCutoff } = useNavigatorCutoffDeadline()
   const isRegistrationRound = useIsNavigatorRegistrationRound(account?.address)
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(account?.address ?? "")
+  const { data: stakeAtSnapshot } = useGetStakedAmountAtTimepoint(account?.address ?? "", snapshot ?? undefined)
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
+  const wasBelowMinAtRoundStart =
+    minStakeData && stakeAtSnapshot ? stakeAtSnapshot.raw > 0n && stakeAtSnapshot.raw < minStakeData.raw : false
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { data: reportEvents } = useNavigatorReportEvents(account?.address)
 
@@ -112,7 +121,11 @@ export const NavigatorDashboardCard = () => {
 
   const allProposalsDone = activeProposals.length === 0 || activeProposals.every(p => decisionsMap?.[p.id])
   const proposalsDoneCount = activeProposals.filter(p => decisionsMap?.[p.id]).length
-  const hasPendingTasks = !hasSetPrefs || !allProposalsDone || (isReportMandatory && !hasReportThisRound)
+  const hasPendingTasks =
+    !hasSetPrefs ||
+    !allProposalsDone ||
+    (isReportMandatory && !hasReportThisRound) ||
+    (wasBelowMinAtRoundStart && isBelowMinStake)
 
   const allocationStatus = hasSetPrefs ? "done" : "pending"
   const reportStatus: ReportRowStatus = hasReportThisRound ? "done" : isReportMandatory ? "pending" : "optionalOpen"
@@ -243,7 +256,7 @@ export const NavigatorDashboardCard = () => {
 
                   <TaskRow
                     icon={<LuVote />}
-                    label={hasSetPrefs ? t("Preferences Set") : t("Preferences Pending")}
+                    label={hasSetPrefs ? t("Voted For Apps") : t("Vote For Apps")}
                     status={allocationStatus}
                   />
 
@@ -271,6 +284,14 @@ export const NavigatorDashboardCard = () => {
                     status={reportStatus}
                     onClick={hasReportThisRound || currentRoundReportURI ? () => setIsViewReportOpen(true) : undefined}
                   />
+
+                  {wasBelowMinAtRoundStart && (
+                    <TaskRow
+                      icon={<LuCoins />}
+                      label={isBelowMinStake ? t("Stake below minimum") : t("Stake above minimum")}
+                      status={isBelowMinStake ? "pending" : "done"}
+                    />
+                  )}
                 </VStack>
               </>
             )}

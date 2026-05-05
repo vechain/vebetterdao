@@ -18,6 +18,7 @@ import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAlloc
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { useEvents } from "@/hooks/useEvents"
 import { ProposalFilter } from "@/store/useProposalFilters"
 import { calculatePotentialRewards } from "@/utils/rewardCalculation"
 
@@ -125,6 +126,24 @@ export const PotentialRewardBox = () => {
     enabled: !!thor && !!currentRoundId,
   })
 
+  const { data: freshnessEvents } = useEvents({
+    abi: xAllocationVotingAbi,
+    contractAddress: xAllocationVotingAddress,
+    eventName: "FreshnessMultiplierApplied",
+    filterParams: {
+      voter: (account?.address ?? "") as `0x${string}`,
+      roundId: currentRoundId!,
+    },
+    select: events => events.map(({ decodedData }) => Number(decodedData.args.multiplier)),
+    enabled: !!account?.address && !!currentRoundId,
+  })
+
+  const freshnessLabel = useMemo(() => {
+    const multiplier = freshnessEvents?.[0]
+    if (!multiplier) return null
+    return `x${multiplier / 10000}`
+  }, [freshnessEvents])
+
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { filteredProposals: activeProposals } = useFilteredProposals([ProposalFilter.InThisRound], enrichedProposals)
   const { data: hasVotedInProposals } = useHasVotedInProposals(
@@ -226,6 +245,7 @@ export const PotentialRewardBox = () => {
         roundEndTimestamp={roundData?.voteEndTimestamp ?? null}
         isDelegating={isDelegating}
         navigatorFeePercentage={navigatorFeePercentage}
+        freshnessLabel={freshnessLabel}
       />
     </>
   )

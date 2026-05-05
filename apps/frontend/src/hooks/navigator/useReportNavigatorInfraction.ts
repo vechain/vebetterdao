@@ -19,6 +19,7 @@ export type InfractionType =
   | "stalePreferences"
   | "missedReport"
   | "latePreferences"
+  | "belowMinStake"
 
 export type ReportableInfraction = {
   type: InfractionType

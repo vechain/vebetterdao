@@ -3,8 +3,10 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuExternalLink, LuShare2 } from "react-icons/lu"
 
-import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
-import { type NavigatorStatusValue } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
+import {
+  type NavigatorStatusValue,
+  useNavigatorStatus,
+} from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { AddressIcon } from "@/components/AddressIcon"
 
@@ -27,6 +29,7 @@ type Props = {
   isOwnPage: boolean
   hasStake: boolean
   isAtCapacity: boolean
+  isBelowMinStake: boolean
   onDelegationClick: () => void
   onManageStakeClick: () => void
   onWithdrawStakeClick: () => void
@@ -41,14 +44,14 @@ type MainActionInput = {
   isOwnPage: boolean
   isConnected: boolean
   hasStake: boolean
-  isNavigator: boolean
+  isActiveNavigator: boolean
 }
 
 const getMainAction = (input: MainActionInput): MainAction => {
   if (input.isOwnPage && input.status === "DEACTIVATED" && input.hasStake) return "withdraw-stake"
   if (input.isDelegatedHere) return "manage-delegation"
   if (input.isOwnPage && input.status === "ACTIVE") return "manage-stake"
-  if (input.isConnected && input.status === "ACTIVE" && !input.isNavigator) return "delegate"
+  if (input.isConnected && input.status === "ACTIVE" && !input.isActiveNavigator) return "delegate"
   return "share"
 }
 
@@ -65,6 +68,7 @@ export const NavigatorHeader = ({
   isOwnPage,
   hasStake,
   isAtCapacity,
+  isBelowMinStake,
   onDelegationClick,
   onManageStakeClick,
   onWithdrawStakeClick,
@@ -74,7 +78,7 @@ export const NavigatorHeader = ({
 }: Props) => {
   const { t } = useTranslation()
   const [isShareOpen, setIsShareOpen] = useState(false)
-  const { data: isNavigator } = useIsNavigator()
+  const { data: connectedUserStatus } = useNavigatorStatus()
 
   const mainAction = getMainAction({
     status,
@@ -82,7 +86,7 @@ export const NavigatorHeader = ({
     isOwnPage,
     isConnected,
     hasStake,
-    isNavigator: !!isNavigator,
+    isActiveNavigator: connectedUserStatus === "ACTIVE",
   })
   const handleShare = () => setIsShareOpen(true)
 
@@ -121,7 +125,7 @@ export const NavigatorHeader = ({
                   size="sm"
                   flex={{ base: 1, md: "initial" }}
                   onClick={onClick}
-                  disabled={mainAction === "delegate" && isAtCapacity}>
+                  disabled={mainAction === "delegate" && (isAtCapacity || isBelowMinStake)}>
                   {mainAction === "share" && <LuShare2 />}
                   {label}
                 </Button>

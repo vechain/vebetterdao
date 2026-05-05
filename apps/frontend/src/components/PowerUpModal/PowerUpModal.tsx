@@ -16,7 +16,9 @@ import { getB3TrTokenDetailsQueryKey } from "@/api/contracts/b3tr/hooks/useB3trT
 import { buildB3trApprovesTx } from "@/api/contracts/b3tr/utils/buildB3trApprovesTx"
 import { getVotesOnBlockPrefixQueryKey } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import { getGetDelegatedAmountQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { buildConvertB3trTx } from "@/api/contracts/vot3/utils/buildConvertB3trTx"
 import { buildDelegateVot3Tx } from "@/api/contracts/vot3/utils/buildDelegateVot3Tx"
@@ -60,6 +62,8 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
   const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
   const { data: domainData } = useVechainDomain(navigatorAddress ?? "")
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(navigatorAddress ?? "")
   const requiresSelfDelegation = useVot3RequireSelfDelegation()
   const availableBalance = b3trBalance?.scaled ?? "0"
 
@@ -75,6 +79,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
       return 0n
     }
   }, [navigatorData])
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
   const freeCapacity = Number(formatEther(freeCapacityWei))
   const amountNum = Number(amount) || 0
   const exceedsCapacity = isDelegated && includeDelegation && amountNum > freeCapacity
@@ -91,9 +96,9 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   useEffect(() => {
     if (isOpen) {
       setAmount("")
-      setIncludeDelegation(true)
+      setIncludeDelegation(!isBelowMinStake)
     }
-  }, [isOpen])
+  }, [isOpen, isBelowMinStake])
 
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
@@ -285,18 +290,26 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           <VStack gap={1} w="full">
             <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
               <Checkbox.Root
-                checked={includeDelegation}
+                checked={includeDelegation && !isBelowMinStake}
                 onCheckedChange={e => setIncludeDelegation(!!e.checked)}
+                disabled={isBelowMinStake}
                 gap={3}
                 alignItems="center">
                 <Checkbox.HiddenInput />
                 <Checkbox.Control mt="0.5" />
                 <Checkbox.Label>
-                  <Text textStyle="xs" color="text.subtle">
+                  <Text textStyle="xs" color={isBelowMinStake ? "fg.subtle" : "text.subtle"}>
                     {t("Also delegate to my navigator for extra voting power")}
                   </Text>
                 </Checkbox.Label>
               </Checkbox.Root>
+              {isBelowMinStake && (
+                <Text textStyle="xs" color="status.warning.strong" mt={1}>
+                  {t(
+                    "Your navigator's stake is below the minimum required. Delegation increase is temporarily unavailable.",
+                  )}
+                </Text>
+              )}
             </Card.Root>
 
             {includeDelegation && navigatorAddress && navigatorData && (

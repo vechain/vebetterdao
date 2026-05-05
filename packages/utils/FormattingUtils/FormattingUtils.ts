@@ -130,6 +130,22 @@ export const removeUrlProtocolAndPath = (url: string) => {
 //     return `${currency} - ${name}`
 // }
 
+// Strip control characters (U+0000–U+001F, U+007F) and Unicode bidi/direction overrides
+const UNSAFE_CHARS =
+  // eslint-disable-next-line no-control-regex
+  /[\u0000-\u001F\u007F\u200E\u200F\u202A-\u202E\u2066-\u2069]/g
+
+export const sanitizeDisplayName = (
+  raw: string | undefined,
+  prefixLen: number,
+  suffixLen: number,
+): string | undefined => {
+  if (!raw) return undefined
+  const clean = raw.replace(UNSAFE_CHARS, "").trim()
+  if (!clean) return undefined
+  return humanDomain(clean, prefixLen, suffixLen)
+}
+
 export const limitChars = (text: string) => {
   if (text.length <= 24) {
     return text

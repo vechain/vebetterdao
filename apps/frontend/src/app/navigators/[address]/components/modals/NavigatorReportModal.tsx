@@ -1,12 +1,17 @@
-import { Button, Input, Text, Textarea, VStack, Heading, HStack, Badge } from "@chakra-ui/react"
+import "@uiw/react-md-editor/markdown-editor.css"
+import { Box, Button, Input, Text, VStack, Heading } from "@chakra-ui/react"
+import dynamic from "next/dynamic"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import rehypeSanitize from "rehype-sanitize"
 
 import { useGetReportInterval } from "@/api/contracts/navigatorRegistry/hooks/useGetReportInterval"
 import { BaseModal } from "@/components/BaseModal"
 import { useSubmitNavigatorReport } from "@/hooks/navigator/useSubmitNavigatorReport"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
 type Props = {
   isOpen: boolean
@@ -94,28 +99,6 @@ export const NavigatorReportModal = ({ isOpen, onClose, initialLink, initialText
         </Text>
 
         <VStack align="stretch" gap={1}>
-          <HStack justify="space-between">
-            <Text textStyle="xs" fontWeight="semibold">
-              {t("Note")}
-            </Text>
-            <Badge size="xs" variant="outline">
-              {t("Markdown")}
-            </Badge>
-          </HStack>
-          <Textarea
-            placeholder={t("Write your report or add additional context")}
-            value={text}
-            onChange={e => setText(e.target.value)}
-            resize="vertical"
-            rows={6}
-            fontSize="16px"
-          />
-          <Text textStyle="xs" color="text.subtle">
-            {t("Supports markdown formatting: **bold**, *italic*, [links](url), lists, and more.")}
-          </Text>
-        </VStack>
-
-        <VStack align="stretch" gap={1}>
           <Text textStyle="xs" fontWeight="semibold">
             {t("Link")}
           </Text>
@@ -130,6 +113,33 @@ export const NavigatorReportModal = ({ isOpen, onClose, initialLink, initialText
               {t("Invalid URL")}
             </Text>
           )}
+        </VStack>
+
+        <VStack align="stretch" gap={1}>
+          <Text textStyle="xs" fontWeight="semibold">
+            {t("Note")}
+          </Text>
+          <Box
+            w="full"
+            h={[260, 320]}
+            className="wmde-markdown-var"
+            border="1px solid"
+            borderColor="border.primary"
+            borderRadius="md"
+            overflow="hidden">
+            <MDEditor
+              preview={"edit"}
+              value={text}
+              onChange={value => setText(value ?? "")}
+              height="100%"
+              textareaProps={{
+                placeholder: t("Write your report or add additional context"),
+              }}
+              previewOptions={{
+                rehypePlugins: [[rehypeSanitize]],
+              }}
+            />
+          </Box>
         </VStack>
 
         <Button variant="primary" w="full" disabled={!canSubmit} onClick={handleSubmit}>

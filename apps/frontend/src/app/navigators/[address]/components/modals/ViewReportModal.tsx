@@ -49,8 +49,11 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
               </Text>
             )}
 
+            {report.link && <LinkPreview url={report.link} />}
+
             {report.text && (
               <Box
+                className="wmde-markdown-var"
                 css={{
                   "& .wmde-markdown": {
                     backgroundColor: "transparent",
@@ -73,8 +76,6 @@ export const ViewReportModal = ({ isOpen, onClose, reportURI }: Props) => {
                 />
               </Box>
             )}
-
-            {report.link && <LinkPreview url={report.link} />}
           </>
         ) : (
           <Text textStyle="sm" color="text.subtle">

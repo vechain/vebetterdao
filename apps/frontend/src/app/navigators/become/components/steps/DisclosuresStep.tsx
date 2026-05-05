@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next"
 
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 
+export const isValidUrl = (url: string) => /^https?:\/\/.+\..+/.test(url)
+
 const ToggleField = ({
   label,
   checked,
@@ -46,13 +48,15 @@ export const DisclosuresStep = () => {
         />
         {data.isAppAffiliated && (
           <Field.Root required>
-            <Field.Label>{t("App names")}</Field.Label>
+            <Field.Label>{t("Apps")}</Field.Label>
             <Input
-              placeholder={t("e.g. Mugshot, GreenCart")}
+              placeholder={t("e.g. Mugshot, Owner of GreenCart")}
               value={data.affiliatedAppNames}
               onChange={e => setData({ affiliatedAppNames: e.target.value })}
               size="sm"
+              maxLength={200}
             />
+            <Field.HelperText ms="auto">{`${data.affiliatedAppNames.length}/200`}</Field.HelperText>
           </Field.Root>
         )}
       </VStack>
@@ -71,7 +75,9 @@ export const DisclosuresStep = () => {
               value={data.foundationRole}
               onChange={e => setData({ foundationRole: e.target.value })}
               size="sm"
+              maxLength={200}
             />
+            <Field.HelperText ms="auto">{`${data.foundationRole.length}/200`}</Field.HelperText>
           </Field.Root>
         )}
       </VStack>
@@ -93,6 +99,7 @@ export const DisclosuresStep = () => {
               maxLength={500}
               size="sm"
             />
+            <Field.HelperText ms="auto">{`${data.conflictsDescription.length}/500`}</Field.HelperText>
           </Field.Root>
         )}
       </VStack>
@@ -111,7 +118,11 @@ export const DisclosuresStep = () => {
         <Input
           placeholder={t("vebetterdao")}
           value={data.twitterHandle}
-          onChange={e => setData({ twitterHandle: e.target.value })}
+          onChange={e => {
+            const sanitized = e.target.value.replace(/[^a-zA-Z0-9_]/g, "")
+            setData({ twitterHandle: sanitized })
+          }}
+          maxLength={15}
         />
         <Field.HelperText>{t("Your Twitter handle (without @)")}</Field.HelperText>
       </Field.Root>
@@ -119,19 +130,25 @@ export const DisclosuresStep = () => {
       <Field.Root>
         <Field.Label>{t("Discord")}</Field.Label>
         <Input
-          placeholder={t("username#1234")}
+          placeholder={t("username")}
           value={data.discordHandle}
-          onChange={e => setData({ discordHandle: e.target.value })}
+          onChange={e => {
+            const sanitized = e.target.value.replace(/[^a-zA-Z0-9._]/g, "")
+            setData({ discordHandle: sanitized })
+          }}
+          maxLength={32}
         />
       </Field.Root>
 
-      <Field.Root>
+      <Field.Root invalid={data.websiteUrl.length > 0 && !isValidUrl(data.websiteUrl)}>
         <Field.Label>{t("Personal website or blog")}</Field.Label>
         <Input
           placeholder={t("https://mywebsite.com")}
           value={data.websiteUrl}
-          onChange={e => setData({ websiteUrl: e.target.value })}
+          onChange={e => setData({ websiteUrl: e.target.value.trim() })}
+          maxLength={200}
         />
+        <Field.ErrorText>{t("Must be a valid URL starting with https://")}</Field.ErrorText>
       </Field.Root>
     </VStack>
   )

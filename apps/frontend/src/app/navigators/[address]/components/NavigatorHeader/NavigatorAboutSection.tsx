@@ -63,7 +63,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
                 <Text textStyle="sm" color="fg.muted">
                   {t("App affiliated")}
                 </Text>
-                <Text textStyle="sm" fontWeight="semibold">
+                <Text textStyle="sm" fontWeight="semibold" textAlign="right">
                   {metadata.disclosures.isAppAffiliated ? metadata.disclosures.affiliatedAppNames || t("Yes") : t("No")}
                 </Text>
               </HStack>
@@ -72,7 +72,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
                 <Text textStyle="sm" color="fg.muted">
                   {t("Foundation member")}
                 </Text>
-                <Text textStyle="sm" fontWeight="semibold">
+                <Text textStyle="sm" fontWeight="semibold" textAlign="right">
                   {metadata.disclosures.isFoundationMember ? metadata.disclosures.foundationRole || t("Yes") : t("No")}
                 </Text>
               </HStack>
@@ -81,7 +81,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
                 <Text textStyle="sm" color="fg.muted">
                   {t("Conflicts of interest")}
                 </Text>
-                <Text textStyle="sm" fontWeight="semibold">
+                <Text textStyle="sm" fontWeight="semibold" textAlign="right">
                   {metadata.disclosures.hasConflictsOfInterest ? t("Yes") : t("No")}
                 </Text>
               </HStack>

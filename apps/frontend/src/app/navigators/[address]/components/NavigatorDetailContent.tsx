@@ -1,6 +1,5 @@
 import { Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useParams, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -8,16 +7,21 @@ import { LuCompass } from "react-icons/lu"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetMetadataURI } from "@/api/contracts/navigatorRegistry/hooks/useGetMetadataURI"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useGetStakedAmountAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetStakedAmountAtTimepoint"
 import { useNavigatorReportEvents } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorReportEvents"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb/PageBreadcrumb"
 import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
+import { useNavigatorDisplayName } from "@/hooks/useNavigatorDisplayName"
 
 import { AnnounceExitModal } from "./modals/AnnounceExitModal"
 import { EditNavigatorProfileModal } from "./modals/EditNavigatorProfileModal"
@@ -60,13 +64,22 @@ export const NavigatorDetailContent = () => {
   // without waiting for the indexer to pick up MetadataURIUpdated events.
   const { data: metadataURI } = useGetMetadataURI(address)
   const { data: metadata, isLoading: metadataLoading } = useNavigatorMetadata(metadataURI)
-  const { data: domainData, isLoading: domainLoading } = useVechainDomain(address)
+  const { displayName, domainLoading } = useNavigatorDisplayName(address, {
+    domainPrefix: 20,
+    domainSuffix: 10,
+    addressPrefix: 10,
+    addressSuffix: 8,
+  })
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: status } = useNavigatorStatus(address)
   const { data: delegationInfo } = useMyDelegationInfo(address)
 
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(address)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: currentSnapshot } = useCurrentRoundSnapshot()
+  const { data: stakeAtSnapshot } = useGetStakedAmountAtTimepoint(address, currentSnapshot ?? undefined)
 
   const currentRoundReportURI = useMemo(() => {
     if (!reportEventsForEdit || !currentRoundId) return undefined
@@ -74,8 +87,6 @@ export const NavigatorDetailContent = () => {
     return reportEventsForEdit.findLast(e => e.roundId === currentRoundId)?.reportURI
   }, [reportEventsForEdit, currentRoundId])
   const { data: currentReportData } = useIpfsMetadata<{ link?: string; text?: string }>(currentRoundReportURI)
-
-  const displayName = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(address, 10, 8)
 
   if (navLoading || (waitForIndexer && !nav)) {
     return <NavigatorDetailSkeleton />
@@ -99,6 +110,10 @@ export const NavigatorDetailContent = () => {
   const currentDelegatedNum = currentDelegation ? Number(currentDelegation.scaled) : 0
   const isDelegatedHere = currentNavigator?.toLowerCase() === address.toLowerCase() && currentDelegatedNum > 0
   const isAtCapacity = Number(nav.stakeFormatted ?? 0) * 10 <= Number(nav.totalDelegatedFormatted ?? 0)
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
+  const minStakeScaled = minStakeData?.scaled ?? "0"
+  const wasBelowMinAtRoundStart =
+    minStakeData && stakeAtSnapshot ? stakeAtSnapshot.raw > 0n && stakeAtSnapshot.raw < minStakeData.raw : false
 
   return (
     <VStack w="full" gap={6} align="stretch">
@@ -114,6 +129,9 @@ export const NavigatorDetailContent = () => {
         isOwnPage={isOwnPage}
         isDelegatedHere={isDelegatedHere}
         isAtCapacity={isAtCapacity}
+        isBelowMinStake={isBelowMinStake}
+        wasBelowMinAtRoundStart={wasBelowMinAtRoundStart}
+        minStakeScaled={minStakeScaled}
         currentDelegatedNum={currentDelegatedNum}
         displayName={displayName}
         delegationInfo={delegationInfo}
@@ -131,6 +149,7 @@ export const NavigatorDetailContent = () => {
         isOwnPage={isOwnPage}
         hasStake={Number(nav.stakeFormatted ?? 0) > 0}
         isAtCapacity={isAtCapacity}
+        isBelowMinStake={isBelowMinStake}
         onDelegationClick={() => {
           setIsExitMode(false)
           setIsDelegationOpen(true)
@@ -158,7 +177,11 @@ export const NavigatorDetailContent = () => {
           <Heading size="lg">{t("Tasks & Rewards")}</Heading>
           <Stack direction={{ base: "column", md: "row" }} gap={4} align="stretch" w="full">
             {(status === "ACTIVE" || status === "EXITING") && (
-              <NavigatorTaskList address={address} onSubmitReport={() => setIsReportOpen(true)} />
+              <NavigatorTaskList
+                address={address}
+                onSubmitReport={() => setIsReportOpen(true)}
+                onManageStakeClick={() => setIsManageStakeOpen(true)}
+              />
             )}
             <NavigatorRewardsCard address={address} />
           </Stack>

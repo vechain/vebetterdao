@@ -1,5 +1,5 @@
 import { Box, CloseButton, Dialog, Heading, HStack, Icon, Link, Stack, Table, Text, VStack } from "@chakra-ui/react"
-import { UilCheckCircle } from "@iconscout/react-unicons"
+import { UilCheckCircle, UilInfoCircle } from "@iconscout/react-unicons"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -98,7 +98,7 @@ const VotingResultContent = ({
             <Table.Row>
               <Table.ColumnHeader>{t("Option")}</Table.ColumnHeader>
               <Table.ColumnHeader>{t("Voters")}</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">{t("Voting power")}</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="end">{t("VOT3")}</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -134,7 +134,7 @@ const VotingResultContent = ({
           </Table.Body>
         </Table.Root>
       </VStack>
-      <VStack bg="bg.subtle" p={5} borderRadius="16px">
+      <VStack bg="bg.subtle" p={5} borderRadius="16px" w={"full"}>
         <Text textStyle="md" fontWeight="semibold" alignSelf="flex-start">
           {"Quorum"}
         </Text>
@@ -259,14 +259,29 @@ const ChartQuorum = ({
           </Text>
         </Box>
       </Box>
-      {isQuorumReached && (
+      {isQuorumReached ? (
         <HStack justifyContent="center" w="full" textWrap={"nowrap"}>
           <Icon as={UilCheckCircle} color="status.positive.primary" boxSize={5} />
           <Text textStyle="xs" fontWeight="semibold">
             <Trans
               i18nKey="Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached"
               values={{
-                quorumNumerator: proposalQuorumNumerator,
+                quorumNumerator: Number(proposalQuorumNumerator),
+              }}
+              components={{
+                Link: <Link target="_blank" href={PROPOSALS_QUORUM_DOCS_LINK} textDecoration="underline" />,
+              }}
+            />
+          </Text>
+        </HStack>
+      ) : (
+        <HStack justifyContent="center" w="full" textWrap={"nowrap"}>
+          <Icon as={UilInfoCircle} color="status.negative.primary" boxSize={5} />
+          <Text textStyle="xs" fontWeight="semibold">
+            <Trans
+              i18nKey="Minimum <Link>quorum</Link> ({{quorumNumerator}}%) not reached"
+              values={{
+                quorumNumerator: Number(proposalQuorumNumerator),
               }}
               components={{
                 Link: <Link target="_blank" href={PROPOSALS_QUORUM_DOCS_LINK} textDecoration="underline" />,
