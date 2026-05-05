@@ -107,6 +107,42 @@ describe("NavigatorRegistry Lifecycle - @shard19f", function () {
     })
   })
 
+  // ======================== 1b. isNavigator after exit ======================== //
+
+  describe("isNavigator() after voluntary exit", function () {
+    const advanceRounds = async (count: number) => {
+      for (let i = 0; i < count; i++) {
+        const roundId = await xAllocationVoting.currentRoundId()
+        await waitForRoundToEnd(Number(roundId))
+        await emissions.connect(minterAccount).distribute()
+      }
+    }
+
+    it("returns true while EXITING (before deadline)", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      expect(await navigatorRegistry.isExiting(navigator1.address)).to.be.true
+      expect(await navigatorRegistry.isNavigator(navigator1.address)).to.be.true
+    })
+
+    it("returns false after exit deadline passes", async function () {
+      await navigatorRegistry.connect(navigator1).announceExit()
+
+      const exitNoticePeriod = await navigatorRegistry.getExitNoticePeriod()
+      // Advance past the notice period so the checkpoint deadline is reached
+      await advanceRounds(Number(exitNoticePeriod) + 1)
+
+      expect(await navigatorRegistry.getStatus(navigator1.address)).to.equal(3) // DEACTIVATED
+      expect(await navigatorRegistry.isNavigator(navigator1.address)).to.be.false
+    })
+
+    it("returns false after governance deactivation", async function () {
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+
+      expect(await navigatorRegistry.isNavigator(navigator1.address)).to.be.false
+    })
+  })
+
   // ======================== 2. Deactivation ======================== //
 
   describe("Deactivation", function () {
