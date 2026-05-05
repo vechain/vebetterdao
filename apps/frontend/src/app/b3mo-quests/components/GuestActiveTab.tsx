@@ -16,7 +16,7 @@ export const GuestActiveTab = () => {
     <VStack align="stretch" gap="8" w="full" pt="5">
       <GuestConnectWalletBanner />
       <SectionCarousel title={t("Open to Join")} section={openToJoin} onCardJoinOverride={open} />
-      <SectionCarousel title={t("What Others Are Doing")} section={whatOthers} />
+      <SectionCarousel title={t("Live Quests You Missed")} section={whatOthers} />
     </VStack>
   )
 }
