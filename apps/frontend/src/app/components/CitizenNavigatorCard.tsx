@@ -163,10 +163,10 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
 
             {isBelowMinStake && (
               <HStack gap={2} p={2} borderRadius="md" bg="status.warning.subtle">
-                <Icon boxSize={4} color="status.warning.primary">
+                <Icon boxSize={4} color="status.warning.strong">
                   <LuCoins />
                 </Icon>
-                <Text textStyle="xs" color="status.warning.primary" fontWeight="medium">
+                <Text textStyle="xs" color="status.warning.strong" fontWeight="medium">
                   {t(
                     "Your navigator's stake is below the minimum required. They may be penalized if it's not resolved.",
                   )}
