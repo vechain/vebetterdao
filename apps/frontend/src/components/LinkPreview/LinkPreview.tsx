@@ -81,8 +81,8 @@ const OgPreview = ({ url }: { url: string }) => {
 }
 
 const FallbackLink = ({ url }: { url: string }) => (
-  <Link href={url} target="_blank" rel="noopener noreferrer" variant="underline">
-    <HStack gap={1}>
+  <Link href={url} target="_blank" rel="noopener noreferrer" variant="underline" maxW="full" display="block">
+    <HStack gap={1} minW={0}>
       <Text textStyle="sm" truncate>
         {url}
       </Text>
