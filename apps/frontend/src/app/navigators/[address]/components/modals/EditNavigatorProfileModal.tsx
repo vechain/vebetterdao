@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 
 import { getGetMetadataURIQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetMetadataURI"
 import { NavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
+import { isValidUrl } from "@/app/navigators/become/components/steps/DisclosuresStep"
 import { BaseModal } from "@/components/BaseModal"
 import { useUpdateNavigatorMetadata } from "@/hooks/navigator/useUpdateNavigatorMetadata"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
@@ -112,7 +113,8 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
     form.qualifications.trim().length > 0 &&
     (!form.isAppAffiliated || form.affiliatedAppNames.trim().length > 0) &&
     (!form.isFoundationMember || form.foundationRole.trim().length > 0) &&
-    (!form.hasConflictsOfInterest || form.conflictsDescription.trim().length > 0)
+    (!form.hasConflictsOfInterest || form.conflictsDescription.trim().length > 0) &&
+    (form.website.length === 0 || isValidUrl(form.website))
 
   const onSave = async () => {
     setIsUploading(true)
@@ -145,6 +147,7 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
               maxLength={1000}
               size="sm"
             />
+            <Field.HelperText ms="auto">{`${form.votingStrategy.length}/1000`}</Field.HelperText>
           </Field.Root>
 
           <Field.Root required>
@@ -156,6 +159,7 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
               maxLength={1000}
               size="sm"
             />
+            <Field.HelperText ms="auto">{`${form.motivation.length}/1000`}</Field.HelperText>
           </Field.Root>
 
           <Field.Root required>
@@ -167,6 +171,7 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
               maxLength={1000}
               size="sm"
             />
+            <Field.HelperText ms="auto">{`${form.qualifications.length}/1000`}</Field.HelperText>
           </Field.Root>
         </VStack>
 
@@ -186,7 +191,9 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
                 value={form.affiliatedAppNames}
                 onChange={e => update({ affiliatedAppNames: e.target.value })}
                 size="sm"
+                maxLength={200}
               />
+              <Field.HelperText ms="auto">{`${form.affiliatedAppNames.length}/200`}</Field.HelperText>
             </Field.Root>
           )}
 
@@ -203,7 +210,9 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
                 value={form.foundationRole}
                 onChange={e => update({ foundationRole: e.target.value })}
                 size="sm"
+                maxLength={200}
               />
+              <Field.HelperText ms="auto">{`${form.foundationRole.length}/200`}</Field.HelperText>
             </Field.Root>
           )}
 
@@ -223,6 +232,7 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
                 maxLength={500}
                 size="sm"
               />
+              <Field.HelperText ms="auto">{`${form.conflictsDescription.length}/500`}</Field.HelperText>
             </Field.Root>
           )}
         </VStack>
@@ -232,17 +242,39 @@ export const EditNavigatorProfileModal = ({ isOpen, onClose, address, metadata }
 
           <Field.Root>
             <Field.Label>{t("Twitter / X")}</Field.Label>
-            <Input value={form.twitter} onChange={e => update({ twitter: e.target.value })} size="sm" />
+            <Input
+              value={form.twitter}
+              onChange={e => {
+                const sanitized = e.target.value.replace(/[^a-zA-Z0-9_]/g, "")
+                update({ twitter: sanitized })
+              }}
+              size="sm"
+              maxLength={15}
+            />
           </Field.Root>
 
           <Field.Root>
             <Field.Label>{t("Discord")}</Field.Label>
-            <Input value={form.discord} onChange={e => update({ discord: e.target.value })} size="sm" />
+            <Input
+              value={form.discord}
+              onChange={e => {
+                const sanitized = e.target.value.replace(/[^a-zA-Z0-9._]/g, "")
+                update({ discord: sanitized })
+              }}
+              size="sm"
+              maxLength={32}
+            />
           </Field.Root>
 
-          <Field.Root>
+          <Field.Root invalid={form.website.length > 0 && !isValidUrl(form.website)}>
             <Field.Label>{t("Website or Blog")}</Field.Label>
-            <Input value={form.website} onChange={e => update({ website: e.target.value })} size="sm" />
+            <Input
+              value={form.website}
+              onChange={e => update({ website: e.target.value.trim() })}
+              size="sm"
+              maxLength={200}
+            />
+            <Field.ErrorText>{t("Must be a valid URL starting with https://")}</Field.ErrorText>
           </Field.Root>
         </VStack>
 

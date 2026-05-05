@@ -13,7 +13,7 @@ import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationSto
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 
 import { AcknowledgeStep } from "../steps/AcknowledgeStep"
-import { DisclosuresStep } from "../steps/DisclosuresStep"
+import { DisclosuresStep, isValidUrl } from "../steps/DisclosuresStep"
 import { MotivationStep } from "../steps/MotivationStep"
 import { StakeStep } from "../steps/StakeStep"
 
@@ -78,6 +78,7 @@ export const BecomeNavigatorFormStepCard = () => {
         if (data.isAppAffiliated && data.affiliatedAppNames.trim().length === 0) return false
         if (data.isFoundationMember && data.foundationRole.trim().length === 0) return false
         if (data.hasConflictsOfInterest && data.conflictsDescription.trim().length === 0) return false
+        if (data.websiteUrl.length > 0 && !isValidUrl(data.websiteUrl)) return false
         return true
       }
       case 2: {
