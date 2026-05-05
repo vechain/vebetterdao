@@ -34,6 +34,7 @@ export const NavigatorDiscoveryCard = () => {
   })
 
   if (!account?.address) return null
+  if (!overviewLoading && !overview?.activeNavigators) return null
 
   return (
     <Card.Root w="full" variant="primary">
