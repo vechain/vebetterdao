@@ -9,6 +9,7 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { useRegisterNavigator } from "@/hooks/navigator/useRegisterNavigator"
+import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 import { useNavigatorApplicationStore } from "@/store/useNavigatorApplicationStore"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 
@@ -45,6 +46,7 @@ export const BecomeNavigatorFormStepCard = () => {
   const clearData = useNavigatorApplicationStore(s => s.clearData)
   const { data: minStake } = useGetMinStake()
   const { data: maxStake } = useGetMaxStake()
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? "")
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: isAutoVotingEnabled } = useIsAutoVotingEnabled()
   const [isUploading, setIsUploading] = useState(false)
@@ -82,10 +84,12 @@ export const BecomeNavigatorFormStepCard = () => {
         return true
       }
       case 2: {
+        if (!account?.address) return false
         const stakeNum = Number(data.stakeAmount) || 0
         const minNum = minStake ? Number(minStake.scaled) : 0
         const maxNum = maxStake ? Number(maxStake.scaled) : Infinity
-        return stakeNum >= minNum && stakeNum <= maxNum && stakeNum > 0
+        const balanceNum = Number(b3trBalance?.scaled ?? "0")
+        return stakeNum >= minNum && stakeNum <= maxNum && stakeNum > 0 && stakeNum <= balanceNum
       }
       case 3: {
         const delegationAck = isDelegated ? data.acceptedDelegationExit : true
@@ -101,7 +105,7 @@ export const BecomeNavigatorFormStepCard = () => {
       default:
         return false
     }
-  }, [currentStep, data, minStake, maxStake, isDelegated, isAutoVotingEnabled])
+  }, [currentStep, data, minStake, maxStake, b3trBalance, account, isDelegated, isAutoVotingEnabled])
 
   const steps: NavigatorStep[] = useMemo(
     () => [

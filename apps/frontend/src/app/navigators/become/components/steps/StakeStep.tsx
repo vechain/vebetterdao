@@ -11,7 +11,7 @@ import {
   VStack,
   Alert,
 } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { WarningTriangle, InfoCircle } from "iconoir-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -29,6 +29,8 @@ export const StakeStep = () => {
   const { t } = useTranslation()
   const { data, setData } = useNavigatorApplicationStore()
   const { account } = useWallet()
+  const { open } = useWalletModal()
+  const isConnected = !!account?.address
   const { data: minStake, isLoading: minStakeLoading } = useGetMinStake()
   const { data: maxStake, isLoading: maxStakeLoading } = useGetMaxStake()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? "")
@@ -205,6 +207,12 @@ export const StakeStep = () => {
           </Alert.Description>
         </Alert.Content>
       </Alert.Root>
+
+      {!isConnected && (
+        <Button variant="primary" size="lg" w="full" onClick={() => open()}>
+          {t("Login to continue")}
+        </Button>
+      )}
     </VStack>
   )
 }
