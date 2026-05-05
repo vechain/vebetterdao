@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Card, Heading, HStack, Icon, SimpleGrid, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Icon, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
@@ -42,36 +42,24 @@ export const NavigatorDiscoveryCard = () => {
           <Heading size="xl">{t("Navigators")}</Heading>
 
           <Skeleton loading={overviewLoading}>
-            <SimpleGrid columns={{ base: 2, md: 4 }} gap={2}>
+            <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: 4, md: 8 }}>
               <StatTile
-                icon={
-                  <Icon boxSize={{ base: 4, md: 4 }} color="text.subtle">
-                    <LuCompass />
-                  </Icon>
-                }
+                icon={<Icon as={LuCompass} boxSize={4} color="brand.secondary" />}
                 value={overview?.activeNavigators ?? 0}
                 label={t("Active")}
               />
               <StatTile
-                icon={
-                  <Icon boxSize={{ base: 4, md: 4 }} color="text.subtle">
-                    <LuUsers />
-                  </Icon>
-                }
+                icon={<Icon as={LuUsers} boxSize={4} color="brand.secondary" />}
                 value={overview?.totalCitizens ?? 0}
                 label={t("Citizens")}
               />
               <StatTile
-                icon={
-                  <Icon boxSize={{ base: 4, md: 5 }}>
-                    <B3trSvg />
-                  </Icon>
-                }
+                icon={<Icon as={B3trSvg} boxSize={6} color="brand.secondary" />}
                 value={overview ? formatter.format(Number(overview.totalStakedFormatted)) : "0"}
                 label={t("B3TR staked")}
               />
               <StatTile
-                icon={<Icon as={Vot3Svg} boxSize={{ base: 4, md: 5 }} color="text.subtle" />}
+                icon={<Icon as={Vot3Svg} boxSize={6} color="brand.secondary" />}
                 value={overview ? formatter.format(Number(overview.totalDelegatedFormatted)) : "0"}
                 label={t("VOT3 delegated")}
               />
@@ -80,40 +68,35 @@ export const NavigatorDiscoveryCard = () => {
 
           {newestNavigators && newestNavigators.length > 0 && (
             <Skeleton loading={newestLoading}>
-              <VStack gap={2} align="stretch">
-                <Text
-                  textStyle="xxs"
-                  color="text.subtle"
-                  fontWeight="semibold"
-                  textTransform="uppercase"
-                  letterSpacing="wider">
+              <VStack gap={2} mt={4} align="stretch">
+                <Heading size="sm" fontWeight="semibold">
                   {t("Recently joined")}
-                </Text>
+                </Heading>
                 {newestNavigators.slice(0, 3).map(nav => (
                   <NavigatorRow key={nav.address} nav={nav} />
                 ))}
               </VStack>
             </Skeleton>
           )}
-
-          <Button variant="outline" size="sm" w="full" onClick={() => router.push("/navigators")}>
-            {t("Explore Navigators")}
-          </Button>
         </VStack>
       </Card.Body>
+      <Card.Footer justifyContent="center" mt={5}>
+        <Button variant="secondary" onClick={() => router.push("/navigators")}>
+          <LuCompass />
+          {t("Explore Navigators")}
+        </Button>
+      </Card.Footer>
     </Card.Root>
   )
 }
 
 const StatTile = ({ icon, value, label }: { icon: ReactNode; value: ReactNode; label: string }) => (
-  <VStack gap={1} align="start" p={3} bg="bg.secondary" borderRadius="lg">
-    <Stack direction={{ base: "column", md: "row" }} gap={{ base: 1, md: 2 }} align={{ base: "start", md: "center" }}>
+  <VStack align="flex-start" gap={1}>
+    <HStack>
       {icon}
-      <Text textStyle="lg" fontWeight="bold">
-        {value}
-      </Text>
-    </Stack>
-    <Text textStyle="xs" color="text.subtle" lineClamp={1}>
+      <Heading size="xl">{value}</Heading>
+    </HStack>
+    <Text textStyle={["xs", "sm"]} color="text.subtle">
       {label}
     </Text>
   </VStack>
