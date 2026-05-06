@@ -165,17 +165,40 @@ contract NavigatorRegistry is
     IERC20(params.b3trToken).approve(params.vot3Token, type(uint256).max);
   }
 
+  /// @notice Reinitializer for V2: fix citizens whose delegation exceeds their VOT3 balance.
+  /// @dev Pre-V2, `delegate()` and `increaseDelegation()` lacked a balance check, so a citizen
+  /// could end up with `getDelegatedAmount > balanceOf`. This caps each affected citizen's
+  /// delegation at their current balance and decrements the navigator's total by the same delta,
+  /// emitting `DelegationDecreased` so indexers reflect the correction as a normal reduce.
+  /// @param affectedCitizens Citizens to evaluate. Idempotent and skips non-affected addresses,
+  /// so over-inclusion is safe. Build the list off-chain by paging the indexer's
+  /// `/api/v1/b3tr/navigators/citizens` endpoint and comparing on-chain
+  /// `getDelegatedAmount(c)` against `vot3.balanceOf(c)`.
+  function initializeV2(address[] calldata affectedCitizens) external reinitializer(2) {
+    NavigatorDelegationUtils.correctOverDelegations(affectedCitizens);
+  }
+
   // ======================== Version & Upgrade ======================== //
 
   /// @notice Get the current contract version
   /// @return The version string
   function version() external pure returns (string memory) {
-    return "1";
+    return "2";
   }
 
   /// @notice Authorize a contract upgrade. Only callable by UPGRADER_ROLE.
   /// @param newImplementation Address of the new implementation contract
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+  // ======================== Migration (admin-callable) ======================== //
+
+  /// @notice Cap delegations at VOT3 balance for any citizen still over-delegated post-upgrade.
+  /// @dev Same logic as `initializeV2` but callable by `DEFAULT_ADMIN_ROLE` after the reinitializer
+  /// has run. Use if additional over-delegated citizens surface or batching is desired.
+  /// @param citizens Addresses to evaluate.
+  function correctOverDelegations(address[] calldata citizens) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    NavigatorDelegationUtils.correctOverDelegations(citizens);
+  }
 
   // ======================== Navigator Registration & Staking ======================== //
 

@@ -33,6 +33,7 @@ import { useDelegateToNavigator } from "@/hooks/navigator/useDelegateToNavigator
 import { useIncreaseDelegation } from "@/hooks/navigator/useIncreaseDelegation"
 import { useSwitchNavigator } from "@/hooks/navigator/useSwitchNavigator"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -55,6 +56,9 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
   const { data: vot3Balance, isLoading: balanceLoading } = useGetVot3UnlockedBalance(account?.address)
+  // Total VOT3 balance (including delegated portion) — used as the upper bound for max in manage mode
+  // to avoid stale-while-revalidate races between unlockedBalance and getDelegatedAmount queries.
+  const { data: vot3TotalBalance } = useGetVot3Balance(account?.address)
   const { data: domainData } = useVechainDomain(nav.address)
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
@@ -88,6 +92,9 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 6, 4)
   const balanceNum = vot3Balance ? Number(vot3Balance.scaled) : 0
+  // Total balanceOf — invariant under delegation state, so safe even when unlockedBalance and
+  // currentDelegated queries are transiently desynced post-tx.
+  const totalBalanceNum = vot3TotalBalance ? Number(vot3TotalBalance.scaled) : 0
   const availableBalance = vot3Balance?.scaled ?? "0"
   const amountNum = Number(amount) || 0
 
@@ -103,15 +110,18 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
   // For switch, undelegating frees currentDelegatedNum back into usable balance
   const effectiveBalance = mode === "switch" ? balanceNum + currentDelegatedNum : balanceNum
+  // In manage mode the field is the new total delegation, so max is bounded by full balance
+  // (NOT currentDelegated + unlockedBalance, which can drift if those queries refetch out of sync
+  // and produce a sum > balanceOf — bypassing the on-chain unlocked-balance guard pre-tx).
   const maxAmount =
     mode === "manage"
-      ? Math.min(currentDelegatedNum + balanceNum, remainingCapacity)
+      ? Math.min(totalBalanceNum, remainingCapacity)
       : Math.min(effectiveBalance, remainingCapacity)
 
   const exceedsCapacity = amountNum > remainingCapacity
   const exceedsBalance =
     mode === "manage"
-      ? amountNum - currentDelegatedNum > balanceNum && amountNum > currentDelegatedNum
+      ? amountNum > totalBalanceNum && amountNum > currentDelegatedNum
       : amountNum > effectiveBalance
 
   /** Must be 0 (full exit) or >= 1 VOT3; values in (0, 1) are invalid on-chain for manage. */
