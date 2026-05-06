@@ -1,14 +1,20 @@
 import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/vechain-kit"
+import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
+import { executeCallClause, useThor, useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { EditPencil, Prohibition } from "iconoir-react"
 import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
+import { getIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { toaster } from "@/components/ui/toaster"
-import { buildMilestoneChainMetadata } from "@/hooks/proposals/grants/milestoneMetadataDocument"
+import {
+  buildMilestoneChainMetadata,
+  parseMilestoneMetadataDocument,
+} from "@/hooks/proposals/grants/milestoneMetadataDocument"
 import {
   ExpenditureReport,
   GrantFormData,
@@ -33,6 +39,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   // HOOKS
   // ==========================================
   const { account } = useWallet()
+  const thor = useThor()
   const { data: milestoneStatesData, isLoading } = useAllMilestoneStates(proposal)
   const { t } = useTranslation()
   const [accordionValue, setAccordionValue] = useState<string[]>([])
@@ -118,6 +125,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     async (clickedIndex: number) => {
       if (!!milestoneDuration) {
         if (milestoneEditIndex === undefined) return
+        if (!thor || !proposal?.id) return
         const updatedMilestones = [] as GrantFormData["milestones"]
         let loopIdx = 0
         for (const milestone of proposal?.milestones ?? []) {
@@ -133,10 +141,28 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
           loopIdx++
         }
 
-        const payload = buildMilestoneChainMetadata(updatedMilestones, proposal?.expenditureReports ?? [])
+        // Re-read on-chain CID + IPFS doc so a concurrently submitted expenditure
+        // report (other tab, or after this component's cache loaded) is not overwritten.
+        const [milestoneMetadataURI] = await executeCallClause({
+          thor,
+          abi: GrantsManager__factory.abi,
+          contractAddress: getConfig().grantsManagerContractAddress,
+          method: "getMilestoneMetadataURI",
+          args: [BigInt(proposal.id)],
+        })
+        let existingRaw: unknown
+        if (milestoneMetadataURI && String(milestoneMetadataURI).length > 0) {
+          existingRaw = await getIpfsMetadata<unknown>(`ipfs://${milestoneMetadataURI}`)
+        }
+        const parsed = parseMilestoneMetadataDocument(existingRaw, proposal?.milestones ?? [])
+
+        const payload = buildMilestoneChainMetadata(updatedMilestones, parsed.expenditureReports)
         const metadataBlob = new Blob([JSON.stringify(payload)], { type: "application/json" })
         const ipfsURI = await uploadBlobToIPFS(metadataBlob, "grant-milestone-metadata.json")
-        if (!ipfsURI) return
+        if (!ipfsURI) {
+          toaster.create({ description: t("Failed to upload milestone metadata"), type: "error", closable: true })
+          return
+        }
         await updateMilestoneMetadata(ipfsURI)
 
         setMilestoneEditIndex(undefined)
@@ -146,13 +172,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         setMilestoneDuration(undefined)
       }
     },
-    [
-      milestoneDuration,
-      milestoneEditIndex,
-      proposal?.milestones,
-      proposal?.expenditureReports,
-      updateMilestoneMetadata,
-    ],
+    [milestoneDuration, milestoneEditIndex, proposal?.id, proposal?.milestones, thor, updateMilestoneMetadata, t],
   )
 
   // ==========================================

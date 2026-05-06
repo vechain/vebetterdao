@@ -1,4 +1,16 @@
-import { Button, Grid, GridItem, Icon, NativeSelect, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Field,
+  Grid,
+  GridItem,
+  HStack,
+  Icon,
+  Input,
+  NativeSelect,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react"
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -154,30 +166,25 @@ export const ExpenditureReportForm = ({
         </Text>
         <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4} w="full">
           <GridItem colSpan={{ base: 1, md: 2 }}>
-            <VStack align="stretch" gap={1}>
-              <Text textStyle="sm" fontWeight="semibold">
+            <Field.Root>
+              <Field.Label textStyle="sm" color="text.default">
                 {t("Milestone goal")}
-              </Text>
-              <textarea
+              </Field.Label>
+              <Textarea
                 placeholder={t("Brief description of the objective for this tranche")}
                 value={milestoneGoal}
                 onChange={e => setMilestoneGoal(e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "80px",
-                  padding: "8px 12px",
-                  borderRadius: "12px",
-                  border: "1px solid var(--chakra-colors-border-primary)",
-                  resize: "vertical",
-                }}
+                borderRadius="xl"
+                minH="80px"
+                resize="vertical"
               />
-            </VStack>
+            </Field.Root>
           </GridItem>
           <GridItem>
-            <VStack align="stretch" gap={1}>
-              <Text textStyle="sm" fontWeight="semibold">
+            <Field.Root>
+              <Field.Label textStyle="sm" color="text.default">
                 {t("Was this milestone achieved?")}
-              </Text>
+              </Field.Label>
               <NativeSelect.Root>
                 <NativeSelect.Field
                   value={milestoneAchieved}
@@ -187,28 +194,23 @@ export const ExpenditureReportForm = ({
                   <option value="partially">{t("Partially")}</option>
                 </NativeSelect.Field>
               </NativeSelect.Root>
-            </VStack>
+            </Field.Root>
           </GridItem>
           {milestoneAchieved !== "yes" && (
             <GridItem colSpan={{ base: 1, md: 2 }}>
-              <VStack align="stretch" gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
+              <Field.Root>
+                <Field.Label textStyle="sm" color="text.default">
                   {t("Explanation")}
-                </Text>
-                <textarea
+                </Field.Label>
+                <Textarea
                   placeholder={t("Explain the current status")}
                   value={milestoneAchievedExplanation}
                   onChange={e => setMilestoneAchievedExplanation(e.target.value)}
-                  style={{
-                    width: "100%",
-                    minHeight: "60px",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--chakra-colors-border-primary)",
-                    resize: "vertical",
-                  }}
+                  borderRadius="xl"
+                  minH="60px"
+                  resize="vertical"
                 />
-              </VStack>
+              </Field.Root>
             </GridItem>
           )}
         </Grid>
@@ -225,10 +227,10 @@ export const ExpenditureReportForm = ({
         {evidenceLinks.map((link, index) => (
           <Grid key={index} templateColumns={{ base: "1fr", md: "1fr 1fr 1fr auto" }} gap={3} w="full">
             <GridItem>
-              <VStack align="stretch" gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
+              <Field.Root>
+                <Field.Label textStyle="sm" color="text.default">
                   {t("Type")}
-                </Text>
+                </Field.Label>
                 <NativeSelect.Root>
                   <NativeSelect.Field value={link.type} onChange={e => updateEvidence(index, "type", e.target.value)}>
                     {EVIDENCE_TYPES.map(type => (
@@ -238,43 +240,33 @@ export const ExpenditureReportForm = ({
                     ))}
                   </NativeSelect.Field>
                 </NativeSelect.Root>
-              </VStack>
+              </Field.Root>
             </GridItem>
             <GridItem>
-              <VStack align="stretch" gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
+              <Field.Root>
+                <Field.Label textStyle="sm" color="text.default">
                   {t("Label")}
-                </Text>
-                <input
+                </Field.Label>
+                <Input
                   placeholder={t("e.g. Smart contract repo")}
                   value={link.label}
                   onChange={e => updateEvidence(index, "label", e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--chakra-colors-border-primary)",
-                  }}
+                  borderRadius="xl"
                 />
-              </VStack>
+              </Field.Root>
             </GridItem>
             <GridItem>
-              <VStack align="stretch" gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
+              <Field.Root>
+                <Field.Label textStyle="sm" color="text.default">
                   {t("URL")}
-                </Text>
-                <input
+                </Field.Label>
+                <Input
                   placeholder="https://..."
                   value={link.url}
                   onChange={e => updateEvidence(index, "url", e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--chakra-colors-border-primary)",
-                  }}
+                  borderRadius="xl"
                 />
-              </VStack>
+              </Field.Root>
             </GridItem>
             {evidenceLinks.length > 1 && (
               <GridItem display="flex" alignItems="flex-end">
@@ -299,59 +291,45 @@ export const ExpenditureReportForm = ({
         {expenditureItems.map((item, index) => (
           <Grid key={index} templateColumns={{ base: "1fr", md: "1fr 1fr auto auto" }} gap={3} w="full">
             <GridItem>
-              <VStack align="stretch" gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
+              <Field.Root>
+                <Field.Label textStyle="sm" color="text.default">
                   {t("Category")}
-                </Text>
-                <input
+                </Field.Label>
+                <Input
                   placeholder={t("e.g. Development, Marketing")}
                   value={item.category}
                   onChange={e => updateExpenditure(index, "category", e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--chakra-colors-border-primary)",
-                  }}
+                  borderRadius="xl"
                 />
-              </VStack>
+              </Field.Root>
             </GridItem>
             <GridItem>
-              <VStack align="stretch" gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
+              <Field.Root>
+                <Field.Label textStyle="sm" color="text.default">
                   {t("Description")}
-                </Text>
-                <input
+                </Field.Label>
+                <Input
                   placeholder={t("e.g. Smart contract work")}
                   value={item.description}
                   onChange={e => updateExpenditure(index, "description", e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--chakra-colors-border-primary)",
-                  }}
+                  borderRadius="xl"
                 />
-              </VStack>
+              </Field.Root>
             </GridItem>
             <GridItem>
-              <VStack align="stretch" gap={1}>
-                <Text textStyle="sm" fontWeight="semibold">
+              <Field.Root>
+                <Field.Label textStyle="sm" color="text.default">
                   {t("Amount (USD)")}
-                </Text>
-                <input
+                </Field.Label>
+                <Input
                   type="number"
+                  min={0}
                   placeholder="0"
                   value={item.amount || ""}
                   onChange={e => updateExpenditure(index, "amount", Number(e.target.value))}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid var(--chakra-colors-border-primary)",
-                  }}
+                  borderRadius="xl"
                 />
-              </VStack>
+              </Field.Root>
             </GridItem>
             {expenditureItems.length > 1 && (
               <GridItem display="flex" alignItems="flex-end">
@@ -375,23 +353,19 @@ export const ExpenditureReportForm = ({
         </Text>
         <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={4} w="full">
           <GridItem>
-            <VStack align="stretch" gap={1}>
-              <Text textStyle="sm" fontWeight="semibold">
+            <Field.Root>
+              <Field.Label textStyle="sm" color="text.default">
                 {t("Total received for this tranche (USD)")}
-              </Text>
-              <input
+              </Field.Label>
+              <Input
                 type="number"
+                min={0}
                 placeholder="0"
                 value={totalReceived || ""}
                 onChange={e => setTotalReceived(Number(e.target.value))}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: "12px",
-                  border: "1px solid var(--chakra-colors-border-primary)",
-                }}
+                borderRadius="xl"
               />
-            </VStack>
+            </Field.Root>
           </GridItem>
           <GridItem>
             <VStack align="stretch" gap={1}>
@@ -409,7 +383,7 @@ export const ExpenditureReportForm = ({
               <Text textStyle="sm" fontWeight="semibold">
                 {t("Unspent amount")}
               </Text>
-              <Text textStyle="md" color={unspentAmount < 0 ? "red.500" : "text.default"}>
+              <Text textStyle="md" color={unspentAmount < 0 ? "status.negative.strong" : "text.default"}>
                 {"$"}
                 {unspentAmount.toLocaleString()}
               </Text>
@@ -423,25 +397,22 @@ export const ExpenditureReportForm = ({
         <Text textStyle="md" fontWeight="semibold">
           {t("Notes or challenges faced")}
         </Text>
-        <textarea
+        <Textarea
           placeholder={t("Share blockers, learnings, or changes")}
           value={notes}
           onChange={e => setNotes(e.target.value)}
           maxLength={MAX_NOTES_LENGTH}
-          style={{
-            width: "100%",
-            minHeight: "100px",
-            padding: "8px 12px",
-            borderRadius: "12px",
-            border: "1px solid var(--chakra-colors-border-primary)",
-            resize: "vertical",
-          }}
+          borderRadius="xl"
+          minH="100px"
+          resize="vertical"
         />
-        <Text textStyle="xs" color="text.subtle" alignSelf="flex-end">
-          {notes.length}
-          {"/"}
-          {MAX_NOTES_LENGTH}
-        </Text>
+        <HStack w="full" justify="flex-end">
+          <Text textStyle="xs" color="text.subtle">
+            {notes.length}
+            {"/"}
+            {MAX_NOTES_LENGTH}
+          </Text>
+        </HStack>
       </VStack>
 
       {/* Actions */}
