@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@chakra-ui/charts": "^3.33.0",
-    "@chakra-ui/react": "^3.26.0",
+    "@chakra-ui/react": "^3.35.0",
     "@emotion/react": "^11.14.0",
     "@iconscout/react-unicons": "^2.0.2",
     "@repo/config": "*",
