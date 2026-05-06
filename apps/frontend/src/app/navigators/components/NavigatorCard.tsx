@@ -3,7 +3,6 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { FaXTwitter } from "react-icons/fa6"
 import { LuSettings, LuUsers } from "react-icons/lu"
 
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
@@ -25,12 +24,10 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
   const router = useRouter()
   const { account } = useWallet()
   const { data: isNavigator } = useIsNavigator()
-  const { displayName, domainLoading, textRecords } = useNavigatorDisplayName(nav.address)
+  const { displayName, domainLoading } = useNavigatorDisplayName(nav.address)
   const { data: metadata } = useNavigatorMetadata(nav.metadataURI)
   const isActive = nav.status === "ACTIVE"
   const isOwnCard = account?.address?.toLowerCase() === nav.address.toLowerCase()
-
-  const twitterHandle = textRecords?.["com.x"]
 
   const actionButton = (() => {
     if (!account?.address) return null
@@ -79,21 +76,7 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
                   )}
                 </VStack>
               </HStack>
-              <HStack gap={2}>
-                {twitterHandle && (
-                  <HStack
-                    gap={1}
-                    color="fg.muted"
-                    _hover={{ color: "fg" }}
-                    onClick={e => {
-                      e.stopPropagation()
-                      window.open(`https://x.com/${twitterHandle}`, "_blank")
-                    }}>
-                    <FaXTwitter size={14} />
-                  </HStack>
-                )}
-                {actionButton && <Box display={{ base: "none", md: "flex" }}>{actionButton}</Box>}
-              </HStack>
+              {actionButton && <Box display={{ base: "none", md: "flex" }}>{actionButton}</Box>}
             </HStack>
 
             <Text textStyle="xs" color="fg.muted" lineClamp={3}>
