@@ -33,7 +33,7 @@ export const UserTransactions = ({ address }: Props) => {
               <>
                 <VStack gap="4" align="stretch">
                   {transactions.map(transaction => (
-                    <TransactionCard key={transaction.txId} transaction={transaction} />
+                    <TransactionCard key={transaction.id} transaction={transaction} />
                   ))}
                 </VStack>
                 {hasNextPage && (

@@ -28,6 +28,14 @@ export const pagesMetadata = {
     image: "/assets/images/allocations_page.webp",
     imageExtension: "image/webp",
   },
+  challenges: {
+    path: "/b3mo-quests",
+    title: "VeBetter B3MO Quests | Compete in Stake and Sponsored Rounds",
+    description:
+      "Explore B3MO quest flows for VeBetter users, from invitations and joins to payout, refunds, and manual finalization.",
+    image: "/assets/images/allocations_page.webp",
+    imageExtension: "image/webp",
+  },
   proposals: {
     path: "/proposals",
     title: "VeBetter Proposals | Vote, Discuss & Influence the Future",

@@ -1,7 +1,8 @@
-import { Button, Heading, HStack, Icon, RadioCard, Text, Textarea, VStack } from "@chakra-ui/react"
+import { Alert, Button, Heading, HStack, Icon, RadioCard, Text, Textarea, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { BaseModal } from "@/components/BaseModal"
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
@@ -17,6 +18,7 @@ type Props = {
 export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
+  const { data: isNavigator } = useIsNavigator()
   const [selectedVote, setSelectedVote] = useState<string | null>(null)
   const [comment, setComment] = useState("")
   const voteOptions = useMemo(
@@ -45,6 +47,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
 
   const castVoteMutation = useProposalCastVote({
     proposalId,
+    isNavigator: !!isNavigator,
     onSuccess: () => {
       onClose()
       castVoteMutation.resetStatus()
@@ -113,7 +116,13 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
           />
         </VStack>
 
-        {/* Vote Button */}
+        {isNavigator && (
+          <Alert.Root status="info" borderRadius="lg">
+            <Alert.Indicator />
+            <Alert.Title textStyle="sm">{t("navigatorDecisionPropagation")}</Alert.Title>
+          </Alert.Root>
+        )}
+
         <Button
           variant="primary"
           w="full"

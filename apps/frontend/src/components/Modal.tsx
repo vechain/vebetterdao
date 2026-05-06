@@ -1,4 +1,4 @@
-import { useMediaQuery, Dialog, Portal, CloseButton, Box, Grid, GridItem } from "@chakra-ui/react"
+import { useMediaQuery, Dialog, Portal, CloseButton, Box, BoxProps, Grid, GridItem } from "@chakra-ui/react"
 import Image from "next/image"
 
 import B3TRLogo from "@/components/Icons/svg/b3tr.svg"
@@ -17,6 +17,7 @@ type Props = {
   isCloseable?: boolean
   title?: string | React.ReactNode
   illustration?: string
+  illustrationSize?: BoxProps["boxSize"]
   footer?: React.ReactNode
   description?: string | React.ReactNode
   showLogo?: boolean
@@ -36,6 +37,7 @@ export const Modal = ({
   isCloseable = true,
   title,
   illustration,
+  illustrationSize = { base: "16", md: "48" },
   footer,
   description,
   showLogo = false,
@@ -73,7 +75,7 @@ export const Modal = ({
                     </GridItem>
                     <GridItem rowSpan={2}>
                       {illustration && (
-                        <Box position="relative" boxSize={{ base: "16", md: "48" }}>
+                        <Box position="relative" boxSize={illustrationSize}>
                           <Image alt="mascot-welcoming" src={illustration} fill />
                         </Box>
                       )}
@@ -119,6 +121,7 @@ export const Modal = ({
         footer={footer}
         title={title}
         illustration={illustration}
+        illustrationSize={illustrationSize}
         showCloseButton={showCloseButton}
         description={description}>
         {children}

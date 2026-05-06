@@ -1,6 +1,6 @@
 {
   "root": true,
-  "ignorePatterns": ["scripts/**/*.ts", "test/**/*.ts"],
+  "ignorePatterns": ["scripts/**/*.ts", "test/**/*.ts", "contracts/mocks/**/*.ts"],
   "extends": ["@repo/eslint-config/library.js"],
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],

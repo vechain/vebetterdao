@@ -9,6 +9,7 @@ import { ProposalDeposit, buildClaimDepositsTx } from "../api/contracts/governan
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey } from "./useGetVot3UnlockedBalance"
 
 /**
  * Type definition for properties accepted by the `useWithdrawDeposits` hook.
@@ -43,8 +44,10 @@ export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: 
     )
     queryKeys.push(getProposalClaimableUserDepositsQueryKey(account?.address ?? ""))
     queryKeys.push(getVot3BalanceQueryKey(account?.address ?? ""))
+    queryKeys.push(getVot3UnlockedBalanceQueryKey(account?.address ?? ""))
     queryKeys.push(getDepositsVotesOnBlockPrefixQueryKey())
     queryKeys.push(getVotesOnBlockPrefixQueryKey())
+    queryKeys.push(["bestBlockCompressed"])
     return queryKeys
   }, [account, proposalDeposits])
 

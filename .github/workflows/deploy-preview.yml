@@ -12,16 +12,11 @@ concurrency:
   group: preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: write
-
 env:
   # AWS Configuration
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: governance-frontend
-  TERRAFORM_VERSION: 1.6.0
+  TERRAFORM_VERSION: 1.10.0
 
   # Project Configuration
   PROJECT_NAME: Governance Frontend
@@ -33,10 +28,41 @@ env:
   TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
+  # True when the PR touches paths that affect the frontend or preview Terraform
+  preview-relevant:
+    name: Preview relevance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      run_preview: ${{ steps.filter.outputs.run_preview }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: filter
+        with:
+          filters: |
+            run_preview:
+              - 'apps/**'
+              - 'packages/**'
+              - 'terraform/**'
+              - 'Dockerfile*'
+              - 'package.json'
+              - 'yarn.lock'
+              - 'turbo.json'
+              - '.github/workflows/deploy*.yml'
+              - '.github/workflows/destroy*.yml'
+
   # Determine which flavors to deploy based on target branch
   setup:
     name: Setup
+    needs: [preview-relevant]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       flavors: ${{ steps.determine.outputs.flavors }}
       pr_number: ${{ steps.determine.outputs.pr_number }}
@@ -45,6 +71,8 @@ jobs:
     steps:
       - name: Determine flavors and metadata
         id: determine
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           PR_NUMBER="${{ github.event.pull_request.number }}"
           SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
@@ -54,22 +82,26 @@ jobs:
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
 
-          if [ "${{ github.base_ref }}" == "main" ]; then
-            echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
-            echo "::notice::PR to main - deploying staging + beta previews"
+          if [ "$BASE_REF" == "main" ]; then
+            echo 'flavors=["staging", "beta", "dev"]' >> $GITHUB_OUTPUT
+            echo "::notice::PR to main - deploying staging + beta + dev previews"
           else
-            echo "::error::Unsupported base branch: ${{ github.base_ref }}"
+            echo "::error::Unsupported base branch: ${BASE_REF}"
             exit 1
           fi
 
-  # Post initial "deploying" comment
-  comment-deploying:
-    name: Post Deploying Comment
-    needs: setup
+  # Post initial "deploying" comment in PR
+  preview-start-comment:
+    name: Preview start comment
+    needs: [setup, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Update PR comment - Deploying
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
@@ -131,10 +163,15 @@ jobs:
   # Build and push Docker image for each flavor
   build-and-push:
     name: Build (${{ matrix.flavor }})
-    needs: [setup, comment-deploying]
+    needs: [setup, preview-start-comment, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true'
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     strategy:
       matrix:
-        flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
+        flavor: [staging, beta, dev]
       fail-fast: false
     uses: ./.github/workflows/build-push-ecr.yml
     with:
@@ -145,15 +182,32 @@ jobs:
     secrets:
       aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
-  # Deploy preview environment for each flavor
-  deploy:
-    name: Deploy Preview (${{ matrix.flavor }})
-    needs: [setup, build-and-push]
-    if: always() && needs.build-and-push.result == 'success'
+  # Same check names as build-and-push, but instant success when nothing app/infra-related changed
+  build-skip:
+    name: Build (${{ matrix.flavor }})
+    needs: [setup, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview != 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flavor: ${{ fromJSON(needs.setup.outputs.flavors) }}
+        flavor: [staging, beta, dev]
+      fail-fast: false
+    steps:
+      - name: Skip build (no relevant changes)
+        run: echo "::notice::No frontend / preview infra changes in this PR - skipping image build."
+
+  # Deploy preview environment for each flavor
+  deploy:
+    name: Deploy Preview (${{ matrix.flavor }})
+    needs: [setup, build-and-push, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true' && always() && needs.build-and-push.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        flavor: [staging, beta, dev]
       fail-fast: false
     outputs:
       # Store URLs and status for each flavor using dynamic keys
@@ -163,27 +217,39 @@ jobs:
       custom_url_beta: ${{ steps.save-urls.outputs.custom_url_beta }}
       service_url_beta: ${{ steps.save-urls.outputs.service_url_beta }}
       status_beta: ${{ steps.save-urls.outputs.status_beta }}
+      custom_url_dev: ${{ steps.save-urls.outputs.custom_url_dev }}
+      service_url_dev: ${{ steps.save-urls.outputs.service_url_dev }}
+      status_dev: ${{ steps.save-urls.outputs.status_dev }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
       - name: Install yq
+        env:
+          YQ_VERSION: v4.53.2
         run: |
-          wget -q https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -O /usr/local/bin/yq
-          chmod +x /usr/local/bin/yq
+          set -euo pipefail
+          YQ_BIN="${HOME}/.local/bin/yq"
+          mkdir -p "$(dirname "${YQ_BIN}")"
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \
+            -o "${YQ_BIN}"
+          chmod +x "${YQ_BIN}"
+          echo "$(dirname "${YQ_BIN}")" >> "${GITHUB_PATH}"
+          yq --version
 
       - name: Create preview environment config
         run: |
@@ -289,15 +355,95 @@ jobs:
           echo "service_url_${FLAVOR}=${{ steps.outputs.outputs.service_url }}" >> $GITHUB_OUTPUT
           echo "status_${FLAVOR}=success" >> $GITHUB_OUTPUT
 
+  # Same check names as deploy, but instant success when preview is not needed
+  deploy-skip:
+    name: Deploy Preview (${{ matrix.flavor }})
+    needs: [setup, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview != 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [staging, beta, dev]
+      fail-fast: false
+    steps:
+      - name: Skip deploy (no relevant changes)
+        run: echo "::notice::No frontend / preview infra changes in this PR - skipping Terraform preview deploy."
+
   # Update comment with final results
   comment-result:
     name: Update PR Comment
-    needs: [setup, build-and-push, deploy]
+    needs: [setup, preview-relevant, build-and-push, build-skip, deploy, deploy-skip]
     runs-on: ubuntu-latest
     if: always()
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
+      - name: Update PR comment - no deploy (docs / CI only)
+        if: needs.preview-relevant.outputs.run_preview != 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          FLAVORS: ${{ needs.setup.outputs.flavors }}
+          PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
+          SHORT_SHA: ${{ needs.setup.outputs.short_sha }}
+          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+        with:
+          script: |
+            function parseFlavors(raw) {
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta', 'dev'];
+              try {
+                return JSON.parse(raw);
+              } catch {
+                return ['staging', 'beta', 'dev'];
+              }
+            }
+            const flavors = parseFlavors(process.env.FLAVORS);
+            const prNumber = process.env.PR_NUMBER;
+            const shortSha = process.env.SHORT_SHA;
+            const projectName = process.env.PROJECT_NAME;
+            const commitUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.payload.pull_request.head.sha}`;
+            let rows = '';
+            for (const flavor of flavors) {
+              rows += `| **${flavor}** | ⏭️ Skipped (no app or preview-infra changes) ([${shortSha}](${commitUrl})) | — | — |\n`;
+            }
+            const commentBody = [
+              `## ${projectName} – Preview`,
+              '',
+              '| Name | Status | Preview | Updated (UTC) |',
+              '|------|--------|---------|---------------|',
+              rows.trim(),
+              '',
+              '---',
+              `<sub>Checks passed without building - PR does not touch \`apps/**\`, \`packages/**\`, \`terraform/**\`, or root build files.</sub>`
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt(prNumber),
+            });
+            const existingComment = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes(`${projectName} – Preview`)
+            );
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(prNumber),
+                body: commentBody
+              });
+            }
+
       - name: Update PR comment - Results
-        uses: actions/github-script@v7
+        if: needs.preview-relevant.outputs.run_preview == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
@@ -311,12 +457,23 @@ jobs:
           CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
           SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
           STATUS_BETA: ${{ needs.deploy.outputs.status_beta }}
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
           # Overall job results (for detecting if deploy was skipped due to build failure)
           BUILD_RESULT: ${{ needs.build-and-push.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
         with:
           script: |
-            const flavors = JSON.parse(process.env.FLAVORS);
+            function parseFlavors(raw) {
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta', 'dev'];
+              try {
+                return JSON.parse(raw);
+              } catch {
+                return ['staging', 'beta', 'dev'];
+              }
+            }
+            const flavors = parseFlavors(process.env.FLAVORS);
             const prNumber = process.env.PR_NUMBER;
             const shortSha = process.env.SHORT_SHA;
             const runUrl = process.env.RUN_URL;
@@ -336,6 +493,11 @@ jobs:
                 custom: process.env.CUSTOM_URL_BETA || '',
                 service: process.env.SERVICE_URL_BETA || '',
                 status: process.env.STATUS_BETA || ''
+              },
+              dev: {
+                custom: process.env.CUSTOM_URL_DEV || '',
+                service: process.env.SERVICE_URL_DEV || '',
+                status: process.env.STATUS_DEV || ''
               }
             };
 
@@ -424,6 +586,7 @@ jobs:
             }
 
       - name: Deployment summary
+        if: needs.preview-relevant.outputs.run_preview == 'true'
         env:
           FLAVORS: ${{ needs.setup.outputs.flavors }}
           PR_NUMBER: ${{ needs.setup.outputs.pr_number }}
@@ -433,6 +596,9 @@ jobs:
           CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
           SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
           STATUS_BETA: ${{ needs.deploy.outputs.status_beta }}
+          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
+          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
+          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
         run: |
           echo "### Preview Environments Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

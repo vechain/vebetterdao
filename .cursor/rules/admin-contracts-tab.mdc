@@ -1,0 +1,20 @@
+---
+description: Keep the admin contracts tab in sync when new contracts are added
+globs: apps/frontend/src/app/admin/components/ContractsDetails.tsx
+alwaysApply: false
+---
+
+# Admin Contracts Tab
+
+When adding a contract that must appear in `http://localhost:3002/admin` -> `Contracts`:
+
+1. Ensure `packages/config/index.ts` exposes `<feature>ContractAddress` and each env config sets it.
+2. Add the contract to `apps/frontend/src/constants/contractList.ts` with the exact on-chain roles.
+3. Add a `ContractDetailsCard` in `apps/frontend/src/app/admin/components/ContractsDetails.tsx` with the same config address.
+4. Use the canonical contract name for the visible card title. Do not translate contract names in the admin contracts tab.
+5. Verify the contract also appears in role-management UI via `CONTRACT_LIST`.
+
+Example for Challenges:
+
+- `config.challengesContractAddress`
+- roles: `DEFAULT_ADMIN_ROLE`, `UPGRADER_ROLE`, `CONTRACTS_ADDRESS_MANAGER_ROLE`, `SETTINGS_MANAGER_ROLE`

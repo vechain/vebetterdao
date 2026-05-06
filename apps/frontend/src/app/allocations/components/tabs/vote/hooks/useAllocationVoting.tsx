@@ -5,6 +5,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { usePreferredRelayer } from "@/api/contracts/relayerRewardsPool/hooks/usePreferredRelayer"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
@@ -45,12 +46,14 @@ export const useAllocationVoting = ({
   const { t } = useTranslation()
   const { account } = useWallet()
 
+  const { data: isNavigator } = useIsNavigator()
   const { votesAtSnapshot } = useVotingPowerAtSnapshot()
   const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const { data: currentPreferences = [] } = useUserVotingPreferences(account?.address)
   const { data: currentPreferredRelayer } = usePreferredRelayer()
   const castAllocationVotes = useCastAllocationVotes({
     roundId,
+    isNavigator: !!isNavigator,
   })
   const manageAutoVotingAndVote = useEnableAutoVotingAndVote({ roundId })
   const updateVotingPreferences = useUpdateVotingPreferences({ roundId })

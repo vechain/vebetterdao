@@ -11,14 +11,14 @@ import { CountdownVoting } from "../../../app/components/Countdown/CountdownVoti
 import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { useDomainOrAddress } from "../../../hooks/useDomainOrAddress"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
-import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "../../../hooks/useGetVot3UnlockedBalance"
 import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 const compactFormatter = getCompactFormatter(4)
 export const SwapB3trVot3 = ({ address }: { address: string }) => {
   const { t } = useTranslation()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(address)
-  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useGetVot3Balance(address)
+  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useGetVot3UnlockedBalance(address)
   const { open: isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading

@@ -1,4 +1,4 @@
-import { Box, Drawer, Portal, VisuallyHidden, CloseButton, Heading, Text } from "@chakra-ui/react"
+import { Box, BoxProps, Drawer, Portal, VisuallyHidden, CloseButton, Heading, Text } from "@chakra-ui/react"
 import { useDrag } from "@use-gesture/react"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
@@ -16,6 +16,7 @@ type Props = {
   footer?: React.ReactNode
   title?: string | React.ReactNode
   illustration?: string
+  illustrationSize?: BoxProps["boxSize"]
   showCloseButton?: boolean
   description?: string | React.ReactNode
   full?: boolean
@@ -43,6 +44,7 @@ export const BaseBottomSheet = ({
   footer,
   title,
   illustration,
+  illustrationSize = "16",
   showCloseButton,
   description,
   full = false,
@@ -179,7 +181,7 @@ export const BaseBottomSheet = ({
                 <Box mb={4}>
                   <Box position="relative">
                     {illustration && (
-                      <Box position="relative" boxSize="16" mx="auto">
+                      <Box position="relative" boxSize={illustrationSize} mx="auto">
                         <Image alt="modal-illustration" src={illustration} fill />
                       </Box>
                     )}

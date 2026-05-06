@@ -6,6 +6,7 @@ import {
   Card,
   HStack,
   Icon,
+  IconButton,
   Heading,
   Grid,
   VStack,
@@ -16,17 +17,20 @@ import {
   Collapsible,
   Skeleton,
   Separator,
+  useDisclosure,
 } from "@chakra-ui/react"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts/factories/VoterRewards__factory"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useWallet } from "@vechain/vechain-kit"
-import { Activity, Check } from "iconoir-react"
+import { Activity, Check, Sparks } from "iconoir-react"
 import { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { formatEther } from "viem"
 
+import { FreshnessMultiplierModal } from "@/app/components/ActionBanners/modals/FreshnessMultiplierModal"
 import { AppImage } from "@/components/AppImage/AppImage"
 import Vote from "@/components/Icons/svg/vote.svg"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -140,6 +144,31 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
   const rewardClaimed = rewardClaimedV2 ?? rewardClaimedV1
   const isRewardClaimedLoading = isV2Loading || isV1Loading
 
+  // Read FreshnessMultiplierApplied event to get the actual multiplier used
+  const { data: freshnessEvents, isLoading: _isFreshnessLoading } = useEvents({
+    abi,
+    contractAddress,
+    eventName: "FreshnessMultiplierApplied",
+    filterParams: { voter: (account?.address ?? "") as `0x${string}`, roundId: BigInt(roundId) },
+    select: events =>
+      events.map(({ decodedData }) => ({
+        multiplier: decodedData.args.multiplier,
+        lastChangedRound: decodedData.args.lastChangedRound,
+      })),
+    enabled: !!account?.address,
+  })
+
+  const freshnessMultiplier = freshnessEvents?.[0]?.multiplier
+  const freshness = useMemo(() => {
+    if (!freshnessMultiplier) return null
+    const value = Number(freshnessMultiplier) / 10000
+    // Tier coloring matches the cast vote modal: x1 is the lowest tier (orange), x2/x3 are good (green)
+    const variant: "green" | "orange" = value <= 1 ? "orange" : "green"
+    return { label: `x${value}`, variant }
+  }, [freshnessMultiplier])
+
+  const { open: isFreshnessModalOpen, onOpen: openFreshnessModal, onClose: closeFreshnessModal } = useDisclosure()
+
   const [appsVotedInRound] = voteCastEvents || []
 
   const appVoteMetrics = useMemo(() => {
@@ -198,7 +227,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
           />
         ) : (
           <Grid
-            gridTemplateColumns={{ base: "1fr 1px 1fr", md: "repeat(2,1fr)" }}
+            gridTemplateColumns={{ base: "1fr 1px 1fr", md: freshness ? "repeat(3,1fr)" : "repeat(2,1fr)" }}
             rowGap={{ base: "5", md: "8" }}
             columnGap={{ base: "8", md: "3" }}>
             <Card.Root
@@ -242,7 +271,37 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
                 </Text>
               </Skeleton>
             </Card.Root>
-            <VStack gridColumn={{ base: "1 / 4", md: "1 / 3" }} align="stretch" gap="3">
+            {freshness && (
+              <Card.Root
+                gridColumn={{ base: "1 / -1", md: "auto" }}
+                p={{ base: "3", md: "4" }}
+                bg={`${freshness.variant}.subtle`}
+                gap="1"
+                border="none"
+                height="max-content">
+                <HStack gap="1">
+                  <Icon hideFrom="md" as={Sparks} boxSize="3.5" color={`${freshness.variant}.fg`} />
+                  <Text textStyle={{ base: "sm", md: "md" }} color={`${freshness.variant}.fg`}>
+                    {t("Freshness Bonus")}
+                  </Text>
+                </HStack>
+                <HStack justify="space-between">
+                  <Text textStyle="xl" fontWeight="semibold" color={`${freshness.variant}.fg`}>
+                    {freshness.label}
+                  </Text>
+                  <IconButton
+                    variant="ghost"
+                    size="2xs"
+                    colorPalette="gray"
+                    color={`${freshness.variant}.fg`}
+                    aria-label={t("How rewards multipliers work")}
+                    onClick={openFreshnessModal}>
+                    <Icon as={UilInfoCircle} boxSize="4" />
+                  </IconButton>
+                </HStack>
+              </Card.Root>
+            )}
+            <VStack gridColumn={{ base: "1 / -1", md: "1 / -1" }} align="stretch" gap="3">
               <HStack justifyContent="space-between">
                 <Heading size="sm">{t("Voted for")}</Heading>
                 <Badge variant="neutral" size="sm" rounded="sm">
@@ -279,6 +338,7 @@ export const UserVotingActivityCard = ({ roundDetails }: { roundDetails: Allocat
           </Grid>
         )}
       </Card.Body>
+      <FreshnessMultiplierModal isOpen={isFreshnessModalOpen} onClose={closeFreshnessModal} infoOnly />
     </Card.Root>
   )
 }

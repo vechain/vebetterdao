@@ -1,4 +1,5 @@
 import localConfig from "./local"
+import e2eConfig from "./e2e"
 import stagingConfig from "./testnet-staging"
 import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
@@ -60,6 +61,7 @@ export type AppConfig = {
   tokenAuctionContractAddress: string
   nodeManagementContractAddress: string
   veBetterPassportContractAddress: string
+  challengesContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   passportLibraries: PassportLibraries
   xAllocationVotingLibraries: XAllocationVotingLibraries
@@ -68,6 +70,7 @@ export type AppConfig = {
   stargateContractAddress: string
   grantsManagerContractAddress: string
   dbaPoolContractAddress: string
+  navigatorRegistryContractAddress: string
   veDelegateAutoDepositContractAddress: string
   nodeUrl: string
   indexerUrl?: string
@@ -85,7 +88,7 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
     case AppEnv.LOCAL:
       return localConfig
     case AppEnv.E2E:
-      return localConfig
+      return e2eConfig
     case AppEnv.TESTNET_STAGING:
       return stagingConfig
     case AppEnv.TESTNET:

@@ -13,6 +13,8 @@ export const VoteButtons = ({ variant = "desktop" }: VoteButtonsProps) => {
   const buttonConfig = useVotingButtonConfig()
   const isMobile = variant === "mobile"
 
+  if (!buttonConfig) return null
+
   if (buttonConfig.type === "editing") {
     const buttons = (
       <ButtonGroup w={{ base: "full", md: "unset" }}>

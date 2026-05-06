@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - dependencies
+      - increment:patch
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - dependencies
+      - increment:patch

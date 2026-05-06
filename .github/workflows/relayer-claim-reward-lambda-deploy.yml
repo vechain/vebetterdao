@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'terraform/relayer-claim-reward/**'
-      - 'lambda/src/relayerClaimReward/**'
+      - 'packages/lambda/src/relayerClaimReward/**'
       - '.github/workflows/relayer-claim-reward-lambda-deploy.yml'
   workflow_dispatch:
     inputs:
@@ -17,14 +17,11 @@ on:
           - dev
           - prod
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: read
-
 jobs:
   build:
     name: Build Lambda
+    permissions:
+      contents: read
     uses: ./.github/workflows/lambda-build.yml
     with:
       workspace: ${{ github.event.inputs.workspace || 'dev' }}
@@ -35,6 +32,10 @@ jobs:
   deploy:
     name: Deploy Infrastructure
     needs: build
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/lambda-infrastructure-deploy.yml
     with:
       workspace: ${{ github.event.inputs.workspace || 'dev' }}

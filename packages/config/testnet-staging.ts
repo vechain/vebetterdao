@@ -1,10 +1,9 @@
 import { AppConfig } from "."
-
 const config: AppConfig = {
   environment: "testnet-staging",
   basePath: "https://b3tr-frontend.vercel.app",
-  ipfsPinningService: "https://api.dev.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
-  ipfsFetchingService: "https://api.dev.gateway-proxy.vechain.org/ipfs",
+  ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
+  ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
   b3trContractAddress: "0x95761346d18244bb91664181bf91193376197088",
   vot3ContractAddress: "0x6e8b4a88d37897fc11f6ba12c805695f1c41f40e",
   b3trGovernorAddress: "0xc30b4d0837f7e3706749655d8bde0c0f265dd81b",
@@ -19,6 +18,7 @@ const config: AppConfig = {
   x2EarnRewardsPoolContractAddress: "0x2d2a2207c68a46fc79325d7718e639d1047b0d8b",
   nodeManagementContractAddress: "0xde17d0a516c38c168d37685bb71465f656aa256e",
   veBetterPassportContractAddress: "0x592c756df7a5d39de1735030e8b9c18b7417e6c4",
+  challengesContractAddress: "0x9529916b152357e7e2990c3ce4fe5373d7da54bc",
   x2EarnCreatorContractAddress: "0xb89f0ecdaf9987f87912d6c77756435fe4085b05",
   tokenAuctionContractAddress: "0x8dbce5de4c1f1840a47ab10c682aee48e9d06c20",
   stargateNFTContractAddress: "0x887d9102f0003f1724d8fd5d4fe95a11572fcd77",
@@ -27,6 +27,7 @@ const config: AppConfig = {
   grantsManagerContractAddress: "0x005af71e9b2d629c0c6e2f9d39fdfd1bb967c0ea",
   relayerRewardsPoolContractAddress: "0x92b5a7484970d9b2ad981e8135ff14e6f996dc04",
   dbaPoolContractAddress: "0x328710f4925c3e4c04961882b96c50cc7cd9d958",
+  navigatorRegistryContractAddress: "0x15a38b65f26bdbca50addf3865732613a45bbc00",
   veDelegateAutoDepositContractAddress: "0xf5DcEfC27461480A75c328402F1633c462Bece6c",
   indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",

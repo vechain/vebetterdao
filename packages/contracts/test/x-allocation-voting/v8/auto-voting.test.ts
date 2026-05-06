@@ -386,7 +386,7 @@ describe("AutoVoting - @shard14b", function () {
       await expect(castVoteTx)
         .to.emit(xAllocationVoting, "AutoVoteSkipped")
         .withArgs(user.address, roundId2, true, 0, ethers.parseEther("0.5"))
-      await expect(castVoteTx).to.emit(relayerRewardsPool, "ExpectedActionsReduced").withArgs(roundId2, 1, 0, 0)
+      await expect(castVoteTx).to.emit(relayerRewardsPool, "ExpectedActionsReduced").withArgs(roundId2, 2, 0, 0)
 
       // Reduced to 0 expected actions
       expect(await relayerRewardsPool.getMissedAutoVotingUsersCount(roundId2)).to.equal(0)

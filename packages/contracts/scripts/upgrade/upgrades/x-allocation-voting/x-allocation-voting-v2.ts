@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { upgradeProxy } from "../../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
-import { XAllocationVoting } from "../../../../typechain-types"
+import { XAllocationVoting, XAllocationVotingV2 } from "../../../../typechain-types"
 import { ethers } from "hardhat"
 
 async function main() {
@@ -20,13 +20,13 @@ async function main() {
 
   const xAllocationVotingV2 = (await upgradeProxy(
     "XAllocationVotingV1",
-    "XAllocationVoting",
+    "XAllocationVotingV2",
     config.xAllocationVotingContractAddress,
     [config.veBetterPassportContractAddress],
     {
       version: 2,
     },
-  )) as XAllocationVoting
+  )) as XAllocationVotingV2
 
   console.log(`XAllocationVoting upgraded`)
 

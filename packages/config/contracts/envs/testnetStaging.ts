@@ -45,9 +45,11 @@ export function createTestnetStagingConfig() {
         "setBaseAllocationPercentage",
         "setAppSharesCap",
         "setVotingThreshold",
+        "setCitizenSkipWindowBlocks",
       ],
       X2EarnAppsV1: ["addApp", "setVotingEligibility"],
       X2EarnApps: ["setVotingEligibility"],
+      NavigatorRegistry: ["deactivateNavigator"],
     },
 
     EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
@@ -64,6 +66,10 @@ export function createTestnetStagingConfig() {
 
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
+    CHALLENGES_MAX_DURATION: 4,
+    CHALLENGES_MAX_SELECTED_APPS: 5,
+    CHALLENGES_MAX_PARTICIPANTS: 100,
+    CHALLENGES_MIN_BET_AMOUNT: 100000000000000000000n, // 100 B3TR
 
     CONTRACTS_ADMIN_ADDRESS: "0x66E9709bc01B8c0AfC99a7dC513f501821306E85", //1st account from mnemonic of testnet staging wallet
     VOTE_2_EARN_POOL_ADDRESS: "0xeaE35dfE902C5D1a44e6b4080224a6621319A671", //2nd account from mnemonic of testnet staging wallet
@@ -168,6 +174,7 @@ export function createTestnetStagingConfig() {
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
 
     X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
+    X2EARN_ENDORSEMENT_SCORE_THRESHOLD: 100,
 
     MULTI_SIG_SIGNERS: [
       "0x66E9709bc01B8c0AfC99a7dC513f501821306E85",
@@ -179,6 +186,13 @@ export function createTestnetStagingConfig() {
 
     GM_MULTIPLIERS_V2: [110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers according
     VOTER_REWARDS_LEVELS_V2: [2, 3, 4, 5, 6, 7, 8, 9, 10], // Voter rewards levels for the new GM multipliers
+
+    // Rewards Multipliers (basis points, 10000 = 1x)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1: 30000, // Updated this round (x3)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2: 20000, // Updated within 2 rounds (x2)
+    VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3: 10000, // No update >= 3 rounds (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST: 10000, // For/Against vote (x1)
+    VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: 3000, // Abstain vote (x0.30)
 
     /*
       Level => B3TR Required (halved)
@@ -219,5 +233,18 @@ export function createTestnetStagingConfig() {
     X_ALLOCATION_POOL_UNALLOCATED_FUNDS_ROUND_IDS: [],
     X_ALLOCATION_POOL_UNALLOCATED_FUNDS_V7: [],
     DBA_DISTRIBUTION_START_ROUND: 1,
+
+    // Navigator Registry
+    NAVIGATOR_MIN_STAKE: 50000n * 10n ** 18n, // 50,000 B3TR
+    NAVIGATOR_MAX_STAKE_PERCENTAGE: 100, // 1% of VOT3 supply
+    NAVIGATOR_FEE_LOCK_PERIOD: 4, // 4 rounds
+    NAVIGATOR_FEE_PERCENTAGE: 2000, // 20% in basis points
+    NAVIGATOR_EXIT_NOTICE_PERIOD: 1, // 1 round
+    NAVIGATOR_REPORT_INTERVAL: 2, // every 2 rounds
+    NAVIGATOR_MINOR_SLASH_PERCENTAGE: 500, // 5% in basis points
+    NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: 8, // 8 blocks, around 80 seconds
+
+    XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
+    B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: 12, // 12 blocks (~2 min)
   })
 }

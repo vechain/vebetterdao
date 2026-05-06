@@ -128,8 +128,13 @@ export function VechainKitProviderWrapper({ children }: Props) {
       onLanguageChange={handleLanguageChange}
       network={{
         type: networkType,
+        nodeUrl: getConfig().nodeUrl,
       }}
       allowCustomTokens={allowCustomTokens}
+      contractAddresses={{
+        b3trContractAddress: getConfig().b3trContractAddress,
+        vot3ContractAddress: getConfig().vot3ContractAddress,
+      }}
       legalDocuments={{
         termsAndConditions: [
           {

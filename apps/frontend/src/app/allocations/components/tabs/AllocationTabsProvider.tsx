@@ -6,25 +6,29 @@ import { usePathname } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
+import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
+import { useAllocationRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useAllocationRoundSnapshot"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useIsAutoVotingEnabled } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabled"
 import { useIsAutoVotingEnabledInCurrentRound } from "@/api/contracts/xAllocations/hooks/useIsAutoVotingEnabledInCurrentRound"
 import { useUserVotingPreferences } from "@/api/contracts/xAllocations/hooks/useUserVotingPreferences"
 import { useUserVotesInRound } from "@/api/contracts/xApps/hooks/useUserVotesInRound"
 import { useStickyState } from "@/hooks/useStickyState"
-import { useUserPreferences } from "@/hooks/useUserPreferences"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 import { AllocationRoundDetails, AppWithVotes } from "../../lib/data"
-import { AutoVoteModal } from "../AutoVoteModal"
 import { ConfirmVoteModal } from "../confirm-vote-modal/ConfirmVoteModal"
+import { NavigatorsIntroModal } from "../NavigatorsIntroModal"
 
 import { useAutoVoteEditMode } from "./hooks/useAutoVoteEditMode"
 import { useAllocationVoting } from "./vote/hooks/useAllocationVoting"
 import { VoteButtons } from "./vote/VoteButtons"
 
 export const MAX_SELECTED_APPS = 15
+
+const NAVIGATORS_INTRO_DISMISSED_KEY = "NAVIGATORS_INTRO_DISMISSED"
 
 interface AllocationTabsContextType {
   roundId: string
@@ -51,6 +55,8 @@ interface AllocationTabsContextType {
   hasExistingPreferences: boolean
   onEnableAutoVoting: () => void
   isAtSelectionLimit: boolean
+  isDelegatedToNavigator: boolean
+  isNavigator: boolean
 }
 
 export const AllocationTabsContext = createContext<AllocationTabsContextType | null>(null)
@@ -67,6 +73,9 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const isVoteTab = pathname === "/allocations" || pathname === "/allocations/vote"
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set())
   const { account } = useWallet()
+  const { data: roundSnapshotBlock } = useAllocationRoundSnapshot(roundDetails.id.toString())
+  const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, roundSnapshotBlock)
+  const { data: isNavigator } = useIsNavigator(account?.address)
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const {
     hasVotesAtSnapshot,
@@ -91,16 +100,19 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   // Initialize local state from chain data
   const [isAutoVotingEnabled, setIsAutoVotingEnabled] = useState(isAutoVotingEnabledOnChain ?? false)
 
-  // Auto-vote modal
-  const { open: isAutoVoteModalOpen, onOpen: openAutoVoteModal, onClose: closeAutoVoteModal } = useDisclosure()
-  const { preferences, updatePreferences } = useUserPreferences()
-
-  // Show the AutoVoteModal once on first visit to vote tab if user has voting power
+  // First-visit intro modal for the navigators feature. SSR-safe: starts closed and opens
+  // from a client effect once we can read localStorage.
+  const [isNavigatorsIntroOpen, setIsNavigatorsIntroOpen] = useState(false)
   useEffect(() => {
-    if (isVoteTab && preferences?.SHOW_AUTOVOTING_MODAL !== false && hasVotesAtSnapshot) {
-      openAutoVoteModal()
+    if (typeof window === "undefined") return
+    if (localStorage.getItem(NAVIGATORS_INTRO_DISMISSED_KEY) !== "true") {
+      setIsNavigatorsIntroOpen(true)
     }
-  }, [isVoteTab, hasVotesAtSnapshot, openAutoVoteModal, preferences?.SHOW_AUTOVOTING_MODAL])
+  }, [])
+  const handleCloseNavigatorsIntro = useCallback(() => {
+    localStorage.setItem(NAVIGATORS_INTRO_DISMISSED_KEY, "true")
+    setIsNavigatorsIntroOpen(false)
+  }, [])
 
   // Keep local state synced with chain state
   useEffect(() => {
@@ -179,11 +191,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
     enterEditMode() // Mark as editing so sync effect doesn't override
     handleOpenModalWithAutoVote()
   }, [storedPreferences, castVotesEvent?.appsIds, handleOpenModalWithAutoVote, enterEditMode, currentRoundAppIds])
-
-  const handleCloseAutoVoteModal = useCallback(() => {
-    closeAutoVoteModal()
-    updatePreferences({ SHOW_AUTOVOTING_MODAL: false })
-  }, [closeAutoVoteModal, updatePreferences])
 
   const selectedApps = useMemo(() => {
     return roundDetails.apps.filter(app => selectedAppIds.has(app.id))
@@ -270,6 +277,8 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         hasExistingPreferences,
         onEnableAutoVoting: handleEnableAutoVoting,
         isAtSelectionLimit,
+        isDelegatedToNavigator: isDelegatedToNavigator ?? false,
+        isNavigator: isNavigator ?? false,
       }}>
       <Box ref={sentinelRef} height="1px" />
 
@@ -277,7 +286,12 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
 
       <Presence
         hideFrom="md"
-        present={isVoteTab && (isEligibleToVote || hasVoted) && (selectedAppIds.size > 0 || showAutoVoteUI)}
+        present={
+          isVoteTab &&
+          !isDelegatedToNavigator &&
+          (isEligibleToVote || hasVoted) &&
+          (selectedAppIds.size > 0 || showAutoVoteUI)
+        }
         animationName={{
           _open: "slide-from-bottom",
           _closed: "slide-to-bottom, fade-out",
@@ -293,8 +307,6 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         </Box>
       </Presence>
 
-      <AutoVoteModal isOpen={isAutoVoteModalOpen} onClose={handleCloseAutoVoteModal} />
-
       <ConfirmVoteModal
         key={selectedApps.map(a => a.id).join(",")}
         isOpen={isModalOpen}
@@ -308,7 +320,11 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         nextRoundNumber={roundDetails.id + 1}
         onEditSelection={handleEditSelection}
         hasVoted={hasVoted ?? false}
+        roundId={roundDetails.id.toString()}
+        isNavigator={isNavigator ?? false}
       />
+
+      <NavigatorsIntroModal isOpen={isNavigatorsIntroOpen} onClose={handleCloseNavigatorsIntro} />
     </AllocationTabsContext.Provider>
   )
 }

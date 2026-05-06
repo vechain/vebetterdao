@@ -1,6 +1,11 @@
+/**
+ * @deprecated Superseded by `relayer-rewards-pool-v3.ts`.
+ * Upgrades proxies from RelayerRewardsPoolV1 (version "1") to RelayerRewardsPoolV2 (version "2").
+ * After this, run `relayer-rewards-pool-v3.ts` to reach version "3".
+ */
 import { getConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
-import { RelayerRewardsPool } from "../../../../typechain-types"
+import { RelayerRewardsPoolV2 } from "../../../../typechain-types"
 import { upgradeProxy } from "../../../helpers"
 import { ethers } from "hardhat"
 
@@ -20,27 +25,27 @@ async function main() {
   console.log("Current contract version:", currentVersion)
 
   console.log(
-    `Upgrading RelayerRewardsPool contract at address: ${config.relayerRewardsPoolContractAddress} on network: ${config.network.name} with account: ${deployer.address}`,
+    `Upgrading RelayerRewardsPool V1 → V2 at ${config.relayerRewardsPoolContractAddress} on ${config.network.name} with ${deployer.address}`,
   )
 
   const relayerRewardsPoolV2 = (await upgradeProxy(
     "RelayerRewardsPoolV1",
-    "RelayerRewardsPool",
+    "RelayerRewardsPoolV2",
     config.relayerRewardsPoolContractAddress,
     [],
     { version: 2 },
-  )) as RelayerRewardsPool
+  )) as RelayerRewardsPoolV2
 
-  console.log("RelayerRewardsPool upgraded")
+  console.log("RelayerRewardsPool upgraded to V2")
 
   const version = await relayerRewardsPoolV2.version()
   console.log(`New RelayerRewardsPool version: ${version}`)
 
-  if (parseInt(version) !== 2) {
+  if (version !== "2") {
     throw new Error(`RelayerRewardsPool version is not 2: ${version}`)
   }
 
-  console.log("Execution completed")
+  console.log("Execution completed — now run relayer-rewards-pool-v3.ts")
   process.exit(0)
 }
 

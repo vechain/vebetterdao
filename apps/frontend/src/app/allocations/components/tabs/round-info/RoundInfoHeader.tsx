@@ -2,7 +2,7 @@
 
 import { Badge, Card, Flex, Grid, Heading, HStack, IconButton, Text, VStack, Mark } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useWallet, useCallClause } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"

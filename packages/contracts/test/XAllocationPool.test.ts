@@ -2137,7 +2137,7 @@ describe("X-Allocation Pool - @shard13", async function () {
         // 1. allocation reserved for the team
         // 1. allocation reserved for rewards
 
-        const expectedTeamAmount = (teamAllocationPercentage * expectedEarnings[0]) / 100n
+        const expectedTeamAmount = (BigInt(teamAllocationPercentage) * expectedEarnings[0]) / 100n
 
         expect(expectedTeamAmount).to.eql(expectedEarnings[2])
 

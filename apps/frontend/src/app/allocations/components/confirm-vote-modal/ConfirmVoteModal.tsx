@@ -12,9 +12,11 @@ import { AllocationAlertCard } from "../AllocationAlertCard"
 import { AutomationToggleCard } from "../AutomationToggleCard"
 import { PreferredRelayerSection } from "../PreferredRelayerSection"
 
+import { FreshnessHint } from "./FreshnessHint"
 import { SelectedAppsPreview } from "./SelectedAppsPreview"
 import { SelectedAppsSection } from "./SelectedAppsSection"
 import { useConfirmVoteModal } from "./useConfirmVoteModal"
+import { useFreshnessPreview } from "./useFreshnessPreview"
 import { VotingPowerSection } from "./VotingPowerSection"
 
 interface ConfirmVoteModalProps {
@@ -29,6 +31,9 @@ interface ConfirmVoteModalProps {
   nextRoundNumber?: number | string
   onEditSelection?: () => void
   hasVoted: boolean
+  roundId?: string
+  snapshotBlock?: string
+  isNavigator?: boolean
 }
 
 export const ConfirmVoteModal = ({
@@ -43,6 +48,9 @@ export const ConfirmVoteModal = ({
   nextRoundNumber,
   onEditSelection,
   hasVoted,
+  roundId,
+  snapshotBlock,
+  isNavigator = false,
 }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
@@ -51,6 +59,13 @@ export const ConfirmVoteModal = ({
 
   // Get user's voting power at snapshot
   const { vot3Balance, isLoading: isLoadingBalance } = useVotingPowerAtSnapshot()
+
+  // Preview the freshness multiplier the user will receive
+  const freshnessPreview = useFreshnessPreview(
+    selectedApps.map(app => app.id),
+    roundId || "0",
+    snapshotBlock,
+  )
 
   const { allocations, setAllocation, setEqualAllocations, getTotalPercentage, isValid } = useConfirmVoteModal(
     selectedApps.map(app => app.id),
@@ -145,6 +160,14 @@ export const ConfirmVoteModal = ({
               apps={selectedApps}
               onEditSelection={showEditSelection ? onEditSelection : undefined}
             />
+            {!freshnessPreview.isLoading && (
+              <FreshnessHint
+                isUpdated={freshnessPreview.isUpdated}
+                tierLabel={freshnessPreview.tierLabel}
+                isFirstVote={freshnessPreview.isFirstVote}
+              />
+            )}
+            {isNavigator && <AllocationAlertCard status="info" message={t("navigatorVotePropagation")} />}
           </>
         ) : (
           <>
@@ -163,6 +186,14 @@ export const ConfirmVoteModal = ({
                 </Button>
               }
             />
+            {!freshnessPreview.isLoading && (
+              <FreshnessHint
+                isUpdated={freshnessPreview.isUpdated}
+                tierLabel={freshnessPreview.tierLabel}
+                isFirstVote={freshnessPreview.isFirstVote}
+              />
+            )}
+            {isNavigator && <AllocationAlertCard status="info" message={t("navigatorVotePropagation")} />}
             <SelectedAppsSection
               apps={selectedApps}
               allocations={allocations}
@@ -178,16 +209,21 @@ export const ConfirmVoteModal = ({
             )}
           </>
         )}
-        <AutomationToggleCard
-          checked={isAutoVotingEnabled}
-          onCheckedChange={onToggleAutoVoting}
-          nextRoundNumber={nextRoundNumber}
-          isEnabledOnChain={isAutoVotingEnabledOnChain}
-          hasVoted={hasVoted}
-          isActiveInCurrentRound={isAutoVotingEnabledInCurrentRound}
-        />
-        {isAutoVotingEnabled && (
-          <PreferredRelayerSection selectedRelayer={selectedRelayer} onSelectRelayer={setSelectedRelayer} />
+
+        {!isNavigator && (
+          <>
+            <AutomationToggleCard
+              checked={isAutoVotingEnabled}
+              onCheckedChange={onToggleAutoVoting}
+              nextRoundNumber={nextRoundNumber}
+              isEnabledOnChain={isAutoVotingEnabledOnChain}
+              hasVoted={hasVoted}
+              isActiveInCurrentRound={isAutoVotingEnabledInCurrentRound}
+            />
+            {isAutoVotingEnabled && (
+              <PreferredRelayerSection selectedRelayer={selectedRelayer} onSelectRelayer={setSelectedRelayer} />
+            )}
+          </>
         )}
       </VStack>
     </Modal>

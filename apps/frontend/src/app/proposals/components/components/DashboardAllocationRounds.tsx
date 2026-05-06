@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationVoting__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useCallClause } from "@vechain/vechain-kit"
 import { Gift, NavArrowLeft, NavArrowRight, Activity } from "iconoir-react"
 import NextLink from "next/link"

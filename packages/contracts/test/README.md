@@ -35,6 +35,7 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard8e**: VeBetterPassport - Entities
 - **shard8f**: VeBetterPassport - Delegation
 - **shard9**: VOT3
+- **shard9a**: B3TRChallenges
 - **shard10-core**: VoterRewards
 - **shard10a**: VoterRewards - Upgrade
 - **shard10b**: VoterRewards - Relayer Claim Rewards
@@ -57,5 +58,15 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard17a**: X-Apps (additional tests)
 - **shard17b**: X-Apps (additional tests)
 - **shard18**: RelayerRewardsPool
+- **shard19a**: Navigator Registry - Core (initialization, staking, governance setters, VOT3 V2 upgrade)
+- **shard19b**: Navigator - Delegation (delegate, reduce, undelegate, checkpoints, VOT3 lock)
+- **shard19c**: Navigator - Voting (allocation preferences with percentages, governance decisions)
+- **shard19d**: Navigator - Fees (deposit, claim, lock period, numerical correctness)
+- **shard19e**: Navigator - Slashing (5 minor infractions, major slash, compounding, treasury verification)
+- **shard19f**: Navigator - Lifecycle (exit with lazy invalidation, deactivation, citizen POV, metadata, reports)
+- **shard19g**: Navigator - Integration (XAllocationVoting, B3TRGovernor, VoterRewards fee deduction, VOT3 lock)
+- **shard19h**: Navigator - Security (malicious users/navigators/relayers, access control, numerical correctness)
+- **shard19i**: Navigator - Staked Voting Power (B3TR/VOT3 conversion accounting, checkpoints, voting power inclusion, slash conversion, no double-counting)
+- **shard20e2e**: Navigator - Relayer E2E (full ecosystem auto-voting + citizen + governance + multi-relayer scenarios)
 
 When adding new tests, assign them to an appropriate shard to maintain balanced execution times across all shards.

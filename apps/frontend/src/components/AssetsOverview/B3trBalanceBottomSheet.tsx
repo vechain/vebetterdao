@@ -1,10 +1,19 @@
 "use client"
 
 import { Box, HStack, Icon, Text, VStack, useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { Gift, NavArrowRight, RefreshDouble, InfoCircle, ArrowDown, ArrowUp, StarSolid } from "iconoir-react"
+import {
+  Gift,
+  NavArrowRight,
+  RefreshDouble,
+  InfoCircle,
+  ArrowDown,
+  ArrowUp,
+  StarSolid,
+  Compass,
+  WarningTriangle,
+} from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -30,7 +39,10 @@ const BALANCE_EVENT_NAMES = [
   "B3TR_UPGRADE_GM",
   "B3TR_SWAP_B3TR_TO_VOT3",
   "B3TR_SWAP_VOT3_TO_B3TR",
-  "TRANSFER_FT",
+  "B3TR_NAVIGATOR_REGISTERED",
+  "B3TR_NAVIGATOR_STAKE_ADDED",
+  "B3TR_NAVIGATOR_STAKE_WITHDRAWN",
+  "B3TR_NAVIGATOR_FEE_CLAIMED",
 ] as const
 const compactFormatter = getCompactFormatter(2)
 const fmtValue = (raw?: string) => (raw ? compactFormatter.format(Number(formatEther(BigInt(raw)))) : "0")
@@ -83,7 +95,7 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
   const { data: apps } = useXApps()
 
   const getBalanceActivityProps = useCallback(
-    (tx: Transaction, account: string): ActivityItemProps | null => {
+    (tx: Transaction, _account: string): ActivityItemProps | null => {
       switch (tx.eventName) {
         case "B3TR_CLAIM_REWARD":
           return {
@@ -142,21 +154,72 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
             sign: "+",
             amountColor: "status.positive.strong",
           }
-        case "TRANSFER_FT": {
-          const b3trAddress = getConfig().b3trContractAddress?.toLowerCase()
-          if (tx.tokenAddress?.toLowerCase() !== b3trAddress) return null
-          const isOutgoing = tx.from?.toLowerCase() === account.toLowerCase()
+        case "B3TR_NAVIGATOR_REGISTERED":
           return {
-            label: isOutgoing ? t("Outgoing transfer") : t("Incoming transfer"),
-            icon: isOutgoing ? <ArrowUp /> : <ArrowDown />,
-            iconBg: isOutgoing ? "status.negative.subtle" : "status.positive.subtle",
-            iconColor: isOutgoing ? "status.negative.strong" : "status.positive.strong",
+            label: t("Registered as Navigator"),
+            icon: <Compass />,
+            iconBg: "status.info.subtle",
+            iconColor: "status.info.strong",
             amount: fmtValue(tx.value),
             token: "B3TR",
-            sign: isOutgoing ? "-" : "+",
-            amountColor: isOutgoing ? undefined : "status.positive.strong",
+            sign: "-",
+            amountColor: undefined,
           }
-        }
+        case "B3TR_NAVIGATOR_STAKE_ADDED":
+          return {
+            label: t("Added Stake"),
+            icon: <ArrowUp />,
+            iconBg: "status.info.subtle",
+            iconColor: "status.info.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "-",
+            amountColor: undefined,
+          }
+        case "B3TR_NAVIGATOR_STAKE_WITHDRAWN":
+          return {
+            label: t("Withdrew Stake"),
+            icon: <ArrowDown />,
+            iconBg: "status.positive.subtle",
+            iconColor: "status.positive.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "+",
+            amountColor: "status.positive.strong",
+          }
+        case "B3TR_NAVIGATOR_SLASHED":
+          return {
+            label: t("Major Slash"),
+            icon: <WarningTriangle />,
+            iconBg: "status.negative.subtle",
+            iconColor: "status.negative.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "-",
+            amountColor: "status.negative.strong",
+          }
+        case "B3TR_NAVIGATOR_MINOR_SLASHED":
+          return {
+            label: t("Minor Slash"),
+            icon: <WarningTriangle />,
+            iconBg: "status.warning.subtle",
+            iconColor: "status.warning.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "-",
+            amountColor: undefined,
+          }
+        case "B3TR_NAVIGATOR_FEE_CLAIMED":
+          return {
+            label: t("Claimed Navigator Fee"),
+            icon: <Gift />,
+            iconBg: "status.positive.subtle",
+            iconColor: "status.positive.strong",
+            amount: fmtValue(tx.value),
+            token: "B3TR",
+            sign: "+",
+            amountColor: "status.positive.strong",
+          }
         default:
           return null
       }
@@ -176,11 +239,27 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
         </Text>
       </Box>
 
+      <ActivityList eventNames={[...BALANCE_EVENT_NAMES]} getActivityProps={getBalanceActivityProps} />
+
       <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
         {t("How to get more B3TR")}
       </Text>
 
       <VStack gap="2" align="stretch">
+        {convertibleVot3 && Number(convertibleVot3.scaled) > 0 && (
+          <InfoRow
+            icon={<RefreshDouble />}
+            title={t("Convert VOT3 to B3TR")}
+            description={t("You have {{amount}} VOT3 that can be converted back to B3TR.", {
+              amount: convertibleVot3.formatted,
+            })}
+            onClick={() => {
+              onClose()
+              onOpenPowerDown()
+            }}
+          />
+        )}
+
         <InfoRow
           icon={<TbLeaf />}
           title={t("Use sustainable apps")}
@@ -201,20 +280,6 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
           }}
         />
 
-        {convertibleVot3 && Number(convertibleVot3.scaled) > 0 && (
-          <InfoRow
-            icon={<RefreshDouble />}
-            title={t("Convert VOT3 to B3TR")}
-            description={t("You have {{amount}} VOT3 that can be converted back to B3TR.", {
-              amount: convertibleVot3.formatted,
-            })}
-            onClick={() => {
-              onClose()
-              onOpenPowerDown()
-            }}
-          />
-        )}
-
         <InfoRow
           icon={<InfoCircle />}
           title={t("What is B3TR?")}
@@ -223,8 +288,6 @@ const BalanceContent = ({ onClose, onOpenPowerDown }: { onClose: () => void; onO
           )}
         />
       </VStack>
-
-      <ActivityList eventNames={[...BALANCE_EVENT_NAMES]} getActivityProps={getBalanceActivityProps} />
     </VStack>
   )
 }

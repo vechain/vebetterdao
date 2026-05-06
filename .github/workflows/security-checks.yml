@@ -1,16 +1,24 @@
 name: "Security Checks"
 on:
   pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/security-checks.yml"
   push:
     branches:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: write
+  pull-requests: write
+
 jobs:
   checkov:
-    uses: vechain/github-actions/.github/workflows/checkov.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
+    uses: vechain/github-actions-public/.github/workflows/checkov.yaml@f54f69d33344b241b5ec901d3d5e1b02d44a1b96 # v.2.3.0
   infracost:
-    uses: vechain/github-actions/.github/workflows/infracost.yaml@7afcb88e42aa6ab0636dd5d899f9bb5cf2806cf1 # v.1.5.0
+    uses: vechain/github-actions-public/.github/workflows/infracost.yaml@f54f69d33344b241b5ec901d3d5e1b02d44a1b96 # v.2.3.0
     secrets:
       INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
-      GIT_VECHAINCI_SSH_KEY: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
+      TERRAFORM_SSH_KEY: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}

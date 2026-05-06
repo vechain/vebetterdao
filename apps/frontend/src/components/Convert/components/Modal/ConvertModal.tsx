@@ -11,7 +11,7 @@ import { useB3trConverted } from "../../../../api/contracts/b3tr/hooks/useB3trCo
 import { useConvertB3tr } from "../../../../hooks/useConvertB3tr"
 import { useConvertVot3 } from "../../../../hooks/useConvertVot3"
 import { useGetB3trBalance } from "../../../../hooks/useGetB3trBalance"
-import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "../../../../hooks/useGetVot3UnlockedBalance"
 import { useSmartAccountUpgradeRequired } from "../../../../hooks/vechainKitHooks/useSmartAccountUpgradeRequired"
 import { Step, StepModal } from "../../../StepModal/StepModal"
 
@@ -39,7 +39,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
 
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: vot3Balance } = useGetVot3UnlockedBalance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
 
   const { open: openUpgradeModal } = useUpgradeSmartAccountModal({ accentColor: "#004CFC" })

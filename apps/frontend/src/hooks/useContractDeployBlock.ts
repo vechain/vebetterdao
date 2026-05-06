@@ -5,7 +5,7 @@ import { indexerQueryClient } from "@/api/indexer/api"
 
 export const useContractDeployBlock = (contractAddress: string) => {
   // When running locally, we do not have an indexer running, so we return 0, to not block the app from loading
-  if (getConfig().environment === AppEnv.LOCAL)
+  if (getConfig().environment === AppEnv.LOCAL || getConfig().environment === AppEnv.TESTNET)
     return { data: 0, isLoading: false, error: null } as ReturnType<typeof indexerQueryClient.useQuery>
 
   return indexerQueryClient.useQuery(

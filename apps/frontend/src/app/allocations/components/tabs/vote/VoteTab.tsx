@@ -39,6 +39,7 @@ export function VoteTab() {
     isAutoVotingEnabledInCurrentRound,
     isEditingAutoVote,
     isAtSelectionLimit,
+    isDelegatedToNavigator,
   } = context
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -80,7 +81,7 @@ export function VoteTab() {
   return (
     <>
       {isMobile && <VotingAlerts />}
-      {shouldShowCantVoteCard && <CantVoteCard />}
+      {shouldShowCantVoteCard && !isDelegatedToNavigator && <CantVoteCard />}
       <SearchField
         placeholder={t("Search app")}
         value={localSearchQuery}
@@ -89,7 +90,7 @@ export function VoteTab() {
       />
       <Bleed inlineStart="4" inlineEnd="4">
         <AppCategoryTabs
-          disabled={shouldShowInsufficientPowerAlert || shouldShowCantVoteCard}
+          disabled={shouldShowInsufficientPowerAlert || shouldShowCantVoteCard || isDelegatedToNavigator}
           apps={sortedApps}
           selectedAppIds={selectedAppIds}
           onToggleApp={onToggleApp}

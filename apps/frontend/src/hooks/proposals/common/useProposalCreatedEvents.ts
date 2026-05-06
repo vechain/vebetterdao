@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/governance/B3TRGovernor__factory"
 import { useMemo } from "react"
 
 import { useEvents } from "../../useEvents"
@@ -11,6 +11,7 @@ export const useProposalCreatedEvents = (): {
   standardProposals: ProposalCreatedEvent[]
   grantProposals: ProposalCreatedEvent[]
   allProposals: ProposalCreatedEvent[]
+  isLoading: boolean
 } => {
   const proposalEvents = useEvents({
     abi,
@@ -70,5 +71,10 @@ export const useProposalCreatedEvents = (): {
     }
   }, [proposalEvents.data, proposalTypeEvents.data])
 
-  return { standardProposals, grantProposals, allProposals }
+  return {
+    standardProposals,
+    grantProposals,
+    allProposals,
+    isLoading: proposalEvents.isLoading || proposalTypeEvents.isLoading,
+  }
 }

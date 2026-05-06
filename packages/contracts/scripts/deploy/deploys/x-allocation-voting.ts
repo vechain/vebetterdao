@@ -3,7 +3,7 @@ import { XAllocationVoting } from "../../../typechain-types"
 import { getConfig } from "@repo/config"
 import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
 import { ethers } from "hardhat"
-import { autoVotingLibraries } from "../../libraries/autoVotingLibraries"
+import { xAllocationVotingLibraries } from "../../libraries/xAllocationVotingLibraries"
 
 /**
  * This script is used to deploy the XAllocationVoting contract that is not associated with contracts.
@@ -28,7 +28,7 @@ export async function main() {
   const x2EarnAppsAddress = ethers.ZeroAddress
   const veBetterPassportAddress = ethers.ZeroAddress
 
-  const { AutoVotingLogic } = await autoVotingLibraries()
+  const xAllocLibs = await xAllocationVotingLibraries(true)
 
   const xAllocationVoting = (await deployAndInitializeLatest(
     "XAllocationVoting",
@@ -59,7 +59,15 @@ export async function main() {
       },
     ],
     {
-      AutoVotingLogic: await AutoVotingLogic.getAddress(),
+      AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+      ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+      VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+      VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+      VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+      RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+      RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+      RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+      RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
     },
     true,
   )) as XAllocationVoting

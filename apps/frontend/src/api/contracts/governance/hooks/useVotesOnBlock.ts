@@ -1,10 +1,12 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/factories/B3TRGovernor__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
-const abi = B3TRGovernor__factory.abi
-const contractAddress = getConfig().b3trGovernorAddress
+// Uses XAllocationVoting.getVotes which includes deposit voting power
+// for non-delegated users and returns delegated amount for delegated users.
+const abi = XAllocationVoting__factory.abi
+const contractAddress = getConfig().xAllocationVotingContractAddress
 const method = "getVotes" as const
 export const getVotesOnBlockPrefixQueryKey = () => getCallClauseQueryKey({ abi, address: contractAddress, method })
 export const getVotesOnBlockQueryKey = (userAddress: string, blockNumber: number) =>
@@ -27,6 +29,11 @@ export const useGetVotesOnBlock = (block?: number, address?: string, enabled = t
     queryOptions: {
       enabled: !!address && !!block && enabled,
       select: data => ethers.formatEther(data[0]),
+      // getPastVotes reverts with "future lookup" when timepoint >= block.number.
+      // After a new round starts, the snapshot block may equal the current block
+      // for up to ~10s (one VeChain block). Retry to wait for the block to advance.
+      retry: 3,
+      retryDelay: 5_000,
     },
   })
 }

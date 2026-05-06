@@ -1,5 +1,5 @@
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Box, Button, Card, Field, HStack, Heading, Stack, Text, VStack, useMediaQuery } from "@chakra-ui/react"
+import { Box, Button, Card, Field, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
@@ -35,7 +35,6 @@ export const NewProposalPageDiscussionContent = () => {
       metadataUri,
     },
   })
-  const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
   const { errors } = formState
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -82,7 +81,14 @@ export const NewProposalPageDiscussionContent = () => {
             </Text>
           </VStack>
           <Field.Root invalid={!!errors.markdownDescription}>
-            <Box w="full" h={500}>
+            <Box
+              w="full"
+              h={500}
+              className="wmde-markdown-var"
+              border="1px solid"
+              borderColor="border.primary"
+              borderRadius="md"
+              overflow="hidden">
               <Controller
                 name="markdownDescription"
                 control={control}
@@ -101,7 +107,7 @@ export const NewProposalPageDiscussionContent = () => {
                 }}
                 render={({ field }) => (
                   <MDEditor
-                    preview={isDesktop ? "live" : "edit"}
+                    preview={"edit"}
                     data-testid="markdown-description-input"
                     value={field.value}
                     onChange={field.onChange}

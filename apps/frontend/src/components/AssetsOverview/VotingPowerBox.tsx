@@ -1,18 +1,18 @@
 "use client"
 
 import { Text, Skeleton, Mark, Badge, Flex } from "@chakra-ui/react"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Flash } from "iconoir-react"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { formatEther } from "viem"
+import { formatEther, parseEther } from "viem"
 
-import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
+import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 
 import { StatCard } from "./StatCard"
 import { VotingPowerBottomSheet } from "./VotingPowerBottomSheet"
@@ -25,21 +25,29 @@ export const VotingPowerBox = () => {
 
   const { isMobile } = useBreakpoints()
 
-  const { vot3Balance, isLoading, votesAtSnapshot } = useVotingPowerAtSnapshot()
-  const { data: currentVot3Balance, isLoading: isCurrentVot3BalanceLoading } = useGetVot3Balance(account?.address)
-  const { data: bestBlock } = useBestBlockCompressed()
-  const { data: currentDepositsVotes, isLoading: isCurrentDepositsVotesLoading } = useTotalVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) : undefined,
+  const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: snapshotBlock, isLoading: isSnapshotBlockLoading } = useCurrentRoundSnapshot()
+  const { data: bestBlock, isLoading: isBestBlockLoading } = useBestBlockCompressed()
+
+  // getVotes handles delegation (returns delegated amount) and includes deposits
+  const { data: snapshotVotes, isLoading: isSnapshotLoading } = useGetVotesOnBlock(
+    snapshotBlock ? Number(snapshotBlock) : undefined,
+    account?.address,
+  )
+  // getPastVotes requires timepoint < block.number, so use bestBlock - 1
+  const { data: currentVotes, isLoading: isCurrentLoading } = useGetVotesOnBlock(
+    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
     account?.address,
   )
 
-  const formatted = vot3Balance?.formatted ?? "-"
-  // Next-round delta accounts for both wallet VOT3 balance and deposit voting power
-  const currentVotingPowerForNextRoundWei =
-    BigInt(currentVot3Balance?.original ?? "0") + (currentDepositsVotes?.depositsVotesWei ?? 0n)
-  const votingPowerNextRound = currentVotingPowerForNextRoundWei - (votesAtSnapshot?.totalVotesWithDepositsWei ?? 0n)
+  const formatted = snapshotVotes ? (parseEther(snapshotVotes) === 0n ? "0" : humanNumber(snapshotVotes)) : "-"
 
-  const allLoading = isLoading || isCurrentVot3BalanceLoading || isCurrentDepositsVotesLoading
+  const votingPowerNextRound = useMemo(() => {
+    if (!snapshotVotes || !currentVotes) return 0n
+    return parseEther(currentVotes) - parseEther(snapshotVotes)
+  }, [snapshotVotes, currentVotes])
+
+  const allLoading = isSnapshotBlockLoading || isBestBlockLoading || isSnapshotLoading || isCurrentLoading
 
   return (
     <>
@@ -70,6 +78,7 @@ export const VotingPowerBox = () => {
                   size="sm"
                   rounded="md">
                   <Trans
+                    parent="span"
                     i18nKey="<bold>{{sign}}{{votingPowerNextRound}}</bold> in next round"
                     values={{
                       sign: votingPowerNextRound > 0n ? "+" : "",
@@ -78,6 +87,7 @@ export const VotingPowerBox = () => {
                     components={{
                       bold: (
                         <Text
+                          key="bold"
                           color={votingPowerNextRound > 0n ? "status.positive.strong" : "status.negative.strong"}
                           as="span"
                         />
@@ -96,6 +106,7 @@ export const VotingPowerBox = () => {
         formatted={formatted}
         votingPowerNextRound={votingPowerNextRound}
         isLoading={allLoading}
+        isDelegated={isDelegated}
       />
     </>
   )

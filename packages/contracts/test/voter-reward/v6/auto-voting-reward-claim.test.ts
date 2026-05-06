@@ -80,10 +80,6 @@ describe("VoterRewards V6 - @shard10b", function () {
       await emissions.connect(minterAccount).start()
     })
 
-    it("should return the correct version", async function () {
-      expect(await voterRewards.version()).to.equal("6")
-    })
-
     it("should take a fee when a relayer claims for a user with auto-voting enabled", async function () {
       // Create a test app
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
@@ -564,7 +560,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       // Check that expected actions reduction event is emitted
       await expect(castVoteTx)
         .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
-        .withArgs(roundId, 1, reducedTotalActions, reducedTotalWeightedActions)
+        .withArgs(roundId, 2, reducedTotalActions, reducedTotalWeightedActions)
 
       expect(await relayerRewardsPool.totalActions(roundId)).to.equal(reducedTotalActions)
       expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(reducedTotalWeightedActions)

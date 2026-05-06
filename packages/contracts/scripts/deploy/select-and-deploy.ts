@@ -27,6 +27,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "b3tr-multi-sig",
     description: "Deploy only this contract",
   },
+  Challenges: {
+    name: "b3tr-challenges",
+    description: "Deploy only this contract",
+  },
   XAllocationVoting: {
     name: "x-allocation-voting",
     description: "Deploy only this contract",
@@ -41,6 +45,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
   },
   "Dynamic Base Allocation Pool": {
     name: "dba-pool",
+    description: "Deploy only this contract",
+  },
+  "Navigator Registry": {
+    name: "navigator-registry",
     description: "Deploy only this contract",
   },
 } as const
@@ -97,6 +105,13 @@ async function deployContract() {
         // Run the upgrade script
         execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
         break
+      case "b3tr-challenges":
+        console.log("Deploying Challenges")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
       case "x-allocation-voting":
         console.log("Deploying XAllocationVoting")
         // Set environment variables
@@ -125,6 +140,13 @@ async function deployContract() {
         break
       case "dba-pool":
         console.log("Deploying Dynamic Base Allocation Pool")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
+      case "navigator-registry":
+        console.log("Deploying Navigator Registry")
         // Set environment variables
         process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
         // Run the upgrade script

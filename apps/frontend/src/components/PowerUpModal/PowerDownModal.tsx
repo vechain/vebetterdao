@@ -1,26 +1,40 @@
 "use client"
 
-import { Button, Card, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/vechain-kit"
-import { InfoCircle, WarningTriangle } from "iconoir-react"
-import { useCallback, useEffect, useState } from "react"
+import { Button, Card, Checkbox, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
+import { useVechainDomain, useWallet, useThor } from "@vechain/vechain-kit"
+import { InfoCircle, NavArrowRight, WarningTriangle } from "iconoir-react"
+import NextLink from "next/link"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { LuUsers } from "react-icons/lu"
 import { parseEther } from "viem"
 
 import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { buildConvertVot3Tx } from "@/api/contracts/vot3/utils/buildConvertVot3Tx"
+import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
-import { useConvertVot3 } from "@/hooks/useConvertVot3"
+import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { buildClause } from "@/utils/buildClause"
+import { removingExcessDecimals } from "@/utils/MathUtils/MathUtils"
 
 import { PowerDownB3trSummary } from "./PowerDownB3trSummary"
 import { handleAmountInput } from "./utils"
 
 const compactFormatter = getCompactFormatter(4)
+const GAS_PADDING = 0.05
+const NavigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
 
 type Props = {
   isOpen: boolean
@@ -30,49 +44,128 @@ type Props = {
 export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const thor = useThor()
   const { isTxModalOpen } = useTransactionModal()
   const [amount, setAmount] = useState("")
+  const [includeDelegated, setIncludeDelegated] = useState(false)
 
   useEffect(() => {
-    if (isOpen) setAmount("")
+    if (isOpen) {
+      setAmount("")
+      setIncludeDelegated(false)
+    }
   }, [isOpen])
 
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
+  const { data: unlockedVot3Balance } = useGetVot3UnlockedBalance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
+  const { data: delegatedAmount } = useGetDelegatedAmount(account?.address ?? undefined)
   const { data: bestBlock } = useBestBlockCompressed()
   const { data: currentVotingPower } = useTotalVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) : undefined,
+    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
     account?.address,
   )
 
-  // It can happen that a user converts B3TR to VOT3 then transfers VOT3 to another account.
-  // In this case, the available balance is less then the "convertedB3trOf", so using swappableVot3Balance would revert the transaction.
-  // There are also cases where a user receives VOT3 from another account, so the available balance is more than the "convertedB3trOf",
-  // so using vot3Balance would revert the transaction.
-  const vot3Original = BigInt(vot3Balance?.original || "0")
+  const delegatedLocked = delegatedAmount?.raw ?? 0n
+  const isDelegated = delegatedLocked > 0n
+  const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
+  const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
+  const { data: domainData } = useVechainDomain(navigatorAddress ?? "")
+  const navigatorDisplayName =
+    navigatorAddress && domainData?.domain
+      ? humanDomain(domainData.domain, 15, 10)
+      : navigatorAddress
+        ? humanAddress(navigatorAddress, 6, 4)
+        : ""
+  const unlockedOriginal = BigInt(unlockedVot3Balance?.original || "0")
   const swappableOriginal = BigInt(swappableVot3Balance?.original || "0")
-  const availableBalanceOriginal = vot3Original > swappableOriginal ? swappableOriginal : vot3Original
 
-  const availableBalance =
-    availableBalanceOriginal === swappableOriginal
-      ? (swappableVot3Balance?.scaled ?? "0")
-      : (vot3Balance?.scaled ?? "0")
+  // When includeDelegated is checked, use full balance (unlocked + delegated); otherwise only unlocked.
+  // Always cap by swappable (convertedB3trOf) to avoid revert on convertToB3TR.
+  const walletOriginal = includeDelegated ? BigInt(vot3Balance?.original || "0") : unlockedOriginal
+  const availableBalanceOriginal = walletOriginal > swappableOriginal ? swappableOriginal : walletOriginal
 
-  const showTransferredVOT3Warning = vot3Original > swappableOriginal
+  const availableBalance = useMemo(() => {
+    if (availableBalanceOriginal === swappableOriginal) return swappableVot3Balance?.scaled ?? "0"
+    if (includeDelegated) return vot3Balance?.scaled ?? "0"
+    return unlockedVot3Balance?.scaled ?? "0"
+  }, [
+    availableBalanceOriginal,
+    swappableOriginal,
+    swappableVot3Balance,
+    vot3Balance,
+    unlockedVot3Balance,
+    includeDelegated,
+  ])
+
+  const showTransferredVOT3Warning = walletOriginal > swappableOriginal
   const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
+
+  const amountWei = useMemo(() => {
+    const trimmed = removingExcessDecimals(amount)
+    if (!trimmed || trimmed === "0" || trimmed === ".") return 0n
+    try {
+      return parseEther(trimmed)
+    } catch {
+      return 0n
+    }
+  }, [amount])
+  const fromNavigatorWei = includeDelegated && amountWei > unlockedOriginal ? amountWei - unlockedOriginal : 0n
+  const fromBalanceWei = amountWei - fromNavigatorWei
+  const isFullyExitingDelegation = includeDelegated && isDelegated && fromNavigatorWei >= delegatedLocked
+
+  const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress
+
+  const clauseBuilder = useCallback(() => {
+    const contractAmount = removingExcessDecimals(amount)
+    if (!contractAmount || contractAmount === "0") throw new Error("amount is required")
+
+    const amountWei = parseEther(contractAmount)
+    const clauses = []
+
+    // If the convert amount exceeds unlocked balance, free delegation first
+    if (includeDelegated && delegatedLocked > 0n && amountWei > unlockedOriginal) {
+      const amountToFree = amountWei - unlockedOriginal
+      if (amountToFree >= delegatedLocked) {
+        clauses.push(
+          buildClause({
+            to: navigatorRegistryAddress,
+            contractInterface: NavigatorRegistryInterface,
+            method: "undelegate",
+            args: [],
+            comment: "Fully undelegate from navigator",
+          }),
+        )
+      } else {
+        clauses.push(
+          buildClause({
+            to: navigatorRegistryAddress,
+            contractInterface: NavigatorRegistryInterface,
+            method: "reduceDelegation",
+            args: [amountToFree],
+            comment: `Reduce delegation by ${amountToFree} VOT3`,
+          }),
+        )
+      }
+    }
+
+    clauses.push(buildConvertVot3Tx(thor, contractAmount))
+    return clauses
+  }, [amount, includeDelegated, delegatedLocked, unlockedOriginal, navigatorRegistryAddress, thor])
 
   const handleSuccess = useCallback(() => {
     onClose()
   }, [onClose])
 
-  const convertVot3Mutation = useConvertVot3({
-    amount,
+  const convertMutation = useBuildTransaction({
+    clauseBuilder,
+    onSuccess: handleSuccess,
     transactionModalCustomUI: {
       waitingConfirmation: { title: t("Powering down...") },
       success: { title: t("Power down complete!") },
       error: { title: t("Power down failed") },
     },
-    onSuccess: handleSuccess,
+    gasPadding: GAS_PADDING,
   })
 
   const invalidAmount =
@@ -80,20 +173,68 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
 
   const handleConfirm = () => {
     if (invalidAmount) return
-    convertVot3Mutation.resetStatus()
-    convertVot3Mutation.sendTransaction()
+    convertMutation.resetStatus()
+    convertMutation.sendTransaction()
   }
 
   return (
     <BaseModal
       isOpen={isOpen && !isTxModalOpen}
       onClose={onClose}
-      modalProps={{ closeOnInteractOutside: true }}
-      modalContentProps={{ maxW: "500px" }}>
-      <VStack gap={5} w="full">
-        <Heading size="xl" textAlign="center" fontWeight="bold" data-testid={"tx-modal-title"}>
-          {t("Reduce your Voting Power")}
+      showCloseButton
+      modalProps={{ closeOnInteractOutside: true }}>
+      <VStack gap={5} w="full" align="stretch">
+        <Heading size="xl" fontWeight="bold" data-testid={"tx-modal-title"}>
+          {isDelegated && !includeDelegated ? t("Convert to B3TR") : t("Reduce your Voting Power")}
         </Heading>
+
+        {isDelegated && (
+          <VStack gap={1} w="full">
+            <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+              <Checkbox.Root
+                checked={includeDelegated}
+                onCheckedChange={e => setIncludeDelegated(!!e.checked)}
+                gap={3}
+                alignItems="center">
+                <Checkbox.HiddenInput />
+                <Checkbox.Control mt="0.5" />
+                <Checkbox.Label>
+                  <Text textStyle="xs" color="text.subtle">
+                    {t("Also withdraw from my navigator delegation")}
+                  </Text>
+                </Checkbox.Label>
+              </Checkbox.Root>
+            </Card.Root>
+
+            {includeDelegated && navigatorAddress && navigatorData && (
+              <NextLink href={`/navigators/${navigatorAddress}`} onClick={onClose} style={{ width: "100%" }}>
+                <HStack
+                  gap={3}
+                  w="full"
+                  bg="card.default"
+                  border="1px solid"
+                  borderColor="border.secondary"
+                  borderRadius="2xl"
+                  p={4}
+                  cursor="pointer">
+                  <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
+                  <VStack gap={0} align="start" flex={1}>
+                    <Text textStyle="sm" fontWeight="semibold">
+                      {navigatorDisplayName}
+                    </Text>
+                    <HStack gap={2}>
+                      <LuUsers size={12} />
+                      <Text textStyle="xs" color="fg.muted">
+                        {t("{{count}} citizens", { count: navigatorData.citizenCount })}
+                      </Text>
+                    </HStack>
+                  </VStack>
+                  <Icon as={NavArrowRight} boxSize="5" color="fg.muted" />
+                </HStack>
+              </NextLink>
+            )}
+          </VStack>
+        )}
 
         <VStack
           bg="card.default"
@@ -101,7 +242,6 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
           borderColor="border.secondary"
           borderRadius="2xl"
           p={4}
-          mt={2}
           gap={2}
           align="start"
           w="full">
@@ -153,16 +293,20 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
                   </Text>
                 </HStack>
                 <Text textStyle="xs" color="text.subtle">
-                  {t("Available:")} {compactFormatter.format(Number(availableBalance))}
+                  {t("Available: {{amount}}", { amount: compactFormatter.format(Number(availableBalance)) })}
                 </Text>
               </VStack>
             </HStack>
           </Field.Root>
         </VStack>
 
-        <PowerDownB3trSummary amount={amount} isHighlighted />
-
-        {/* <PowerUpSummary mode="power-down" amount={amount} /> */}
+        <PowerDownB3trSummary
+          amount={amount}
+          isHighlighted
+          fromBalanceWei={fromBalanceWei}
+          fromNavigatorWei={fromNavigatorWei}
+          isFullyExitingDelegation={isFullyExitingDelegation}
+        />
 
         {showTransferredVOT3Warning && (
           <Text textStyle="xs" color="text.subtle">

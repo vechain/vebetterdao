@@ -38,6 +38,12 @@ export type ContractsConfig = {
   X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: number
   X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: number
 
+  // Challenges
+  CHALLENGES_MAX_DURATION: number
+  CHALLENGES_MAX_SELECTED_APPS: number
+  CHALLENGES_MAX_PARTICIPANTS: number
+  CHALLENGES_MIN_BET_AMOUNT: bigint
+
   CONTRACTS_ADMIN_ADDRESS: string
 
   VOTE_2_EARN_POOL_ADDRESS: string
@@ -82,6 +88,7 @@ export type ContractsConfig = {
   CREATOR_NFT_URI: string
 
   X2EARN_NODE_COOLDOWN_PERIOD: number
+  X2EARN_ENDORSEMENT_SCORE_THRESHOLD: number
 
   MULTI_SIG_SIGNERS: string[]
 
@@ -90,6 +97,13 @@ export type ContractsConfig = {
 
   GM_MULTIPLIERS_V2: number[]
   VOTER_REWARDS_LEVELS_V2: number[]
+
+  // Rewards Multipliers (basis points, 10000 = 1x)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER1: number // Updated this round (default: 30000 = x3)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER2: number // Updated within 2 rounds (default: 20000 = x2)
+  VOTER_REWARDS_FRESHNESS_MULTIPLIER_TIER3: number // No update >= 3 rounds (default: 10000 = x1)
+  VOTER_REWARDS_INTENT_MULTIPLIER_FOR_AGAINST: number // For/Against vote (default: 10000 = x1)
+  VOTER_REWARDS_INTENT_MULTIPLIER_ABSTAIN: number // Abstain vote (default: 3000 = x0.30)
 
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
 
@@ -108,4 +122,18 @@ export type ContractsConfig = {
 
   // DBA distribution start round
   DBA_DISTRIBUTION_START_ROUND: number
+
+  // Navigator Registry
+  NAVIGATOR_MIN_STAKE: bigint // minimum B3TR to register (default: 50000e18)
+  NAVIGATOR_MAX_STAKE_PERCENTAGE: number // max stake as basis points of VOT3 supply (default: 100 = 1%)
+  NAVIGATOR_FEE_LOCK_PERIOD: number // rounds before fees claimable (default: 4)
+  NAVIGATOR_FEE_PERCENTAGE: number // navigator fee in basis points (default: 2000 = 20%)
+  NAVIGATOR_EXIT_NOTICE_PERIOD: number // rounds of notice before exit takes effect (default: 1)
+  NAVIGATOR_REPORT_INTERVAL: number // rounds between required reports (default: 2)
+  NAVIGATOR_MINOR_SLASH_PERCENTAGE: number // minor slash in basis points (default: 500 = 5%)
+  NAVIGATOR_PREFERENCE_CUTOFF_PERIOD: number // blocks before round deadline (default: 8640 = ~24hr)
+
+  // Navigator skip windows (blocks before round/proposal deadline when relayers can skip navigator votes)
+  XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS: number // XAllocationVoting skip window (default: 720 = ~2hr)
+  B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS: number // B3TRGovernor skip window (default: 720 = ~2hr)
 }

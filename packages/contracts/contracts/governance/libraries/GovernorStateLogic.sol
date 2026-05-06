@@ -56,32 +56,28 @@ library GovernorStateLogic {
 
   /**
    * @notice Retrieves the current state of a proposal.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @return The current state of the proposal.
    */
   function state(
-    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
-  ) external view returns (GovernorTypes.ProposalState) {
-    return _state(self, proposalId);
+  ) external view returns (uint8) {
+    return uint8(_state(proposalId));
   }
 
   /** ------------------ INTERNAL FUNCTIONS ------------------ **/
 
   /**
    * @dev Internal function to validate the current state of a proposal against expected states.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @param allowedStates The bitmap of allowed states.
    * @return The current state of the proposal.
    */
   function validateStateBitmap(
-    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId,
     bytes32 allowedStates
   ) internal view returns (GovernorTypes.ProposalState) {
-    GovernorTypes.ProposalState currentState = _state(self, proposalId);
+    GovernorTypes.ProposalState currentState = _state(proposalId);
     if (encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
       revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
     }
@@ -100,17 +96,16 @@ library GovernorStateLogic {
   /**
    * @notice Retrieves the current state of a proposal.
    * @dev See {IB3TRGovernor-state}.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposalId The ID of the proposal.
    * @return The current state of the proposal.
    */
   function _state(
-    GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (GovernorTypes.ProposalState) {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     // Load the proposal into memory
-    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
-    GovernorTypes.ProposalDevelopmentState proposalDevelopmentState = self.proposalDevelopmentState[proposalId];
+    GovernorTypes.ProposalCore storage proposal = $.proposals[proposalId];
+    GovernorTypes.ProposalDevelopmentState proposalDevelopmentState = $.proposalDevelopmentState[proposalId];
     bool proposalExecuted = proposal.executed;
     bool proposalCanceled = proposal.canceled;
 
@@ -135,30 +130,30 @@ library GovernorStateLogic {
     }
 
     // Check if the proposal is pending
-    if (self.xAllocationVoting.currentRoundId() < proposal.roundIdVoteStart) {
+    if ($.xAllocationVoting.currentRoundId() < proposal.roundIdVoteStart) {
       return GovernorTypes.ProposalState.Pending;
     }
 
-    uint256 currentTimepoint = GovernorClockLogic.clock(self);
-    uint256 deadline = GovernorProposalLogic._proposalDeadline(self, proposalId);
+    uint256 currentTimepoint = GovernorClockLogic.clock();
+    uint256 deadline = GovernorProposalLogic._proposalDeadline(proposalId);
 
-    if (!GovernorDepositLogic.proposalDepositReached(self, proposalId)) {
+    if (!GovernorDepositLogic.proposalDepositReached(proposalId)) {
       return GovernorTypes.ProposalState.DepositNotMet;
     }
 
     if (deadline >= currentTimepoint) {
       return GovernorTypes.ProposalState.Active;
     } else if (
-      !GovernorQuorumLogic.quorumReached(self, proposalId) || !GovernorVotesLogic.voteSucceeded(self, proposalId)
+      !GovernorQuorumLogic.quorumReached(proposalId) || !GovernorVotesLogic.voteSucceeded(proposalId)
     ) {
       return GovernorTypes.ProposalState.Defeated;
-    } else if (GovernorProposalLogic.proposalEta(self, proposalId) == 0) {
+    } else if (GovernorProposalLogic.proposalEta(proposalId) == 0) {
       return GovernorTypes.ProposalState.Succeeded;
     } else {
-      bytes32 queueid = self.timelockIds[proposalId];
-      if (self.timelock.isOperationPending(queueid)) {
+      bytes32 queueid = $.timelockIds[proposalId];
+      if ($.timelock.isOperationPending(queueid)) {
         return GovernorTypes.ProposalState.Queued;
-      } else if (self.timelock.isOperationDone(queueid)) {
+      } else if ($.timelock.isOperationDone(queueid)) {
         return GovernorTypes.ProposalState.Executed;
       } else {
         return GovernorTypes.ProposalState.Canceled;

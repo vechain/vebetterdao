@@ -6,14 +6,14 @@ import { Trans, useTranslation } from "react-i18next"
 
 import { VOTING_POWER_DOCS_LINK } from "@/constants/links"
 
-import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "../../../../hooks/useGetVot3UnlockedBalance"
 
 export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: () => void }) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
   const { open: openWalletModal } = useWalletModal()
-  const { data: userVot3Balance } = useGetVot3Balance(account?.address)
+  const { data: userVot3Balance } = useGetVot3UnlockedBalance(account?.address)
   const userHasNoTokens = useMemo(() => {
     return userVot3Balance?.original === "0"
   }, [userVot3Balance])

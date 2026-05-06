@@ -22,6 +22,7 @@ export type ContractName =
   | "GrantsManager"
   | "DBAPool"
   | "RelayerRewardsPool"
+  | "NavigatorRegistry"
 
 export const PROXY_ABI = ["event Upgraded(address indexed implementation)"]
 
@@ -48,6 +49,7 @@ export function getAllContracts(config: AppConfig): Array<{ proxy: string; name:
     { proxy: config.grantsManagerContractAddress, name: "GrantsManager" },
     { proxy: config.dbaPoolContractAddress, name: "DBAPool" },
     { proxy: config.relayerRewardsPoolContractAddress, name: "RelayerRewardsPool" },
+    { proxy: config.navigatorRegistryContractAddress, name: "NavigatorRegistry" },
   ]
 }
 
@@ -102,7 +104,12 @@ export function findArtifactFile(dir: string, contractName: string): string | nu
     const entries = fs.readdirSync(dir, { withFileTypes: true })
 
     for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name)
+      const resolvedDir = path.resolve(dir)
+      const fullPath = path.resolve(resolvedDir, entry.name)
+      const relative = path.relative(resolvedDir, fullPath)
+      if (relative.startsWith("..") || path.isAbsolute(relative)) {
+        continue
+      }
 
       if (entry.isDirectory()) {
         // Recursively search subdirectories
@@ -474,21 +481,36 @@ export function copySourceFiles(metadata: any, tempDir: string, contractsBaseDir
       continue
     }
 
-    let sourceFilePath: string
+    let sourceFilePath: string | undefined
 
     if (path.isAbsolute(sourcePath)) {
       sourceFilePath = sourcePath
     } else {
       const { packageDir } = getProjectPaths()
-      const possiblePaths = [
-        path.join(packageDir, sourcePath),
-        path.join(contractsBaseDir, sourcePath),
-        sourcePath.startsWith("contracts/")
-          ? path.join(contractsBaseDir, sourcePath.replace(/^contracts\//, ""))
-          : null,
-      ].filter(Boolean) as string[]
+      const resolvedContractsBaseDir = path.resolve(contractsBaseDir)
+      const possiblePath1 = path.resolve(packageDir, sourcePath)
+      const possiblePath2 = path.resolve(contractsBaseDir, sourcePath)
+      const possiblePath3 = sourcePath.startsWith("contracts/")
+        ? path.resolve(contractsBaseDir, sourcePath.replace(/^contracts\//, ""))
+        : null
+      const possiblePaths = [possiblePath1, possiblePath2, possiblePath3].filter(Boolean) as string[]
 
-      sourceFilePath = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0]
+      for (const p of possiblePaths) {
+        const rel = path.relative(resolvedContractsBaseDir, p)
+        if (!rel.startsWith("..") && !path.isAbsolute(rel)) {
+          if (fs.existsSync(p)) {
+            sourceFilePath = p
+            break
+          }
+        }
+      }
+      if (sourceFilePath === undefined && possiblePaths.length > 0) {
+        sourceFilePath = possiblePaths[0]
+      }
+    }
+
+    if (!sourceFilePath) {
+      continue
     }
 
     if (fs.existsSync(sourceFilePath)) {
@@ -522,9 +544,14 @@ export async function submitVerification(
 
     const sources: Record<string, string> = {}
     for (const file of copiedFiles) {
-      const filePath = path.join(tempDir, file)
-      if (fs.existsSync(filePath)) {
-        sources[file] = fs.readFileSync(filePath, "utf8")
+      const base = path.resolve(tempDir)
+      const target = path.resolve(base, file)
+      const relative = path.relative(base, target)
+      if (relative.startsWith("..") || path.isAbsolute(relative)) {
+        throw new Error("Invalid file path")
+      }
+      if (fs.existsSync(target)) {
+        sources[file] = fs.readFileSync(target, "utf8")
       }
     }
 

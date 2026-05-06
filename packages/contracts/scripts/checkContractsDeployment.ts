@@ -56,12 +56,14 @@ export async function overrideLocalConfigWithNewContracts(contracts: Awaited<Ret
     x2EarnCreatorContractAddress: await contracts.x2EarnCreator.getAddress(),
     nodeManagementContractAddress: await contracts.vechainNodeManagement.getAddress(),
     veBetterPassportContractAddress: await contracts.veBetterPassport.getAddress(),
+    challengesContractAddress: await contracts.b3trChallenges.getAddress(),
     grantsManagerContractAddress: await contracts.grantsManager.getAddress(),
     dbaPoolContractAddress: await contracts.dynamicBaseAllocationPool.getAddress(),
     stargateContractAddress: await contracts.stargate.getAddress(),
     stargateNFTContractAddress: await contracts.stargateNFT.getAddress(),
     tokenAuctionContractAddress: await contracts.vechainNodesMock.getAddress(),
     relayerRewardsPoolContractAddress: await contracts.relayerRewardsPool.getAddress(),
+    navigatorRegistryContractAddress: await contracts.navigatorRegistry.getAddress(),
     b3trGovernorLibraries: {
       governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
       governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),
@@ -94,6 +96,9 @@ export async function overrideLocalConfigWithNewContracts(contracts: Awaited<Ret
   switch (env) {
     case AppEnv.LOCAL:
       fileToWrite = "local.ts"
+      break
+    case AppEnv.E2E:
+      fileToWrite = "e2e.ts"
       break
     case AppEnv.TESTNET_STAGING:
       fileToWrite = "testnet-staging.ts"

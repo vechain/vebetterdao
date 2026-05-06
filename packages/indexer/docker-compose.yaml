@@ -1,0 +1,138 @@
+services:
+  mongo-node1:
+    image: mongo:8
+    container_name: mongo-node1
+    hostname: mongo-node1
+    command: mongod --replSet rs0 --bind_ip_all --port 27017
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok } catch(e) { 0 }
+        " | grep -q 1
+      interval: 5s
+      retries: 30
+    networks:
+      - vechain-thor
+
+  mongo-setup:
+    image: mongo:8
+    container_name: mongo-setup
+    depends_on:
+      mongo-node1:
+        condition: service_started
+    entrypoint:
+      - bash
+      - -c
+      - |
+        sleep 3
+        mongosh --host mongo-node1:27017 --quiet --eval '
+          rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongo-node1:27017" }] });
+        ' || true
+        sleep 2
+        mongosh --host mongo-node1:27017 --quiet --eval '
+          while (!rs.isMaster().ismaster) { sleep(1000); }
+          print("mongo-setup done");
+        '
+    restart: "no"
+    networks:
+      - vechain-thor
+
+  vechain-indexer:
+    image: ghcr.io/vechain/vechain-indexer/indexer:pr.1231.bb4e7bf
+    container_name: vechain-indexer
+    depends_on:
+      mongo-setup:
+        condition: service_completed_successfully
+    volumes:
+      - ./genesis-vet-balances-solo.json:/usr/app/genesis-solo.json:ro
+    environment:
+      MONGO_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
+      SPRING_PROFILES_ACTIVE: "indexer,nfts,transactions,transfers,history,stargate,b3tr,explorer,token-reward,delegation,accounts,contracts"
+      THOR_URL: "http://thor-solo:8669"
+      INDEXER_GENESIS_VET_BALANCES_RESOURCE: "file:/usr/app/genesis-solo.json"
+      B3TR_CONTRACT: "${B3TR_CONTRACT}"
+      VOT3_CONTRACT: "${VOT3_CONTRACT}"
+      EMISSIONS_CONTRACT: "${EMISSIONS_CONTRACT}"
+      B3TR_GOVERNOR_CONTRACT: "${B3TR_GOVERNOR_CONTRACT}"
+      B3TR_DBA_POOL_CONTRACT: "${B3TR_DBA_POOL_CONTRACT}"
+      GM_NFT_CONTRACT: "${GM_NFT_CONTRACT}"
+      X_ALLOC_VOTING_CONTRACT: "${X_ALLOC_VOTING_CONTRACT}"
+      CHALLENGES_CONTRACT: "${CHALLENGES_CONTRACT}"
+      X_ALLOC_POOL_CONTRACT: "${X_ALLOC_POOL_CONTRACT}"
+      X2EARN_REWARDS_POOL_CONTRACT: "${X2EARN_REWARDS_POOL_CONTRACT}"
+      VOTER_REWARDS_CONTRACT: "${VOTER_REWARDS_CONTRACT}"
+      TREASURY_CONTRACT: "${TREASURY_CONTRACT}"
+      STARGATE_NFT_CONTRACT: "${STARGATE_NFT_CONTRACT}"
+      STARGATE_DELEGATION_CONTRACT: "${STARGATE_DELEGATION_CONTRACT}"
+      NAVIGATOR_REGISTRY_CONTRACT: "${NAVIGATOR_REGISTRY_CONTRACT}"
+      INDEXER_START_BLOCK_NFTS: 0
+      INDEXER_START_BLOCK_NFT_BLACKLIST: 0
+      INDEXER_START_BLOCK_TRANSFERS: 0
+      INDEXER_START_BLOCK_TRANSACTIONS: 0
+      INDEXER_START_BLOCK_HISTORY: 0
+      INDEXER_START_BLOCK_STARGATE: 0
+      INDEXER_START_BLOCK_VEVOTE: 0
+      INDEXER_START_BLOCK_HISTORIC_PROPOSALS: 0
+      INDEXER_START_BLOCK_B3TR: 0
+      INDEXER_START_BLOCK_B3TR_CHALLENGES: 0
+      INDEXER_START_BLOCK_B3TR_PROPOSAL: 0
+      INDEXER_START_BLOCK_B3TR_X_ALLOC_RESULT: 0
+      INDEXER_START_BLOCK_B3TR_SUSTAINABLE_ACTIONS: 0
+    networks:
+      - vechain-thor
+
+  vechain-indexer-api:
+    image: ghcr.io/vechain/vechain-indexer/api:pr.1231.bb4e7bf
+    container_name: vechain-indexer-api
+    depends_on:
+      mongo-setup:
+        condition: service_completed_successfully
+    environment:
+      MONGO_URI: "mongodb://mongo-node1:27017/vechain-indexer?replicaSet=rs0"
+      SPRING_PROFILES_ACTIVE: "nfts,transactions,transfers,history,stargate,b3tr,explorer,delegation,accounts"
+      THOR_URL: "http://thor-solo:8669"
+      CHALLENGES_CONTRACT: "${CHALLENGES_CONTRACT}"
+    ports:
+      - "8089:8080"
+    networks:
+      - vechain-thor
+
+  block-explorer:
+    image: ghcr.io/vechain/block-explorer:latest
+    container_name: block-explorer
+    hostname: block-explorer
+    environment:
+      - ALLOW_DEV_MODE=true
+      - SOLO_B3TR_ADDRESS=${B3TR_CONTRACT}
+      - SOLO_VOT3_ADDRESS=${VOT3_CONTRACT}
+      - SOLO_STARGATE_NFT_ADDRESS=${STARGATE_NFT_CONTRACT}
+      - SOLO_STARGATE_DELEGATION_ADDRESS=${STARGATE_DELEGATION_CONTRACT}
+      - B32_URL=https://b32.vecha.in
+    ports:
+      - "8088:3000"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    depends_on:
+      vechain-indexer-api:
+        condition: service_started
+    networks:
+      - vechain-thor
+
+networks:
+  vechain-thor:
+    external: true
+
+volumes:
+  mongo-data:
+    driver: local
+    name: mongo-data

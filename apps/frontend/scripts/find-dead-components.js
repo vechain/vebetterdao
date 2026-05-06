@@ -54,7 +54,18 @@ if (requestedDirs.length === 0) {
   }
 }
 
-const targetDirs = requestedDirs.map(dir => normalizePath(path.resolve(projectRoot, dir))).sort()
+const targetDirs = requestedDirs
+  .map(dir => {
+    const resolvedBase = path.resolve(projectRoot)
+    const resolvedTarget = path.resolve(resolvedBase, dir)
+    const relativePath = path.relative(resolvedBase, resolvedTarget)
+    if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+      console.error("Invalid directory path")
+      process.exit(1)
+    }
+    return normalizePath(resolvedTarget)
+  })
+  .sort()
 
 const configPath = ts.findConfigFile(projectRoot, ts.sys.fileExists, "tsconfig.json")
 if (!configPath) {

@@ -4,9 +4,15 @@ import { useMemo, useState } from "react"
 import { A11y, Autoplay, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
+import { useNeededActionsSection } from "@/api/challenges/useChallengeSections"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { useUserPreferences } from "@/hooks/useUserPreferences"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
@@ -22,17 +28,20 @@ import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetD
 import { useUserBotSignals } from "../../../api/contracts/vePassport/hooks/useUserBotSignals"
 import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useCurrentRoundSnapshot } from "../../../api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useGetVot3UnlockedBalance } from "../../../hooks/useGetVot3UnlockedBalance"
 import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 import { ProposalFilter } from "../../../store/useProposalFilters"
 import { BannerStorageKey } from "../Banners/GenericBanner"
 
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
+import { ChallengeNeededActionsBanner } from "./components/ChallengeNeededActionsBanner"
 import { ClaimDepositsBanner } from "./components/ClaimDepositsBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
@@ -41,9 +50,12 @@ import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBann
 import { DelegatingBanner } from "./components/DelegatingBanner"
 import { DoActionBanner } from "./components/DoActionBanner/DoActionBanner"
 import { EntityBanner } from "./components/EntityBanner"
+import { FreshnessMultiplierBanner } from "./components/FreshnessMultiplierBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
+import { NavigatorsBanner } from "./components/NavigatorsBanner"
 import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
+import { UndelegatedVot3Banner } from "./components/UndelegatedVot3Banner"
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 import { NodeUpgradeModal } from "./modals/NodeUpgradeModal"
 
@@ -62,6 +74,13 @@ export const ActionBanner = () => {
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
   const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
+  const { data: currentRoundSnapshotBlock } = useCurrentRoundSnapshot()
+  const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, currentRoundSnapshotBlock)
+  const { data: isCurrentlyDelegated } = useIsDelegated(account?.address)
+  const { data: unlockedVot3Balance } = useGetVot3UnlockedBalance(account?.address)
+  const { data: currentNavigatorAddress = "" } = useGetNavigator(account?.address)
+  const { data: currentNavigatorData } = useNavigatorByAddress(currentNavigatorAddress ?? "")
+  const { data: minStakeData } = useGetMinStake()
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
 
@@ -78,6 +97,7 @@ export const ActionBanner = () => {
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
+  const neededActionsSection = useNeededActionsSection(account?.address)
 
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
@@ -144,10 +164,15 @@ export const ActionBanner = () => {
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0 && (preferences?.[BannerStorageKey.SHOW_NEW_APP] ?? true)
 
+  // Feature announcement banners
+  const showFreshnessMultiplierBanner = preferences?.[BannerStorageKey.SHOW_FRESHNESS_MULTIPLIER] ?? true
+  const showNavigatorsBanner = preferences?.[BannerStorageKey.SHOW_NAVIGATORS] ?? true
+
   // Claim tokens (VOT3 deposits) banner logic
   const { data: { totalClaimableDeposits, claimableDeposits } = { totalClaimableDeposits: 0, claimableDeposits: [] } } =
     useProposalClaimableUserDeposits(account?.address ?? "")
   const showClaimTokensBanner = totalClaimableDeposits > 0 && claimableDeposits.length > 0 && !!account?.address
+  const showChallengesNeededActionsBanner = !!account?.address && neededActionsSection.items.length > 0
 
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled
@@ -167,12 +192,13 @@ export const ActionBanner = () => {
   const showDelegatingBanner = !!account?.address && (isVeDelegated || hasAutoDeposit) && !isDelegateeLoading
   const showEntityBanner = !!account?.address && isEntity && !isLoadingAccountLinking
 
-  const showCastVoteBanner = !!account?.address && !isLoading && canUserVote
+  const showCastVoteBanner = !!account?.address && !isLoading && canUserVote && !isDelegatedToNavigator
 
   const showClaimB3trBanner =
     !!account?.address &&
     votingRewardsQuery.data?.claimableTotal &&
-    Number(votingRewardsQuery.data.claimableTotal) !== 0
+    Number(votingRewardsQuery.data.claimableTotal) !== 0 &&
+    !isDelegatedToNavigator
 
   // Creator NFT banners logic
   const showCreatorNftBannerPreference = preferences?.[BannerStorageKey.SHOW_CREATOR_NFT] ?? true
@@ -191,7 +217,16 @@ export const ActionBanner = () => {
     !submissionsLoading &&
     isLatestSubmissionOngoing
 
-  const showCastVoteInProposalBanners = !!account?.address && hasProposals && userCanVoteInProposals
+  const showCastVoteInProposalBanners =
+    !!account?.address && hasProposals && userCanVoteInProposals && !isDelegatedToNavigator
+
+  const showUndelegatedVot3Banner =
+    !!account?.address &&
+    isCurrentlyDelegated &&
+    Number(unlockedVot3Balance?.scaled ?? "0") >= 1 &&
+    currentNavigatorData?.status === "ACTIVE" &&
+    minStakeData != null &&
+    BigInt(currentNavigatorData?.stake ?? 0) >= minStakeData.raw
 
   //Show one of the banners explainining why the user can't vote
   // Only one of the following banners can be shown at a time
@@ -253,10 +288,15 @@ export const ActionBanner = () => {
         />,
       )
     if (showClaimTokensBanner) bannerComponents.push(<ClaimDepositsBanner key="claim-deposits" />)
+    if (showUndelegatedVot3Banner) bannerComponents.push(<UndelegatedVot3Banner key="undelegated-vot3" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
+    if (showChallengesNeededActionsBanner)
+      bannerComponents.push(<ChallengeNeededActionsBanner key="challenge-needed-actions" />)
     if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
+    if (showFreshnessMultiplierBanner) bannerComponents.push(<FreshnessMultiplierBanner key="freshness-multiplier" />)
+    if (showNavigatorsBanner) bannerComponents.push(<NavigatorsBanner key="navigators" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
@@ -268,10 +308,14 @@ export const ActionBanner = () => {
     votingRewardsQuery.data?.roundsRewards,
     votingRewardsQuery.data?.claimableTotalFormatted,
     gmRewards,
+    showUndelegatedVot3Banner,
     showClaimTokensBanner,
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
+    showFreshnessMultiplierBanner,
+    showNavigatorsBanner,
+    showChallengesNeededActionsBanner,
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,

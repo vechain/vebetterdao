@@ -6,6 +6,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                                                                   | Summary                                                                                                                                      |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 29 April 2026       | `NavigatorRegistry` version `1`, `B3TRGovernor` version `10`, `XAllocationVoting` version `9`, `VoterRewards` version `7`, `VOT3` version `2`, `RelayerRewardsPool` version `3` | Navigators: rewards multipliers (freshness + governance intent), navigator delegation system with B3TR staking (converted to VOT3 for voting power), citizen delegation, fees, slashing, relayer integration |
 | 17 February 2026    | `X2EarnApps` version `8`                                                                                                      | Flexible endorsement: partial points, multiple apps per node, configurable caps, migration support                                           |
 | 17 February 2026    | `B3TRGovernor` version `9`                                                                                                    | Added reason parameter to cancel function                                                                                                    |
 | 16 February 2026    | `XAllocationPool` version `7` (patch)                                                                                         | Fix allocations with zero votes                                                                                                              |
@@ -37,6 +38,86 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 | 4th September 2024  | `X2EarnRewardsPool` version `2`                                                                                               | - Added impact key management and proof building                                                                                             |
 | 31st August 2024    | `VoterRewards` version `2`                                                                                                    | - Added quadratic rewarding features                                                                                                         |
 | 29th August 2024    | `B3TRGovernor` version `2`                                                                                                    | Updated access control modifiers                                                                                                             |
+
+---
+
+## Navigators: `NavigatorRegistry` V1, `B3TRGovernor` V10, `XAllocationVoting` V9, `VoterRewards` V7, `VOT3` V2, `RelayerRewardsPool` V3
+
+Introduces the Navigator delegation system with rewards multipliers. Navigators are professional voting delegates who stake B3TR (converted to VOT3 for voting power) and vote on behalf of citizens.
+
+---
+
+### Changes
+
+- **New Contract:**
+  - `NavigatorRegistry.sol` version `1` — 6 external libraries: staking (B3TR-to-VOT3 conversion, checkpointed), delegation, voting preferences, fees, slashing, lifecycle
+
+- **Upgraded Contract(s):**
+  - `B3TRGovernor.sol` to version `10` — library architecture, `castNavigatorVote`, intent multiplier, skip-or-vote logic, staked amount in voting power
+  - `XAllocationVoting.sol` to version `9` — library architecture, `castNavigatorVote`, freshness multiplier, staked amount in voting power
+  - `VoterRewards.sol` to version `7` — multiplier checkpoints (freshness + intent), navigator fee deduction, CLAIM action for citizens
+  - `VOT3.sol` to version `2` — transfer lock for navigator delegation, B3TR/VOT3 conversion for staking
+  - `RelayerRewardsPool.sol` to version `3` — per-user skip tracking, governance action support, separated `governanceUsers`
+
+---
+
+### Storage Changes
+
+- **`NavigatorRegistry`**:
+  - `mapping(address => Checkpoints.Trace208) stakedAmount` — checkpointed staked amount (B3TR converted to VOT3)
+  - `mapping(address => Checkpoints.Trace208) citizenToNavigator` — citizen-to-navigator delegation
+  - `mapping(address => Checkpoints.Trace208) delegatedAmount` — citizen delegation amount
+  - `mapping(address => Checkpoints.Trace208) totalDelegatedToNavigator` — per-navigator total delegated
+  - `Checkpoints.Trace208 totalDelegatedCitizens` — global citizen count
+  - Fee escrow, slashing flags, lifecycle state, voting preferences/decisions
+
+- **`B3TRGovernor`** (V10):
+  - `INavigatorRegistry navigatorRegistry`, `IRelayerRewardsPool relayerRewardsPool`
+  - `mapping(uint256 => uint256[]) proposalsForRound`
+
+- **`VoterRewards`** (V7):
+  - 5 `Checkpoints.Trace208` traces for multiplier values
+  - `INavigatorRegistry navigatorRegistry`
+
+- **`VOT3`** (V2):
+  - `address navigatorRegistry`
+
+- **`RelayerRewardsPool`** (V3):
+  - Per-user skip tracking mappings, `activeProposalsForRound` cache
+
+---
+
+### New Features
+
+- **Rewards Multipliers:**
+  - Freshness multiplier (allocation): x3/x2/x1 based on how recently vote preferences changed
+  - Governance intent multiplier: x1 for For/Against, x0.30 for Abstain
+  - Both affect reward weight only, not on-chain voting power
+
+- **Navigator Staking with Voting Power:**
+  - Staked B3TR converted to VOT3 via `VOT3.convertToVOT3()`, counted as navigator voting power
+  - NavigatorRegistry self-delegates on VOT3 in `initialize()`
+  - `getStakedAmountAtTimepoint(navigator, timepoint)` for snapshot queries
+  - VotesUtils and GovernorVotesLogic include staked amount in `getVotes()`
+
+- **Navigator Delegation:**
+  - Citizens delegate specific VOT3 amounts (locked, checkpointed)
+  - One navigator per citizen, snapshotted at round start
+  - Lazy invalidation on exit/deactivation
+
+- **Voting:**
+  - `XAllocationVoting.castNavigatorVote(citizen, roundId)` with skip-or-vote logic
+  - `B3TRGovernor.castNavigatorVote(proposalId, citizen)` with skip-or-vote logic
+
+- **Fees & Slashing:**
+  - 20% navigator fee deducted at claim time, locked for 4 rounds
+  - 5 minor infraction types, at most one 5% slash per round
+  - Major slash via governance with fee forfeiture
+
+- **Relayer Integration:**
+  - Citizens counted in expected actions alongside auto-voters
+  - Per-user skip tracking prevents pool deadlock
+  - Governance votes earn relayer credit
 
 ---
 

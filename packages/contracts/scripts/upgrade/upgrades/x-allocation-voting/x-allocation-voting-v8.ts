@@ -4,6 +4,8 @@ import { EnvConfig } from "@repo/config/contracts"
 import { XAllocationVoting, RelayerRewardsPool } from "../../../../typechain-types"
 import { autoVotingLibraries } from "../../../libraries/autoVotingLibraries"
 import { ethers } from "hardhat"
+import { XAllocationVotingV8 } from "../../../../typechain-types/contracts/deprecated/V8"
+import { TransactionResponse } from "ethers"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -26,7 +28,7 @@ async function main() {
 
   const xAllocationVotingV8 = (await upgradeProxy(
     "XAllocationVotingV7",
-    "XAllocationVoting",
+    "XAllocationVotingV8",
     config.xAllocationVotingContractAddress,
     [],
     {
@@ -35,7 +37,7 @@ async function main() {
         AutoVotingLogic: await AutoVotingLogic.getAddress(),
       },
     },
-  )) as XAllocationVoting
+  )) as XAllocationVotingV8
 
   console.log(`XAllocationVoting upgraded`)
 
@@ -70,7 +72,7 @@ async function main() {
   await relayerRewardsPool
     .connect(deployer)
     .grantRole(POOL_ADMIN_ROLE, config.xAllocationVotingContractAddress)
-    .then(async tx => await tx.wait())
+    .then(async (tx: TransactionResponse) => await tx.wait())
 
   // Verify the role was granted successfully
   const hasRole = await relayerRewardsPool.hasRole(POOL_ADMIN_ROLE, config.xAllocationVotingContractAddress)

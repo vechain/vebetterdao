@@ -76,6 +76,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error GovernorInsufficientVotingPower();
 
   /**
+   * @dev The `voter` has voted for the same app multiple times in the same transaction.
+   */
+  error DuplicateAppVote();
+
+  /**
    * The `voter` is not identified as a person via the VeBetterPassport.
    */
   error GovernorPersonhoodVerificationFailed(address person, string reason);
@@ -105,6 +110,31 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev The `caller` is not valid
    */
   error InvalidCaller(address caller);
+
+  /**
+   * @dev Citizen is not delegated to any navigator
+   */
+  error NotDelegatedToNavigator(address citizen);
+
+  /**
+   * @dev Citizen is delegated to a navigator and cannot vote manually
+   */
+  error DelegatedToNavigator(address citizen);
+
+  /**
+   * @dev Navigator cannot enable auto-voting
+   */
+  error NavigatorCannotEnableAutoVoting(address navigator);
+
+  /**
+   * @dev Navigator has not set allocation preferences for the round
+   */
+  error NavigatorPreferencesNotSet(address navigator, uint256 roundId);
+
+  /**
+   * @dev The skip window (minimum time into the round before skips are allowed) has not been reached
+   */
+  error SkipWindowNotReached(uint256 roundId);
 
   /**
    * @dev Emitted when auto-voting is skipped.
@@ -149,43 +179,42 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   event PreferredAppsUpdated(address indexed account, bytes32[] apps);
 
   /**
-   * @notice module:core
-   * @dev Name of the governor instance (used in building the ERC712 domain separator).
+   * @dev Emitted when a navigator casts a vote on behalf of a delegated citizen
    */
-  function name() external view returns (string memory);
+  event NavigatorVoteCast(
+    address indexed citizen,
+    address indexed navigator,
+    uint256 indexed roundId,
+    bytes32[] appsIds,
+    uint256[] voteWeights
+  );
+
+  /**
+   * @dev Emitted when a navigator vote is skipped (navigator dead or no preferences set)
+   */
+  event NavigatorVoteSkipped(address indexed citizen, address indexed navigator, uint256 indexed roundId);
+
+  /**
+   * @dev Emitted when a freshness multiplier is applied to a vote.
+   * @param voter The voter address
+   * @param roundId The round in which the vote was cast
+   * @param fingerprint The XOR fingerprint of the voted apps
+   * @param lastChangedRound The round when the voter's fingerprint last changed
+   * @param multiplier The freshness multiplier applied (basis points, 10000 = 1x)
+   */
+  event FreshnessMultiplierApplied(
+    address indexed voter,
+    uint256 indexed roundId,
+    bytes32 fingerprint,
+    uint256 lastChangedRound,
+    uint256 multiplier
+  );
 
   /**
    * @notice module:core
    * @dev Version of the governor instance (used in building the ERC712 domain separator). Default: "1"
    */
   function version() external view returns (string memory);
-
-  /**
-   * @notice module:voting
-   * @dev A description of the possible `support` values for {castVote} and the way these votes are counted, meant to
-   * be consumed by UIs to show correct vote options and interpret the results. The string is a URL-encoded sequence of
-   * key-value pairs that each describe one aspect, for example `support=bravo&quorum=for,abstain`.
-   *
-   * There are 2 standard keys: `support` and `quorum`.
-   *
-   * - `support=bravo` refers to the vote options 0 = Against, 1 = For, 2 = Abstain, as in `GovernorBravo`.
-   * - `support=x-allocations` refers to the fractionalized vote for each x-application.
-   * - `quorum=bravo` means that only For votes are counted towards quorum.
-   * - `quorum=for,abstain` means that both For and Abstain votes are counted towards quorum.
-   * - `quorum=auto` means that the contract defines the logic for counting the quorum.
-   *
-   * If a counting module makes use of encoded `params`, it should  include this under a `params` key with a unique
-   * name that describes the behavior. For example:
-   *
-   * - `params=fractional` might refer to a scheme where votes are divided fractionally between for/against/abstain.
-   * - `params=erc721` might refer to a scheme where specific NFTs are delegated to vote.
-   *
-   * NOTE: The string can be decoded by the standard
-   * https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams[`URLSearchParams`]
-   * JavaScript class.
-   */
-  // solhint-disable-next-line func-name-mixedcase
-  function COUNTING_MODE() external view returns (string memory);
 
   /**
    * @notice module:core
@@ -207,12 +236,6 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * possible to cast a vote during this block.
    */
   function roundDeadline(uint256 roundId) external view returns (uint256);
-
-  /**
-   * @notice module:core
-   * @dev The account that created a round.
-   */
-  function roundProposer(uint256 roundId) external view returns (address);
 
   /**
    * @notice module:user-config
@@ -311,6 +334,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function toggleAutoVoting(address user) external;
 
   /**
+   * @dev Disable autovoting for a user. Called by NavigatorRegistry when a citizen delegates.
+   * @param user The address to disable autovoting for
+   */
+  function disableAutoVotingFor(address user) external;
+
+  /**
    * @dev Check if autovoting is enabled for an account
    * @param user The address to check
    * @return Whether autovoting is enabled for the account
@@ -398,14 +427,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    */
   function validatePersonhoodForCurrentRound(address account) external view returns (bool);
 
-  /**
-   * @dev Gets total voting power (voting power + deposit voting power) and validates it's greater than zero
-   */
-  function getAndValidateVotingPower(address account, uint256 timepoint) external view returns (uint256, bool);
-
-  /**
-   * @dev Get the total voting power (VOT3 tokens + deposits) for a voter at a given timepoint
-   */
+  /// @dev Deprecated: use getVotes instead, which now includes deposit voting power.
   function getTotalVotingPower(address voter, uint256 roundStart) external view returns (uint256);
 
   /**

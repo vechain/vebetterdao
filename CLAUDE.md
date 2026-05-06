@@ -30,7 +30,7 @@ Turborepo monorepo with:
 
 ## Frontend (`apps/frontend`)
 
-- Next.js 14 App Router with file-based routing
+- Next.js 16 App Router with file-based routing
 - API layer: `src/api/` - contract hooks in `src/api/contracts/`, indexer queries in `src/api/indexer/`
 - State: React Query for server state, Zustand for client state
 - VeChain integration: `@vechain/vechain-kit` with `useThor` hook (not deprecated `useConnex`)
@@ -99,8 +99,14 @@ Stop: `make solo-down` | Reset: `make solo-clean && make solo-up`
 
 ## Contracts
 
+See `packages/contracts/CLAUDE.md` for detailed smart contract rules (structure, upgrades, security, testing patterns).
+
 - `yarn contracts:compile`: Compile smart contracts
 - `yarn contracts:test`: Test contracts on hardhat network
+- **CRITICAL**: Contract tests MUST run against the Hardhat network, NOT Thor Solo. Always use `yarn contracts:test` or pass `--network hardhat` when running tests directly. Example for a single test file:
+  ```bash
+  cd packages/contracts && NEXT_PUBLIC_APP_ENV=local npx hardhat test test/navigator/NavigatorRegistry.test.ts --network hardhat
+  ```
 
 ## Code quality
 

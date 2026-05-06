@@ -1,9 +1,9 @@
 import { getConfig } from "@repo/config"
-import { XAllocationVotingGovernor__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVotingGovernor__factory"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress
-const abi = XAllocationVotingGovernor__factory.abi
+const abi = XAllocationVoting__factory.abi
 const method = "totalVotesQF" as const
 /**
  *  Returns the query key for fetching the number of quadratic funding votes for a given roundId.

@@ -1,25 +1,48 @@
 "use client"
 
-import { Button, Card, Field, Heading, HStack, Icon, Link, NumberInput, Text, VStack } from "@chakra-ui/react"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
+import { Button, Card, Checkbox, Field, Heading, HStack, Icon, Link, NumberInput, Text, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
+import { useUpgradeSmartAccountModal, useVechainDomain, useWallet, useThor } from "@vechain/vechain-kit"
 import { Clock, NavArrowRight, WarningTriangle } from "iconoir-react"
 import NextLink from "next/link"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { parseEther } from "viem"
+import { LuUsers } from "react-icons/lu"
+import { formatEther, parseEther } from "viem"
 
+import { getB3TrTokenDetailsQueryKey } from "@/api/contracts/b3tr/hooks/useB3trTokenDetails"
+import { buildB3trApprovesTx } from "@/api/contracts/b3tr/utils/buildB3trApprovesTx"
+import { getVotesOnBlockPrefixQueryKey } from "@/api/contracts/governance/hooks/useVotesOnBlock"
+import { getGetDelegatedAmountQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { buildConvertB3trTx } from "@/api/contracts/vot3/utils/buildConvertB3trTx"
+import { buildDelegateVot3Tx } from "@/api/contracts/vot3/utils/buildDelegateVot3Tx"
+import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
-import { useConvertB3tr } from "@/hooks/useConvertB3tr"
-import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
+import { useBuildTransaction } from "@/hooks/useBuildTransaction"
+import { useGetB3trBalance, getB3trBalanceQueryKey } from "@/hooks/useGetB3trBalance"
+import { getVot3BalanceQueryKey } from "@/hooks/useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey } from "@/hooks/useGetVot3UnlockedBalance"
 import { useSmartAccountUpgradeRequired } from "@/hooks/vechainKitHooks/useSmartAccountUpgradeRequired"
+import { useVot3RequireSelfDelegation } from "@/hooks/vechainKitHooks/useVot3RequireSelfDelegation"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { buildClause } from "@/utils/buildClause"
+import { removingExcessDecimals } from "@/utils/MathUtils/MathUtils"
 
 import { PowerUpSummary } from "./PowerUpSummary"
 import { handleAmountInput } from "./utils"
 
 const compactFormatter = getCompactFormatter(4)
+const config = getConfig()
+const GAS_PADDING = 0.05
+const NavigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
 
 type Props = {
   isOpen: boolean
@@ -29,56 +52,141 @@ type Props = {
 export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const thor = useThor()
   const { isTxModalOpen } = useTransactionModal()
   const [amount, setAmount] = useState("")
-
-  useEffect(() => {
-    if (isOpen) setAmount("")
-  }, [isOpen])
+  const [includeDelegation, setIncludeDelegation] = useState(true)
 
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
+  const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: navigatorAddress } = useGetNavigator(isDelegated ? account?.address : undefined)
+  const { data: navigatorData } = useNavigatorByAddress(navigatorAddress ?? "")
+  const { data: domainData } = useVechainDomain(navigatorAddress ?? "")
+  const { data: minStakeData } = useGetMinStake()
+  const { data: stakeData } = useGetStake(navigatorAddress ?? "")
+  const requiresSelfDelegation = useVot3RequireSelfDelegation()
   const availableBalance = b3trBalance?.scaled ?? "0"
+
+  // Compute free capacity in wei to avoid floating-point precision issues
+  const freeCapacityWei = useMemo(() => {
+    if (!navigatorData) return 0n
+    try {
+      const stakeWei = parseEther(navigatorData.stakeFormatted)
+      const totalDelegatedWei = parseEther(navigatorData.totalDelegatedFormatted)
+      const free = stakeWei * 10n - totalDelegatedWei
+      return free > 0n ? free : 0n
+    } catch {
+      return 0n
+    }
+  }, [navigatorData])
+  const isBelowMinStake = minStakeData && stakeData ? stakeData.raw < minStakeData.raw : false
+  const freeCapacity = Number(formatEther(freeCapacityWei))
+  const amountNum = Number(amount) || 0
+  const exceedsCapacity = isDelegated && includeDelegation && amountNum > freeCapacity
+  const navigatorDisplayName =
+    navigatorAddress && domainData?.domain
+      ? humanDomain(domainData.domain, 15, 10)
+      : navigatorAddress
+        ? humanAddress(navigatorAddress, 6, 4)
+        : ""
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
   const { open: openUpgradeModal } = useUpgradeSmartAccountModal({ accentColor: "#004CFC" })
+
+  useEffect(() => {
+    if (isOpen) {
+      setAmount("")
+      setIncludeDelegation(!isBelowMinStake)
+    }
+  }, [isOpen, isBelowMinStake])
+
+  const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
+
+  const clauseBuilder = useCallback(() => {
+    if (!contractAmount || contractAmount === "0") throw new Error("amount is required")
+    if (!account?.address) throw new Error("account address is required")
+
+    const clauses = []
+
+    if (requiresSelfDelegation) {
+      clauses.push(buildDelegateVot3Tx(thor, account.address))
+    }
+
+    clauses.push(buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress))
+    clauses.push(buildConvertB3trTx(thor, contractAmount))
+
+    if (isDelegated && includeDelegation) {
+      const amountWei = parseEther(contractAmount)
+      clauses.push(
+        buildClause({
+          to: config.navigatorRegistryContractAddress,
+          contractInterface: NavigatorRegistryInterface,
+          method: "increaseDelegation",
+          args: [amountWei],
+          comment: `Increase delegation by ${contractAmount} VOT3`,
+        }),
+      )
+    }
+
+    return clauses
+  }, [contractAmount, account?.address, requiresSelfDelegation, isDelegated, includeDelegation, thor])
+
+  const refetchQueryKeys = useMemo(
+    () => [
+      getB3trBalanceQueryKey(account?.address ?? undefined),
+      getVot3BalanceQueryKey(account?.address ?? ""),
+      getVot3UnlockedBalanceQueryKey(account?.address ?? ""),
+      getB3trBalanceQueryKey(config.vot3ContractAddress),
+      getB3TrTokenDetailsQueryKey(),
+      getVotesOnBlockPrefixQueryKey(),
+      getGetDelegatedAmountQueryKey(account?.address ?? ""),
+      ["indexer", "navigators"],
+      ["bestBlockCompressed"],
+    ],
+    [account?.address],
+  )
 
   const handleSuccess = useCallback(() => {
     onClose()
   }, [onClose])
 
-  const convertB3trMutation = useConvertB3tr({
-    amount,
+  const mutation = useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess: handleSuccess,
     transactionModalCustomUI: {
       waitingConfirmation: { title: t("Powering up...") },
       success: { title: t("Power up complete!") },
       error: { title: t("Power up failed") },
     },
-    onSuccess: handleSuccess,
+    gasPadding: GAS_PADDING,
   })
 
-  const invalidAmount =
-    !amount || amount === "." || Number(amount) === 0 || parseEther(amount) > BigInt(b3trBalance?.original ?? "0")
+  const insufficientBalance = parseEther(amount || "0") > BigInt(b3trBalance?.original ?? "0")
+  const invalidAmount = !amount || amount === "." || Number(amount) === 0 || insufficientBalance || exceedsCapacity
 
   const handleConfirm = () => {
     if (invalidAmount) return
     if (isSmartAccountUpgradeRequired) return openUpgradeModal()
-    convertB3trMutation.resetStatus()
-    convertB3trMutation.sendTransaction()
+    mutation.resetStatus()
+    mutation.sendTransaction()
   }
 
   return (
     <BaseModal
       isOpen={isOpen && !isTxModalOpen}
       onClose={onClose}
-      modalProps={{ closeOnInteractOutside: true }}
-      modalContentProps={{ maxW: "500px" }}>
-      <VStack gap={5} w="full">
-        <Heading size="xl" textAlign="center" fontWeight="bold" data-testid={"tx-modal-title"}>
-          {t("Increase your Voting Power")}
+      showCloseButton
+      modalProps={{ closeOnInteractOutside: true }}>
+      <VStack gap={5} w="full" align="stretch">
+        <Heading size="xl" fontWeight="bold" data-testid={"tx-modal-title"}>
+          {isDelegated && !includeDelegation ? t("Convert to VOT3") : t("Increase your Voting Power")}
         </Heading>
 
-        <Text mt={2} textStyle="xs" color="text.subtle" textAlign="center">
-          {t("1 B3TR = 1 Voting Power. You can redeem your B3TR back at any time.")}
+        <Text textStyle="xs" color="text.subtle">
+          {isDelegated && !includeDelegation
+            ? t("1 B3TR = 1 VOT3. You can redeem your B3TR back at any time.")
+            : t("1 B3TR = 1 Voting Power. You can redeem your B3TR back at any time.")}
         </Text>
 
         <VStack
@@ -87,14 +195,10 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
           borderColor="border.secondary"
           borderRadius="2xl"
           p={4}
-          mt={2}
           gap={2}
           align="start"
           w="full">
-          <Field.Root
-            gap={2}
-            required
-            invalid={!!amount && amount !== "." && parseEther(amount) > BigInt(b3trBalance?.original ?? "0")}>
+          <Field.Root gap={2} required invalid={!!amount && amount !== "." && (insufficientBalance || exceedsCapacity)}>
             <Field.Label w="full" alignItems="center" justifyContent="space-between">
               <Text textStyle="sm" color="text.subtle">
                 {t("Use available B3TR")}
@@ -111,13 +215,16 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
 
             <HStack w="full" justifyContent="space-between">
               <VStack align="start" gap="2" w="full">
-                <NumberInput.Root asChild textOverflow="ellipsis" p="0" allowOverflow={false} min={0}>
+                <NumberInput.Root
+                  textOverflow="ellipsis"
+                  p="0"
+                  allowOverflow={false}
+                  min={0}
+                  value={amount}
+                  onValueChange={details => setAmount(handleAmountInput(details.value))}>
                   <NumberInput.Input
-                    min={0}
                     p="0"
-                    value={amount}
                     placeholder="0"
-                    onChange={e => setAmount(handleAmountInput(e.target.value))}
                     onBlur={() => setAmount(prev => prev.replace(/\.$/, ""))}
                     border="none"
                     outline="none"
@@ -127,7 +234,9 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                 </NumberInput.Root>
                 <Field.ErrorText>
                   <Icon as={WarningTriangle} boxSize="4" />
-                  {t("Not enough B3TR")}
+                  {exceedsCapacity
+                    ? t("Max: {{max}} VOT3", { max: compactFormatter.format(freeCapacity) })
+                    : t("Not enough B3TR")}
                 </Field.ErrorText>
               </VStack>
 
@@ -139,14 +248,106 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
                   </Text>
                 </HStack>
                 <Text textStyle="xs" color="text.subtle">
-                  {t("Available:")} {compactFormatter.format(Number(availableBalance))}
+                  {t("Available: {{amount}}", { amount: compactFormatter.format(Number(availableBalance)) })}
                 </Text>
               </VStack>
             </HStack>
           </Field.Root>
         </VStack>
 
-        <PowerUpSummary mode="power-up" amount={amount} isHighlighted />
+        {exceedsCapacity && navigatorAddress && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.negative.subtle"
+            border="1px solid"
+            borderColor="status.negative.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.negative.strong" mt="0.5" flexShrink={0} />
+              <VStack align="start" gap={1}>
+                <Text textStyle="xs" color="status.negative.strong" fontWeight="semibold">
+                  {t(
+                    "Your navigator has reached its delegation capacity and cannot receive this amount. You can uncheck the delegation option or reduce the amount.",
+                  )}
+                </Text>
+                {freeCapacity > 0 && (
+                  <Link
+                    as="button"
+                    variant="underline"
+                    textStyle="xs"
+                    color="status.negative.strong"
+                    onClick={() => setAmount(handleAmountInput(formatEther(freeCapacityWei)))}>
+                    {t("Use max allowed")}
+                  </Link>
+                )}
+              </VStack>
+            </HStack>
+          </Card.Root>
+        )}
+
+        {isDelegated && (
+          <VStack gap={1} w="full">
+            <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+              <Checkbox.Root
+                checked={includeDelegation && !isBelowMinStake}
+                onCheckedChange={e => setIncludeDelegation(!!e.checked)}
+                disabled={isBelowMinStake}
+                gap={3}
+                alignItems="center">
+                <Checkbox.HiddenInput />
+                <Checkbox.Control mt="0.5" />
+                <Checkbox.Label>
+                  <Text textStyle="xs" color={isBelowMinStake ? "fg.subtle" : "text.subtle"}>
+                    {t("Also delegate to my navigator for extra voting power")}
+                  </Text>
+                </Checkbox.Label>
+              </Checkbox.Root>
+              {isBelowMinStake && (
+                <Text textStyle="xs" color="status.warning.strong" mt={1}>
+                  {t(
+                    "Your navigator's stake is below the minimum required. Delegation increase is temporarily unavailable.",
+                  )}
+                </Text>
+              )}
+            </Card.Root>
+
+            {includeDelegation && navigatorAddress && navigatorData && (
+              <NextLink href={`/navigators/${navigatorAddress}`} onClick={onClose} style={{ width: "100%" }}>
+                <HStack
+                  gap={3}
+                  w="full"
+                  bg="card.default"
+                  border="1px solid"
+                  borderColor="border.secondary"
+                  borderRadius="2xl"
+                  p={4}
+                  cursor="pointer">
+                  <AddressIcon address={navigatorAddress} boxSize={10} borderRadius="full" />
+                  <VStack gap={0} align="start" flex={1}>
+                    <Text textStyle="sm" fontWeight="semibold">
+                      {navigatorDisplayName}
+                    </Text>
+                    <HStack gap={2}>
+                      <LuUsers size={12} />
+                      <Text textStyle="xs" color="fg.muted">
+                        {t("{{count}} citizens", { count: navigatorData.citizenCount })}
+                      </Text>
+                    </HStack>
+                  </VStack>
+                  <Icon as={NavArrowRight} boxSize="5" color="fg.muted" />
+                </HStack>
+              </NextLink>
+            )}
+          </VStack>
+        )}
+
+        <PowerUpSummary
+          mode="power-up"
+          amount={amount}
+          includeDelegation={isDelegated && includeDelegation}
+          isHighlighted
+        />
 
         {Number(availableBalance) < 2 && (
           <Card.Root
