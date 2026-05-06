@@ -79,7 +79,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
 
               <HStack justify="space-between">
                 <Text textStyle="sm" color="fg.muted">
-                  {t("Conflicts of interest")}
+                  {t("Other conflicts of interest")}
                 </Text>
                 <Text textStyle="sm" fontWeight="semibold" textAlign="right">
                   {metadata.disclosures.hasConflictsOfInterest ? t("Yes") : t("No")}
