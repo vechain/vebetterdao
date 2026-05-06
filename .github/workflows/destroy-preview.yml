@@ -12,7 +12,7 @@ env:
   BASE_DOMAIN: governance.vebetterdao.org
 
   # All possible preview flavors
-  ALL_FLAVORS: "staging beta dev"
+  ALL_FLAVORS: "staging beta"
 
   # Terraform Paths
   TERRAFORM_DIR: terraform/frontend/frontend-env-level
