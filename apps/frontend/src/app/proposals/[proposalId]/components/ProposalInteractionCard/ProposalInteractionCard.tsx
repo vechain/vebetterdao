@@ -389,9 +389,7 @@ export const ProposalInteractionCard = ({
               <>
                 <HStack>
                   <Icon as={Clock} boxSize={5} />
-                  <Card.Title p={0} gap={0}>
-                    <Heading>{t("Ends in")}</Heading>
-                  </Card.Title>
+                  <Heading>{t("Ends in")}</Heading>
                 </HStack>
                 {/* Countdown Display */}
                 <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
