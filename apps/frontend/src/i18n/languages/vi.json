@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "Nếu bạn hủy bỏ đề xuất, nó sẽ không được bỏ phiếu trong vòng sau. Sau khi vòng bắt đầu, bạn sẽ không thể hủy bỏ nó nữa.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "Nếu đề xuất của bạn được cấp vốn trước khi phiên bỏ phiếu bắt đầu, cộng đồng sẽ bỏ phiếu để quyết định liệu họ ủng hộ hay bác bỏ ý tưởng của bạn.",
   "If your proposal receives enough votes, it will be executed.": "Nếu đề xuất của bạn nhận được đủ phiếu bầu, nó sẽ được thực thi.",
+  "Ignore missing report warning and send anyway": "Bỏ qua cảnh báo thiếu báo cáo và vẫn gửi",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Thực hiện xác thực dựa trên chứng chỉ, CAPTCHA, CORS và giới hạn tốc độ.",
   "Implements device identification to prevent multiple installations.": "Thực hiện nhận dạng thiết bị để ngăn chặn cài đặt nhiều lần.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Thực hiện mở khóa tiến bộ, điều chỉnh phần thưởng hoặc các chiến lược chống lạm dụng khác.",

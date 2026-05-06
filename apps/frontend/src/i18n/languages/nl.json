@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "Als je het voorstel annuleert, wordt er in de volgende ronde niet over gestemd. Nadat de ronde begint, kun je het niet meer annuleren.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "Als je voorstel gefinancierd wordt voordat de stemronde begint, zal de gemeenschap stemmen om te beslissen of ze je idee steunen of verwerpen.",
   "If your proposal receives enough votes, it will be executed.": "Als je voorstel genoeg stemmen krijgt, zal het worden uitgevoerd.",
+  "Ignore missing report warning and send anyway": "Waarschuwing voor ontbrekend rapport negeren en toch versturen",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Implementeert certificaatgebaseerde authenticatie, CAPTCHA, CORS en snelheidslimitering.",
   "Implements device identification to prevent multiple installations.": "Implementeert apparaatidentificatie om meervoudige installaties te voorkomen.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Implementeert progressieve ontgrendeling, beloningsschaalverdeling of andere anti-farming strategieën.",

@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "Om du avbryter förslaget kommer det inte att röstas på i nästa omgång. När omgången börjar kommer du inte längre att kunna avbryta det.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "Om ditt förslag finansieras innan röstsessionen börjar, kommer gemenskapen att rösta för att avgöra om de stöder eller avvisar din idé.",
   "If your proposal receives enough votes, it will be executed.": "Om ditt förslag får tillräckligt med röster kommer det att genomföras.",
+  "Ignore missing report warning and send anyway": "Ignorera varningen om saknad rapport och skicka ändå",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Implementerar certifikatbaserad autentisering, CAPTCHA, CORS och hastighetsbegränsning.",
   "Implements device identification to prevent multiple installations.": "Implementerar enhetsidentifiering för att förhindra flera installationer.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Implementerar progressiv upplåsning, belöningsskalning eller andra antifarmingstrategier.",

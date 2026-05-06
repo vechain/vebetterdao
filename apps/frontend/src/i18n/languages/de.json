@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "Wenn Sie den Vorschlag stornieren, wird in der nächsten Runde nicht darüber abgestimmt. Sobald die Runde beginnt, können Sie ihn nicht mehr stornieren.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "Wenn Ihr Vorschlag vor Beginn der Abstimmungsphase finanziert wird, wird die Gemeinschaft abstimmen, ob sie Ihre Idee unterstützt oder ablehnt.",
   "If your proposal receives enough votes, it will be executed.": "Wenn Ihr Vorschlag genügend Stimmen erhält, wird er ausgeführt.",
+  "Ignore missing report warning and send anyway": "Warnung über fehlenden Bericht ignorieren und trotzdem senden",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Implementiert zertifikatsbasierte Authentifizierung, CAPTCHA, CORS und Ratenbegrenzung.",
   "Implements device identification to prevent multiple installations.": "Implementiert Geräteerkennung, um mehrfache Installationen zu verhindern.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Implementiert stufenweises Freischalten, Belohnungsskalierung oder andere Anti-Farming-Strategien.",

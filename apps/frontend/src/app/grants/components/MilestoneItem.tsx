@@ -1,4 +1,4 @@
-import { Button, Field, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Button, Checkbox, Field, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
@@ -82,6 +82,7 @@ export const MilestoneItem = ({
       ? dayjs(milestoneData.milestone?.durationTo * 1000).format("YYYY-MM-DD")
       : "",
   })
+  const [overrideMissingReport, setOverrideMissingReport] = useState(false)
 
   // Hooks with proper milestone context
   const { sendTransaction: approveMilestone, resetStatus: resetApproveMilestone } = useApproveMilestone({
@@ -225,21 +226,38 @@ export const MilestoneItem = ({
 
       {/* Reviewer actions (approve/reject) - only on current pending milestone */}
       {shouldWarnReviewerMissingExpenditureReport && (
-        <GenericAlert
-          type="warning"
-          isLoading={false}
-          title={t("Expenditure report missing for this payout")}
-          message={t(
-            "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
-          )}
-        />
+        <VStack align="flex-start" w="full" gap={3}>
+          <GenericAlert
+            type="warning"
+            isLoading={false}
+            title={t("Expenditure report missing for this payout")}
+            message={t(
+              "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
+            )}
+          />
+          <Checkbox.Root
+            size="md"
+            checked={overrideMissingReport}
+            onCheckedChange={({ checked }) => setOverrideMissingReport(Boolean(checked))}>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control>
+              <Checkbox.Indicator />
+            </Checkbox.Control>
+            <Checkbox.Label>
+              <Text textStyle="sm">{t("Ignore missing report warning and send anyway")}</Text>
+            </Checkbox.Label>
+          </Checkbox.Root>
+        </VStack>
       )}
       {shouldShowReviewerActions && (
         <HStack w="full">
           <Button variant="secondary" onClick={handleReject}>
             {t("Reject")}
           </Button>
-          <Button variant="primary" onClick={handleApprove}>
+          <Button
+            variant="primary"
+            onClick={handleApprove}
+            disabled={Boolean(shouldWarnReviewerMissingExpenditureReport) && !overrideMissingReport}>
             {t("Approve & Fund")}
           </Button>
         </HStack>

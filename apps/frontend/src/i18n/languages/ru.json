@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "Если вы отмените предложение, за него не будут голосовать в следующем раунде. После начала раунда вы больше не сможете его отменить.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "Если ваше предложение получит финансирование до начала голосования, сообщество проголосует за или против вашей идеи.",
   "If your proposal receives enough votes, it will be executed.": "Если ваше предложение получит достаточно голосов, оно будет выполнено.",
+  "Ignore missing report warning and send anyway": "Игнорировать предупреждение об отсутствующем отчёте и отправить",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Реализует аутентификацию на основе сертификатов, CAPTCHA, CORS и ограничение запросов.",
   "Implements device identification to prevent multiple installations.": "Реализует идентификацию устройства для предотвращения множественных установок.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Реализует постепенную разблокировку, масштабирование наград или другие стратегии против фарминга.",

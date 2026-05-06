@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "Teklifi iptal ederseniz, bir sonraki turda oylanmaz. Tur başladıktan sonra, onu iptal edemezsiniz.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "Teklifinizin oylama oturumu başlamadan finanse edilmesi durumunda, topluluk fikrinizi destekleyip desteklemeyeceğine karar vermek için oy kullanacaktır.",
   "If your proposal receives enough votes, it will be executed.": "Teklifiniz yeterli oyu alırsa, yürütülecektir.",
+  "Ignore missing report warning and send anyway": "Eksik rapor uyarısını yoksay ve yine de gönder",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Sertifika tabanlı kimlik doğrulama, CAPTCHA, CORS ve hız sınırlaması uygular.",
   "Implements device identification to prevent multiple installations.": "Birden fazla kurulumun önüne geçmek için cihaz tanımlaması uygular.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Kademeli kilit açma, ödül ölçeklendirme veya diğer çiftçilik karşıtı stratejileri uygular.",

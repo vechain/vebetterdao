@@ -1152,6 +1152,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.",
   "If your proposal receives enough votes, it will be executed.": "If your proposal receives enough votes, it will be executed.",
+  "Ignore missing report warning and send anyway": "Ignore missing report warning and send anyway",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.",
   "Implements device identification to prevent multiple installations.": "Implements device identification to prevent multiple installations.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Implements progressive unlocking, reward scaling, or other anti-farming strategies.",

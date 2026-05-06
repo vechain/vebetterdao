@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "如果你取消提案，它将在下一轮不被投票表决。回合开始后，你将无法取消它。",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "如果您的提案在投票会话开始前获得资助，社区将投票决定是否支持或拒绝您的想法。",
   "If your proposal receives enough votes, it will be executed.": "如果您的提案获得足够的票数，将被执行。",
+  "Ignore missing report warning and send anyway": "忽略缺少报告的警告并仍然发送",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "实施基于证书的身份验证、验证码、跨域资源共享（CORS）和速率限制。",
   "Implements device identification to prevent multiple installations.": "实现设备识别以防止多次安装。",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "实施逐步解锁、奖励缩放或其他反刷策略。",

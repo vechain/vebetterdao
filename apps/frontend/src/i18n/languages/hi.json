@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "यदि आप प्रस्ताव रद्द करते हैं तो इसे अगले चक्र में मतदान नहीं किया जाएगा। एक बार चक्र शुरू होने के बाद, आप इसे रद्द नहीं कर पाएंगे।",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "यदि आपके प्रस्ताव को मतदान सत्र शुरू होने से पहले धन प्राप्त होता है, तो समुदाय यह निर्णय लेने के लिए मतदान करेगा कि वे आपके विचार का समर्थन करते हैं या अस्वीकार करते हैं।",
   "If your proposal receives enough votes, it will be executed.": "यदि आपके प्रस्ताव को पर्याप्त वोट मिलते हैं, तो इसे क्रियान्वित किया जाएगा।",
+  "Ignore missing report warning and send anyway": "गुम रिपोर्ट चेतावनी को अनदेखा करें और फिर भी भेजें",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "प्रमाणपत्र-आधारित प्रमाणीकरण, CAPTCHA, CORS, और दर सीमा को लागू करता है।",
   "Implements device identification to prevent multiple installations.": "एकाधिक स्थापना को रोकने के लिए डिवाइस पहचान को लागू करता है।",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "प्रगतिशील अनलॉकिंग, इनाम स्केलिंग, या अन्य एंटी-फार्मिंग रणनीतियों को लागू करता है।",

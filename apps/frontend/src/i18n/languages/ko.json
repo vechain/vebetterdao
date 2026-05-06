@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "제안을 취소하면 다음 라운드에서 투표되지 않습니다. 라운드가 시작되면 더 이상 취소할 수 없습니다.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "귀하의 제안서가 투표 세션 시작 전에 자금을 지원받으면 커뮤니티가 귀하의 아이디어를 지원할지 여부를 결정하기 위해 투표할 것입니다.",
   "If your proposal receives enough votes, it will be executed.": "귀하의 제안서가 충분한 투표를 받으면 실행됩니다.",
+  "Ignore missing report warning and send anyway": "보고서 누락 경고를 무시하고 그대로 전송",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "인증서 기반 인증, CAPTCHA, CORS 및 속도 제한 구현.",
   "Implements device identification to prevent multiple installations.": "다중 설치를 방지하기 위해 장치 식별 구현.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "점진적 잠금 해제, 보상 조정 또는 기타 안티-파밍 전략을 구현합니다.",

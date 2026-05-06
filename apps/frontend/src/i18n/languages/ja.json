@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "提案をキャンセルすると、次のラウンドで投票されません。ラウンド開始後はキャンセルできなくなります。",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "投票セッションが始まる前に提案が資金を得た場合、コミュニティはあなたのアイデアを支持するか拒否するかを決定するために投票します。",
   "If your proposal receives enough votes, it will be executed.": "提案が十分な票を得た場合、実行されます。",
+  "Ignore missing report warning and send anyway": "レポート未提出の警告を無視して送信する",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "証明書ベースの認証、CAPTCHA、CORS、およびレート制限を実装します。",
   "Implements device identification to prevent multiple installations.": "複数インストールを防ぐためにデバイス識別を実装します。",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "段階的なアンロックや報酬のスケーリング、その他のアンチファーミング戦略を実装します。",

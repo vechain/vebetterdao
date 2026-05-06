@@ -1127,6 +1127,7 @@
   "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.": "Dacă anulezi propunerea, aceasta nu va fi votată în runda următoare. După ce runda începe, nu vei mai putea să o anulezi.",
   "If your proposal gets funded before the voting session starts, the community will vote to decide if they support or reject your idea.": "Dacă propunerea ta este finanțată înainte de începerea sesiunii de vot, comunitatea va vota pentru a decide dacă îți sprijină sau respinge ideea.",
   "If your proposal receives enough votes, it will be executed.": "Dacă propunerea ta primește suficiente voturi, va fi executată.",
+  "Ignore missing report warning and send anyway": "Ignoră avertismentul de raport lipsă și trimite oricum",
   "Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.": "Implementează autentificare pe bază de certificate, CAPTCHA, CORS și limitare de rată.",
   "Implements device identification to prevent multiple installations.": "Implementează identificarea dispozitivului pentru a preveni instalările multiple.",
   "Implements progressive unlocking, reward scaling, or other anti-farming strategies.": "Implementează deblocare progresivă, scalare recompense sau alte strategii anti-farming.",
