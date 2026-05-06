@@ -68,7 +68,7 @@ export const GrantsStatsCards = ({
           display: "none",
         },
         scrollbarWidth: "none",
-        "-webkit-overflow-scrolling": "touch",
+        WebkitOverflowScrolling: "touch",
       }}>
       <Grid
         w={{ base: "max-content", lg: "full" }}
