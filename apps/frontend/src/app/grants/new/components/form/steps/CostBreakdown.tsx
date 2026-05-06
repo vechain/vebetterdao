@@ -1,7 +1,7 @@
 import { Button, Grid, GridItem, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
 import { useMemo } from "react"
-import { Control, FieldErrors, UseFormGetValues, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
+import { Control, FieldErrors, UseFormGetValues, UseFormRegister, UseFormSetValue, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { FormItem } from "@/components/CustomFormFields/FormItem"
@@ -13,15 +13,16 @@ interface CostBreakdownProps {
   register: UseFormRegister<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   getValues: UseFormGetValues<GrantFormData>
-  watch: UseFormWatch<GrantFormData>
   setData: (data: Partial<GrantFormData>) => void
   errors: FieldErrors<GrantFormData>
   control: Control<GrantFormData>
 }
 
-export const CostBreakdown = ({ register, setValue, getValues, watch, setData, errors }: CostBreakdownProps) => {
+export const CostBreakdown = ({ register, setValue, getValues, setData, errors, control }: CostBreakdownProps) => {
   const { t } = useTranslation()
-  const watchedCostBreakdown = watch("costBreakdown")
+  // useWatch (vs watch) re-renders on every nested-field change in the array,
+  // so totalBudget updates live as amounts are typed — not only on add/remove.
+  const watchedCostBreakdown = useWatch({ control, name: "costBreakdown" })
   const costBreakdown = useMemo(() => watchedCostBreakdown ?? [], [watchedCostBreakdown])
 
   const totalBudget = useMemo(() => {

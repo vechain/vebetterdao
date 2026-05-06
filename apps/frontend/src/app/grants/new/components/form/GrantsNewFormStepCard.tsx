@@ -126,7 +126,6 @@ export const GrantsNewFormStepCard = () => {
           register={register}
           setValue={setValue}
           getValues={getValues}
-          watch={watch}
           setData={setData}
           errors={errors}
           control={control}
