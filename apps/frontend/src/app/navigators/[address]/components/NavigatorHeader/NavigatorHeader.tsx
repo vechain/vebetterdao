@@ -144,7 +144,7 @@ export const NavigatorHeader = ({
           </HStack>
 
           <Skeleton loading={metadataLoading}>
-            <Text textStyle="sm" color="fg.muted">
+            <Text textStyle="sm" color="fg.muted" whiteSpace="pre-wrap">
               {metadata?.votingStrategy || t("No voting strategy provided")}
             </Text>
           </Skeleton>
