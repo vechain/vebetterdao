@@ -1,4 +1,4 @@
-import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
+import { Accordion, Button, Circle, HStack, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts/factories/GrantsManager__factory"
@@ -275,28 +275,25 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                 <VStack pb={"24px"} align="flex-start" w="full" flex={1}>
                   <Accordion.Item value={`milestone-accordion-item-${index}`} border="none" w="full">
                     {/* Milestone header */}
-                    <VStack align="flex-start" gap={"16px"} pb={"16px"}>
-                      <Accordion.ItemTrigger py={1} display="flex" justifyContent="space-between" w="full">
+                    <HStack align="center" justifyContent="space-between" w="full" pb={"16px"} gap={2}>
+                      <Accordion.ItemTrigger py={1} flex={1} justifyContent="flex-start">
                         <Text textStyle="lg" fontWeight={"semibold"}>
                           {t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}
                         </Text>
-                        {milestone.milestone?.durationFrom &&
-                          dayjs(milestone.milestone.durationFrom * 1000).isAfter(dayjs()) &&
-                          compareAddresses(account?.address, proposal?.proposerAddress) && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              loading={metadataUploading}
-                              onClick={e => {
-                                e.stopPropagation()
-                                handleSaveEdit(index)
-                              }}>
-                              {!milestoneDuration && <Icon as={EditPencil} />}
-                              {!!milestoneDuration && index === milestoneEditIndex ? t("Save") : t("Edit")}
-                            </Button>
-                          )}
                       </Accordion.ItemTrigger>
-                    </VStack>
+                      {milestone.milestone?.durationFrom &&
+                        dayjs(milestone.milestone.durationFrom * 1000).isAfter(dayjs()) &&
+                        compareAddresses(account?.address, proposal?.proposerAddress) && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            loading={metadataUploading}
+                            onClick={() => handleSaveEdit(index)}>
+                            {!milestoneDuration && <Icon as={EditPencil} />}
+                            {!!milestoneDuration && index === milestoneEditIndex ? t("Save") : t("Edit")}
+                          </Button>
+                        )}
+                    </HStack>
                     <Accordion.ItemContent>
                       {proposal && (
                         <MilestoneItem
