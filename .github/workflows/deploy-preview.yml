@@ -83,8 +83,8 @@ jobs:
           echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
 
           if [ "$BASE_REF" == "main" ]; then
-            echo 'flavors=["staging", "beta", "dev"]' >> $GITHUB_OUTPUT
-            echo "::notice::PR to main - deploying staging + beta + dev previews"
+            echo 'flavors=["staging", "beta"]' >> $GITHUB_OUTPUT
+            echo "::notice::PR to main - deploying staging + beta previews"
           else
             echo "::error::Unsupported base branch: ${BASE_REF}"
             exit 1
@@ -171,7 +171,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        flavor: [staging, beta, dev]
+        flavor: [staging, beta]
       fail-fast: false
     uses: ./.github/workflows/build-push-ecr.yml
     with:
@@ -190,7 +190,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flavor: [staging, beta, dev]
+        flavor: [staging, beta]
       fail-fast: false
     steps:
       - name: Skip build (no relevant changes)
@@ -207,7 +207,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        flavor: [staging, beta, dev]
+        flavor: [staging, beta]
       fail-fast: false
     outputs:
       # Store URLs and status for each flavor using dynamic keys
@@ -217,9 +217,6 @@ jobs:
       custom_url_beta: ${{ steps.save-urls.outputs.custom_url_beta }}
       service_url_beta: ${{ steps.save-urls.outputs.service_url_beta }}
       status_beta: ${{ steps.save-urls.outputs.status_beta }}
-      custom_url_dev: ${{ steps.save-urls.outputs.custom_url_dev }}
-      service_url_dev: ${{ steps.save-urls.outputs.service_url_dev }}
-      status_dev: ${{ steps.save-urls.outputs.status_dev }}
 
     steps:
       - name: Checkout code
@@ -363,7 +360,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flavor: [staging, beta, dev]
+        flavor: [staging, beta]
       fail-fast: false
     steps:
       - name: Skip deploy (no relevant changes)
@@ -390,11 +387,11 @@ jobs:
         with:
           script: |
             function parseFlavors(raw) {
-              if (!raw || String(raw).trim() === '') return ['staging', 'beta', 'dev'];
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta'];
               try {
                 return JSON.parse(raw);
               } catch {
-                return ['staging', 'beta', 'dev'];
+                return ['staging', 'beta'];
               }
             }
             const flavors = parseFlavors(process.env.FLAVORS);
@@ -457,20 +454,17 @@ jobs:
           CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
           SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
           STATUS_BETA: ${{ needs.deploy.outputs.status_beta }}
-          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
-          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
-          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
           # Overall job results (for detecting if deploy was skipped due to build failure)
           BUILD_RESULT: ${{ needs.build-and-push.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
         with:
           script: |
             function parseFlavors(raw) {
-              if (!raw || String(raw).trim() === '') return ['staging', 'beta', 'dev'];
+              if (!raw || String(raw).trim() === '') return ['staging', 'beta'];
               try {
                 return JSON.parse(raw);
               } catch {
-                return ['staging', 'beta', 'dev'];
+                return ['staging', 'beta'];
               }
             }
             const flavors = parseFlavors(process.env.FLAVORS);
@@ -493,11 +487,6 @@ jobs:
                 custom: process.env.CUSTOM_URL_BETA || '',
                 service: process.env.SERVICE_URL_BETA || '',
                 status: process.env.STATUS_BETA || ''
-              },
-              dev: {
-                custom: process.env.CUSTOM_URL_DEV || '',
-                service: process.env.SERVICE_URL_DEV || '',
-                status: process.env.STATUS_DEV || ''
               }
             };
 
@@ -596,9 +585,6 @@ jobs:
           CUSTOM_URL_BETA: ${{ needs.deploy.outputs.custom_url_beta }}
           SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
           STATUS_BETA: ${{ needs.deploy.outputs.status_beta }}
-          CUSTOM_URL_DEV: ${{ needs.deploy.outputs.custom_url_dev }}
-          SERVICE_URL_DEV: ${{ needs.deploy.outputs.service_url_dev }}
-          STATUS_DEV: ${{ needs.deploy.outputs.status_dev }}
         run: |
           echo "### Preview Environments Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

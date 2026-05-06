@@ -234,7 +234,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const navInfoValue =
     mode === "manage"
       ? { label: t("Your delegated VOT3"), value: formatter.format(currentDelegatedNum) }
-      : { label: t("B3TR staked"), value: formatter.format(Number(nav.stakeFormatted)) }
+      : { label: t("VOT3 capacity"), value: formatter.format(remainingCapacity) }
 
   return (
     <BaseModal

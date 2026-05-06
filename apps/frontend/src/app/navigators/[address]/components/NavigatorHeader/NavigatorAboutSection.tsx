@@ -36,7 +36,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
             {t("Motivation")}
           </Text>
           <Skeleton loading={metadataLoading}>
-            <Text textStyle="sm" color="fg.muted">
+            <Text textStyle="sm" color="fg.muted" whiteSpace="pre-wrap">
               {metadata?.motivation || t("No motivation provided")}
             </Text>
           </Skeleton>
@@ -47,7 +47,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
             {t("Qualifications")}
           </Text>
           <Skeleton loading={metadataLoading}>
-            <Text textStyle="sm" color="fg.muted">
+            <Text textStyle="sm" color="fg.muted" whiteSpace="pre-wrap">
               {metadata?.qualifications || t("No qualifications provided")}
             </Text>
           </Skeleton>
@@ -79,7 +79,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
 
               <HStack justify="space-between">
                 <Text textStyle="sm" color="fg.muted">
-                  {t("Conflicts of interest")}
+                  {t("Other conflicts of interest")}
                 </Text>
                 <Text textStyle="sm" fontWeight="semibold" textAlign="right">
                   {metadata.disclosures.hasConflictsOfInterest ? t("Yes") : t("No")}
@@ -87,7 +87,7 @@ export const NavigatorAboutSection = ({ metadata, metadataLoading, registeredAt 
               </HStack>
 
               {metadata.disclosures.hasConflictsOfInterest && metadata.disclosures.conflictsDescription && (
-                <Text textStyle="xs" color="fg.muted">
+                <Text textStyle="xs" color="fg.muted" whiteSpace="pre-wrap">
                   {metadata.disclosures.conflictsDescription}
                 </Text>
               )}
