@@ -1,9 +1,9 @@
 import { AppDetailPage } from "./AppDetailPage"
 
-export type Props = {
-  params: { appId: string }
+type Props = {
+  params: Promise<{ appId: string }>
 }
 export default async function AppDetail({ params }: Readonly<Props>) {
-  const { appId } = params
+  const { appId } = await params
   return <AppDetailPage appId={appId} />
 }

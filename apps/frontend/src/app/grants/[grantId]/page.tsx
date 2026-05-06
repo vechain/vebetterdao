@@ -1,9 +1,9 @@
 import { GrantPage } from "./GrantPage"
 
-export type Props = {
-  params: { grantId: string }
+type Props = {
+  params: Promise<{ grantId: string }>
 }
 export default async function Grant({ params }: Readonly<Props>) {
-  const { grantId } = params
+  const { grantId } = await params
   return <GrantPage grantId={grantId} />
 }
