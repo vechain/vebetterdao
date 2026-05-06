@@ -16,6 +16,7 @@ import { useRejectGrant } from "@/hooks/useRejectGrant"
 
 import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
 import { DatePicker } from "../../../components/DatePicker/DatePicker"
+import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type MilestoneWithState = {
   milestone?: {
@@ -150,8 +151,7 @@ export const MilestoneItem = ({
   const hasTrancheExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
 
   /** Reviewer sees a warning before Approve & Fund if no on-chain expenditure report for this payout (tranche). */
-  const shouldWarnReviewerMissingExpenditureReport =
-    shouldShowReviewerActions && !hasTrancheExpenditureReport
+  const shouldWarnReviewerMissingExpenditureReport = shouldShowReviewerActions && !hasTrancheExpenditureReport
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -225,16 +225,14 @@ export const MilestoneItem = ({
 
       {/* Reviewer actions (approve/reject) - only on current pending milestone */}
       {shouldWarnReviewerMissingExpenditureReport && (
-        <VStack w="full" bg="orange.50" p={3} borderRadius="xl" align="flex-start">
-          <Text textStyle="sm" color="orange.700" fontWeight="semibold">
-            {t("Expenditure report missing for this payout")}
-          </Text>
-          <Text textStyle="sm" color="orange.600">
-            {t(
-              "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
-            )}
-          </Text>
-        </VStack>
+        <GenericAlert
+          type="warning"
+          isLoading={false}
+          title={t("Expenditure report missing for this payout")}
+          message={t(
+            "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
+          )}
+        />
       )}
       {shouldShowReviewerActions && (
         <HStack w="full">

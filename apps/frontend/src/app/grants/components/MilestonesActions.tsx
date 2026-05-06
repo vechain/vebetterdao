@@ -46,10 +46,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
   const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
   const { metadataUploading } = useUploadGrantProposalMetadata()
-  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(
-    proposal?.id || "",
-    proposal?.ipfsDescription,
-  )
+  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
   const { submitReport } = useSubmitExpenditureReport()
   const [showReportForm, setShowReportForm] = useState(false)
   const [isPublishingReport, setIsPublishingReport] = useState(false)
