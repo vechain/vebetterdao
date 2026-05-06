@@ -124,6 +124,9 @@ export const ProposalInteractionCard = ({
 
   // ===== COMPUTED VALUES =====
   const isProposer = compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
+  // Grant proposers cannot support their own grant — only applies to grant-type proposals in support phase.
+  const isGrantProposerInSupportPhase =
+    isProposer && proposal?.type !== GrantsProposalType.Standard && proposal?.state === ProposalState.Pending
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? "0")
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
   const proposalQuorumBigInt = BigInt(proposalQuorum ?? "0")
@@ -232,9 +235,9 @@ export const ProposalInteractionCard = ({
       return hasUserAlreadyVoted || userVotingPower === 0
     }
 
-    // If it's support phase AND: User has no balance OR Maximum support reached
+    // If it's support phase AND: User has no balance OR Maximum support reached OR user is the grant proposer
     if (proposal?.state === ProposalState.Pending) {
-      return userVot3Balance < 1 || proposalDepositReached
+      return userVot3Balance < 1 || proposalDepositReached || isGrantProposerInSupportPhase
     }
 
     //User has permissions to execute or queue
@@ -251,6 +254,7 @@ export const ProposalInteractionCard = ({
     userVot3Balance,
     proposalDepositReached,
     currentUserCanExecute,
+    isGrantProposerInSupportPhase,
   ])
 
   // ===== VOTING DATA PROCESSING =====
@@ -389,9 +393,7 @@ export const ProposalInteractionCard = ({
               <>
                 <HStack>
                   <Icon as={Clock} boxSize={5} />
-                  <Card.Title p={0} gap={0}>
-                    <Heading>{t("Ends in")}</Heading>
-                  </Card.Title>
+                  <Heading>{t("Ends in")}</Heading>
                 </HStack>
                 {/* Countdown Display */}
                 <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
@@ -446,6 +448,19 @@ export const ProposalInteractionCard = ({
                       "You have 0 voting power. Your {{amount}} VOT3 tokens were used to support a proposal and count as voting power only for allocation rounds, not for proposals.",
                       { amount: humanNumber(userDepositedAmount) },
                     )}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
+
+            {isGrantProposerInSupportPhase && (
+              <Alert.Root status="info" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
+                    {t("You can't support your own grant proposal.")}
                   </Text>
                 </HStack>
               </Alert.Root>

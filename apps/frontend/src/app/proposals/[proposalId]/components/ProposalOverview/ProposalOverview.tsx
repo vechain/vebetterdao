@@ -8,6 +8,7 @@ import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { useIsDepositReached } from "../../../../../api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalUserDeposit } from "../../../../../api/contracts/governance/hooks/useProposalUserDeposit"
 import { useUserSingleProposalVoteEvent } from "../../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { CostBreakdownView } from "../../../../grants/components/CostBreakdownView"
 import { MilestonesActions } from "../../../../grants/components/MilestonesActions"
 import { ProposalContentAndActions } from "../ProposalContentAndActions/ProposalContentAndActions"
 import { ProposalOverviewHeader } from "../ProposalOverviewHeader/ProposalOverviewHeader"
@@ -44,10 +45,14 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
             <Tabs.Root spaceY={7} defaultValue="overview" w="full" fitted lazyMount unmountOnExit>
               <Tabs.List>
                 <Tabs.Trigger value="overview">{"Overview"}</Tabs.Trigger>
+                <Tabs.Trigger value="budget">{"Budget"}</Tabs.Trigger>
                 <Tabs.Trigger value="milestones">{"Milestones"}</Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="overview">
                 <ProposalContentAndActions proposal={proposal} />
+              </Tabs.Content>
+              <Tabs.Content value="budget">
+                <CostBreakdownView proposal={proposal as GrantProposalEnriched} />
               </Tabs.Content>
               <Tabs.Content value="milestones">
                 <MilestonesActions proposal={proposal as GrantProposalEnriched} />

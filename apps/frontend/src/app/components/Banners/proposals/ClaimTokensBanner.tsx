@@ -57,7 +57,7 @@ export const ClaimTokensBanner = () => {
             <Text>
               <Trans
                 i18nKey="You have <b>{{votesToClaim}} VOT3</b> tokens ready to be claimed from supporting {{amountProposals}} proposals."
-                components={{ b: <b /> }}
+                components={{ b: <Text as="span" fontWeight="bold" /> }}
                 values={{
                   votesToClaim: compactFormatter.format(formattedDeposits),
                   amountProposals: claimableDeposits.length,

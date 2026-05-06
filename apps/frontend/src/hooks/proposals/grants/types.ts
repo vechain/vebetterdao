@@ -9,20 +9,6 @@ export enum GovernanceType {
 export type CommunityInteraction = {
   percentage: number
 }
-export type ProposalEnriched = ProposalCreatedEvent & {
-  title: string
-  shortDescription: string
-  markdownDescription: string
-  description: string
-  proposerAddress: string
-  state: ProposalState
-  discourseUrl?: string
-}
-export type GrantProposalEnriched = ProposalEnriched &
-  Omit<GrantFormData, "termsOfService"> & {
-    grantType: string
-    grantAmountRequested: number // Amount requested by the grantee
-  }
 export type ProposalCreatedEvent = {
   id: string
   type: ProposalType
@@ -36,6 +22,56 @@ export type ProposalCreatedEvent = {
   createdAtBlock: number
   values: readonly string[]
 }
+export type BudgetLineItem = {
+  category: string
+  description: string
+  amount: number // USD
+}
+
+export type SpendingPlan = {
+  budgetItems: BudgetLineItem[]
+  totalBudget: number // USD
+}
+
+export type EvidenceLink = {
+  url: string
+  type: string // e.g. "GitHub", "Demo", "Dashboard", "Audit Report", "Other"
+  label: string
+}
+
+export type ExpenditureLineItem = {
+  category: string
+  description: string
+  amount: number // USD
+}
+
+export type ExpenditureReport = {
+  projectName: string
+  grantRecipient: string
+  trancheNumber: number
+  totalTranches: number
+  dateSubmitted: number // Unix timestamp
+  // Milestone completion summary
+  milestoneGoal: string
+  milestoneAchieved: "yes" | "no" | "partially"
+  milestoneAchievedExplanation?: string
+  evidenceLinks: EvidenceLink[]
+  // Expenditure breakdown
+  expenditureItems: ExpenditureLineItem[]
+  totalSpent: number // USD
+  // Unspent funds
+  totalReceivedForTranche: number // USD
+  unspentAmount: number // USD
+  // Notes
+  notes: string
+}
+
+export type AttachmentFile = {
+  type: string
+  ipfs: string
+  name?: string
+}
+
 export type GrantFormData = {
   grantType: string // dapp or infra grant
   proposerAddress: string
@@ -69,6 +105,9 @@ export type GrantFormData = {
   revenueModel: string
   highLevelRoadmap: string
   outcomesAttachment?: AttachmentFile[]
+  // Budget & spending plan (optional for backward compat with existing grants)
+  costBreakdown?: BudgetLineItem[]
+  spendingPlan?: string // Free-text spending plan / allocation timeline
   // Milestones
   milestones: Array<{
     description: string
@@ -81,12 +120,6 @@ export type GrantFormData = {
   votingRoundId: string
   // Terms of service
   termsOfService: boolean
-}
-
-export type AttachmentFile = {
-  type: string
-  ipfs: string
-  name?: string
 }
 
 export enum ProposalState {
@@ -103,6 +136,24 @@ export enum ProposalState {
   InDevelopment, // 8
   Completed, // 9
 }
+
+export type ProposalEnriched = ProposalCreatedEvent & {
+  title: string
+  shortDescription: string
+  markdownDescription: string
+  description: string
+  proposerAddress: string
+  state: ProposalState
+  discourseUrl?: string
+}
+
+export type GrantProposalEnriched = ProposalEnriched &
+  Omit<GrantFormData, "termsOfService"> & {
+    grantType: string
+    grantAmountRequested: number // Amount requested by the grantee
+    /** Parsed from on-chain milestone metadata IPFS (see milestoneMetadataDocument.ts) */
+    expenditureReports?: ExpenditureReport[]
+  }
 
 export enum MilestoneState {
   Pending, // 0
