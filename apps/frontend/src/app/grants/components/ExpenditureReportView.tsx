@@ -1,5 +1,6 @@
 import { Badge, Grid, GridItem, HStack, Icon, Link, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { Fragment } from "react"
 import { useTranslation } from "react-i18next"
 import { PiLinkSimple } from "react-icons/pi"
 
@@ -9,12 +10,18 @@ interface ExpenditureReportViewProps {
   report: ExpenditureReport
 }
 
+const KNOWN_EVIDENCE_TYPES = ["GitHub", "Demo", "Dashboard", "Audit Report", "Other"] as const
+type KnownEvidenceType = (typeof KNOWN_EVIDENCE_TYPES)[number]
+const isKnownEvidenceType = (s: string): s is KnownEvidenceType =>
+  (KNOWN_EVIDENCE_TYPES as readonly string[]).includes(s)
+
 const AchievementBadge = ({ status }: { status: "yes" | "no" | "partially" }) => {
+  const { t } = useTranslation()
   const colorMap = { yes: "green", no: "red", partially: "orange" }
-  const labelMap = { yes: "Yes", no: "No", partially: "Partially" }
+  const label = status === "yes" ? t("Yes") : status === "no" ? t("No") : t("Partially")
   return (
     <Badge colorPalette={colorMap[status]} variant="subtle">
-      {labelMap[status]}
+      {label}
     </Badge>
   )
 }
@@ -69,9 +76,9 @@ export const ExpenditureReportView = ({ report }: ExpenditureReportViewProps) =>
             <HStack key={index} gap={2}>
               <Icon as={PiLinkSimple} boxSize={4} color="icon.subtle" />
               <Badge variant="outline" size="sm">
-                {link.type}
+                {isKnownEvidenceType(link.type) ? t(link.type) : link.type}
               </Badge>
-              <Link href={link.url} target="_blank" textStyle="sm" color="blue.500" textDecoration="underline">
+              <Link href={link.url} target="_blank" rel="noopener noreferrer" variant="underline" textStyle="sm">
                 {link.label || link.url}
               </Link>
             </HStack>
@@ -102,7 +109,7 @@ export const ExpenditureReportView = ({ report }: ExpenditureReportViewProps) =>
           </GridItem>
           {report.expenditureItems.map((item, index) => (
             // eslint-disable-next-line react/no-array-index-key
-            <Grid key={`row-${index}`} templateColumns="2fr 1fr 1fr" gap={2} w="full" px={2}>
+            <Fragment key={`row-${index}`}>
               <GridItem>
                 <Text textStyle="sm">{item.category}</Text>
               </GridItem>
@@ -117,7 +124,7 @@ export const ExpenditureReportView = ({ report }: ExpenditureReportViewProps) =>
                   {item.amount.toLocaleString()}
                 </Text>
               </GridItem>
-            </Grid>
+            </Fragment>
           ))}
         </Grid>
       </VStack>
@@ -146,7 +153,10 @@ export const ExpenditureReportView = ({ report }: ExpenditureReportViewProps) =>
           <Text textStyle="xs" color="text.subtle">
             {t("Unspent")}
           </Text>
-          <Text textStyle="sm" fontWeight="semibold" color={report.unspentAmount < 0 ? "red.500" : "text.default"}>
+          <Text
+            textStyle="sm"
+            fontWeight="semibold"
+            color={report.unspentAmount < 0 ? "status.negative.strong" : "text.default"}>
             {"$"}
             {report.unspentAmount.toLocaleString()}
           </Text>

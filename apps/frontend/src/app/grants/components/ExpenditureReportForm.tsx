@@ -24,7 +24,16 @@ import {
 } from "@/hooks/proposals/grants/types"
 
 const MAX_NOTES_LENGTH = 1500
-const EVIDENCE_TYPES = ["GitHub", "Demo", "Dashboard", "Audit Report", "Other"]
+const EVIDENCE_TYPES = ["GitHub", "Demo", "Dashboard", "Audit Report", "Other"] as const
+
+const isValidEvidenceUrl = (url: string): boolean => {
+  try {
+    const u = new URL(url)
+    return u.protocol === "http:" || u.protocol === "https:"
+  } catch {
+    return false
+  }
+}
 
 interface ExpenditureReportFormProps {
   proposal: GrantProposalEnriched
@@ -93,9 +102,23 @@ export const ExpenditureReportForm = ({
       return
     }
 
+    if (milestoneAchieved !== "yes" && !milestoneAchievedExplanation.trim()) {
+      toaster.create({ description: t("Please explain the milestone status"), type: "error", closable: true })
+      return
+    }
+
     const validLinks = evidenceLinks.filter(link => link.url.trim())
     if (validLinks.length === 0) {
       toaster.create({ description: t("Please add at least one evidence link"), type: "error", closable: true })
+      return
+    }
+
+    if (validLinks.some(link => !isValidEvidenceUrl(link.url))) {
+      toaster.create({
+        description: t("Please enter a valid URL starting with http:// or https://"),
+        type: "error",
+        closable: true,
+      })
       return
     }
 
@@ -103,6 +126,15 @@ export const ExpenditureReportForm = ({
     if (validItems.length === 0) {
       toaster.create({
         description: t("Please add at least one expenditure item"),
+        type: "error",
+        closable: true,
+      })
+      return
+    }
+
+    if (totalReceived <= 0) {
+      toaster.create({
+        description: t("Please specify the total amount received"),
         type: "error",
         closable: true,
       })
@@ -235,7 +267,7 @@ export const ExpenditureReportForm = ({
                   <NativeSelect.Field value={link.type} onChange={e => updateEvidence(index, "type", e.target.value)}>
                     {EVIDENCE_TYPES.map(type => (
                       <option key={type} value={type}>
-                        {type}
+                        {t(type)}
                       </option>
                     ))}
                   </NativeSelect.Field>
