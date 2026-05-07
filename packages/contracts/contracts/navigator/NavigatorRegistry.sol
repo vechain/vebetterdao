@@ -165,25 +165,12 @@ contract NavigatorRegistry is
     IERC20(params.b3trToken).approve(params.vot3Token, type(uint256).max);
   }
 
-  /// @notice Reinitializer for V2: fix citizens whose delegation exceeds their VOT3 balance.
-  /// @dev Pre-V2, `delegate()` and `increaseDelegation()` lacked a balance check, so a citizen
-  /// could end up with `getDelegatedAmount > balanceOf`. This caps each affected citizen's
-  /// delegation at their current balance and decrements the navigator's total by the same delta,
-  /// emitting `DelegationDecreased` so indexers reflect the correction as a normal reduce.
-  /// @param affectedCitizens Citizens to evaluate. Idempotent and skips non-affected addresses,
-  /// so over-inclusion is safe. Build the list off-chain by paging the indexer's
-  /// `/api/v1/b3tr/navigators/citizens` endpoint and comparing on-chain
-  /// `getDelegatedAmount(c)` against `vot3.balanceOf(c)`.
-  function initializeV2(address[] calldata affectedCitizens) external reinitializer(2) {
-    NavigatorDelegationUtils.correctOverDelegations(affectedCitizens);
-  }
-
   // ======================== Version & Upgrade ======================== //
 
   /// @notice Get the current contract version
   /// @return The version string
   function version() external pure returns (string memory) {
-    return "2";
+    return "1";
   }
 
   /// @notice Authorize a contract upgrade. Only callable by UPGRADER_ROLE.
@@ -656,7 +643,10 @@ contract NavigatorRegistry is
   /// @param roundId The round ID
   /// @return slashed True if slashed for that round
   /// @return infractionFlags Bitmask of infractions found when slashed
-  function isSlashedForRound(address navigator, uint256 roundId) external view returns (bool slashed, uint256 infractionFlags) {
+  function isSlashedForRound(
+    address navigator,
+    uint256 roundId
+  ) external view returns (bool slashed, uint256 infractionFlags) {
     return NavigatorSlashingUtils.isSlashedForRound(navigator, roundId);
   }
 

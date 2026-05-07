@@ -576,7 +576,7 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
     it("switch flow (undelegate + delegate) still works for full balance", async function () {
       // Register a second navigator on a fresh signer
       const signers = await ethers.getSigners()
-      const navigator2 = signers[20]
+      const navigator2 = signers[19]
       await registerNavigator(navigator2)
 
       await getVot3Tokens(citizen1, "1000")
