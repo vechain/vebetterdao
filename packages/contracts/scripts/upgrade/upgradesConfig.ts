@@ -175,9 +175,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Navigator Registry": {
     name: "navigator-registry",
     configAddressField: "navigatorRegistryContractAddress",
-    versions: ["v2"] as const,
+    versions: ["v1-hotfix"] as const,
     descriptions: {
-      v2: "Add VOT3 unlocked-balance check on delegate/increaseDelegation; reinitializer caps over-delegated citizens at their balance",
+      "v1-hotfix":
+        "Add VOT3 unlocked-balance check on delegate/increaseDelegation; reinitializer caps over-delegated citizens at their balance",
     },
   },
 } as const

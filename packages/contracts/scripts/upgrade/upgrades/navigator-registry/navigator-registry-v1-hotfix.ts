@@ -64,6 +64,13 @@ async function main() {
   const navigator = await ethers.getContractAt("NavigatorRegistry", config.navigatorRegistryContractAddress)
   const vot3 = await ethers.getContractAt("VOT3", config.vot3ContractAddress)
 
+  // Check wallet has UPGRADER_ROLE and DEFAULT_ADMIN_ROLE
+  const hasUpgraderRole = await navigator.hasRole(await navigator.UPGRADER_ROLE(), signer.address)
+  const hasDefaultAdminRole = await navigator.hasRole(await navigator.DEFAULT_ADMIN_ROLE(), signer.address)
+  if (!hasUpgraderRole || !hasDefaultAdminRole) {
+    throw new Error("Wallet does not have UPGRADER_ROLE or DEFAULT_ADMIN_ROLE")
+  }
+
   const block = await ethers.provider.getBlockNumber()
   const affected: string[] = []
   for (const citizen of candidates) {
@@ -86,23 +93,26 @@ async function main() {
     NavigatorLifecycleUtils: await libs.NavigatorLifecycleUtils.getAddress(),
   }
 
-  // 4. Upgrade — initializeV2(affected) runs in the same tx
+  // 4. Upgrade
   const upgraded = (await upgradeProxy(
     "NavigatorRegistry",
     "NavigatorRegistry",
     config.navigatorRegistryContractAddress,
-    [affected],
+    [],
     {
-      version: 2,
+      version: 1,
       libraries: libraryAddresses,
     },
   )) as unknown as NavigatorRegistry
 
   const newVersion = await upgraded.version()
   console.log(`New NavigatorRegistry version: ${newVersion}`)
-  if (newVersion !== "2") {
-    throw new Error(`NavigatorRegistry version is not 2: ${newVersion}`)
+  if (newVersion !== "1") {
+    throw new Error(`NavigatorRegistry version is not 1: ${newVersion}`)
   }
+
+  // 5. Correct over-delegated citizens
+  await upgraded.correctOverDelegations(affected)
 
   console.log("Execution completed")
   process.exit(0)
