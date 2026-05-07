@@ -177,6 +177,16 @@ contract NavigatorRegistry is
   /// @param newImplementation Address of the new implementation contract
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
+  // ======================== Migration (admin-callable) ======================== //
+
+  /// @notice Cap delegations at VOT3 balance for any citizen still over-delegated post-upgrade.
+  /// @dev Same logic as `initializeV2` but callable by `DEFAULT_ADMIN_ROLE` after the reinitializer
+  /// has run. Use if additional over-delegated citizens surface or batching is desired.
+  /// @param citizens Addresses to evaluate.
+  function correctOverDelegations(address[] calldata citizens) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    NavigatorDelegationUtils.correctOverDelegations(citizens);
+  }
+
   // ======================== Navigator Registration & Staking ======================== //
 
   /// @notice Register as a navigator by staking B3TR (permissionless, must approve B3TR first)
@@ -633,7 +643,10 @@ contract NavigatorRegistry is
   /// @param roundId The round ID
   /// @return slashed True if slashed for that round
   /// @return infractionFlags Bitmask of infractions found when slashed
-  function isSlashedForRound(address navigator, uint256 roundId) external view returns (bool slashed, uint256 infractionFlags) {
+  function isSlashedForRound(
+    address navigator,
+    uint256 roundId
+  ) external view returns (bool slashed, uint256 infractionFlags) {
     return NavigatorSlashingUtils.isSlashedForRound(navigator, roundId);
   }
 

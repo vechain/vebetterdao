@@ -524,4 +524,135 @@ describe("NavigatorRegistry Delegation - @shard19b", function () {
       expect(await vot3.getNavigatorLockedAmount(citizen1.address)).to.equal(0)
     })
   })
+
+  // ======================== Unlocked Balance Guard ======================== //
+
+  describe("Unlocked balance guard", function () {
+    it("should revert delegate() with InsufficientUnlockedBalance when amount > balance", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      const overBalance = ethers.parseEther("1001")
+
+      await expect(
+        navigatorRegistry.connect(citizen1).delegate(navigator1.address, overBalance),
+      ).to.be.revertedWithCustomError(navigatorRegistry, "InsufficientUnlockedBalance")
+    })
+
+    it("should revert increaseDelegation() with InsufficientUnlockedBalance when total would exceed balance", async function () {
+      await getVot3Tokens(citizen1, "3000")
+      const full = ethers.parseEther("3000")
+
+      // First delegation: full balance
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, full)
+
+      // Reproduces reported bug: delegate full balance, then try to increase by another full balance.
+      // Pre-fix this would succeed and end at 6000 delegated for a 3000 balance citizen.
+      await expect(navigatorRegistry.connect(citizen1).increaseDelegation(full)).to.be.revertedWithCustomError(
+        navigatorRegistry,
+        "InsufficientUnlockedBalance",
+      )
+
+      // State unchanged
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(full)
+    })
+
+    it("should allow delegate up to exactly balance", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      const full = ethers.parseEther("1000")
+
+      await expect(navigatorRegistry.connect(citizen1).delegate(navigator1.address, full)).to.not.be.reverted
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(full)
+    })
+
+    it("should allow incremental increases up to balance", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      const half = ethers.parseEther("500")
+
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, half)
+      await expect(navigatorRegistry.connect(citizen1).increaseDelegation(half)).to.not.be.reverted
+
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(ethers.parseEther("1000"))
+    })
+
+    it("switch flow (undelegate + delegate) still works for full balance", async function () {
+      // Register a second navigator on a fresh signer
+      const signers = await ethers.getSigners()
+      const navigator2 = signers[19]
+      await registerNavigator(navigator2)
+
+      await getVot3Tokens(citizen1, "1000")
+      const full = ethers.parseEther("1000")
+
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, full)
+
+      // VeChain switch is a single multi-clause tx (undelegate then delegate). On hardhat we
+      // sequence as two txs — same end state. Post-undelegate, unlockedBalance == balanceOf,
+      // so re-delegating the full balance to a new nav passes the guard.
+      await navigatorRegistry.connect(citizen1).undelegate()
+      await expect(navigatorRegistry.connect(citizen1).delegate(navigator2.address, full)).to.not.be.reverted
+
+      expect(await navigatorRegistry.getNavigator(citizen1.address)).to.equal(navigator2.address)
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(full)
+    })
+  })
+
+  // ======================== Over-delegation Corrector ======================== //
+
+  describe("correctOverDelegations()", function () {
+    /**
+     * Helper: forcibly induce an over-delegated state by upgrading "back" to a buggy state.
+     * Since the V2 guard prevents creating over-delegation, we simulate it by transferring VOT3
+     * away from the citizen using the admin's mint/transfer route. But VOT3's transfer lock
+     * blocks that. So instead we mint extra VOT3 to the citizen, delegate the inflated amount,
+     * then convert the extra back to B3TR is also blocked.
+     *
+     * The cleanest reproduction: delegate full balance via the now-correct guard, then have a
+     * dead-nav scenario where balance drops via convertToB3TR after lazy-invalidation, then
+     * re-delegate via auto-clear, etc. — but that would test contrived flows.
+     *
+     * For functional coverage of the corrector logic, we directly test idempotency on a
+     * non-over-delegated citizen and the no-op paths. The reverse-engineering required to
+     * synthesize over-delegation post-fix would itself rely on bypassing the guard.
+     */
+
+    it("should be a no-op for citizens with no delegation", async function () {
+      await navigatorRegistry.correctOverDelegations([citizen1.address])
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
+      expect(await navigatorRegistry.isDelegated(citizen1.address)).to.equal(false)
+    })
+
+    it("should be a no-op for citizens at or below their balance (idempotent)", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      const amount = ethers.parseEther("500")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, amount)
+
+      const totalBefore = await navigatorRegistry.getTotalDelegated(navigator1.address)
+      await navigatorRegistry.correctOverDelegations([citizen1.address])
+      // Re-run to assert idempotency
+      await navigatorRegistry.correctOverDelegations([citizen1.address])
+
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(amount)
+      expect(await navigatorRegistry.getTotalDelegated(navigator1.address)).to.equal(totalBefore)
+    })
+
+    it("should require DEFAULT_ADMIN_ROLE", async function () {
+      await expect(navigatorRegistry.connect(citizen1).correctOverDelegations([citizen1.address])).to.be.reverted
+    })
+
+    it("should skip citizens whose navigator is dead (lazy-invalidated)", async function () {
+      await getVot3Tokens(citizen1, "1000")
+      await navigatorRegistry.connect(citizen1).delegate(navigator1.address, ethers.parseEther("500"))
+
+      // Deactivate navigator (governance-driven major slash with 0%)
+      await navigatorRegistry.connect(owner).deactivateNavigator(navigator1.address, 0, false)
+
+      // Lazy invalidation: getDelegatedAmount returns 0
+      expect(await navigatorRegistry.getDelegatedAmount(citizen1.address)).to.equal(0)
+
+      // Corrector skips dead-nav citizens — no events, no state change
+      await expect(navigatorRegistry.correctOverDelegations([citizen1.address])).to.not.emit(
+        navigatorRegistry,
+        "DelegationDecreased",
+      )
+    })
+  })
 })

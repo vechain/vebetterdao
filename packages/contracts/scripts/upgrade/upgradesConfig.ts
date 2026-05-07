@@ -172,4 +172,13 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Set NavigatorRegistry for delegation lock enforcement",
     },
   },
+  "Navigator Registry": {
+    name: "navigator-registry",
+    configAddressField: "navigatorRegistryContractAddress",
+    versions: ["v1-hotfix"] as const,
+    descriptions: {
+      "v1-hotfix":
+        "Add VOT3 unlocked-balance check on delegate/increaseDelegation; reinitializer caps over-delegated citizens at their balance",
+    },
+  },
 } as const
