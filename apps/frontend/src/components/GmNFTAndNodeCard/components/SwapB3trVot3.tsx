@@ -1,9 +1,24 @@
-import { Button, Heading, Image, Skeleton, useDisclosure, Card, Stat, Icon, GridItem, Grid } from "@chakra-ui/react"
+import {
+  Button,
+  Heading,
+  Image,
+  Skeleton,
+  useDisclosure,
+  Card,
+  Stat,
+  Icon,
+  GridItem,
+  Grid,
+  Text,
+} from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
+import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { SnapshotExplanationModal } from "@/app/components/Countdown/SnapshotExplanationModal"
 
 import { ConvertB3trAndVot3Modal } from "../../../app/components/ConvertB3trAndVot3Modal"
@@ -19,6 +34,15 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
   const { t } = useTranslation()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(address)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useGetVot3UnlockedBalance(address)
+  const { data: delegatedAmount, isLoading: isDelegatedLoading } = useGetDelegatedAmount(address)
+  const { data: isNavigator } = useIsNavigator(address)
+  const { data: stakeData, isLoading: isStakeLoading } = useGetStake(address)
+
+  // Delegated VOT3 — citizen role: VOT3 locked under a navigator (not in `unlockedBalance`).
+  const hasDelegated = !!delegatedAmount && delegatedAmount.raw > 0n
+  // Staked B3TR — navigator role: B3TR converted to VOT3 inside NavigatorRegistry as collateral.
+  const hasStaked = !!isNavigator && !!stakeData && stakeData.raw > 0n
+
   const { open: isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
@@ -46,7 +70,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
           <Card.Body>
             <Stat.Root>
               <Stat.Label color="actions.primary.text" textStyle="sm">
-                {t("Total B3TR Balance")}
+                {t("Available B3TR")}
               </Stat.Label>
               <Stat.ValueText flex={1} alignItems="center">
                 <Icon as={B3TRIcon} boxSize={"30px"} />
@@ -56,6 +80,15 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
                   </Heading>
                 </Skeleton>
               </Stat.ValueText>
+              {hasStaked && (
+                <Skeleton loading={isStakeLoading}>
+                  <Text textStyle="xs" color="actions.primary.text" opacity={0.7} mt={1}>
+                    {t("+ {{amount}} staked as navigator", {
+                      amount: compactFormatter.format(Number(stakeData?.scaled ?? "0")),
+                    })}
+                  </Text>
+                </Skeleton>
+              )}
             </Stat.Root>
           </Card.Body>
         </Card.Root>
@@ -64,16 +97,25 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
           <Card.Body>
             <Stat.Root>
               <Stat.Label color="actions.primary.text" textStyle="sm">
-                {t("Total VOT3 Balance")}
+                {t("Available VOT3")}
               </Stat.Label>
               <Stat.ValueText flex={1} alignItems="center">
                 <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
-                <Skeleton loading={isB3trBalanceLoading}>
+                <Skeleton loading={isVot3BalanceLoading}>
                   <Heading size="3xl" color="actions.primary.text">
                     {compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}
                   </Heading>
                 </Skeleton>
               </Stat.ValueText>
+              {hasDelegated && (
+                <Skeleton loading={isDelegatedLoading}>
+                  <Text textStyle="xs" color="actions.primary.text" opacity={0.7} mt={1}>
+                    {t("+ {{amount}} delegated to navigator", {
+                      amount: compactFormatter.format(Number(delegatedAmount?.scaled ?? "0")),
+                    })}
+                  </Text>
+                </Skeleton>
+              )}
             </Stat.Root>
           </Card.Body>
         </Card.Root>
