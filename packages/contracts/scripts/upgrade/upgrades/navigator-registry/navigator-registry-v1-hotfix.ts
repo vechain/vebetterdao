@@ -13,7 +13,7 @@ type Pagination = { hasNext: boolean }
 const INDEXER_HEADERS = { "x-project-id": "b3tr-governor" }
 
 async function fetchAllNavigators(indexerBase: string): Promise<string[]> {
-  const url = `${indexerBase}/api/v1/b3tr/navigators?size=500`
+  const url = `${indexerBase}/api/v1/b3tr/navigators?size=100`
   const res = await fetch(url, { headers: INDEXER_HEADERS })
   if (!res.ok) throw new Error(`Indexer GET ${url} → ${res.status}`)
   const body = (await res.json()) as { data: IndexerNavigator[] }
@@ -29,7 +29,7 @@ async function fetchCitizensFor(indexerBase: string, navigator: string): Promise
     const res = await fetch(url, { headers: INDEXER_HEADERS })
     if (!res.ok) throw new Error(`Indexer GET ${url} → ${res.status}`)
     const body = (await res.json()) as { data: IndexerCitizen[]; pagination: Pagination }
-    out.push(...body.data.map(c => c.citizen.toLowerCase()))
+    out.push(...body.data.filter(c => c.citizen).map(c => c.citizen.toLowerCase()))
     if (!body.pagination.hasNext) break
     page++
   }
