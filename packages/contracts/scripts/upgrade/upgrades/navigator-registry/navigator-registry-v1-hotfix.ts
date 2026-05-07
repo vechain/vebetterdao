@@ -7,7 +7,7 @@ import { navigatorRegistryLibraries } from "../../../libraries/navigatorRegistry
 import { NavigatorRegistry } from "../../../../typechain-types"
 
 type IndexerNavigator = { address: string; status: string }
-type IndexerCitizen = { citizen: string }
+type IndexerCitizen = { address: string }
 type Pagination = { hasNext: boolean }
 
 const INDEXER_HEADERS = { "x-project-id": "b3tr-governor" }
@@ -29,7 +29,10 @@ async function fetchCitizensFor(indexerBase: string, navigator: string): Promise
     const res = await fetch(url, { headers: INDEXER_HEADERS })
     if (!res.ok) throw new Error(`Indexer GET ${url} → ${res.status}`)
     const body = (await res.json()) as { data: IndexerCitizen[]; pagination: Pagination }
-    out.push(...body.data.filter(c => c.citizen).map(c => c.citizen.toLowerCase()))
+    console.log(
+      `Found ${body.data.length} citizens for navigator ${navigator}, page ${page}, data: ${JSON.stringify(body.data)}`,
+    )
+    out.push(...body.data.filter(c => c.address).map(c => c.address.toLowerCase()))
     if (!body.pagination.hasNext) break
     page++
   }
@@ -49,6 +52,9 @@ async function main() {
   console.log(`Upgrading NavigatorRegistry at ${config.navigatorRegistryContractAddress}`)
   console.log(`Indexer: ${indexerBase}`)
 
+  const deployer = (await ethers.getSigners())[0]
+  console.log(`Deployer: ${deployer.address}`)
+
   // 1. Enumerate currently-delegating citizens via indexer (union over all alive navigators)
   const navigators = await fetchAllNavigators(indexerBase)
   console.log(`Found ${navigators.length} alive navigators`)
@@ -64,13 +70,6 @@ async function main() {
   const navigator = await ethers.getContractAt("NavigatorRegistry", config.navigatorRegistryContractAddress)
   const vot3 = await ethers.getContractAt("VOT3", config.vot3ContractAddress)
 
-  // Check wallet has UPGRADER_ROLE and DEFAULT_ADMIN_ROLE
-  const hasUpgraderRole = await navigator.hasRole(await navigator.UPGRADER_ROLE(), signer.address)
-  const hasDefaultAdminRole = await navigator.hasRole(await navigator.DEFAULT_ADMIN_ROLE(), signer.address)
-  if (!hasUpgraderRole || !hasDefaultAdminRole) {
-    throw new Error("Wallet does not have UPGRADER_ROLE or DEFAULT_ADMIN_ROLE")
-  }
-
   const block = await ethers.provider.getBlockNumber()
   const affected: string[] = []
   for (const citizen of candidates) {
@@ -82,7 +81,14 @@ async function main() {
   }
   console.log(`Block ${block}: ${affected.length} over-delegated citizens to correct`)
 
-  // 3. Fresh libraries (always redeployed per CLAUDE.md upgrade rules)
+  // Check wallet has UPGRADER_ROLE and DEFAULT_ADMIN_ROLE
+  const hasUpgraderRole = await navigator.hasRole(await navigator.UPGRADER_ROLE(), deployer.address)
+  const hasDefaultAdminRole = await navigator.hasRole(await navigator.DEFAULT_ADMIN_ROLE(), deployer.address)
+  if (!hasUpgraderRole || !hasDefaultAdminRole) {
+    throw new Error("Wallet does not have UPGRADER_ROLE or DEFAULT_ADMIN_ROLE")
+  }
+
+  // 3. Fresh libraries
   const libs = await navigatorRegistryLibraries(true)
   const libraryAddresses: Record<string, string> = {
     NavigatorStakingUtils: await libs.NavigatorStakingUtils.getAddress(),
