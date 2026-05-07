@@ -18,6 +18,7 @@ import { InfoCircle, WarningTriangle } from "iconoir-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuArrowLeftRight, LuUsers } from "react-icons/lu"
+import { formatEther, parseEther } from "viem"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
@@ -110,19 +111,43 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
   // For switch, undelegating frees currentDelegatedNum back into usable balance
   const effectiveBalance = mode === "switch" ? balanceNum + currentDelegatedNum : balanceNum
-  // In manage mode the field is the new total delegation, so max is bounded by full balance
-  // (NOT currentDelegated + unlockedBalance, which can drift if those queries refetch out of sync
-  // and produce a sum > balanceOf — bypassing the on-chain unlocked-balance guard pre-tx).
-  const maxAmount =
-    mode === "manage"
-      ? Math.min(totalBalanceNum, remainingCapacity)
-      : Math.min(effectiveBalance, remainingCapacity)
+
+  // Precise wei-based max for "Use max". Going through Number drops digits past ~15 sig figs,
+  // so a balance like 2618.003912366415308023 rounds to 2618.0039123664155 and parseEther on
+  // that produces 2618003912366415500000 — 191977 wei above the actual balance, which the
+  // pre-fix contract accepted as an over-delegation.
+  const maxAmountExact = useMemo(() => {
+    const bigMin = (a: bigint, b: bigint) => (a < b ? a : b)
+    const stakeWei = parseEther(nav.stakeFormatted ?? "0")
+    const totalDelegatedWei = parseEther(nav.totalDelegatedFormatted ?? "0")
+    const navCapWei = stakeWei * 10n
+    const remainingCapacityWei =
+      mode === "manage" ? navCapWei - totalDelegatedWei + (currentDelegation?.raw ?? 0n) : navCapWei - totalDelegatedWei
+    const remainingCapacityWeiClamped = remainingCapacityWei > 0n ? remainingCapacityWei : 0n
+
+    // manage: input is the new total delegation, bounded by full balanceOf.
+    // switch: undelegate frees currentDelegated back into unlocked balance.
+    // new: bounded by current unlockedBalance.
+    const applicableBalanceWei =
+      mode === "manage"
+        ? BigInt(vot3TotalBalance?.original ?? "0")
+        : mode === "switch"
+          ? BigInt(vot3Balance?.original ?? "0") + (currentDelegation?.raw ?? 0n)
+          : BigInt(vot3Balance?.original ?? "0")
+
+    return formatEther(bigMin(applicableBalanceWei, remainingCapacityWeiClamped))
+  }, [
+    mode,
+    nav.stakeFormatted,
+    nav.totalDelegatedFormatted,
+    vot3Balance?.original,
+    vot3TotalBalance?.original,
+    currentDelegation?.raw,
+  ])
 
   const exceedsCapacity = amountNum > remainingCapacity
   const exceedsBalance =
-    mode === "manage"
-      ? amountNum > totalBalanceNum && amountNum > currentDelegatedNum
-      : amountNum > effectiveBalance
+    mode === "manage" ? amountNum > totalBalanceNum && amountNum > currentDelegatedNum : amountNum > effectiveBalance
 
   /** Must be 0 (full exit) or >= 1 VOT3; values in (0, 1) are invalid on-chain for manage. */
   const violatesMinDelegation = amountNum > 0 && amountNum < MIN_DELEGATION
@@ -188,10 +213,16 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     } else {
       if (manageValidation.isFullRemoval) {
         sendUndelegate({})
-      } else if (manageValidation.isDecreasing) {
-        sendReduce({ amount: Math.abs(manageValidation.delta).toString() })
-      } else if (manageValidation.isIncreasing) {
-        sendIncrease({ amount: manageValidation.delta.toString() })
+        return
+      }
+      // Compute delta in wei from the input string and current delegation. Number subtraction
+      // would lose precision past ~15 sig figs and could send a tx that drifts above balance.
+      const inputWei = parseEther(amount || "0")
+      const currentWei = currentDelegation?.raw ?? 0n
+      if (inputWei > currentWei) {
+        sendIncrease({ amount: formatEther(inputWei - currentWei) })
+      } else if (inputWei < currentWei) {
+        sendReduce({ amount: formatEther(currentWei - inputWei) })
       }
     }
   }, [
@@ -199,7 +230,8 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     mode,
     amount,
     nav.address,
-    manageValidation,
+    manageValidation.isFullRemoval,
+    currentDelegation?.raw,
     sendDelegate,
     sendSwitch,
     sendUndelegate,
@@ -374,7 +406,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                   height="5"
                   size="sm"
                   p="0"
-                  onClick={() => setAmount(handleAmountInput(maxAmount.toString()))}>
+                  onClick={() => setAmount(handleAmountInput(maxAmountExact))}>
                   {t("Use max")}
                 </Button>
               </Field.Label>
