@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react"
 
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
+import { getConvertedB3TRQueryKey } from "../api/contracts/b3tr/hooks/useB3trConverted"
 import { getB3TrTokenDetailsQueryKey } from "../api/contracts/b3tr/hooks/useB3trTokenDetails"
 import { buildB3trApprovesTx } from "../api/contracts/b3tr/utils/buildB3trApprovesTx"
 import { getVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useVotesOnBlock"
@@ -69,6 +70,9 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
       // getVotesQueryKey(account?.address ?? undefined),
       getB3trBalanceQueryKey(config.vot3ContractAddress),
       getB3TrTokenDetailsQueryKey(),
+      // convertToVOT3 increases convertedB3TR[user]; consumers (PowerDownModal,
+      // ConvertB3trAndVot3Modal) read this to cap the swappable VOT3 amount.
+      getConvertedB3TRQueryKey(account?.address ?? ""),
       getVotesOnBlockPrefixQueryKey(),
       ["bestBlockCompressed"],
     ],

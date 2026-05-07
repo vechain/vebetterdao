@@ -3,6 +3,7 @@
 import { Button, Card, Checkbox, Field, Heading, HStack, Icon, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { useQueryClient } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
 import { useVechainDomain, useWallet, useThor } from "@vechain/vechain-kit"
 import { InfoCircle, NavArrowRight, WarningTriangle } from "iconoir-react"
@@ -12,19 +13,26 @@ import { useTranslation } from "react-i18next"
 import { LuUsers } from "react-icons/lu"
 import { parseEther } from "viem"
 
-import { useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
+import { getConvertedB3TRQueryKey, useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
+import { getB3TrTokenDetailsQueryKey } from "@/api/contracts/b3tr/hooks/useB3trTokenDetails"
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
-import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { getVotesOnBlockPrefixQueryKey } from "@/api/contracts/governance/hooks/useVotesOnBlock"
+import {
+  getGetDelegatedAmountQueryKey,
+  useGetDelegatedAmount,
+} from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
+import { getGetNavigatorQueryKey, useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { getIsDelegatedQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { buildConvertVot3Tx } from "@/api/contracts/vot3/utils/buildConvertVot3Tx"
-import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
+import { invalidateNavigatorQueries, useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
+import { getB3trBalanceQueryKey } from "@/hooks/useGetB3trBalance"
 import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
-import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
+import { getVot3BalanceQueryKey, useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { getVot3UnlockedBalanceQueryKey, useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
 import { removingExcessDecimals } from "@/utils/MathUtils/MathUtils"
@@ -45,6 +53,7 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const thor = useThor()
+  const queryClient = useQueryClient()
   const { isTxModalOpen } = useTransactionModal()
   const [amount, setAmount] = useState("")
   const [includeDelegated, setIncludeDelegated] = useState(false)
@@ -153,12 +162,36 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
     return clauses
   }, [amount, includeDelegated, delegatedLocked, unlockedOriginal, navigatorRegistryAddress, thor])
 
+  // Power-down mutates: VOT3 balance ↓, B3TR balance ↑, convertedB3TR ↓, voting power ↓.
+  // When the user also withdraws from delegation: delegated amount ↓, possibly fully undelegated
+  // (isDelegated → false, navigator cleared), navigator capacity ↑.
+  const refetchQueryKeys = useMemo(
+    () => [
+      getB3trBalanceQueryKey(account?.address ?? undefined),
+      getVot3BalanceQueryKey(account?.address ?? ""),
+      getVot3UnlockedBalanceQueryKey(account?.address ?? ""),
+      getB3trBalanceQueryKey(getConfig().vot3ContractAddress),
+      getB3TrTokenDetailsQueryKey(),
+      getConvertedB3TRQueryKey(account?.address ?? ""),
+      getVotesOnBlockPrefixQueryKey(),
+      getGetDelegatedAmountQueryKey(account?.address ?? ""),
+      getGetNavigatorQueryKey(account?.address ?? ""),
+      getIsDelegatedQueryKey(account?.address ?? ""),
+      ["bestBlockCompressed"],
+    ],
+    [account?.address],
+  )
+
   const handleSuccess = useCallback(() => {
+    invalidateNavigatorQueries(queryClient)
+    queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/citizens"] })
+    queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/delegations"] })
     onClose()
-  }, [onClose])
+  }, [queryClient, onClose])
 
   const convertMutation = useBuildTransaction({
     clauseBuilder,
+    refetchQueryKeys,
     onSuccess: handleSuccess,
     transactionModalCustomUI: {
       waitingConfirmation: { title: t("Powering down...") },
