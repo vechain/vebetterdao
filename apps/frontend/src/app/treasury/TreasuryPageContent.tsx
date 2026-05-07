@@ -1,13 +1,13 @@
 "use client"
-import { Grid, Heading, HStack, Icon, IconButton, Link, List, Text, VStack } from "@chakra-ui/react"
+import { Grid, Heading, HStack, Icon, IconButton, Link, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getConfig } from "@repo/config"
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FiExternalLink } from "react-icons/fi"
 
 import { AddressButton } from "@/components/AddressButton"
-import { Modal } from "@/components/Modal"
+import { InfoStep, InfoStepsCard } from "@/components/InfoStepsCard"
 import { getExplorerAddressLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 import { useBreakpoints } from "../../hooks/useBreakpoints"
@@ -20,6 +20,46 @@ export const TreasuryPageContent = () => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const [isInfoOpen, setIsInfoOpen] = useState(false)
+  const onClose = useCallback(() => setIsInfoOpen(false), [])
+
+  const steps = useMemo<InfoStep[]>(
+    () => [
+      {
+        key: "what",
+        title: t("About the Treasury"),
+        image: "/assets/mascot/mascot-holding-tokens.webp",
+        heading: t("What is the Treasury?"),
+        listItems: [
+          t(
+            "The VeBetterDAO Treasury is a community-owned fund that holds B3TR tokens and other assets. It is governed by the community through on-chain proposals and voting.",
+          ),
+        ],
+      },
+      {
+        key: "funds",
+        title: t("About the Treasury"),
+        image: "/assets/mascot/B3MO_Tokens_2.webp",
+        heading: t("Where do funds come from?"),
+        listItems: [
+          t("Weekly B3TR emissions allocated to the treasury"),
+          t("Surplus from app voting allocation rounds"),
+          t("Users upgrading their Galaxy Membership NFTs"),
+        ],
+      },
+      {
+        key: "usage",
+        title: t("About the Treasury"),
+        image: "/assets/mascot/mascot-proposal.png",
+        heading: t("How can funds be used?"),
+        listItems: [
+          t(
+            "Any community member can submit a governance proposal to transfer funds from the treasury. Proposals require community approval through voting before execution.",
+          ),
+        ],
+      },
+    ],
+    [t],
+  )
 
   return (
     <VStack w="full" gap={8} pb={8} data-testid="treasury-page">
@@ -52,6 +92,8 @@ export const TreasuryPageContent = () => {
           </HStack>
         </HStack>
 
+        <InfoStepsCard steps={steps} isOpen={isInfoOpen} onClose={onClose} />
+
         <Grid templateColumns={{ base: "minmax(0, 1fr)", lg: "minmax(0, 1fr) minmax(0, 1fr)" }} gap={8} w="full">
           <TreasuryOverview />
           <TreasuryBalanceChart />
@@ -59,57 +101,6 @@ export const TreasuryPageContent = () => {
       </VStack>
 
       <TreasuryTransfersList />
-
-      <TreasuryInfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
     </VStack>
-  )
-}
-
-const TreasuryInfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { t } = useTranslation()
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("About the Treasury")} showCloseButton>
-      <VStack align="stretch" gap={4}>
-        <VStack align="start" gap={1}>
-          <Text fontWeight="semibold">{t("What is the Treasury?")}</Text>
-          <Text textStyle="sm" color="text.muted">
-            {t(
-              "The VeBetterDAO Treasury is a community-owned fund that holds B3TR tokens and other assets. It is governed by the community through on-chain proposals and voting.",
-            )}
-          </Text>
-        </VStack>
-
-        <VStack align="start" gap={1}>
-          <Text fontWeight="semibold">{t("Where do funds come from?")}</Text>
-          <List.Root gap={1}>
-            <List.Item>
-              <Text textStyle="sm" color="text.muted">
-                {t("Weekly B3TR emissions allocated to the treasury")}
-              </Text>
-            </List.Item>
-            <List.Item>
-              <Text textStyle="sm" color="text.muted">
-                {t("Surplus from app voting allocation rounds")}
-              </Text>
-            </List.Item>
-            <List.Item>
-              <Text textStyle="sm" color="text.muted">
-                {t("Users upgrading their Galaxy Membership NFTs")}
-              </Text>
-            </List.Item>
-          </List.Root>
-        </VStack>
-
-        <VStack align="start" gap={1}>
-          <Text fontWeight="semibold">{t("How can funds be used?")}</Text>
-          <Text textStyle="sm" color="text.muted">
-            {t(
-              "Any community member can submit a governance proposal to transfer funds from the treasury. Proposals require community approval through voting before execution.",
-            )}
-          </Text>
-        </VStack>
-      </VStack>
-    </Modal>
   )
 }
