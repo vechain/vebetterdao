@@ -104,7 +104,6 @@ export const useAllChallenges = () => {
 
       const ids = Array.from({ length: total }, (_, i) => i + 1)
       const out: RawChallenge[] = []
-      let didDebugLog = false
 
       for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
         const slice = ids.slice(i, i + CHUNK_SIZE)
@@ -115,12 +114,6 @@ export const useAllChallenges = () => {
           args: [BigInt(id)] as const,
         }))
         const results = (await executeMultipleClausesCall({ thor: thor!, calls })) as unknown[]
-
-        if (!didDebugLog && results[0] !== undefined) {
-          // eslint-disable-next-line no-console
-          console.log("[admin/quests] first raw getChallenge result:", results[0])
-          didDebugLog = true
-        }
 
         for (const r of results) {
           out.push({
