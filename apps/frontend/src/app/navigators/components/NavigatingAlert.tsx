@@ -18,7 +18,7 @@ export const NavigatingAlert = () => {
   if (!navigator) return null
 
   return (
-    <Alert.Root status="info" borderRadius="xl" alignItems="center">
+    <Alert.Root status="info" borderRadius="xl" flexWrap="wrap" alignItems="center">
       <Alert.Indicator>
         <LuCompass />
       </Alert.Indicator>
@@ -28,7 +28,11 @@ export const NavigatingAlert = () => {
           amount: formatter.format(Number(navigator.totalDelegatedFormatted)),
         })}
       </Alert.Title>
-      <Button size="xs" variant="secondary" onClick={() => router.push(`/navigators/${account?.address}`)}>
+      <Button
+        size="xs"
+        variant="secondary"
+        width={{ base: "full", md: "auto" }}
+        onClick={() => router.push(`/navigators/${account?.address}`)}>
         {t("Manage")}
       </Button>
     </Alert.Root>
