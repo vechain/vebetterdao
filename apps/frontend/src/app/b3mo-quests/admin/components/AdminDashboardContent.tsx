@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { formatEther } from "ethers"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { aggregateChallenges, ChallengesAggregate } from "@/api/challenges/aggregateChallenges"
@@ -70,6 +70,14 @@ export const AdminDashboardContent = () => {
   const { data: challenges, isLoading, isError, error } = useAllChallenges()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const [roundFilter, setRoundFilter] = useState<RoundFilter>(ALL_ROUNDS)
+  const [hasUserFiltered, setHasUserFiltered] = useState(false)
+
+  // Default to current round once it loads, unless user already changed the filter
+  useEffect(() => {
+    if (!hasUserFiltered && currentRoundId) {
+      setRoundFilter(Number(currentRoundId))
+    }
+  }, [currentRoundId, hasUserFiltered])
 
   const aggregate = useMemo<ChallengesAggregate | null>(
     () =>
@@ -131,7 +139,10 @@ export const AdminDashboardContent = () => {
               rounds={allRounds}
               value={roundFilter}
               currentRound={currentRoundId ? Number(currentRoundId) : undefined}
-              onChange={setRoundFilter}
+              onChange={v => {
+                setHasUserFiltered(true)
+                setRoundFilter(v)
+              }}
             />
 
             <SimpleGrid columns={{ base: 2, md: 4 }} gap={3}>
