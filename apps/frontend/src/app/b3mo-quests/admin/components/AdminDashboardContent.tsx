@@ -79,14 +79,16 @@ export const AdminDashboardContent = () => {
     [challenges, roundFilter],
   )
 
-  // Full range from launch round to current, descending, regardless of challenge data.
-  // Each entry carries the count of quests active during that round so the selector
-  // can show "Round 96 — 0 quests" instead of leaving the user to guess which rounds
-  // had any data.
+  // Range from launch round (95) to the latest round that either is the current
+  // allocation round OR has at least one quest ending in it — quests can be created
+  // with endRound > currentRound (scheduled), so we include those future rounds too.
+  // Each entry carries the count of quests active during that round.
   const allRounds = useMemo<{ round: number; activeCount: number }[]>(() => {
     const current = currentRoundId ? Number(currentRoundId) : null
     if (!current || current < FIRST_QUEST_ROUND) return []
-    const range = Array.from({ length: current - FIRST_QUEST_ROUND + 1 }, (_, i) => current - i)
+    const maxQuestRound = challenges?.reduce((m, c) => Math.max(m, c.endRound), 0) ?? 0
+    const last = Math.max(current, maxQuestRound)
+    const range = Array.from({ length: last - FIRST_QUEST_ROUND + 1 }, (_, i) => last - i)
     return range.map(round => ({
       round,
       activeCount: challenges?.filter(c => c.startRound <= round && c.endRound >= round).length ?? 0,
