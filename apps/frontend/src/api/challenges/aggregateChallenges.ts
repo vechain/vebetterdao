@@ -14,6 +14,8 @@ export interface ChallengesAggregate {
   byVisibility: Map<ChallengeVisibility, number>
   bySettlement: Map<SettlementMode, number>
   totalPrizeByStatus: Map<ChallengeStatus, bigint>
+  totalPrizeByKind: Map<ChallengeKind, bigint>
+  totalPrizeByVisibility: Map<ChallengeVisibility, bigint>
   totalPrize: bigint
   sumParticipants: number
   sumInvited: number
@@ -49,6 +51,8 @@ export const aggregateChallenges = (
   const byVisibility = new Map<ChallengeVisibility, number>()
   const bySettlement = new Map<SettlementMode, number>()
   const totalPrizeByStatus = new Map<ChallengeStatus, bigint>()
+  const totalPrizeByKind = new Map<ChallengeKind, bigint>()
+  const totalPrizeByVisibility = new Map<ChallengeVisibility, bigint>()
   const creatorCounts = new Map<string, number>()
 
   let sumParticipants = 0
@@ -63,6 +67,8 @@ export const aggregateChallenges = (
     inc(byVisibility, c.visibility)
     inc(bySettlement, c.settlementMode)
     addBig(totalPrizeByStatus, c.status, c.totalPrize)
+    addBig(totalPrizeByKind, c.kind, c.totalPrize)
+    addBig(totalPrizeByVisibility, c.visibility, c.totalPrize)
 
     sumParticipants += c.participantCount
     sumInvited += c.invitedCount
@@ -90,6 +96,8 @@ export const aggregateChallenges = (
     byVisibility,
     bySettlement,
     totalPrizeByStatus,
+    totalPrizeByKind,
+    totalPrizeByVisibility,
     totalPrize,
     sumParticipants,
     sumInvited,

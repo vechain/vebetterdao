@@ -274,6 +274,7 @@ export const AdminDashboardContent = () => {
             </SimpleGrid>
 
             <PrizeByStatusCard aggregate={aggregate} />
+            <PrizeByKindAndVisibilityCard aggregate={aggregate} />
             <TopCreatorsCard aggregate={aggregate} />
           </>
         )}
@@ -532,6 +533,102 @@ const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
         </ResponsiveContainer>
       </Card.Body>
     </Card.Root>
+  )
+}
+
+const PrizeByKindAndVisibilityCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
+  const colors = useChartColors()
+
+  const kindData = [
+    {
+      label: KIND_LABELS[ChallengeKind.Stake],
+      b3tr: Number(formatEther(aggregate.totalPrizeByKind.get(ChallengeKind.Stake) ?? 0n)),
+      count: aggregate.byKind.get(ChallengeKind.Stake) ?? 0,
+      color: colors.graph[0]!,
+    },
+    {
+      label: KIND_LABELS[ChallengeKind.Sponsored],
+      b3tr: Number(formatEther(aggregate.totalPrizeByKind.get(ChallengeKind.Sponsored) ?? 0n)),
+      count: aggregate.byKind.get(ChallengeKind.Sponsored) ?? 0,
+      color: colors.graph[1]!,
+    },
+  ]
+
+  const visibilityData = [
+    {
+      label: VISIBILITY_LABELS[ChallengeVisibility.Public],
+      b3tr: Number(formatEther(aggregate.totalPrizeByVisibility.get(ChallengeVisibility.Public) ?? 0n)),
+      count: aggregate.byVisibility.get(ChallengeVisibility.Public) ?? 0,
+      color: colors.graph[2]!,
+    },
+    {
+      label: VISIBILITY_LABELS[ChallengeVisibility.Private],
+      b3tr: Number(formatEther(aggregate.totalPrizeByVisibility.get(ChallengeVisibility.Private) ?? 0n)),
+      count: aggregate.byVisibility.get(ChallengeVisibility.Private) ?? 0,
+      color: colors.graph[3]!,
+    },
+  ]
+
+  const makeChart = (data: typeof kindData) => (
+    <ResponsiveContainer width="100%" height={100}>
+      <BarChart data={data} layout="vertical" margin={{ left: 8, right: 60, top: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={colors.grid} />
+        <XAxis
+          type="number"
+          tick={{ fontSize: 11 }}
+          tickFormatter={v => humanNumber(v)}
+          stroke={colors.axis}
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          type="category"
+          dataKey="label"
+          tick={{ fontSize: 11 }}
+          width={96}
+          stroke={colors.axis}
+          axisLine={false}
+          tickLine={false}
+        />
+        <Tooltip
+          cursor={{ fill: colors.grid, opacity: 0.3 }}
+          content={
+            <ChartTooltip
+              formatter={entry => ({
+                value: `${humanNumber(entry.value)} B3TR (${entry.payload?.count ?? 0} quests)`,
+                name: String(entry.payload?.label ?? "Total prize"),
+              })}
+            />
+          }
+        />
+        <Bar dataKey="b3tr" radius={[0, 4, 4, 0]}>
+          {data.map((entry, i) => (
+            <Cell key={i} fill={entry.color} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  )
+
+  return (
+    <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+      <Card.Root variant="outline">
+        <Card.Body>
+          <Heading size="sm" mb={4}>
+            B3TR volume by kind
+          </Heading>
+          {makeChart(kindData)}
+        </Card.Body>
+      </Card.Root>
+      <Card.Root variant="outline">
+        <Card.Body>
+          <Heading size="sm" mb={4}>
+            B3TR volume by visibility
+          </Heading>
+          {makeChart(visibilityData)}
+        </Card.Body>
+      </Card.Root>
+    </SimpleGrid>
   )
 }
 
