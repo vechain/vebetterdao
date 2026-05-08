@@ -96,7 +96,7 @@ export const useChallengeParticipantActions = (challengeId: number, participants
 
       const items = slice.map((participant, index) => ({
         participant,
-        actions: Number(results[index] ?? 0),
+        actions: index < results.length ? Number(toBigIntValue(results[index])) : 0,
       }))
 
       const next = offset + PARTICIPANT_ACTIONS_PAGE_SIZE
@@ -149,12 +149,17 @@ export const useChallengeParticipantActions = (challengeId: number, participants
 
   const totalActions = useMemo(() => leaderboard.reduce((sum, entry) => sum + entry.actions, 0), [leaderboard])
 
+  // React Query returns isLoading=false when enabled=false (e.g. thor not
+  // yet initialised). Treat "participants exist but no data yet" as loading
+  // so consumers show skeletons instead of an empty/zero-score leaderboard.
+  const isLoading = query.isLoading || (total > 0 && contractOk && !query.data)
+
   return {
     leaderboard,
     totalActions,
     loadedCount: loadedItems.length,
     totalCount: total,
-    isLoading: query.isLoading,
+    isLoading,
     isError: query.isError,
     isFetchingNextPage: query.isFetchingNextPage,
     hasNextPage: query.hasNextPage,
