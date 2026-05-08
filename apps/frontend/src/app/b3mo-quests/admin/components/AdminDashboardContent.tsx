@@ -341,10 +341,10 @@ const ParticipationCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
           Participation
         </Heading>
         <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 24, top: 0, bottom: 0 }}>
+          <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 24, top: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
             <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={80} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={96} />
             <Tooltip formatter={((v: number) => [v, ""]) as never} />
             <Bar dataKey="value" fill="#6366F1" radius={[0, 4, 4, 0]} />
           </BarChart>
@@ -374,10 +374,10 @@ const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
           Total B3TR (totalPrize) by status
         </Heading>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 60, top: 0, bottom: 0 }}>
+          <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 60, top: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
             <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => humanNumber(v)} />
-            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={80} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={96} />
             <Tooltip
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={
@@ -448,10 +448,10 @@ const TopCreatorsCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
         ) : (
           <>
             <ResponsiveContainer width="100%" height={Math.max(160, aggregate.topCreators.length * 32)}>
-              <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 32, top: 0, bottom: 0 }}>
+              <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 32, top: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
                 <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={90} fontFamily="monospace" />
+                <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={120} fontFamily="monospace" />
                 <Tooltip formatter={((v: number) => [v, "Quests"]) as never} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {barData.map((entry, i) => (
