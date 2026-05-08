@@ -23,7 +23,7 @@ export const DelegatingAlert = ({ amount, navigatorAddress }: Props) => {
   const name = domainData?.domain ? humanDomain(domainData.domain, 20, 10) : humanAddress(navigatorAddress, 6, 4)
 
   return (
-    <Alert.Root status="info" borderRadius="xl" alignItems="center">
+    <Alert.Root status="info" borderRadius="xl" flexWrap="wrap" alignItems="center">
       <Alert.Indicator>
         <LuUserCheck />
       </Alert.Indicator>
@@ -41,7 +41,11 @@ export const DelegatingAlert = ({ amount, navigatorAddress }: Props) => {
             }),
           })}`}
       </Alert.Title>
-      <Button size="xs" variant="secondary" onClick={() => router.push(`/navigators/${navigatorAddress}`)}>
+      <Button
+        size="xs"
+        variant="secondary"
+        width={{ base: "full", md: "auto" }}
+        onClick={() => router.push(`/navigators/${navigatorAddress}`)}>
         {t("Go to Navigator")}
       </Button>
     </Alert.Root>

@@ -2,12 +2,16 @@ import { Badge, Box, Button, Card, HStack, Icon, Separator, Skeleton, Text, VSta
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuSettings, LuUsers } from "react-icons/lu"
 
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
+import { DelegationModal } from "@/app/navigators/shared/DelegationModal"
 import { AddressIcon } from "@/components/AddressIcon"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
 import Vot3Svg from "@/components/Icons/svg/vot3-icon.svg"
@@ -26,8 +30,12 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
   const { data: isNavigator } = useIsNavigator()
   const { displayName, domainLoading } = useNavigatorDisplayName(nav.address)
   const { data: metadata } = useNavigatorMetadata(nav.metadataURI)
+  const { data: isDelegated } = useIsDelegated(account?.address)
+  const { data: currentNavigator } = useGetNavigator(account?.address)
+  const [isDelegationModalOpen, setIsDelegationModalOpen] = useState(false)
   const isActive = nav.status === "ACTIVE"
   const isOwnCard = account?.address?.toLowerCase() === nav.address.toLowerCase()
+  const isDelegatedHere = isDelegated && currentNavigator?.toLowerCase() === nav.address.toLowerCase()
 
   const actionButton = (() => {
     if (!account?.address) return null
@@ -46,82 +54,99 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
         </Button>
       )
     }
+    if (isActive && !isOwnCard) {
+      return (
+        <Button
+          variant={isDelegatedHere ? "outline" : "solid"}
+          size="xs"
+          width={{ base: "full", md: "auto" }}
+          onClick={e => {
+            e.stopPropagation()
+            setIsDelegationModalOpen(true)
+          }}>
+          {isDelegatedHere ? t("Manage Delegation") : t("Delegate")}
+        </Button>
+      )
+    }
     return null
   })()
 
   return (
-    <Card.Root
-      variant="outline"
-      w="full"
-      borderRadius="xl"
-      cursor="pointer"
-      _hover={{ borderColor: "border.emphasized" }}
-      onClick={() => router.push(`/navigators/${nav.address}`)}>
-      <Card.Body>
-        <VStack gap={3} align="stretch" justify="space-between" h="full">
-          <VStack gap={6} align="stretch">
-            <HStack justify="space-between" align="center">
-              <HStack gap={2}>
-                <AddressIcon address={nav.address} boxSize={10} borderRadius="full" />
-                <VStack gap={0} align="start">
-                  <Skeleton loading={domainLoading}>
-                    <Text textStyle="sm" fontWeight="semibold">
-                      {displayName}
-                    </Text>
-                  </Skeleton>
-                  {!isActive && (
-                    <Badge colorPalette={nav.status === "EXITING" ? "yellow" : "red"} size="xs">
-                      {nav.status}
-                    </Badge>
-                  )}
-                </VStack>
+    <>
+      <Card.Root
+        variant="outline"
+        w="full"
+        borderRadius="xl"
+        cursor="pointer"
+        _hover={{ borderColor: "border.emphasized" }}
+        onClick={() => router.push(`/navigators/${nav.address}`)}>
+        <Card.Body>
+          <VStack gap={3} align="stretch" justify="space-between" h="full">
+            <VStack gap={6} align="stretch">
+              <HStack justify="space-between" align="center">
+                <HStack gap={2}>
+                  <AddressIcon address={nav.address} boxSize={10} borderRadius="full" />
+                  <VStack gap={0} align="start">
+                    <Skeleton loading={domainLoading}>
+                      <Text textStyle="sm" fontWeight="semibold">
+                        {displayName}
+                      </Text>
+                    </Skeleton>
+                    {!isActive && (
+                      <Badge colorPalette={nav.status === "EXITING" ? "yellow" : "red"} size="xs">
+                        {nav.status}
+                      </Badge>
+                    )}
+                  </VStack>
+                </HStack>
+                {actionButton && <Box display={{ base: "none", md: "flex" }}>{actionButton}</Box>}
               </HStack>
-              {actionButton && <Box display={{ base: "none", md: "flex" }}>{actionButton}</Box>}
-            </HStack>
 
-            <Text textStyle="xs" color="fg.muted" lineClamp={3}>
-              {metadata?.votingStrategy || t("No voting strategy provided")}
-            </Text>
-          </VStack>
-
-          <VStack gap={3} align="stretch">
-            <HStack gap={3}>
-              <HStack gap={1}>
-                <Icon boxSize={5} ml="-1">
-                  <B3trSvg />
-                </Icon>
-                <Text textStyle="xs" fontWeight="semibold">
-                  {formatter.format(Number(nav.stakeFormatted))}
-                </Text>
-                <Text textStyle="xs" color="fg.muted">
-                  {t("staked")}
-                </Text>
-              </HStack>
-              <Separator orientation="vertical" height="50%" />
-              <HStack gap={1}>
-                <Icon boxSize={5}>
-                  <Vot3Svg />
-                </Icon>
-                <Text textStyle="xs" fontWeight="semibold">
-                  {formatter.format(Number(nav.totalDelegatedFormatted))}
-                </Text>
-                <Text textStyle="xs" color="fg.muted">
-                  {t("delegated")}
-                </Text>
-              </HStack>
-            </HStack>
-
-            <HStack gap={1}>
-              <LuUsers size={14} color="var(--chakra-colors-fg-muted)" />
-              <Text textStyle="xs" color="fg.muted">
-                {t("Trusted by {{count}} citizens", { count: nav.citizenCount })}
+              <Text textStyle="xs" color="fg.muted" lineClamp={3}>
+                {metadata?.votingStrategy || t("No voting strategy provided")}
               </Text>
-            </HStack>
+            </VStack>
 
-            {actionButton && <Box display={{ base: "flex", md: "none" }}>{actionButton}</Box>}
+            <VStack gap={3} align="stretch">
+              <HStack gap={3}>
+                <HStack gap={1}>
+                  <Icon boxSize={5} ml="-1">
+                    <B3trSvg />
+                  </Icon>
+                  <Text textStyle="xs" fontWeight="semibold">
+                    {formatter.format(Number(nav.stakeFormatted))}
+                  </Text>
+                  <Text textStyle="xs" color="fg.muted">
+                    {t("staked")}
+                  </Text>
+                </HStack>
+                <Separator orientation="vertical" height="50%" />
+                <HStack gap={1}>
+                  <Icon boxSize={5}>
+                    <Vot3Svg />
+                  </Icon>
+                  <Text textStyle="xs" fontWeight="semibold">
+                    {formatter.format(Number(nav.totalDelegatedFormatted))}
+                  </Text>
+                  <Text textStyle="xs" color="fg.muted">
+                    {t("delegated")}
+                  </Text>
+                </HStack>
+              </HStack>
+
+              <HStack gap={1}>
+                <LuUsers size={14} color="var(--chakra-colors-fg-muted)" />
+                <Text textStyle="xs" color="fg.muted">
+                  {t("Trusted by {{count}} citizens", { count: nav.citizenCount })}
+                </Text>
+              </HStack>
+
+              {actionButton && <Box display={{ base: "flex", md: "none" }}>{actionButton}</Box>}
+            </VStack>
           </VStack>
-        </VStack>
-      </Card.Body>
-    </Card.Root>
+        </Card.Body>
+      </Card.Root>
+      <DelegationModal isOpen={isDelegationModalOpen} onClose={() => setIsDelegationModalOpen(false)} navigator={nav} />
+    </>
   )
 }
