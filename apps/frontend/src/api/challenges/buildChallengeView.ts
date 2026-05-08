@@ -219,7 +219,15 @@ export const buildChallengeViews = async ({
     })
 
     // ChallengeView is a subset of ChallengeDetail; the Card list uses the lighter shape.
-    const { participants: _p, invited: _i, declined: _d, selectedApps: _s, winners: _w, ...view } = detail
+    const {
+      participants: _p,
+      invited: _i,
+      declined: _d,
+      selectedApps: _s,
+      winners: _w,
+      viewerActions: _va,
+      ...view
+    } = detail
     views.push(view)
   }
 
