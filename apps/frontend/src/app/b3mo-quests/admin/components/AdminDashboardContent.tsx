@@ -42,10 +42,10 @@ const KIND_LABELS: Record<ChallengeKind, string> = { 0: "Stake", 1: "Sponsored" 
 const TYPE_LABELS: Record<ChallengeType, string> = { 0: "MaxActions", 1: "SplitWin" }
 const VISIBILITY_LABELS: Record<ChallengeVisibility, string> = { 0: "Public", 1: "Private" }
 const SETTLEMENT_LABELS: Record<SettlementMode, string> = {
-  0: "None",
-  1: "TopWinners",
-  2: "CreatorRefund",
-  3: "SplitWinCompleted",
+  0: "Not settled",
+  1: "Top winners paid",
+  2: "Creator refunded",
+  3: "Split-win paid",
 }
 
 // Status-specific colors matching VeBetterDAO semantic palette
@@ -162,7 +162,7 @@ export const AdminDashboardContent = () => {
                 total={aggregate.total}
               />
               <BreakdownCard
-                title="By settlement mode"
+                title="Payout outcome"
                 labels={[
                   [SettlementMode.None, SETTLEMENT_LABELS[0]],
                   [SettlementMode.TopWinners, SETTLEMENT_LABELS[1]],
