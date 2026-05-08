@@ -18,6 +18,7 @@ import {
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
 import { formatEther } from "ethers"
 import { useMemo, useState } from "react"
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { aggregateChallenges, ChallengesAggregate } from "@/api/challenges/aggregateChallenges"
 import {
@@ -47,6 +48,17 @@ const SETTLEMENT_LABELS: Record<SettlementMode, string> = {
   2: "CreatorRefund",
   3: "SplitWinCompleted",
 }
+
+// Status-specific colors matching VeBetterDAO semantic palette
+const STATUS_COLORS: Record<number, string> = {
+  0: "#3B82F6", // Pending — blue
+  1: "#10B981", // Active — green
+  2: "#14B8A6", // Completed — teal
+  3: "#F59E0B", // Cancelled — amber
+  4: "#EF4444", // Invalid — red
+}
+// Generic graph palette for non-status breakdowns
+const GRAPH_COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#14B8A6"]
 
 const ALL_ROUNDS = "all" as const
 type RoundFilter = number | typeof ALL_ROUNDS
@@ -121,6 +133,7 @@ export const AdminDashboardContent = () => {
                 labels={STATUS_ORDER.map(s => [s, challengeStatusLabel(s)])}
                 counts={aggregate.byStatus}
                 total={aggregate.total}
+                colorMap={STATUS_COLORS}
               />
               <BreakdownCard
                 title="By kind"
@@ -239,48 +252,104 @@ const BreakdownCard = <K extends number>({
   labels,
   counts,
   total,
+  colorMap,
 }: {
   title: string
   labels: [K, string][]
   counts: Map<K, number>
   total: number
-}) => (
-  <Card.Root variant="outline">
-    <Card.Body>
-      <Heading size="sm" mb={3}>
-        {title}
-      </Heading>
-      <VStack align="stretch" gap={2}>
-        {labels.map(([key, label]) => {
-          const c = counts.get(key) ?? 0
-          const pct = total > 0 ? ((c / total) * 100).toFixed(1) : "0.0"
-          return (
-            <HStack key={String(key)} justify="space-between">
-              <Text textStyle="sm">{label}</Text>
-              <Text textStyle="sm" color="text.subtle">
-                {c} ({pct}%)
-              </Text>
-            </HStack>
-          )
-        })}
-      </VStack>
-    </Card.Body>
-  </Card.Root>
-)
+  colorMap?: Record<number, string>
+}) => {
+  const pieData = labels.map(([key, label], i) => ({
+    name: label,
+    value: counts.get(key) ?? 0,
+    color: colorMap?.[key] ?? GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1",
+    key,
+  }))
+  const hasData = pieData.some(d => d.value > 0)
+
+  return (
+    <Card.Root variant="outline">
+      <Card.Body>
+        <Heading size="sm" mb={3}>
+          {title}
+        </Heading>
+        {hasData && (
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
+                {pieData.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter={
+                  ((value: number, name: string) => {
+                    const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0.0"
+                    return [`${value} (${pct}%)`, name]
+                  }) as any
+                }
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+        <VStack align="stretch" gap={2} mt={hasData ? 2 : 0}>
+          {labels.map(([key, label], i) => {
+            const c = counts.get(key) ?? 0
+            const pct = total > 0 ? ((c / total) * 100).toFixed(1) : "0.0"
+            const color = colorMap?.[key] ?? GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1"
+            return (
+              <HStack key={String(key)} justify="space-between">
+                <HStack gap={2}>
+                  <chakra.span
+                    display="inline-block"
+                    w="10px"
+                    h="10px"
+                    borderRadius="full"
+                    flexShrink={0}
+                    style={{ backgroundColor: color }}
+                  />
+                  <Text textStyle="sm">{label}</Text>
+                </HStack>
+                <Text textStyle="sm" color="text.subtle" fontWeight="semibold">
+                  {c} ({pct}%)
+                </Text>
+              </HStack>
+            )
+          })}
+        </VStack>
+      </Card.Body>
+    </Card.Root>
+  )
+}
 
 const ParticipationCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
   const { total, sumParticipants, sumInvited, sumDeclined } = aggregate
   const avg = (n: number) => (total > 0 ? (n / total).toFixed(2) : "0.00")
+
+  const barData = [
+    { label: "Participants", value: sumParticipants },
+    { label: "Invited", value: sumInvited },
+    { label: "Declined", value: sumDeclined },
+  ]
+
   return (
     <Card.Root variant="outline">
       <Card.Body>
         <Heading size="sm" mb={3}>
           Participation
         </Heading>
-        <VStack align="stretch" gap={2}>
-          <Row label="Sum participants" value={sumParticipants.toString()} />
-          <Row label="Sum invited" value={sumInvited.toString()} />
-          <Row label="Sum declined" value={sumDeclined.toString()} />
+        <ResponsiveContainer width="100%" height={120}>
+          <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 24, top: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+            <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={80} />
+            <Tooltip formatter={((v: number) => [v, ""]) as never} />
+            <Bar dataKey="value" fill="#6366F1" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+        <VStack align="stretch" gap={1} mt={3}>
           <Row label="Avg participants/quest" value={avg(sumParticipants)} />
           <Row label="Avg invited/quest" value={avg(sumInvited)} />
           <Row label="Avg declined/quest" value={avg(sumDeclined)} />
@@ -290,69 +359,133 @@ const ParticipationCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
   )
 }
 
-const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => (
-  <Card.Root variant="outline">
-    <Card.Body>
-      <Heading size="sm" mb={3}>
-        Total B3TR (totalPrize) by status
-      </Heading>
-      <Table.Root size="sm">
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader>Status</Table.ColumnHeader>
-            <Table.ColumnHeader textAlign="end">Count</Table.ColumnHeader>
-            <Table.ColumnHeader textAlign="end">Total B3TR</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {STATUS_ORDER.map(s => (
-            <Table.Row key={s}>
-              <Table.Cell>{challengeStatusLabel(s)}</Table.Cell>
-              <Table.Cell textAlign="end">{aggregate.byStatus.get(s) ?? 0}</Table.Cell>
-              <Table.Cell textAlign="end">{fmtB3tr(aggregate.totalPrizeByStatus.get(s) ?? 0n)}</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
-    </Card.Body>
-  </Card.Root>
-)
+const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
+  const barData = STATUS_ORDER.map(s => ({
+    label: challengeStatusLabel(s),
+    b3tr: Number(formatEther(aggregate.totalPrizeByStatus.get(s) ?? 0n)),
+    count: aggregate.byStatus.get(s) ?? 0,
+    color: STATUS_COLORS[s],
+  }))
 
-const TopCreatorsCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => (
-  <Card.Root variant="outline">
-    <Card.Body>
-      <Heading size="sm" mb={3}>
-        Top creators by quest count
-      </Heading>
-      {aggregate.topCreators.length === 0 ? (
-        <Text textStyle="sm" color="text.subtle">
-          No quests in this view.
-        </Text>
-      ) : (
-        <Table.Root size="sm">
+  return (
+    <Card.Root variant="outline">
+      <Card.Body>
+        <Heading size="sm" mb={4}>
+          Total B3TR (totalPrize) by status
+        </Heading>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 60, top: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+            <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => humanNumber(v)} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={80} />
+            <Tooltip
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={
+                ((v: number, _name: string, props: any) => [
+                  `${humanNumber(v)} B3TR (${props.payload?.count ?? 0} quests)`,
+                  "Total prize",
+                ]) as never
+              }
+            />
+            <Bar dataKey="b3tr" radius={[0, 4, 4, 0]}>
+              {barData.map((entry, i) => (
+                <Cell key={i} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+        <Table.Root size="sm" mt={4}>
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>#</Table.ColumnHeader>
-              <Table.ColumnHeader>Address</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">Quests</Table.ColumnHeader>
+              <Table.ColumnHeader>Status</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="end">Count</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="end">Total B3TR</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {aggregate.topCreators.map((c, i) => (
-              <Table.Row key={c.address}>
-                <Table.Cell>{i + 1}</Table.Cell>
-                <Table.Cell fontFamily="mono" textStyle="xs">
-                  {humanAddress(c.address)}
+            {STATUS_ORDER.map(s => (
+              <Table.Row key={s}>
+                <Table.Cell>
+                  <HStack gap={2}>
+                    <chakra.span
+                      display="inline-block"
+                      w="8px"
+                      h="8px"
+                      borderRadius="full"
+                      style={{ backgroundColor: STATUS_COLORS[s] }}
+                    />
+                    {challengeStatusLabel(s)}
+                  </HStack>
                 </Table.Cell>
-                <Table.Cell textAlign="end">{c.count}</Table.Cell>
+                <Table.Cell textAlign="end">{aggregate.byStatus.get(s) ?? 0}</Table.Cell>
+                <Table.Cell textAlign="end">{fmtB3tr(aggregate.totalPrizeByStatus.get(s) ?? 0n)}</Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>
         </Table.Root>
-      )}
-    </Card.Body>
-  </Card.Root>
-)
+      </Card.Body>
+    </Card.Root>
+  )
+}
+
+const TopCreatorsCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
+  const barData = aggregate.topCreators.map((c, i) => ({
+    label: humanAddress(c.address, 4, 4),
+    value: c.count,
+    color: GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1",
+  }))
+
+  return (
+    <Card.Root variant="outline">
+      <Card.Body>
+        <Heading size="sm" mb={3}>
+          Top creators by quest count
+        </Heading>
+        {aggregate.topCreators.length === 0 ? (
+          <Text textStyle="sm" color="text.subtle">
+            No quests in this view.
+          </Text>
+        ) : (
+          <>
+            <ResponsiveContainer width="100%" height={Math.max(160, aggregate.topCreators.length * 32)}>
+              <BarChart data={barData} layout="vertical" margin={{ left: 0, right: 32, top: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={90} fontFamily="monospace" />
+                <Tooltip formatter={((v: number) => [v, "Quests"]) as never} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                  {barData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <Table.Root size="sm" mt={4}>
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>#</Table.ColumnHeader>
+                  <Table.ColumnHeader>Address</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="end">Quests</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {aggregate.topCreators.map((c, i) => (
+                  <Table.Row key={c.address}>
+                    <Table.Cell>{i + 1}</Table.Cell>
+                    <Table.Cell fontFamily="mono" textStyle="xs">
+                      {humanAddress(c.address)}
+                    </Table.Cell>
+                    <Table.Cell textAlign="end">{c.count}</Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </>
+        )}
+      </Card.Body>
+    </Card.Root>
+  )
+}
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <HStack justify="space-between">
