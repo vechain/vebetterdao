@@ -11,7 +11,6 @@ import {
   SimpleGrid,
   Spinner,
   Stack,
-  Table,
   Text,
   VStack,
 } from "@chakra-ui/react"
@@ -296,25 +295,18 @@ const BreakdownCard = <K extends number>({
         )}
         <VStack align="stretch" gap={2} mt={hasData ? 2 : 0}>
           {labels.map(([key, label], i) => {
-            const c = counts.get(key) ?? 0
-            const pct = total > 0 ? ((c / total) * 100).toFixed(1) : "0.0"
             const color = colorMap?.[key] ?? GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1"
             return (
-              <HStack key={String(key)} justify="space-between">
-                <HStack gap={2}>
-                  <chakra.span
-                    display="inline-block"
-                    w="10px"
-                    h="10px"
-                    borderRadius="full"
-                    flexShrink={0}
-                    style={{ backgroundColor: color }}
-                  />
-                  <Text textStyle="sm">{label}</Text>
-                </HStack>
-                <Text textStyle="sm" color="text.subtle" fontWeight="semibold">
-                  {c} ({pct}%)
-                </Text>
+              <HStack key={String(key)} gap={2}>
+                <chakra.span
+                  display="inline-block"
+                  w="10px"
+                  h="10px"
+                  borderRadius="full"
+                  flexShrink={0}
+                  style={{ backgroundColor: color }}
+                />
+                <Text textStyle="sm">{label}</Text>
               </HStack>
             )
           })}
@@ -394,35 +386,6 @@ const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <Table.Root size="sm" mt={4}>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">Count</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">Total B3TR</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {STATUS_ORDER.map(s => (
-              <Table.Row key={s}>
-                <Table.Cell>
-                  <HStack gap={2}>
-                    <chakra.span
-                      display="inline-block"
-                      w="8px"
-                      h="8px"
-                      borderRadius="full"
-                      style={{ backgroundColor: STATUS_COLORS[s] }}
-                    />
-                    {challengeStatusLabel(s)}
-                  </HStack>
-                </Table.Cell>
-                <Table.Cell textAlign="end">{aggregate.byStatus.get(s) ?? 0}</Table.Cell>
-                <Table.Cell textAlign="end">{fmtB3tr(aggregate.totalPrizeByStatus.get(s) ?? 0n)}</Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
       </Card.Body>
     </Card.Root>
   )
@@ -460,26 +423,6 @@ const TopCreatorsCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-            <Table.Root size="sm" mt={4}>
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>#</Table.ColumnHeader>
-                  <Table.ColumnHeader>Address</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="end">Quests</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {aggregate.topCreators.map((c, i) => (
-                  <Table.Row key={c.address}>
-                    <Table.Cell>{i + 1}</Table.Cell>
-                    <Table.Cell fontFamily="mono" textStyle="xs">
-                      {humanAddress(c.address)}
-                    </Table.Cell>
-                    <Table.Cell textAlign="end">{c.count}</Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Root>
           </>
         )}
       </Card.Body>
