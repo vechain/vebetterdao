@@ -59,6 +59,8 @@ const STATUS_COLORS: Record<number, string> = {
 // Generic graph palette for non-status breakdowns
 const GRAPH_COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#14B8A6"]
 
+const FIRST_QUEST_ROUND = 95
+
 const ALL_ROUNDS = "all" as const
 type RoundFilter = number | typeof ALL_ROUNDS
 
@@ -76,6 +78,13 @@ export const AdminDashboardContent = () => {
         : null,
     [challenges, roundFilter],
   )
+
+  // Full range from launch round to current, descending, regardless of challenge data
+  const allRounds = useMemo<number[]>(() => {
+    const current = currentRoundId ? Number(currentRoundId) : null
+    if (!current || current < FIRST_QUEST_ROUND) return []
+    return Array.from({ length: current - FIRST_QUEST_ROUND + 1 }, (_, i) => current - i)
+  }, [currentRoundId])
 
   return (
     <Container maxW="6xl" py={{ base: 4, md: 8 }}>
@@ -110,7 +119,7 @@ export const AdminDashboardContent = () => {
         {aggregate && challenges && (
           <>
             <RoundSelector
-              rounds={aggregate.rounds}
+              rounds={allRounds}
               value={roundFilter}
               currentRound={currentRoundId ? Number(currentRoundId) : undefined}
               onChange={setRoundFilter}
