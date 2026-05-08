@@ -74,7 +74,7 @@ export const AdminDashboardContent = () => {
   const aggregate = useMemo<ChallengesAggregate | null>(
     () =>
       challenges
-        ? aggregateChallenges(challenges, roundFilter === ALL_ROUNDS ? undefined : { endRound: roundFilter })
+        ? aggregateChallenges(challenges, roundFilter === ALL_ROUNDS ? undefined : { activeInRound: roundFilter })
         : null,
     [challenges, roundFilter],
   )
@@ -217,7 +217,7 @@ const RoundSelector = ({
     <Card.Body>
       <Stack direction={{ base: "column", md: "row" }} align={{ base: "stretch", md: "center" }} gap={3}>
         <Text textStyle="sm" color="text.subtle" minW="120px">
-          Filter by endRound
+          Filter by round
         </Text>
         <chakra.select
           value={value === ALL_ROUNDS ? ALL_ROUNDS : String(value)}

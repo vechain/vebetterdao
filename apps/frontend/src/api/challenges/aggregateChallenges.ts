@@ -33,9 +33,15 @@ const addBig = <K>(map: Map<K, bigint>, key: K, delta: bigint) => map.set(key, (
  */
 export const aggregateChallenges = (
   challenges: RawChallenge[],
-  filter?: { endRound?: number },
+  filter?: { activeInRound?: number },
 ): ChallengesAggregate => {
-  const filtered = filter?.endRound !== undefined ? challenges.filter(c => c.endRound === filter.endRound) : challenges
+  // "Active in round R" = the challenge's [startRound, endRound] window contains R.
+  // This matches the natural mental model of the round selector ("what was running
+  // during round R") rather than only matching challenges that happen to end on R.
+  const filtered =
+    filter?.activeInRound !== undefined
+      ? challenges.filter(c => c.startRound <= filter.activeInRound! && c.endRound >= filter.activeInRound!)
+      : challenges
 
   const byStatus = new Map<ChallengeStatus, number>()
   const byKind = new Map<ChallengeKind, number>()
