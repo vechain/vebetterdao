@@ -293,24 +293,24 @@ const BreakdownCard = <K extends number>({
             </PieChart>
           </ResponsiveContainer>
         )}
-        <VStack align="stretch" gap={2} mt={hasData ? 2 : 0}>
+        <chakra.div mt={hasData ? 2 : 0} display="flex" flexWrap="wrap" gap={3} rowGap={1}>
           {labels.map(([key, label], i) => {
             const color = colorMap?.[key] ?? GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1"
             return (
-              <HStack key={String(key)} gap={2}>
+              <HStack key={String(key)} gap={1.5}>
                 <chakra.span
                   display="inline-block"
-                  w="10px"
-                  h="10px"
+                  w="8px"
+                  h="8px"
                   borderRadius="full"
                   flexShrink={0}
                   style={{ backgroundColor: color }}
                 />
-                <Text textStyle="sm">{label}</Text>
+                <Text textStyle="xs">{label}</Text>
               </HStack>
             )
           })}
-        </VStack>
+        </chakra.div>
       </Card.Body>
     </Card.Root>
   )
