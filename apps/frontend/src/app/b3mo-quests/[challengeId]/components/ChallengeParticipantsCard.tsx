@@ -103,13 +103,16 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   const viewerRanking = useMemo(() => {
     if (!account?.address) return undefined
     const entry = leaderboard.find(e => AddressUtils.compareAddresses(e.participant, account.address ?? ""))
-    if (!entry) return undefined
-    return {
-      position: entry.position,
-      address: account.address,
-      score: entry.actions,
+    if (entry) {
+      return { position: entry.position, address: account.address, score: entry.actions }
     }
-  }, [leaderboard, account?.address])
+    // Viewer is a participant but not yet in the loaded leaderboard pages —
+    // fall back to the action count already fetched by the challenge detail.
+    if (challenge.isJoined) {
+      return { position: 0, address: account.address, score: challenge.viewerActions }
+    }
+    return undefined
+  }, [leaderboard, account?.address, challenge.isJoined, challenge.viewerActions])
 
   const isViewerInTop = rankings.some(r => AddressUtils.compareAddresses(r.address, account?.address ?? ""))
 
