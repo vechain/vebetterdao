@@ -54,7 +54,7 @@ export const NavigatorCard = ({ navigator: nav }: Props) => {
         </Button>
       )
     }
-    if (isActive && !isOwnCard) {
+    if (isActive && !isOwnCard && !isNavigator) {
       return (
         <Button
           variant={isDelegatedHere ? "outline" : "solid"}
