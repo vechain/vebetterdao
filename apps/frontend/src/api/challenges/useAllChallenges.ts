@@ -34,25 +34,49 @@ export interface RawChallenge {
   payoutsClaimed: number
 }
 
-interface RawTuple {
-  challengeId: bigint
-  kind: number
-  visibility: number
-  challengeType: number
-  status: number
-  settlementMode: number
-  creator: string
-  stakeAmount: bigint
-  startRound: bigint
-  endRound: bigint
-  totalPrize: bigint
-  participantCount: bigint
-  invitedCount: bigint
-  declinedCount: bigint
-  winnersCount: bigint
-  numWinners: bigint
-  bestScore: bigint
-  payoutsClaimed: bigint
+/**
+ * Positional layout of the `ChallengeView` struct returned by `getChallenge`.
+ * `executeMultipleClausesCall` from `vechain-kit` returns `result.plain` from the
+ * VeChain SDK, which for struct returns is **not guaranteed to expose named keys**
+ * — accessing `r.startRound` may yield `undefined` depending on ABI/decoder. We
+ * read by index to be robust. Order MUST match `ChallengeTypes.ChallengeView` in
+ * `packages/contracts/contracts/challenges/libraries/ChallengeTypes.sol`.
+ */
+const IDX = {
+  challengeId: 0,
+  kind: 1,
+  visibility: 2,
+  challengeType: 3,
+  status: 4,
+  settlementMode: 5,
+  creator: 6,
+  stakeAmount: 7,
+  startRound: 8,
+  endRound: 9,
+  duration: 10,
+  threshold: 11,
+  numWinners: 12,
+  winnersClaimed: 13,
+  prizePerWinner: 14,
+  allApps: 15,
+  totalPrize: 16,
+  participantCount: 17,
+  invitedCount: 18,
+  declinedCount: 19,
+  selectedAppsCount: 20,
+  winnersCount: 21,
+  bestScore: 22,
+  bestCount: 23,
+  payoutsClaimed: 24,
+} as const
+
+// Read either by named key (if SDK exposes them) or by positional index — whichever
+// is defined. Casts via `unknown` because the runtime shape is not statically known.
+const pick = <T>(r: unknown, key: keyof typeof IDX): T => {
+  const obj = r as Record<string, unknown>
+  const named = obj[key]
+  if (named !== undefined) return named as T
+  return (obj[IDX[key]] as T) ?? (Array.isArray(r) ? (r[IDX[key]] as T) : (undefined as T))
 }
 
 /**
@@ -80,6 +104,7 @@ export const useAllChallenges = () => {
 
       const ids = Array.from({ length: total }, (_, i) => i + 1)
       const out: RawChallenge[] = []
+      let didDebugLog = false
 
       for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
         const slice = ids.slice(i, i + CHUNK_SIZE)
@@ -89,28 +114,34 @@ export const useAllChallenges = () => {
           functionName: "getChallenge" as const,
           args: [BigInt(id)] as const,
         }))
-        const results = (await executeMultipleClausesCall({ thor: thor!, calls })) as RawTuple[]
+        const results = (await executeMultipleClausesCall({ thor: thor!, calls })) as unknown[]
+
+        if (!didDebugLog && results[0] !== undefined) {
+          // eslint-disable-next-line no-console
+          console.log("[admin/quests] first raw getChallenge result:", results[0])
+          didDebugLog = true
+        }
 
         for (const r of results) {
           out.push({
-            challengeId: Number(r.challengeId),
-            kind: Number(r.kind) as ChallengeKind,
-            visibility: Number(r.visibility) as ChallengeVisibility,
-            challengeType: Number(r.challengeType) as ChallengeType,
-            status: Number(r.status) as ChallengeStatus,
-            settlementMode: Number(r.settlementMode) as SettlementMode,
-            creator: r.creator,
-            stakeAmount: r.stakeAmount,
-            startRound: Number(r.startRound),
-            endRound: Number(r.endRound),
-            totalPrize: r.totalPrize,
-            participantCount: Number(r.participantCount),
-            invitedCount: Number(r.invitedCount),
-            declinedCount: Number(r.declinedCount),
-            winnersCount: Number(r.winnersCount),
-            numWinners: Number(r.numWinners),
-            bestScore: r.bestScore,
-            payoutsClaimed: Number(r.payoutsClaimed),
+            challengeId: Number(pick<bigint>(r, "challengeId")),
+            kind: Number(pick<bigint | number>(r, "kind")) as ChallengeKind,
+            visibility: Number(pick<bigint | number>(r, "visibility")) as ChallengeVisibility,
+            challengeType: Number(pick<bigint | number>(r, "challengeType")) as ChallengeType,
+            status: Number(pick<bigint | number>(r, "status")) as ChallengeStatus,
+            settlementMode: Number(pick<bigint | number>(r, "settlementMode")) as SettlementMode,
+            creator: pick<string>(r, "creator"),
+            stakeAmount: pick<bigint>(r, "stakeAmount"),
+            startRound: Number(pick<bigint>(r, "startRound")),
+            endRound: Number(pick<bigint>(r, "endRound")),
+            totalPrize: pick<bigint>(r, "totalPrize"),
+            participantCount: Number(pick<bigint>(r, "participantCount")),
+            invitedCount: Number(pick<bigint>(r, "invitedCount")),
+            declinedCount: Number(pick<bigint>(r, "declinedCount")),
+            winnersCount: Number(pick<bigint>(r, "winnersCount")),
+            numWinners: Number(pick<bigint>(r, "numWinners")),
+            bestScore: pick<bigint>(r, "bestScore"),
+            payoutsClaimed: Number(pick<bigint>(r, "payoutsClaimed")),
           })
         }
       }
