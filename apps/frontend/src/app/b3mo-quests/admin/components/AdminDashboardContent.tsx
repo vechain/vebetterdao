@@ -79,12 +79,19 @@ export const AdminDashboardContent = () => {
     [challenges, roundFilter],
   )
 
-  // Full range from launch round to current, descending, regardless of challenge data
-  const allRounds = useMemo<number[]>(() => {
+  // Full range from launch round to current, descending, regardless of challenge data.
+  // Each entry carries the count of quests active during that round so the selector
+  // can show "Round 96 — 0 quests" instead of leaving the user to guess which rounds
+  // had any data.
+  const allRounds = useMemo<{ round: number; activeCount: number }[]>(() => {
     const current = currentRoundId ? Number(currentRoundId) : null
     if (!current || current < FIRST_QUEST_ROUND) return []
-    return Array.from({ length: current - FIRST_QUEST_ROUND + 1 }, (_, i) => current - i)
-  }, [currentRoundId])
+    const range = Array.from({ length: current - FIRST_QUEST_ROUND + 1 }, (_, i) => current - i)
+    return range.map(round => ({
+      round,
+      activeCount: challenges?.filter(c => c.startRound <= round && c.endRound >= round).length ?? 0,
+    }))
+  }, [currentRoundId, challenges])
 
   return (
     <Container maxW="6xl" py={{ base: 4, md: 8 }}>
@@ -208,7 +215,7 @@ const RoundSelector = ({
   currentRound,
   onChange,
 }: {
-  rounds: number[]
+  rounds: { round: number; activeCount: number }[]
   value: RoundFilter
   currentRound?: number
   onChange: (v: RoundFilter) => void
@@ -230,10 +237,11 @@ const RoundSelector = ({
           borderWidth="1px"
           borderColor="border.primary">
           <option value={ALL_ROUNDS}>All rounds ({rounds.length})</option>
-          {rounds.map(r => (
-            <option key={r} value={r}>
-              Round {r}
-              {currentRound === r ? " (current)" : ""}
+          {rounds.map(({ round, activeCount }) => (
+            <option key={round} value={round}>
+              Round {round}
+              {currentRound === round ? " (current)" : ""} — {activeCount} active{" "}
+              {activeCount === 1 ? "quest" : "quests"}
             </option>
           ))}
         </chakra.select>
