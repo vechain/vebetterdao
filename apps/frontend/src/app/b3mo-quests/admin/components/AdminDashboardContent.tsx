@@ -224,7 +224,7 @@ const RoundSelector = ({
 const KpiCard = ({ label, value }: { label: string; value: string }) => (
   <Card.Root variant="outline">
     <Card.Body p={4}>
-      <Text textStyle="xs" color="text.subtle" lineClamp={1}>
+      <Text textStyle="xs" color="text.subtle">
         {label}
       </Text>
       <Text textStyle={{ base: "lg", md: "xl" }} fontWeight="bold" mt={1}>
