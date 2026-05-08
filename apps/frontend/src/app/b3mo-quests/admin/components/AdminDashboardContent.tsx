@@ -2,6 +2,7 @@
 /* eslint-disable react/jsx-no-literals -- internal-only dashboard, not user-facing copy */
 
 import {
+  Box,
   Card,
   chakra,
   Container,
@@ -12,6 +13,7 @@ import {
   Spinner,
   Stack,
   Text,
+  useToken,
   VStack,
 } from "@chakra-ui/react"
 import { humanAddress, humanNumber } from "@repo/utils/FormattingUtils"
@@ -48,16 +50,16 @@ const SETTLEMENT_LABELS: Record<SettlementMode, string> = {
   3: "Split-win paid",
 }
 
-// Status-specific colors matching VeBetterDAO semantic palette
-const STATUS_COLORS: Record<number, string> = {
-  0: "#3B82F6", // Pending — blue
-  1: "#10B981", // Active — green
-  2: "#14B8A6", // Completed — teal
-  3: "#F59E0B", // Cancelled — amber
-  4: "#EF4444", // Invalid — red
+// Status-specific token keys (resolved via useToken at render time)
+const STATUS_TOKENS: Record<number, string> = {
+  0: "blue.500",
+  1: "green.500",
+  2: "teal.500",
+  3: "orange.400",
+  4: "red.500",
 }
-// Generic graph palette for non-status breakdowns
-const GRAPH_COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#14B8A6"]
+const GRAPH_TOKENS = ["purple.500", "green.500", "orange.400", "red.500", "blue.500", "teal.500"]
+const NEUTRAL_TOKENS = { axis: "gray.400", grid: "gray.200" }
 
 const FIRST_QUEST_ROUND = 95
 
@@ -65,6 +67,73 @@ const ALL_ROUNDS = "all" as const
 type RoundFilter = number | typeof ALL_ROUNDS
 
 const fmtB3tr = (wei: bigint) => humanNumber(formatEther(wei))
+
+// Resolve every chart token in one place so each card doesn't repeat the lookup.
+const useChartColors = () => {
+  const allKeys = [...Object.values(STATUS_TOKENS), ...GRAPH_TOKENS, NEUTRAL_TOKENS.axis, NEUTRAL_TOKENS.grid]
+  const unique = [...new Set(allKeys)]
+  const resolved = useToken("colors", unique)
+  const map = Object.fromEntries(unique.map((k, i) => [k, resolved[i] ?? "#6366F1"])) as Record<string, string>
+  return {
+    status: Object.fromEntries(Object.entries(STATUS_TOKENS).map(([k, v]) => [k, map[v]])) as Record<number, string>,
+    graph: GRAPH_TOKENS.map(t => map[t] ?? "#6366F1"),
+    axis: map[NEUTRAL_TOKENS.axis] ?? "#A0AEC0",
+    grid: map[NEUTRAL_TOKENS.grid] ?? "#E2E8F0",
+  }
+}
+
+// Chakra-styled tooltip used for every chart on the page so they match the rest
+// of the design system (matches RewardHistoryChart on the app detail page).
+type TooltipPayload = { value: number; name?: string; payload?: Record<string, unknown>; color?: string }
+const ChartTooltip = ({
+  active,
+  payload,
+  label,
+  formatter,
+}: {
+  active?: boolean
+  payload?: TooltipPayload[]
+  label?: string | number
+  formatter?: (entry: TooltipPayload) => { value: string; name?: string }
+}) => {
+  if (!active || !payload?.length) return null
+  return (
+    <Box
+      bg="white"
+      _dark={{ bg: "gray.800" }}
+      border="1px solid"
+      borderColor="border"
+      borderRadius="lg"
+      p={3}
+      boxShadow="lg">
+      {label !== undefined && (
+        <Text textStyle="xs" fontWeight="semibold" mb={1}>
+          {label}
+        </Text>
+      )}
+      {payload.map((entry, i) => {
+        const formatted = formatter ? formatter(entry) : { value: String(entry.value), name: entry.name }
+        return (
+          <HStack key={i} gap={1.5}>
+            {entry.color && (
+              <chakra.span
+                display="inline-block"
+                w="8px"
+                h="8px"
+                borderRadius="full"
+                style={{ backgroundColor: entry.color }}
+              />
+            )}
+            <Text textStyle="xs" color="text.subtle">
+              {formatted.name ? `${formatted.name}: ` : ""}
+              {formatted.value}
+            </Text>
+          </HStack>
+        )
+      })}
+    </Box>
+  )
+}
 
 export const AdminDashboardContent = () => {
   const { data: challenges, isLoading, isError, error } = useAllChallenges()
@@ -161,7 +230,7 @@ export const AdminDashboardContent = () => {
                 labels={STATUS_ORDER.map(s => [s, challengeStatusLabel(s)])}
                 counts={aggregate.byStatus}
                 total={aggregate.total}
-                colorMap={STATUS_COLORS}
+                useStatusColors
               />
               <BreakdownCard
                 title="By kind"
@@ -281,18 +350,24 @@ const BreakdownCard = <K extends number>({
   labels,
   counts,
   total,
-  colorMap,
+  useStatusColors,
 }: {
   title: string
   labels: [K, string][]
   counts: Map<K, number>
   total: number
-  colorMap?: Record<number, string>
+  useStatusColors?: boolean
 }) => {
+  const colors = useChartColors()
+  const pickColor = (key: K, i: number) =>
+    useStatusColors
+      ? (colors.status[key] ?? colors.graph[0]!)
+      : (colors.graph[i % colors.graph.length] ?? colors.graph[0]!)
+
   const pieData = labels.map(([key, label], i) => ({
     name: label,
     value: counts.get(key) ?? 0,
-    color: colorMap?.[key] ?? GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1",
+    color: pickColor(key, i),
     key,
   }))
   const hasData = pieData.some(d => d.value > 0)
@@ -312,34 +387,32 @@ const BreakdownCard = <K extends number>({
                 ))}
               </Pie>
               <Tooltip
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={
-                  ((value: number, name: string) => {
-                    const pct = total > 0 ? ((value / total) * 100).toFixed(1) : "0.0"
-                    return [`${value} (${pct}%)`, name]
-                  }) as any
+                content={
+                  <ChartTooltip
+                    formatter={entry => {
+                      const pct = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0.0"
+                      return { value: `${entry.value} (${pct}%)`, name: entry.name }
+                    }}
+                  />
                 }
               />
             </PieChart>
           </ResponsiveContainer>
         )}
         <chakra.div mt={hasData ? 2 : 0} display="flex" flexWrap="wrap" gap={3} rowGap={1}>
-          {labels.map(([key, label], i) => {
-            const color = colorMap?.[key] ?? GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1"
-            return (
-              <HStack key={String(key)} gap={1.5}>
-                <chakra.span
-                  display="inline-block"
-                  w="8px"
-                  h="8px"
-                  borderRadius="full"
-                  flexShrink={0}
-                  style={{ backgroundColor: color }}
-                />
-                <Text textStyle="xs">{label}</Text>
-              </HStack>
-            )
-          })}
+          {pieData.map(({ key, name, color }) => (
+            <HStack key={String(key)} gap={1.5}>
+              <chakra.span
+                display="inline-block"
+                w="8px"
+                h="8px"
+                borderRadius="full"
+                flexShrink={0}
+                style={{ backgroundColor: color }}
+              />
+              <Text textStyle="xs">{name}</Text>
+            </HStack>
+          ))}
         </chakra.div>
       </Card.Body>
     </Card.Root>
@@ -347,6 +420,7 @@ const BreakdownCard = <K extends number>({
 }
 
 const ParticipationCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
+  const colors = useChartColors()
   const { total, sumParticipants, sumInvited, sumDeclined } = aggregate
   const avg = (n: number) => (total > 0 ? (n / total).toFixed(2) : "0.00")
 
@@ -364,11 +438,33 @@ const ParticipationCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
         </Heading>
         <ResponsiveContainer width="100%" height={120}>
           <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 24, top: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-            <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={96} />
-            <Tooltip formatter={((v: number) => [v, ""]) as never} />
-            <Bar dataKey="value" fill="#6366F1" radius={[0, 4, 4, 0]} />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={colors.grid} />
+            <XAxis
+              type="number"
+              tick={{ fontSize: 11 }}
+              allowDecimals={false}
+              stroke={colors.axis}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              type="category"
+              dataKey="label"
+              tick={{ fontSize: 11 }}
+              width={96}
+              stroke={colors.axis}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip
+              cursor={{ fill: colors.grid, opacity: 0.3 }}
+              content={
+                <ChartTooltip
+                  formatter={entry => ({ value: humanNumber(entry.value), name: String(entry.payload?.label ?? "") })}
+                />
+              }
+            />
+            <Bar dataKey="value" fill={colors.graph[0]} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
         <VStack align="stretch" gap={1} mt={3}>
@@ -382,11 +478,12 @@ const ParticipationCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
 }
 
 const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
+  const colors = useChartColors()
   const barData = STATUS_ORDER.map(s => ({
     label: challengeStatusLabel(s),
     b3tr: Number(formatEther(aggregate.totalPrizeByStatus.get(s) ?? 0n)),
     count: aggregate.byStatus.get(s) ?? 0,
-    color: STATUS_COLORS[s],
+    color: colors.status[s] ?? colors.graph[0]!,
   }))
 
   return (
@@ -397,16 +494,33 @@ const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
         </Heading>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 60, top: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-            <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => humanNumber(v)} />
-            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={96} />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={colors.grid} />
+            <XAxis
+              type="number"
+              tick={{ fontSize: 11 }}
+              tickFormatter={v => humanNumber(v)}
+              stroke={colors.axis}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              type="category"
+              dataKey="label"
+              tick={{ fontSize: 11 }}
+              width={96}
+              stroke={colors.axis}
+              axisLine={false}
+              tickLine={false}
+            />
             <Tooltip
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              formatter={
-                ((v: number, _name: string, props: any) => [
-                  `${humanNumber(v)} B3TR (${props.payload?.count ?? 0} quests)`,
-                  "Total prize",
-                ]) as never
+              cursor={{ fill: colors.grid, opacity: 0.3 }}
+              content={
+                <ChartTooltip
+                  formatter={entry => ({
+                    value: `${humanNumber(entry.value)} B3TR (${entry.payload?.count ?? 0} quests)`,
+                    name: String(entry.payload?.label ?? "Total prize"),
+                  })}
+                />
               }
             />
             <Bar dataKey="b3tr" radius={[0, 4, 4, 0]}>
@@ -422,10 +536,11 @@ const PrizeByStatusCard = ({ aggregate }: { aggregate: ChallengesAggregate }) =>
 }
 
 const TopCreatorsCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
+  const colors = useChartColors()
   const barData = aggregate.topCreators.map((c, i) => ({
     label: humanAddress(c.address, 4, 4),
     value: c.count,
-    color: GRAPH_COLORS[i % GRAPH_COLORS.length] ?? "#6366F1",
+    color: colors.graph[i % colors.graph.length] ?? colors.graph[0]!,
   }))
 
   return (
@@ -439,21 +554,45 @@ const TopCreatorsCard = ({ aggregate }: { aggregate: ChallengesAggregate }) => {
             No quests in this view.
           </Text>
         ) : (
-          <>
-            <ResponsiveContainer width="100%" height={Math.max(160, aggregate.topCreators.length * 32)}>
-              <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 32, top: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
-                <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={120} fontFamily="monospace" />
-                <Tooltip formatter={((v: number) => [v, "Quests"]) as never} />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                  {barData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </>
+          <ResponsiveContainer width="100%" height={Math.max(160, aggregate.topCreators.length * 32)}>
+            <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 32, top: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={colors.grid} />
+              <XAxis
+                type="number"
+                tick={{ fontSize: 11 }}
+                allowDecimals={false}
+                stroke={colors.axis}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="label"
+                tick={{ fontSize: 11 }}
+                width={120}
+                fontFamily="monospace"
+                stroke={colors.axis}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                cursor={{ fill: colors.grid, opacity: 0.3 }}
+                content={
+                  <ChartTooltip
+                    formatter={entry => ({
+                      value: String(entry.value),
+                      name: String(entry.payload?.label ?? "Quests"),
+                    })}
+                  />
+                }
+              />
+              <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                {barData.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         )}
       </Card.Body>
     </Card.Root>
