@@ -110,7 +110,7 @@
     "turbo": "^2.5.0"
   },
   "devDependencies": {
-    "@datadog/browser-rum": "^5.23.0",
+    "@datadog/browser-rum": "^6.33.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv": "^16.4.5",
