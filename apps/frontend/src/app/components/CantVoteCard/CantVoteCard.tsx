@@ -166,7 +166,9 @@ export const CantVoteCard = () => {
                 justify="space-between"
                 alignItems={{ base: "flex-end", md: "flex-start" }}
                 w="full">
-                <Text color="status.warning.strong">{cantVoteReasonText?.description}</Text>
+                <Text as="div" color="status.warning.strong">
+                  {cantVoteReasonText?.description}
+                </Text>
 
                 {!!cantVoteReasonText?.onLearnMoreClick && (
                   <Button
