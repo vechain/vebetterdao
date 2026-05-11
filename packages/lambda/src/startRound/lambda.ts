@@ -463,12 +463,18 @@ async function distributeDBARewards(thor: ThorClient) {
   // Send the signed transaction to the blockchain
   const tx = await thor.transactions.sendTransaction(signedTx)
 
-  // Wait for the transaction to be processed and get the receipt
-  const receipt = await thor.transactions.waitForTransaction(tx.id)
+  // Wait longer for heavy multi-app DBA transactions (default SDK timeout is too short)
+  let receipt = await thor.transactions.waitForTransaction(tx.id, { timeoutMs: 60_000 })
 
-  // Check if receipt was received
+  // Retry receipt fetch once -- the tx was sent, it may just need another block cycle
   if (!receipt) {
-    console.log(`WARNING: DBA distribution transaction was sent but receipt was not received for round ${roundId}`)
+    console.log(`DBA receipt not found after 60s, retrying in 10s... (txId: ${tx.id})`)
+    await new Promise(resolve => setTimeout(resolve, 10_000))
+    receipt = await thor.transactions.getTransactionReceipt(tx.id)
+  }
+
+  if (!receipt) {
+    console.log(`WARNING: DBA distribution receipt not received for round ${roundId} -- tx may still succeed on-chain`)
     console.log(`Transaction ID: ${tx.id}`)
     return { receipt: null, eligibleAppsCount: eligibleApps.length, gasResult }
   }
@@ -708,11 +714,11 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     } else if (skipped) {
       console.log("DBA distribution skipped (no eligible apps)")
     } else if (!receiptDBA) {
-      console.log("DBA distribution: receipt is null or undefined")
+      console.log("DBA distribution: receipt not received (tx was sent, may still succeed on-chain)")
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: DBA distribution transaction reverted or receipt not received. Please check the logs.`,
+        `${SLACK_MESSAGE_PREFIX}:warning: DBA distribution tx sent but receipt not received. Tx may still succeed on-chain. Check logs for tx ID.`,
       )
     } else {
       console.log("DBA distribution successful")
