@@ -1,57 +1,32 @@
-import { VStack, Button, useDisclosure, Card, Text, Stack, HStack, Icon, List, Skeleton } from "@chakra-ui/react"
+import { VStack, Button, useDisclosure, Card, Text, Stack, HStack, Icon, Image, Heading, Box } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCircleAlert, LuCircleCheck, LuCircleDashed } from "react-icons/lu"
+import { IoGridOutline } from "react-icons/io5"
+import { LuCircleAlert, LuSparkles, LuZap } from "react-icons/lu"
 
 import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
+import { PowerUpModal } from "@/components/PowerUpModal"
 
 import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
+import { useVeDelegateAutoDeposit } from "../../../api/contracts/veDelegate/hooks/useVeDelegateAutoDeposit"
 import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetDelegatee"
 import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
 import { useUserScore } from "../../../api/indexer/sustainability/useUserScore"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 
-type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions" | "signaled" | "blacklisted"
-type CantVoteReasonText = {
+import { VotingRequirementsList } from "./VotingRequirementsList"
+
+type CantVoteReason = "new" | "returning" | "delegator" | "secondary" | "signaled" | "blacklisted"
+
+type SimpleReasonText = {
   title: string
   description: ReactNode
   onLearnMoreClick?: () => void
-}
-
-/**
- * Uses isPerson from the contract (checked at snapshot) as source of truth for the actions check.
- * missingActions from the indexer is only used as guidance for how many more actions are needed.
- */
-export const VotingRequirementsList = ({ isPerson }: { isPerson?: boolean }) => {
-  const { t } = useTranslation()
-  const { account } = useWallet()
-  const { missingActions, isLoading: isLoadingMissingActions } = useUserScore()
-  const { data: voteBalance, isLoading: isLoadingVoteBalance } = useGetVot3Balance(account?.address)
-
-  // Contract isPerson (at snapshot) is the source of truth.
-  // If isPerson is explicitly false, the user does NOT have enough actions regardless of indexer data.
-  const hasEnoughActions = isPerson ?? missingActions <= 0
-
-  return (
-    <Skeleton loading={isLoadingMissingActions || isLoadingVoteBalance}>
-      <List.Root variant="plain">
-        <List.Item>
-          <List.Indicator asChild color="inherit">
-            {hasEnoughActions ? <LuCircleCheck /> : <LuCircleDashed />}
-          </List.Indicator>
-          {t("Complete {{count}} more Better Actions in our apps", { count: Math.max(missingActions, 1) })}
-        </List.Item>
-        <List.Item>
-          <List.Indicator asChild color="inherit">
-            {!!voteBalance?.original && Number(voteBalance.original) > 0 ? <LuCircleCheck /> : <LuCircleDashed />}
-          </List.Indicator>
-          {t("Convert your B3TR to VOT3 to gain voting power in the next round")}
-        </List.Item>
-      </List.Root>
-    </Skeleton>
-  )
 }
 
 export const CantVoteCard = () => {
@@ -60,7 +35,14 @@ export const CantVoteCard = () => {
   const router = useRouter()
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
+  const { isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
+  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
+  const { missingActions } = useUserScore()
+  const { data: b3trBalance } = useGetB3trBalance(account?.address)
+  const { data: voteBalance } = useGetVot3Balance(account?.address)
   const doActionModal = useDisclosure()
+  const powerUpModal = useDisclosure()
 
   const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson, personReason } = useCanUserVote()
 
@@ -72,20 +54,46 @@ export const CantVoteCard = () => {
     router.push("/profile?tab=governance")
   }, [router])
 
+  const handleGoToApps = useCallback(() => {
+    router.push("/apps")
+  }, [router])
+
   const handleOpenDoActionModal = useCallback(() => {
     doActionModal.onOpen()
   }, [doActionModal])
 
+  const isUsingVeDelegate = isVeDelegated || hasAutoDeposit
+  const hasEnoughActions = isPerson ?? missingActions <= 0
+  const hasB3trToConvert = Number(b3trBalance?.scaled ?? "0") >= 1
+  const holdsAtLeastOneVot3 = Number(voteBalance?.scaled ?? "0") >= 1
+  const allStepsComplete = hasEnoughActions && holdsAtLeastOneVot3
+
+  // Contextual primary action: pick the most pressing next step for the user.
+  // Order: missing actions → power up B3TR → fallback "earn more".
+  // When all 3 steps are complete, no primary action is shown — the user is prepped for the next round.
+  const primaryAction = allStepsComplete
+    ? null
+    : !hasEnoughActions
+      ? { label: t("Explore apps"), onClick: handleGoToApps, icon: <IoGridOutline /> }
+      : hasB3trToConvert && !holdsAtLeastOneVot3
+        ? { label: t("Power up"), onClick: powerUpModal.onOpen, icon: <LuZap /> }
+        : { label: t("Explore apps"), onClick: handleGoToApps, icon: <IoGridOutline /> }
+
   const cantVoteReason = useMemo<CantVoteReason | null>(() => {
-    if (!account?.address || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading) return null
+    if (!account?.address || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading || isDelegateeLoading)
+      return null
+    // veDelegate users see the DelegatingBanner via ActionBanner; suppress here to avoid duplication.
+    if (isUsingVeDelegate) return null
     if (isEntity) return "secondary"
     if (isDelegator) return "delegator"
-    if (!hasVotesAtSnapshot) return "no-votes"
     if (!isPerson) {
       if (personReason.includes("signaled")) return "signaled"
       if (personReason.includes("blacklisted")) return "blacklisted"
-      return "no-actions"
+      // Had ≥ threshold VOT3 at snapshot but missing actions → can still vote this round if they complete actions in time.
+      if (hasVotesAtSnapshot) return "returning"
     }
+    // Sub-threshold VOT3 at snapshot → cannot vote this round regardless; prepare for next round.
+    if (!hasVotesAtSnapshot) return "new"
     return null
   }, [
     account?.address,
@@ -94,12 +102,14 @@ export const CantVoteCard = () => {
     isLoadingDelegator,
     isDelegator,
     canVoteLoading,
+    isDelegateeLoading,
+    isUsingVeDelegate,
     hasVotesAtSnapshot,
     isPerson,
     personReason,
   ])
 
-  const cantVoteReasonText = useMemo<CantVoteReasonText | null>(() => {
+  const simpleReasonText = useMemo<SimpleReasonText | null>(() => {
     switch (cantVoteReason) {
       case "delegator":
         return {
@@ -125,20 +135,97 @@ export const CantVoteCard = () => {
           title: t("You can't vote because your account has been blacklisted."),
           description: t("Contact VeBetterDAO support for more information."),
         }
-      case "no-votes":
-      case "no-actions":
-        return {
-          title: t("You're not eligible to vote yet. To vote in next round:"),
-          description: <VotingRequirementsList isPerson={isPerson} />,
-          onLearnMoreClick: handleOpenDoActionModal,
-        }
-
       default:
         return null
     }
-  }, [cantVoteReason, t, isPerson, handleGoToGovernance, handleGoToLinking, handleOpenDoActionModal])
+  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking])
 
-  if (!cantVoteReasonText) return null
+  if (!cantVoteReason) return null
+
+  if (cantVoteReason === "new" || cantVoteReason === "returning") {
+    const isNew = cantVoteReason === "new"
+    const palette = isNew
+      ? {
+          bg: "status.positive.subtle",
+          border: "status.positive.primary",
+          strong: "status.positive.strong",
+        }
+      : {
+          bg: "status.warning.subtle",
+          border: "status.warning.primary",
+          strong: "status.warning.strong",
+        }
+    const title = isNew ? t("You're almost there — get ready to vote next round") : t("You can still vote this round")
+    const body = isNew
+      ? t("Complete a few quick steps now and you'll qualify to vote in the next round.")
+      : t("You have voting power but need to complete a few Better Actions before the round ends to unlock voting.")
+    const mascotSrc = isNew ? "/assets/mascot/B3MO_Tokens_2.webp" : "/assets/mascot/mascot-warning-head.webp"
+
+    return (
+      <Card.Root
+        bg={palette.bg}
+        border="1px solid"
+        borderColor={palette.border}
+        rounded="xl"
+        w="full"
+        h="full"
+        p="4"
+        position="relative"
+        overflow="hidden">
+        <Card.Body position="relative" p="0">
+          <Stack direction={{ base: "column", md: "row" }} align="flex-start" gap="4">
+            <Icon
+              asChild
+              color={palette.strong}
+              boxSize="9"
+              flexShrink={0}
+              display={{ base: "none", md: "inline-flex" }}>
+              {isNew ? <LuSparkles /> : <LuCircleAlert />}
+            </Icon>
+            <VStack align="flex-start" gap="3" flex="1" minW={0} w="full">
+              <VStack align="flex-start" gap="1">
+                <Heading size="md" fontWeight="bold" color={palette.strong}>
+                  {title}
+                </Heading>
+                <Text color={palette.strong}>{body}</Text>
+              </VStack>
+              <Box color={palette.strong} w="full">
+                <VotingRequirementsList isPerson={isPerson} />
+              </Box>
+              <Stack
+                direction={{ base: "column", sm: "row" }}
+                gap="2"
+                mt="4"
+                w="full"
+                align={{ base: "stretch", sm: "center" }}>
+                {primaryAction && (
+                  <Button size="sm" variant="tertiary" onClick={primaryAction.onClick}>
+                    {primaryAction.icon}
+                    {primaryAction.label}
+                  </Button>
+                )}
+                <Button size="sm" variant="link" color={palette.strong} onClick={handleOpenDoActionModal}>
+                  {t("Learn more")}
+                </Button>
+              </Stack>
+            </VStack>
+            <Image
+              src={mascotSrc}
+              alt="B3MO"
+              boxSize={isNew ? { base: "200px", md: "200px" } : { base: "120px", md: "160px" }}
+              objectFit="contain"
+              flexShrink={0}
+              display={{ base: "none", sm: "block" }}
+            />
+          </Stack>
+        </Card.Body>
+        <DoActionModal doActionModal={doActionModal} variant={isNew ? "new" : "returning"} />
+        <PowerUpModal isOpen={powerUpModal.open} onClose={powerUpModal.onClose} />
+      </Card.Root>
+    )
+  }
+
+  if (!simpleReasonText) return null
 
   return (
     <Card.Root
@@ -157,7 +244,7 @@ export const CantVoteCard = () => {
             </Icon>
             <VStack gap={0} w="full" align="flex-start">
               <Text fontWeight="bold" color="status.warning.strong" as="span">
-                {cantVoteReasonText?.title}
+                {simpleReasonText.title}
               </Text>
               <Stack
                 flexDir={{ base: "column", md: "row" }}
@@ -167,17 +254,17 @@ export const CantVoteCard = () => {
                 alignItems={{ base: "flex-end", md: "flex-start" }}
                 w="full">
                 <Text as="div" color="status.warning.strong">
-                  {cantVoteReasonText?.description}
+                  {simpleReasonText.description}
                 </Text>
 
-                {!!cantVoteReasonText?.onLearnMoreClick && (
+                {!!simpleReasonText.onLearnMoreClick && (
                   <Button
                     size="sm"
                     alignItems="flex-end"
                     variant="plain"
                     _hover={{ textDecoration: "underline" }}
                     color="status.warning.strong"
-                    onClick={cantVoteReasonText.onLearnMoreClick}>
+                    onClick={simpleReasonText.onLearnMoreClick}>
                     {t("Learn more")}
                   </Button>
                 )}
@@ -186,8 +273,6 @@ export const CantVoteCard = () => {
           </HStack>
         </VStack>
       </Card.Body>
-
-      <DoActionModal doActionModal={doActionModal} />
     </Card.Root>
   )
 }
