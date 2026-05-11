@@ -14,6 +14,8 @@ import { useVeDelegateAutoDeposit } from "../../../api/contracts/veDelegate/hook
 import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
 import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetDelegatee"
 import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useHasVotedInRound } from "../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useUserScore } from "../../../api/indexer/sustainability/useUserScore"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
@@ -45,6 +47,8 @@ export const CantVoteCard = () => {
   const powerUpModal = useDisclosure()
 
   const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson, personReason } = useCanUserVote()
+  const { data: currentRoundIdRaw } = useCurrentAllocationsRoundId()
+  const { data: hasVotedAllocation } = useHasVotedInRound(currentRoundIdRaw ?? "0", account?.address)
 
   const handleGoToLinking = useCallback(() => {
     router.push("/profile?tab=linked-accounts")
@@ -92,12 +96,16 @@ export const CantVoteCard = () => {
       // Had ≥ threshold VOT3 at snapshot but missing actions → can still vote this round if they complete actions in time.
       if (hasVotesAtSnapshot) return "returning"
     }
+    // User already voted this round (e.g. via a Navigator delegation) → don't show the "next round" framing.
+    // FirstVoteCard owns the post-vote roadmap surface.
+    if (hasVotedAllocation) return null
     // Sub-threshold VOT3 at snapshot → cannot vote this round regardless; prepare for next round.
     if (!hasVotesAtSnapshot) return "new"
     return null
   }, [
     account?.address,
     isEntity,
+    hasVotedAllocation,
     isLoadingAccountLinking,
     isLoadingDelegator,
     isDelegator,

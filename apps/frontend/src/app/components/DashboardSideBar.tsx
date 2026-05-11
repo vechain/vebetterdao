@@ -8,6 +8,7 @@ import { ManagedAppsCard } from "../../components/ManagedAppsCard/ManagedAppsCar
 import { useBreakpoints } from "../../hooks/useBreakpoints"
 
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
+import { FirstVoteCard } from "./CantVoteCard/FirstVoteCard"
 import { CitizenNavigatorCard } from "./CitizenNavigatorCard"
 import { NavigatorDashboardCard } from "./NavigatorDashboardCard"
 import { NavigatorDiscoveryCard } from "./NavigatorDiscoveryCard"
@@ -20,6 +21,7 @@ export const DashboardSideBar = () => {
   return (
     <VStack gap={4}>
       {isMobile && <CantVoteCard />}
+      {isMobile && <FirstVoteCard />}
       <ManagedAppsCard />
       <NavigatorDashboardCard />
       <CitizenNavigatorCard />
