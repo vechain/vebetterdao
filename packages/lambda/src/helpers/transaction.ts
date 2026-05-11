@@ -1,4 +1,4 @@
-import { TransactionClause } from "@vechain/sdk-core"
+import { HexUInt, TransactionClause } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
 import { maxGasLimit } from "./gas"
 
@@ -26,15 +26,32 @@ const buildGasEstimate = async (
 }
 
 /**
- * Builds a transaction body with the specified clause and gas settings
- * @param thor - Thor client instance
- * @param clause - Transaction clause
- * @param gasResult - Gas estimation result - if not provided, the default is half of the max gas limit
- * @returns The built transaction body
+ * Builds a transaction body with the specified clause and gas settings.
+ * Automatically applies EIP-1559 fee headroom (2x baseFee + priorityFee) post-Galactica
+ * so transactions survive rising baseFees during congestion.
  */
 const buildTxBody = async (thor: ThorClient, clauses: TransactionClause[], totalGas?: number) => {
   const useGas = totalGas || maxGasLimit / 2
-  return await thor.transactions.buildTransactionBody(clauses, useGas)
+
+  const isGalactica = await thor.forkDetector.isGalacticaForked("best")
+  if (!isGalactica) {
+    return await thor.transactions.buildTransactionBody(clauses, useGas)
+  }
+
+  const baseFeeHex = await thor.blocks.getBestBlockBaseFeePerGas()
+  const priorityFeeHex = await thor.gas.getMaxPriorityFeePerGas()
+
+  const baseFee = baseFeeHex ? HexUInt.of(baseFeeHex).bi : 0n
+  const priorityFee = HexUInt.of(priorityFeeHex).bi
+
+  // 2x baseFee headroom: survives ~6 consecutive full blocks of rising fees
+  const maxFeePerGas = HexUInt.of(baseFee * 2n + priorityFee).toString()
+  const maxPriorityFeePerGas = HexUInt.of(priorityFee).toString()
+
+  return await thor.transactions.buildTransactionBody(clauses, useGas, {
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  })
 }
 
 export { buildTxBody, buildGasEstimate }
