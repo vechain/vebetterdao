@@ -1,5 +1,7 @@
 import { useMemo } from "react"
 
+import { useVote2EarnDecay } from "@/api/contracts/emissions/hooks/useVote2EarnDecay"
+import { useVote2EarnDecayPeriod } from "@/api/contracts/emissions/hooks/useVote2EarnDecayPeriod"
 import { useXAllocationsDecay } from "@/api/contracts/emissions/hooks/useXAllocationsDecay"
 import { useXAllocationsDecayPeriod } from "@/api/contracts/emissions/hooks/useXAllocationsDecayPeriod"
 import { useAllocationAmount } from "@/api/contracts/xAllocations/hooks/useAllocationAmount"
@@ -7,15 +9,15 @@ import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAlloc
 
 import { ActivityItem, ActivityType } from "./types"
 
-type DecreasedBucket = {
-  type:
-    | ActivityType.APP_REWARDS_DECREASED
-    | ActivityType.VOTER_REWARDS_DECREASED
-    | ActivityType.TREASURY_REWARDS_DECREASED
-    | ActivityType.GM_REWARDS_DECREASED
-  curr: string
-  prev: string
-  title: string
+const sumAllocations = (a: { treasury: string; voteX2Earn: string; voteXAllocations: string; gm: string }) =>
+  parseFloat(a.treasury) + parseFloat(a.voteX2Earn) + parseFloat(a.voteXAllocations) + parseFloat(a.gm)
+
+const computeNextDecayRound = (currentRoundId: string, periodStr?: string): string => {
+  const period = Number(periodStr ?? 0)
+  if (period <= 0) return "0"
+  const roundNum = Number(currentRoundId)
+  const remainder = roundNum % period
+  return String(roundNum + (period - remainder))
 }
 
 export const useEmissionsActivities = (
@@ -25,88 +27,77 @@ export const useEmissionsActivities = (
   const { data: currentAmount, isLoading: isCurrentLoading } = useAllocationAmount(currentRoundId)
   const { data: previousAmount, isLoading: isPreviousLoading } = useAllocationAmount(previousRoundId)
   const { data: round, isLoading: isRoundLoading } = useAllocationsRound(currentRoundId)
-  const { data: decayPeriod, isLoading: isDecayPeriodLoading } = useXAllocationsDecayPeriod()
-  const { data: decayRate, isLoading: isDecayLoading } = useXAllocationsDecay()
+  const { data: xDecayPeriod, isLoading: isXDecayPeriodLoading } = useXAllocationsDecayPeriod()
+  const { data: xDecayRate, isLoading: isXDecayRateLoading } = useXAllocationsDecay()
+  const { data: v2eDecayPeriod, isLoading: isV2eDecayPeriodLoading } = useVote2EarnDecayPeriod()
+  const { data: v2eDecayRate, isLoading: isV2eDecayRateLoading } = useVote2EarnDecay()
 
   const data = useMemo((): ActivityItem[] => {
     if (!currentRoundId || currentRoundId === "0") return []
     if (!previousRoundId || previousRoundId === "0") return []
     if (!currentAmount || !previousAmount) return []
 
-    const date = round?.voteStartTimestamp?.unix() ?? 0
-    const roundNum = Number(currentRoundId)
-    const period = Number(decayPeriod ?? 0)
-    let nextDecreaseRound = "0"
-    if (period > 0) {
-      const remainder = roundNum % period
-      nextDecreaseRound = String(roundNum + (period - remainder))
-    }
-    const nextDecreasePercentage = Number(decayRate ?? 0)
+    const anyDecreased =
+      parseFloat(currentAmount.voteXAllocations) < parseFloat(previousAmount.voteXAllocations) ||
+      parseFloat(currentAmount.voteX2Earn) < parseFloat(previousAmount.voteX2Earn) ||
+      parseFloat(currentAmount.treasury) < parseFloat(previousAmount.treasury) ||
+      parseFloat(currentAmount.gm) < parseFloat(previousAmount.gm)
 
-    const buckets: DecreasedBucket[] = [
+    if (!anyDecreased) return []
+
+    const currentTotal = sumAllocations(currentAmount)
+    const previousTotal = sumAllocations(previousAmount)
+    const totalPercentageChange =
+      previousTotal !== 0 ? Math.round(((currentTotal - previousTotal) / previousTotal) * 10000) / 100 : 0
+
+    const date = round?.voteStartTimestamp?.unix() ?? 0
+
+    return [
       {
-        type: ActivityType.APP_REWARDS_DECREASED,
-        curr: currentAmount.voteXAllocations,
-        prev: previousAmount.voteXAllocations,
-        title: "App rewards decreased",
-      },
-      {
-        type: ActivityType.VOTER_REWARDS_DECREASED,
-        curr: currentAmount.voteX2Earn,
-        prev: previousAmount.voteX2Earn,
-        title: "Voter rewards decreased",
-      },
-      {
-        type: ActivityType.TREASURY_REWARDS_DECREASED,
-        curr: currentAmount.treasury,
-        prev: previousAmount.treasury,
-        title: "Treasury allocation decreased",
-      },
-      {
-        type: ActivityType.GM_REWARDS_DECREASED,
-        curr: currentAmount.gm,
-        prev: previousAmount.gm,
-        title: "GM rewards decreased",
+        type: ActivityType.EMISSIONS_DECREASED,
+        date,
+        roundId: currentRoundId,
+        title: "Emissions decreased",
+        metadata: {
+          previousAppsAmount: previousAmount.voteXAllocations,
+          previousVotersAmount: previousAmount.voteX2Earn,
+          previousTreasuryAmount: previousAmount.treasury,
+          previousGmAmount: previousAmount.gm,
+          currentAppsAmount: currentAmount.voteXAllocations,
+          currentVotersAmount: currentAmount.voteX2Earn,
+          currentTreasuryAmount: currentAmount.treasury,
+          currentGmAmount: currentAmount.gm,
+          previousTotal: String(previousTotal),
+          currentTotal: String(currentTotal),
+          totalPercentageChange,
+          nextEmissionsDecreaseRound: computeNextDecayRound(currentRoundId, xDecayPeriod),
+          nextEmissionsDecreasePercentage: Number(xDecayRate ?? 0),
+          nextVoterShiftRound: computeNextDecayRound(currentRoundId, v2eDecayPeriod),
+          nextVoterShiftPercentage: Number(v2eDecayRate ?? 0),
+        },
       },
     ]
-
-    return buckets
-      .filter(b => {
-        const prev = parseFloat(b.prev)
-        const curr = parseFloat(b.curr)
-        return prev > 0 && curr < prev
-      })
-      .map(b => {
-        const prev = parseFloat(b.prev)
-        const curr = parseFloat(b.curr)
-        const percentageChange = Math.round(((curr - prev) / prev) * 10000) / 100
-
-        return {
-          type: b.type,
-          date,
-          roundId: currentRoundId,
-          title: b.title,
-          metadata: {
-            currentAmount: b.curr,
-            previousAmount: b.prev,
-            percentageChange,
-            nextDecreaseRound,
-            nextDecreasePercentage,
-          },
-        }
-      })
   }, [
     currentRoundId,
     previousRoundId,
     currentAmount,
     previousAmount,
     round?.voteStartTimestamp,
-    decayPeriod,
-    decayRate,
+    xDecayPeriod,
+    xDecayRate,
+    v2eDecayPeriod,
+    v2eDecayRate,
   ])
 
   return {
     data,
-    isLoading: isCurrentLoading || isPreviousLoading || isRoundLoading || isDecayPeriodLoading || isDecayLoading,
+    isLoading:
+      isCurrentLoading ||
+      isPreviousLoading ||
+      isRoundLoading ||
+      isXDecayPeriodLoading ||
+      isXDecayRateLoading ||
+      isV2eDecayPeriodLoading ||
+      isV2eDecayRateLoading,
   }
 }

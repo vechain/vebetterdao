@@ -4,7 +4,7 @@ export type {
   ProposalActivityMeta,
   AppActivityMeta,
   RoundActivityMeta,
-  AllocationDecreasedActivityMeta,
+  EmissionsActivityMeta,
   GrantActivityMeta,
 } from "./types"
 export { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalActivities"

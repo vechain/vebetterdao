@@ -1,7 +1,7 @@
 export { ActivityCard } from "./ActivityCard"
 export { ActivityFeed } from "./ActivityFeed"
 export { AppActivityCard } from "./AppActivityCard"
-export { AllocationDecreasedActivityCard } from "./AllocationDecreasedActivityCard"
+export { EmissionsActivityCard } from "./EmissionsActivityCard"
 export { GrantActivityCard } from "./GrantActivityCard"
 export { ProposalActivityCard } from "./ProposalActivityCard"
 export { RoundActivityCard } from "./RoundActivityCard"
