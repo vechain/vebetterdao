@@ -37,18 +37,11 @@ export const useEmissionsActivities = (
     if (!previousRoundId || previousRoundId === "0") return []
     if (!currentAmount || !previousAmount) return []
 
-    const anyDecreased =
-      parseFloat(currentAmount.voteXAllocations) < parseFloat(previousAmount.voteXAllocations) ||
-      parseFloat(currentAmount.voteX2Earn) < parseFloat(previousAmount.voteX2Earn) ||
-      parseFloat(currentAmount.treasury) < parseFloat(previousAmount.treasury) ||
-      parseFloat(currentAmount.gm) < parseFloat(previousAmount.gm)
-
-    if (!anyDecreased) return []
-
     const currentTotal = sumAllocations(currentAmount)
     const previousTotal = sumAllocations(previousAmount)
-    const totalPercentageChange =
-      previousTotal !== 0 ? Math.round(((currentTotal - previousTotal) / previousTotal) * 10000) / 100 : 0
+    if (currentTotal >= previousTotal) return []
+
+    const percentageChange = previousTotal !== 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0
 
     const date = round?.voteStartTimestamp?.unix() ?? 0
 
@@ -59,17 +52,13 @@ export const useEmissionsActivities = (
         roundId: currentRoundId,
         title: "Emissions decreased",
         metadata: {
-          previousAppsAmount: previousAmount.voteXAllocations,
-          previousVotersAmount: previousAmount.voteX2Earn,
-          previousTreasuryAmount: previousAmount.treasury,
-          previousGmAmount: previousAmount.gm,
-          currentAppsAmount: currentAmount.voteXAllocations,
-          currentVotersAmount: currentAmount.voteX2Earn,
-          currentTreasuryAmount: currentAmount.treasury,
-          currentGmAmount: currentAmount.gm,
-          previousTotal: String(previousTotal),
           currentTotal: String(currentTotal),
-          totalPercentageChange,
+          previousTotal: String(previousTotal),
+          appsAmount: currentAmount.voteXAllocations,
+          treasuryAmount: currentAmount.treasury,
+          votersAmount: currentAmount.voteX2Earn,
+          gmAmount: currentAmount.gm,
+          percentageChange: Math.round(percentageChange * 100) / 100,
           nextEmissionsDecreaseRound: computeNextDecayRound(currentRoundId, xDecayPeriod),
           nextEmissionsDecreasePercentage: Number(xDecayRate ?? 0),
           nextVoterShiftRound: computeNextDecayRound(currentRoundId, v2eDecayPeriod),
