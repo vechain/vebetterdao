@@ -258,11 +258,11 @@ export async function distributeEmissions(thor: ThorClient) {
 }
 
 /**
- * Distributes X-Allocations to the X-App addresses that have not yet claimed their allocations.
- *
- * @param thor - The ThorClient instance
- * @returns the transaction receipt of the distribution of X-Allocations if successful and the gas result
+ * Max clauses per transaction to stay well under the 40M block gas limit.
+ * Each claim costs ~300-500K gas; 30 claims * 500K * 1.1 padding ≈ 16.5M, safely under limit.
  */
+const X_ALLOCATION_BATCH_SIZE = 30
+
 export async function distributeXAllocations(thor: ThorClient) {
   const privateKey = await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY)
 
@@ -270,44 +270,32 @@ export async function distributeXAllocations(thor: ThorClient) {
     throw new Error("Private key not found")
   }
 
-  // Get the current round number from the Emissions contract
-  const currentRound = await thor.contracts.executeCall(
-    CONFIG.emissionsContractAddress,
-    ABIContract.ofAbi(Emissions__factory.abi).getFunction("getCurrentCycle"),
-    [],
-  )
-  // Get the previous round number for which the X-Allocations are to be distributed
-  const previousRound = Number(currentRound.result?.array?.[0] ?? 0) - 1
+  const walletAddress = Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString()
 
-  // Get the X-Apps for the current round
+  // Refetch current cycle fresh to ensure we claim the correct round after emissions distribution
+  const currentRound = await getCurrentCycleId(thor)
+  const previousRound = currentRound - 1
+
+  logger.info(`Distributing X-Allocations for round ${previousRound} (current cycle: ${currentRound})`)
+
   const xApps = await getAllApps(thor, CONFIG, previousRound.toString())
-
-  // Get the IDs of the X-Apps that have not yet claimed their allocations
   const xAppIds = await getIdsOfUnclaimed(thor, CONFIG, xApps, previousRound.toString())
   logger.info("X-App IDs", { xAppIds })
 
-  // If no X-Apps need to claim, skip distribution
   if (xAppIds.length === 0) {
     console.log(
       `No X-Apps need to claim allocations for round ${previousRound} (${xApps.length} total apps, 0 unclaimed)`,
     )
-    return { receipt: null, gasResult: null, allClaimed: true }
+    return { receipts: [], allClaimed: true, failedBatches: 0 }
   }
 
   const claimClauses = []
   const failedXAppIds: string[] = []
 
-  // Build the claim clauses for the X-Apps that have not yet claimed their allocations and the gas estimation does not revert
   for (const xAppId of xAppIds) {
     const claimClause = buildClaimClause(CONFIG, xAppId, previousRound.toString())
+    const gasResult = await thor.gas.estimateGas([claimClause], walletAddress)
 
-    // Estimate the gas cost for the transaction
-    const gasResult = await thor.gas.estimateGas(
-      [claimClause],
-      Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
-    )
-
-    // Check if the transaction was estimated to revert and handle accordingly
     if (!gasResult.reverted) {
       claimClauses.push(claimClause)
     } else {
@@ -317,52 +305,51 @@ export async function distributeXAllocations(thor: ThorClient) {
 
   logger.info("Claim clauses", { claimClauses, ineligibleApps: failedXAppIds, xAppIdsCount: xAppIds.length })
 
-  // If no claims to process, skip distribution
-  // ClaimClauses is used to determine if the app is eligible to claim allocations
-  // If it's empty, it means no apps are eligible to claim allocations
   if (claimClauses.length === 0) {
     logger.info(`No claim clauses to distribute X-Allocations for round ${previousRound}`)
-    return { receipt: null, gasResult: null, allClaimed: true }
+    return { receipts: [], allClaimed: true, failedBatches: 0 }
   }
 
-  // Estimate the gas cost for the transaction
-  const gasResult = await buildGasEstimate(
-    thor,
-    claimClauses,
-    Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
-  )
+  // Split into batches to avoid exceeding block gas limit
+  const totalBatches = Math.ceil(claimClauses.length / X_ALLOCATION_BATCH_SIZE)
+  const receipts = []
+  let failedBatches = 0
 
-  // Check if the transaction was estimated to revert and handle accordingly
-  if (gasResult.reverted) {
-    console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
+  for (let i = 0; i < claimClauses.length; i += X_ALLOCATION_BATCH_SIZE) {
+    const batch = claimClauses.slice(i, i + X_ALLOCATION_BATCH_SIZE)
+    const batchNum = Math.floor(i / X_ALLOCATION_BATCH_SIZE) + 1
 
-    await publishMessage(
-      client,
-      SLACK_CHANNEL_ID,
-      `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute X-Allocations:\n${gasResult.revertReasons}, ${gasResult.vmErrors}`,
-    )
+    logger.info(`Processing X-Allocation batch ${batchNum}/${totalBatches}`, { clausesInBatch: batch.length })
 
-    return { receipt: null, gasResult }
+    const gasResult = await buildGasEstimate(thor, batch, walletAddress)
+
+    if (gasResult.reverted) {
+      logger.error(`Batch ${batchNum} gas estimation reverted`, undefined, {
+        revertReasons: gasResult.revertReasons,
+        vmErrors: gasResult.vmErrors,
+      })
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: X-Allocations batch ${batchNum}/${totalBatches} reverted: ${gasResult.revertReasons}`,
+      )
+      failedBatches++
+      continue
+    }
+
+    const txBody = await buildTxBody(thor, batch, gasResult.totalGas)
+    const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
+    const tx = await thor.transactions.sendTransaction(signedTx)
+    const receipt = await thor.transactions.waitForTransaction(tx.id)
+
+    if (receipt) {
+      receipts.push(receipt)
+    } else {
+      logger.warn(`Batch ${batchNum} receipt not received`, { txId: tx.id })
+    }
   }
 
-  // Build the transaction body with the estimated gas
-  const txBody = await buildTxBody(thor, claimClauses, gasResult.totalGas * 2)
-
-  // Sign the transaction with the developer's private key
-  const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
-
-  // Send the signed transaction to the blockchain
-  const tx = await thor.transactions.sendTransaction(signedTx)
-
-  const receipt = await thor.transactions.waitForTransaction(tx.id)
-
-  if (!receipt) {
-    console.log("WARNING: X-Allocations distribution transaction was sent but receipt was not received")
-    console.log(`Transaction ID: ${tx.id}`)
-  }
-
-  // Return the transaction receipt
-  return { receipt, gasResult }
+  return { receipts, allClaimed: false, failedBatches }
 }
 
 /**
@@ -623,7 +610,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       }
     }
 
-    // Distribute the X-Allocations to the X-App addresses that have not yet claimed them with retry
+    // Distribute X-Allocations in batches to avoid exceeding block gas limit
     let xAllocationsResult
     try {
       xAllocationsResult = await withRetry(
@@ -647,7 +634,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       }
     }
 
-    const { receipt: receiptClaim, gasResult: gasResultXallocations, allClaimed } = xAllocationsResult
+    const { receipts: receiptsClaim, allClaimed, failedBatches } = xAllocationsResult
 
     if (allClaimed) {
       console.log("No X-Apps need to claim allocations - skipping")
@@ -656,22 +643,19 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         SLACK_CHANNEL_ID,
         `${SLACK_MESSAGE_PREFIX}:information_source: No eligible X-Apps found to claim allocations`,
       )
-    } else if (!receiptClaim && gasResultXallocations?.reverted) {
+    } else if (receiptsClaim.length > 0) {
+      console.log(`X-Allocations distributed in ${receiptsClaim.length} batch(es)`)
+      const failedMsg = failedBatches > 0 ? ` (${failedBatches} batch(es) failed)` : ""
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:alert: X-Allocations transaction reverted: ${gasResultXallocations.revertReasons}, ${gasResultXallocations.vmErrors}`,
+        `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed in ${receiptsClaim.length} tx(s)${failedMsg}`,
       )
-      // Continue to DBA distribution instead of returning
-    } else if (receiptClaim) {
-      // Log the transaction receipt for debugging and verification
-      console.log("Receipt:", receiptClaim)
-
-      // Publish a success message to the Slack channel
+    } else if (failedBatches > 0) {
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
+        `${SLACK_MESSAGE_PREFIX}:alert: All ${failedBatches} X-Allocation batch(es) failed`,
       )
     }
 
@@ -692,7 +676,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         statusCode: 200,
         body: JSON.stringify({
           receiptEmissions,
-          receiptClaim,
+          receiptsClaim,
           dbaError: `Failed to distribute DBA rewards: ${error}`,
         }),
       }
@@ -745,7 +729,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       statusCode: 200,
       body: JSON.stringify({
         receiptEmissions,
-        receiptClaim,
+        receiptsClaim,
         receiptDBA,
         dbaEligibleAppsCount: eligibleAppsCount,
         dbaSkipped: skipped,
