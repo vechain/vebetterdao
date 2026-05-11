@@ -5,7 +5,7 @@ import NextLink, { type LinkProps } from "next/link"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { FaStar, FaStarHalfStroke } from "react-icons/fa6"
-import { LuBan } from "react-icons/lu"
+import { LuInfo } from "react-icons/lu"
 
 import { AppImage } from "@/components/AppImage/AppImage"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
@@ -32,7 +32,7 @@ const getIcon = (type: Props["activity"]["type"]) => {
     case ActivityType.APP_ENDORSEMENT_LOST:
       return { icon: FaStarHalfStroke, color: "status.warning.strong" }
     case ActivityType.APP_BANNED:
-      return { icon: LuBan, color: "status.negative.strong" }
+      return { icon: LuInfo, color: "status.info.strong" }
   }
 }
 
@@ -45,7 +45,7 @@ const getTitle = (type: Props["activity"]["type"], t: TFunction) => {
     case ActivityType.APP_ENDORSEMENT_LOST:
       return t("App lost endorsement")
     case ActivityType.APP_BANNED:
-      return t("App banned")
+      return t("App Status Update")
   }
 }
 
