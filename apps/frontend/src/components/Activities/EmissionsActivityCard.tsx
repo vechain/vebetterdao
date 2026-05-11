@@ -59,7 +59,7 @@ export const EmissionsActivityCard: React.FC<Props> = ({ activity }) => {
 
   return (
     <LinkBox asChild>
-      <Card.Root variant="outline" rounded="lg" w="full" p="4" cursor="pointer">
+      <Card.Root variant="subtle" rounded="lg" w="full" p="4" cursor="pointer">
         <Card.Body p="0">
           <VStack gap="3" align="flex-start" w="full">
             <HStack gap="3" align="flex-start" w="full">
