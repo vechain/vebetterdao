@@ -2,8 +2,8 @@ import React from "react"
 
 import { ActivityItem, ActivityType } from "@/hooks/activities/types"
 
-import { AllocationDecreasedActivityCard } from "./AllocationDecreasedActivityCard"
 import { AppActivityCard } from "./AppActivityCard"
+import { EmissionsActivityCard } from "./EmissionsActivityCard"
 import { GmUpgradeActivityCard } from "./GmUpgradeActivityCard"
 import { GrantActivityCard } from "./GrantActivityCard"
 import { NavigatorActivityCard } from "./NavigatorActivityCard"
@@ -41,11 +41,8 @@ export const ActivityCard: React.FC<Props> = ({ activity }) => {
       return <RoundActivityCard activity={activity} />
     case ActivityType.GM_UPGRADED:
       return <GmUpgradeActivityCard activity={activity} />
-    case ActivityType.APP_REWARDS_DECREASED:
-    case ActivityType.VOTER_REWARDS_DECREASED:
-    case ActivityType.TREASURY_REWARDS_DECREASED:
-    case ActivityType.GM_REWARDS_DECREASED:
-      return <AllocationDecreasedActivityCard activity={activity} />
+    case ActivityType.EMISSIONS_DECREASED:
+      return <EmissionsActivityCard activity={activity} />
     case ActivityType.USER_ALLOCATION_VOTE_CAST:
       return <UserAllocationVoteCard activity={activity} />
     case ActivityType.USER_PROPOSAL_VOTE_CAST:

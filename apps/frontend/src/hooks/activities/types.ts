@@ -17,10 +17,7 @@ export enum ActivityType {
   APP_NEW = "APP_NEW",
   APP_BANNED = "APP_BANNED",
   ROUND_ENDED = "ROUND_ENDED",
-  APP_REWARDS_DECREASED = "APP_REWARDS_DECREASED",
-  VOTER_REWARDS_DECREASED = "VOTER_REWARDS_DECREASED",
-  TREASURY_REWARDS_DECREASED = "TREASURY_REWARDS_DECREASED",
-  GM_REWARDS_DECREASED = "GM_REWARDS_DECREASED",
+  EMISSIONS_DECREASED = "EMISSIONS_DECREASED",
   GM_UPGRADED = "GM_UPGRADED",
   USER_ALLOCATION_VOTE_CAST = "USER_ALLOCATION_VOTE_CAST",
   USER_PROPOSAL_VOTE_CAST = "USER_PROPOSAL_VOTE_CAST",
@@ -49,12 +46,16 @@ export type RoundActivityMeta = {
   topApps: { appId: string; appName: string; percentage: number }[]
 }
 
-export type AllocationDecreasedActivityMeta = {
-  currentAmount: string
-  previousAmount: string
+export type EmissionsActivityMeta = {
+  currentTotal: string
+  previousTotal: string
+  appsAmount: string
+  treasuryAmount: string
+  votersAmount: string
+  gmAmount: string
   percentageChange: number
-  nextDecreaseRound?: string
-  nextDecreasePercentage?: number
+  nextDecreaseRound: string
+  nextDecreasePercentage: number
 }
 
 export type GrantActivityMeta = {
@@ -157,16 +158,12 @@ export type ActivityItem =
       metadata: RoundActivityMeta
     }
   | {
-      type:
-        | ActivityType.APP_REWARDS_DECREASED
-        | ActivityType.VOTER_REWARDS_DECREASED
-        | ActivityType.TREASURY_REWARDS_DECREASED
-        | ActivityType.GM_REWARDS_DECREASED
+      type: ActivityType.EMISSIONS_DECREASED
       date: number
       roundId: string
       title: string
       description?: string
-      metadata: AllocationDecreasedActivityMeta
+      metadata: EmissionsActivityMeta
     }
   | {
       type: ActivityType.GM_UPGRADED
