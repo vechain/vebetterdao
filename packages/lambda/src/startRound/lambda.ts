@@ -453,9 +453,7 @@ async function distributeDBARewards(thor: ThorClient) {
     return { receipt: null, eligibleAppsCount: eligibleApps.length, gasResult }
   }
 
-  // Build the transaction body with the estimated gas
-  // 2x the gas limit for safety
-  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas * 2)
+  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas)
 
   // Sign the transaction
   const signedTx = Transaction.of(txBody).sign(privateKey)
