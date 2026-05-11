@@ -54,6 +54,10 @@ export const GmNFTAndNodeCard = () => {
     return <Skeleton height={isMobile ? "96" : "64"} width="full" rounded="xl" />
   }
 
+  if (userHasNoNodeOrGm && !hasCreatorNFT) {
+    return null
+  }
+
   return (
     <Card.Root
       asChild
