@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "उत्सर्जन शायद अभी तक शुरू नहीं हुआ है",
   "emissions_decreased_description": "उत्सर्जन <bold>{{percentage}}%</bold> कम हुए, कुल <bold>{{previous}} B3TR</bold> से <bold>{{current}} B3TR</bold> तक, जिसमें <bold>{{apps}}</bold> ऐप्स के लिए, <bold>{{treasury}}</bold> ट्रेज़री के लिए, <bold>{{voters}}</bold> वोटर्स के लिए, और <bold>{{gm}}</bold> GM रिवॉर्ड्स के लिए।",
   "emissions_next_decrease": "उत्सर्जन में अगली कटौती राउंड #{{round}} में होगी, कुल उत्सर्जन को {{percentage}}% और कम कर देगी।",
-  "emissions_next_voter_shift": "वोटर हिस्सा राउंड #{{round}} में फिर से बदलेगा, वोटर हिस्से को {{percentage}}% और कम कर देगा।",
+  "emissions_next_voter_shift": "वोटर रिवॉर्ड्स को राउंड #{{round}} में एक अतिरिक्त कटौती मिलेगी, {{percentage}}% और कम हो जाएंगे।",
   "Enable": "सक्षम करें",
   "Enable auto-vote": "स्वचालित वोट सक्षम करें",
   "Enable Rewards Pool": "इनाम पूल सक्षम करें",

@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "Emisiile probabil nu au început încă",
   "emissions_decreased_description": "Emisiunile au scăzut cu <bold>{{percentage}}%</bold>, de la un total de <bold>{{previous}} B3TR</bold> la <bold>{{current}} B3TR</bold>, cu <bold>{{apps}}</bold> rezervați pentru aplicații, <bold>{{treasury}}</bold> pentru trezorerie, <bold>{{voters}}</bold> pentru votanți și <bold>{{gm}}</bold> pentru recompensele GM.",
   "emissions_next_decrease": "Următoarea scădere a emisiunilor va avea loc în runda #{{round}}, reducând emisiunile totale cu încă {{percentage}}%.",
-  "emissions_next_voter_shift": "Cota votanților se va schimba din nou în runda #{{round}}, reducând cota votanților cu încă {{percentage}}%.",
+  "emissions_next_voter_shift": "Recompensele votanților vor primi o scădere suplimentară în runda #{{round}}, scăzând cu încă {{percentage}}%.",
   "Enable": "Activează",
   "Enable auto-vote": "Activează votul automat",
   "Enable Rewards Pool": "Activează Pool-ul de Recompense",

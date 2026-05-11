@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "Emissionen haben wahrscheinlich noch nicht begonnen",
   "emissions_decreased_description": "Die Emissionen sind um <bold>{{percentage}}%</bold> gesunken, von insgesamt <bold>{{previous}} B3TR</bold> auf <bold>{{current}} B3TR</bold>, davon <bold>{{apps}}</bold> für Apps, <bold>{{treasury}}</bold> für das Treasury, <bold>{{voters}}</bold> für Wähler und <bold>{{gm}}</bold> für GM-Belohnungen.",
   "emissions_next_decrease": "Die nächste Emissionsreduzierung erfolgt in Runde #{{round}} und verringert die Gesamtemissionen um weitere {{percentage}}%.",
-  "emissions_next_voter_shift": "Der Wähleranteil wird in Runde #{{round}} erneut verschoben und um weitere {{percentage}}% reduziert.",
+  "emissions_next_voter_shift": "Wähler-Belohnungen erhalten in Runde #{{round}} eine zusätzliche Reduzierung und sinken um weitere {{percentage}}%.",
   "Enable": "Aktivieren",
   "Enable auto-vote": "Automatische Abstimmung aktivieren",
   "Enable Rewards Pool": "Prämienpool aktivieren",

@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "Эмиссии, вероятно, ещё не начались",
   "emissions_decreased_description": "Эмиссия уменьшилась на <bold>{{percentage}}%</bold>, с <bold>{{previous}} B3TR</bold> до <bold>{{current}} B3TR</bold>, из которых <bold>{{apps}}</bold> для приложений, <bold>{{treasury}}</bold> для казны, <bold>{{voters}}</bold> для избирателей и <bold>{{gm}}</bold> для вознаграждений GM.",
   "emissions_next_decrease": "Следующее уменьшение эмиссии произойдет в раунде #{{round}}, сократив общую эмиссию еще на {{percentage}}%.",
-  "emissions_next_voter_shift": "Доля избирателей снова изменится в раунде #{{round}}, сократив долю избирателей еще на {{percentage}}%.",
+  "emissions_next_voter_shift": "Вознаграждения избирателей получат дополнительное снижение в раунде #{{round}}, сократившись еще на {{percentage}}%.",
   "Enable": "Включить",
   "Enable auto-vote": "Включить автоголосование",
   "Enable Rewards Pool": "Включить пул наград",

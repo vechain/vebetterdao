@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "发行可能尚未开始",
   "emissions_decreased_description": "本轮排放量减少了 <bold>{{percentage}}%</bold>，从总计 <bold>{{previous}} B3TR</bold> 降至 <bold>{{current}} B3TR</bold>，其中 <bold>{{apps}}</bold> 分配给应用，<bold>{{treasury}}</bold> 给金库，<bold>{{voters}}</bold> 给投票者，<bold>{{gm}}</bold> 给 GM 奖励。",
   "emissions_next_decrease": "下次排放量减少将发生在第 #{{round}} 轮，总排放量将再减少 {{percentage}}%。",
-  "emissions_next_voter_shift": "投票者份额将在第 #{{round}} 轮再次变动，投票者份额将再减少 {{percentage}}%。",
+  "emissions_next_voter_shift": "投票者奖励将在第 #{{round}} 轮获得额外减少，再下降 {{percentage}}%。",
   "Enable": "启用",
   "Enable auto-vote": "启用自动投票",
   "Enable Rewards Pool": "启用奖励池",

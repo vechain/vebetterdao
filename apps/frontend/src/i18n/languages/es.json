@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "Probablemente las emisiones aún no han comenzado",
   "emissions_decreased_description": "Las emisiones disminuyeron un <bold>{{percentage}}%</bold>, de un total de <bold>{{previous}} B3TR</bold> a un total de <bold>{{current}} B3TR</bold>, con <bold>{{apps}}</bold> reservados para apps, <bold>{{treasury}}</bold> para el Tesoro, <bold>{{voters}}</bold> para los votantes y <bold>{{gm}}</bold> para recompensas GM.",
   "emissions_next_decrease": "La próxima disminución de emisiones ocurrirá en la ronda #{{round}}, reduciendo las emisiones totales en otro {{percentage}}%.",
-  "emissions_next_voter_shift": "La cuota de votantes cambiará nuevamente en la ronda #{{round}}, reduciendo la cuota de votantes en otro {{percentage}}%.",
+  "emissions_next_voter_shift": "Las recompensas de votantes recibirán una disminución adicional en la ronda #{{round}}, cayendo otro {{percentage}}%.",
   "Enable": "Activar",
   "Enable auto-vote": "Habilitar voto automático",
   "Enable Rewards Pool": "Activar Fondo de Recompensas",

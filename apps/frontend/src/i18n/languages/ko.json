@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "배출이 아직 시작되지 않았을 가능성이 높습니다",
   "emissions_decreased_description": "발행량이 <bold>{{percentage}}%</bold> 감소하여 총 <bold>{{previous}} B3TR</bold>에서 <bold>{{current}} B3TR</bold>로 변경되었습니다. 앱에 <bold>{{apps}}</bold>, 트레저리에 <bold>{{treasury}}</bold>, 투표자에 <bold>{{voters}}</bold>, GM 보상에 <bold>{{gm}}</bold>이 할당됩니다.",
   "emissions_next_decrease": "다음 발행량 감소는 라운드 #{{round}}에서 발생하며, 총 발행량이 {{percentage}}% 추가로 감소합니다.",
-  "emissions_next_voter_shift": "투표자 점유율은 라운드 #{{round}}에서 다시 변경되며, 투표자 점유율이 {{percentage}}% 추가로 감소합니다.",
+  "emissions_next_voter_shift": "투표자 보상은 라운드 #{{round}}에서 추가 감소를 받으며, {{percentage}}% 더 하락합니다.",
   "Enable": "활성화",
   "Enable auto-vote": "자동 투표 활성화",
   "Enable Rewards Pool": "보상 풀 활성화",

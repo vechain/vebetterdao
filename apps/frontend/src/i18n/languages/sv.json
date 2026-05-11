@@ -872,7 +872,7 @@
   "Emissions have propably not started yet": "Utsläppen har antagligen inte startat än",
   "emissions_decreased_description": "Emissionerna minskade med <bold>{{percentage}}%</bold>, från totalt <bold>{{previous}} B3TR</bold> till <bold>{{current}} B3TR</bold>, varav <bold>{{apps}}</bold> till appar, <bold>{{treasury}}</bold> till Treasury, <bold>{{voters}}</bold> till röstare och <bold>{{gm}}</bold> till GM-belöningar.",
   "emissions_next_decrease": "Nästa emissionsminskning sker i runda #{{round}} och minskar de totala emissionerna med ytterligare {{percentage}}%.",
-  "emissions_next_voter_shift": "Röstarandelen förskjuts igen i runda #{{round}} och minskar röstarandelen med ytterligare {{percentage}}%.",
+  "emissions_next_voter_shift": "Röstarbelöningar får en extra minskning i runda #{{round}} och sjunker med ytterligare {{percentage}}%.",
   "Enable": "Aktivera",
   "Enable auto-vote": "Aktivera automatisk röstning",
   "Enable Rewards Pool": "Aktivera Belöningspool",
