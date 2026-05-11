@@ -298,7 +298,7 @@
   "App updates": "App-Updates",
   "App voting surplus": "App-Abstimmungsüberschuss",
   "App will add updates here.": "App wird hier Updates hinzufügen.",
-  "appActivityBannedDesc": "Aus den Zuteilungsrunden entfernt: {{names}}. Nicht mehr berechtigt.",
+  "appActivityBannedDesc": "Update zu {{names}}: aus den Zuteilungsrunden entfernt und nicht mehr teilnahmeberechtigt.",
   "appActivityEndorsedDesc": "{{names}} hat die Unterstützungsschwelle erreicht und ist für Zuteilungsrunden berechtigt",
   "appActivityLostDesc": "{{names}} hat die Unterstützung verloren und befindet sich in der Nachfrist",
   "appActivityNewDesc": "{{names}} ist dem Ökosystem beigetreten und sucht nach Unterstützung",

@@ -298,7 +298,7 @@
   "App updates": "Actualizări aplicație",
   "App voting surplus": "Surplus din votul aplicatiilor",
   "App will add updates here.": "Aplicația va adăuga actualizări aici.",
-  "appActivityBannedDesc": "Eliminate din rundele de alocare: {{names}}. Nu mai sunt eligibile.",
+  "appActivityBannedDesc": "Actualizare despre {{names}}: eliminate din rundele de alocare și nu mai sunt eligibile să participe.",
   "appActivityEndorsedDesc": "{{names}} a atins pragul de susținere și este eligibil pentru rundele de alocare",
   "appActivityLostDesc": "{{names}} a pierdut susținerea și a intrat în perioada de grație",
   "appActivityNewDesc": "{{names}} s-a alăturat ecosistemului și caută susținere",

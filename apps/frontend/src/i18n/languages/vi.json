@@ -298,7 +298,7 @@
   "App updates": "Cập nhật ứng dụng",
   "App voting surplus": "Thặng dư bỏ phiếu ứng dụng",
   "App will add updates here.": "Ứng dụng sẽ thêm các cập nhật tại đây.",
-  "appActivityBannedDesc": "Đã loại khỏi các vòng phân bổ: {{names}}. Không còn đủ điều kiện.",
+  "appActivityBannedDesc": "Cập nhật về {{names}}: đã bị loại khỏi các vòng phân bổ và không còn đủ điều kiện tham gia.",
   "appActivityEndorsedDesc": "{{names}} đã đạt ngưỡng ủng hộ và đủ điều kiện cho các vòng phân bổ",
   "appActivityLostDesc": "{{names}} đã mất sự ủng hộ và bước vào thời gian ân hạn",
   "appActivityNewDesc": "{{names}} đã tham gia hệ sinh thái và đang tìm kiếm sự ủng hộ",

@@ -298,7 +298,7 @@
   "App updates": "Appuppdateringar",
   "App voting surplus": "App-röstöverskott",
   "App will add updates here.": "Appen kommer att lägga till uppdateringar här.",
-  "appActivityBannedDesc": "Borttagna från tilldelningsrundor: {{names}}. Inte längre berättigade.",
+  "appActivityBannedDesc": "Uppdatering om {{names}}: borttagna från tilldelningsrundorna och kan inte längre delta.",
   "appActivityEndorsedDesc": "{{names}} nådde stödtröskeln och är berättigad till tilldelningsrundor",
   "appActivityLostDesc": "{{names}} förlorade stöd och gick in i nådperioden",
   "appActivityNewDesc": "{{names}} gick med i ekosystemet och söker stöd",

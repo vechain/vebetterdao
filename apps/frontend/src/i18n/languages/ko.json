@@ -298,7 +298,7 @@
   "App updates": "앱 업데이트",
   "App voting surplus": "앱 투표 잉여",
   "App will add updates here.": "앱이 여기에 업데이트를 추가합니다.",
-  "appActivityBannedDesc": "배분 라운드에서 제외됨: {{names}}. 더 이상 참여할 수 없습니다.",
+  "appActivityBannedDesc": "{{names}} 관련 업데이트: 배분 라운드에서 제외되어 더 이상 참여할 수 없습니다.",
   "appActivityEndorsedDesc": "{{names}}이(가) 지지 임계값에 도달하여 배분 라운드에 참여할 수 있습니다",
   "appActivityLostDesc": "{{names}}이(가) 지지를 잃고 유예 기간에 진입했습니다",
   "appActivityNewDesc": "{{names}}이(가) 생태계에 참여했으며 지지를 찾고 있습니다",

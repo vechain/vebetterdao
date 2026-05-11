@@ -298,7 +298,7 @@
   "App updates": "Actualizaciones de la aplicación",
   "App voting surplus": "Excedente de votación de apps",
   "App will add updates here.": "La aplicación agregará actualizaciones aquí.",
-  "appActivityBannedDesc": "Eliminadas de las rondas de asignación: {{names}}. Ya no son elegibles.",
+  "appActivityBannedDesc": "Novedad sobre {{names}}: eliminadas de las rondas de asignación y ya no pueden participar.",
   "appActivityEndorsedDesc": "{{names}} alcanzó el umbral de respaldo y es elegible para las rondas de asignación",
   "appActivityLostDesc": "{{names}} perdió el respaldo y entró en el período de gracia",
   "appActivityNewDesc": "{{names}} se unió al ecosistema y busca respaldo",

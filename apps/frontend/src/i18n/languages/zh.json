@@ -298,7 +298,7 @@
   "App updates": "应用更新",
   "App voting surplus": "应用投票盈余",
   "App will add updates here.": "应用程序将在这里添加更新。",
-  "appActivityBannedDesc": "已从分配轮次中移除：{{names}}。不再具备资格。",
+  "appActivityBannedDesc": "{{names}}的最新动态：已从分配轮次中移除，不再具备参与资格。",
   "appActivityEndorsedDesc": "{{names}}已达到背书门槛，有资格参加分配轮次",
   "appActivityLostDesc": "{{names}}失去了背书，进入了宽限期",
   "appActivityNewDesc": "{{names}}已加入生态系统，正在寻求背书",

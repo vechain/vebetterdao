@@ -298,7 +298,7 @@
   "App updates": "ऐप अपडेट्स",
   "App voting surplus": "ऐप वोटिंग अधिशेष",
   "App will add updates here.": "ऐप यहाँ अपडेट जोड़ देगा।",
-  "appActivityBannedDesc": "आवंटन दौर से हटाया गया: {{names}}। अब पात्र नहीं।",
+  "appActivityBannedDesc": "{{names}} पर अपडेट: आवंटन दौर से हटा दिया गया है और अब भागीदारी के लिए पात्र नहीं हैं।",
   "appActivityEndorsedDesc": "{{names}} ने समर्थन सीमा पूरी कर ली है और आवंटन दौर के लिए पात्र है",
   "appActivityLostDesc": "{{names}} ने समर्थन खो दिया और अनुग्रह अवधि में प्रवेश किया",
   "appActivityNewDesc": "{{names}} पारिस्थितिकी तंत्र में शामिल हुआ और समर्थन की तलाश में है",

@@ -298,7 +298,7 @@
   "App updates": "Uygulama güncellemeleri",
   "App voting surplus": "Uygulama oylama fazlası",
   "App will add updates here.": "Uygulama buraya güncellemeler ekleyecek.",
-  "appActivityBannedDesc": "Tahsis turlarından çıkarıldı: {{names}}. Artık uygun değil.",
+  "appActivityBannedDesc": "{{names}} hakkında güncelleme: tahsis turlarından çıkarıldı ve artık katılım için uygun değil.",
   "appActivityEndorsedDesc": "{{names}} onay eşiğine ulaştı ve tahsis turları için uygun hale geldi",
   "appActivityLostDesc": "{{names}} onayını kaybetti ve ek süreye girdi",
   "appActivityNewDesc": "{{names}} ekosisteme katıldı ve onay arıyor",

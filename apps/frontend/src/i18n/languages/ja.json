@@ -298,7 +298,7 @@
   "App updates": "アプリの更新",
   "App voting surplus": "アプリ投票の余剰",
   "App will add updates here.": "アプリはここに更新を追加します。",
-  "appActivityBannedDesc": "配分ラウンドから除外されました：{{names}}。対象外となりました。",
+  "appActivityBannedDesc": "{{names}}に関する更新：配分ラウンドから除外され、参加できなくなりました。",
   "appActivityEndorsedDesc": "{{names}}が支持のしきい値に達し、配分ラウンドの対象となりました",
   "appActivityLostDesc": "{{names}}が支持を失い、猶予期間に入りました",
   "appActivityNewDesc": "{{names}}がエコシステムに参加し、支持を求めています",

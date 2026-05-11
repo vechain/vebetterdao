@@ -298,7 +298,7 @@
   "App updates": "App updates",
   "App voting surplus": "App voting surplus",
   "App will add updates here.": "App will add updates here.",
-  "appActivityBannedDesc": "Delisted from allocation rounds: {{names}}. No longer eligible.",
+  "appActivityBannedDesc": "Update on {{names}}: delisted from allocation rounds and no longer eligible to participate.",
   "appActivityEndorsedDesc": "{{names}} reached the endorsement threshold and is eligible for allocation rounds",
   "appActivityLostDesc": "{{names}} lost endorsement and entered the grace period",
   "appActivityNewDesc": "{{names}} joined the ecosystem and is looking for endorsements",

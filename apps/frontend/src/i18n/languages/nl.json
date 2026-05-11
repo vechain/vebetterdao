@@ -298,7 +298,7 @@
   "App updates": "App-updates",
   "App voting surplus": "App-stemoverschot",
   "App will add updates here.": "De app zal hier updates toevoegen.",
-  "appActivityBannedDesc": "Verwijderd uit toewijzingsrondes: {{names}}. Niet meer in aanmerking.",
+  "appActivityBannedDesc": "Update over {{names}}: verwijderd uit de toewijzingsrondes en niet langer in aanmerking om deel te nemen.",
   "appActivityEndorsedDesc": "{{names}} heeft de ondersteuningsdrempel bereikt en komt in aanmerking voor toewijzingsrondes",
   "appActivityLostDesc": "{{names}} heeft ondersteuning verloren en is in de respijtperiode getreden",
   "appActivityNewDesc": "{{names}} is toegetreden tot het ecosysteem en zoekt ondersteuning",

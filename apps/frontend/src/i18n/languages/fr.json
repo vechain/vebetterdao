@@ -298,7 +298,7 @@
   "App updates": "Mises à jour de l'application",
   "App voting surplus": "Excédent de vote des apps",
   "App will add updates here.": "L'application ajoutera des mises à jour ici.",
-  "appActivityBannedDesc": "Retirées des tours d'allocation : {{names}}. Plus éligibles.",
+  "appActivityBannedDesc": "Mise à jour concernant {{names}} : retirées des tours d'allocation et ne peuvent plus y participer.",
   "appActivityEndorsedDesc": "{{names}} a atteint le seuil de soutien et est éligible aux tours d'allocation",
   "appActivityLostDesc": "{{names}} a perdu le soutien et est entrée dans la période de grâce",
   "appActivityNewDesc": "{{names}} a rejoint l'écosystème et recherche du soutien",
