@@ -94,11 +94,11 @@ export const LastSevenDaysSection = ({ address }: Props) => {
         <Heading size="sm" fontWeight="semibold">
           {t("Last 7 days")}
         </Heading>
-        <Skeleton loading={state === "loading"}>
+        {headerHint && (
           <Heading size="xs" fontWeight="normal" color="text.subtle">
             {headerHint}
           </Heading>
-        </Skeleton>
+        )}
       </HStack>
 
       {state === "loading" && <Skeleton h="160px" w="full" borderRadius="lg" />}
