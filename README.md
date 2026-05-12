@@ -79,93 +79,47 @@ yarn install
 
 ```
 cp .env.example .env
-```
-
-```
-make solo-up
-```
-
-```
 yarn dev
 ```
 
-If contracts are not deployed, the script will deploy them automatically. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
+`yarn dev` delegates to [`@vechain/dev-stack`](../dev-stack), the shared local dev environment used by other VeChain projects. It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, registers their addresses with the stack, restarts the indexer + explorer to pick up the new env, and exec's the frontend dev server.
+
+If the contracts are already deployed and the chain is intact, the deploy step short-circuits and just re-uses `packages/config/local.ts`. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
 
 > **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn dev`.
 
 > **First run note:** the script compiles and deploys ~30 contracts to thor-solo. **This can take up to 5 minutes.** Log lines will appear continuously — do not Ctrl-C.
 
-This command relies on a turbo pipeline which:
-
-- checks if the contracts specified under `./packages/config/local` have been deployed, deploying them if they weren't (config is updated automatically);
-- runs the frontend using the updated config;
-
-If you need to start again you can stop the frontend from running and restart thor solo by running:
+To stop just this project (leaving the shared stack running for other projects):
 
 ```
-make solo-down
+yarn dev:down
 ```
 
-Thor solo will persist its state to a volume. To clear this state run:
+To tear down everything (shared infra + volumes + all projects' registered addresses):
 
 ```
-make solo-clean
+yarn dev:reset
 ```
 
+To force a fresh redeploy of the contracts (e.g. after pulling new contract changes):
+
 ```
-make solo-up
-```
-
-### Block Explorer & Indexer (Local) — Optional
-
-The block explorer and indexer stack is **optional** — only needed when working on pages that read from the indexer API. The local setup runs them against the solo network.
-
-#### Workflow
-
-1. `make solo-up` — starts Thor solo, insight, inspector, and block explorer
-2. `yarn dev` — deploys contracts, generates `packages/config/local.ts`
-3. `make indexer-up` — reads contract addresses from `local.ts`, starts MongoDB + indexer + API
-
-#### Port Map
-
-| Service        | Port  | Command           |
-| -------------- | ----- | ----------------- |
-| Thor solo node | 8669  | `make solo-up`    |
-| Insight        | 8086  | `make solo-up`    |
-| Inspector      | 8087  | `make solo-up`    |
-| Block explorer | 8088  | `make solo-up`    |
-| MongoDB        | 27017 | `make indexer-up` |
-| Indexer        | 8090  | `make indexer-up` |
-| Indexer API    | 8089  | `make indexer-up` |
-
-#### URLs
-
-- Block explorer: http://localhost:8088
-- Insight: http://localhost:8086
-- Inspector: http://localhost:8087
-- Indexer API health: http://localhost:8089/actuator/health
-
-#### Indexer Commands
-
-```bash
-make indexer-up      # Start indexer (requires deployed contracts)
-make indexer-down    # Stop indexer services
-make indexer-clean   # Stop + remove indexer volumes
+yarn dev:redeploy
 ```
 
-#### Key Files
+### Block Explorer & Indexer (Local)
 
-| File                                             | Purpose                                                 |
-| ------------------------------------------------ | ------------------------------------------------------- |
-| `packages/contracts/docker-compose.yaml`         | Solo node + block explorer                              |
-| `packages/indexer/docker-compose.yaml`           | MongoDB + indexer services                              |
-| `scripts/extract-local-config.sh`                | Extracts contract addresses from `local.ts` as env vars |
+Both the block explorer and the indexer are provided by `@vechain/dev-stack` and come up automatically as part of `yarn dev`. No separate commands required.
 
-#### Notes
+| Service        | Port  | URL                       |
+| -------------- | ----- | ------------------------- |
+| Thor solo      | 8669  | http://localhost:8669     |
+| Block explorer | 8088  | http://localhost:8088     |
+| Indexer API    | 8089  | http://localhost:8089     |
+| MongoDB        | 27017 | mongodb://localhost:27017 |
 
-- Block explorer is built from `~/apps/block-explorer` source via Docker build context
-- The indexer compose file uses the `vechain-thor` network (created by the main compose) so the indexer can reach `thor-solo:8669`
-- MongoDB runs without auth (local dev only)
+B3TR's registered config (profiles + addresses) lives at `~/.vechain-dev/config/b3tr.json` after the first successful `yarn dev`.
 
 ### Spin up the project pointing to the staging environment
 
@@ -208,23 +162,7 @@ Run this command to install the dependencies:
 yarn install
 ```
 
-If you want to test/deploy contracts against vechain thor solo, you need to have the solo node running. You can start the solo node by running:
-
-```
-make solo-up
-```
-
-Stop it by running:
-
-```
-make solo-down
-```
-
-Thor solo will persist its state to a volume. To clear this state run:
-
-```
-make solo-clean
-```
+If you want to test/deploy contracts against vechain thor solo, you need to have the shared dev-stack up. The simplest way is `yarn dev` from the repo root — it brings up thor-solo (via `@vechain/dev-stack`) and runs the deploy as part of its flow. Use `yarn dev:down` to stop and `yarn dev:reset` to wipe.
 
 Each environment has its own configuration file under `./packages/config/contracts/envs` folder:
 

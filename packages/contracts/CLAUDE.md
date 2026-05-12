@@ -74,7 +74,7 @@ Then read the generated documentation in `packages/contracts/docs/`.
 ```bash
 yarn contracts:compile          # Compile contracts
 yarn contracts:test             # Run tests (Hardhat network)
-yarn contracts:test:thor-solo   # Run tests (Thor solo - requires make solo-up)
+yarn contracts:test:thor-solo   # Run tests (Thor solo - requires `yarn dev` running, which brings up thor-solo via @vechain/dev-stack)
 yarn contracts:upgrade:<env>    # Interactive upgrade
 yarn contracts:call:<env>       # Interactive contract call
 yarn contracts:generate-docs    # Generate NatSpec docs

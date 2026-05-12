@@ -58,7 +58,7 @@ export const useHookName = (param: string) => {
 
 # Environments
 
-- local: Local development (requires Thor solo node via `make solo-up`)
+- local: Local development (shared thor-solo via `@vechain/dev-stack`, started by `yarn dev`)
 - testnet-staging: Staging testnet
 - testnet: VeChain testnet
 - mainnet: VeChain mainnet
@@ -69,11 +69,10 @@ export const useHookName = (param: string) => {
 nvm use
 yarn install
 cp .env.example .env
-make solo-up  # Start Thor solo node (requires Docker)
-yarn dev
+yarn dev   # joins shared dev-stack: thor-solo + indexer + block-explorer, deploys, then runs frontend
 ```
 
-Stop: `make solo-down` | Reset: `make solo-clean && make solo-up`
+Stop: `yarn dev:down` (leaves shared stack running for other projects) | Reset: `yarn dev:reset` (tears down everything)
 
 # Common commands
 

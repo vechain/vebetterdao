@@ -7589,6 +7589,9 @@
     valtio "1.13.2"
     viem "2.23.2"
 
+"@vechain/dev-stack@file:.yalc/@vechain/dev-stack":
+  version "0.1.0-alpha.0"
+
 "@vechain/picasso@2.1.1", "@vechain/picasso@^2.1.1":
   version "2.1.1"
   resolved "https://registry.npmjs.org/@vechain/picasso/-/picasso-2.1.1.tgz#a0adc594a3ce5047c606e7745566a65f341671fb"

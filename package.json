@@ -21,10 +21,10 @@
     "start:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env -- turbo start:staging --",
     "start:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo start:testnet --",
     "start:mainnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -e .env -- turbo start:mainnet --",
-    "dev:xapps-unendorsed": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- turbo dev --",
-    "dev:simulation": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -- turbo dev:simulation --",
-    "dev:simulation-galactica": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=galactica-test -v ENDORSE_XAPPS=true -- turbo dev:simulation --",
-    "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- turbo dev --",
+    "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- vechain-dev up",
+    "dev:xapps-unendorsed": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- vechain-dev up",
+    "dev:down": "vechain-dev down",
+    "dev:reset": "rm -f packages/config/local.ts && vechain-dev reset",
     "dev:redeploy": "yarn contracts:compile && rm -f packages/config/local.ts && yarn dev",
     "dev:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env -- turbo dev:staging --",
     "dev:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
@@ -80,8 +80,6 @@
     "contracts:call:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/functionCalls/select-and-call.ts",
     "contracts:get-app-shares": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-app-shares --filter=@vechain/vebetterdao-contracts",
     "contracts:get-challenges-stats:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-challenges-stats:mainnet --filter=@vechain/vebetterdao-contracts",
-    "solo-up": "make solo-up",
-    "solo-down": "make solo-down",
     "prepare": "husky install",
     "contracts:verify:testnet": "dotenv -v VITE_APP_ENV=testnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
     "contracts:verify:mainnet": "dotenv -v VITE_APP_ENV=mainnet -- yarn workspace @vechain/vebetterdao-contracts ts-node scripts/verify/verify-entrypoint.ts",
@@ -106,6 +104,7 @@
     "contracts:advance-round": "dotenv -e .env -v NEXT_PUBLIC_APP_ENV=local -- turbo run advance-round:local --filter=@vechain/vebetterdao-contracts"
   },
   "dependencies": {
+    "@vechain/dev-stack": "file:.yalc/@vechain/dev-stack",
     "dotenv-cli": "latest",
     "turbo": "^2.5.0"
   },
@@ -113,12 +112,12 @@
     "@datadog/browser-rum": "^6.33.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@vechain/picasso": "^2.1.1",
     "dotenv": "^16.4.5",
     "hardhat": "2.19.1",
     "husky": "^8.0.0",
     "lint-staged": "12.5.0",
-    "prettier": "^3.3.0",
-    "@vechain/picasso": "^2.1.1"
+    "prettier": "^3.3.0"
   },
   "engines": {
     "node": "20.x.x"

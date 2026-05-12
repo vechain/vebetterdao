@@ -4,6 +4,7 @@ import { getConfig, getContractsConfig } from "@repo/config"
 import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
+import { pathToFileURL } from "url"
 import { AppEnv } from "@repo/config/contracts"
 
 const config = getConfig()
@@ -21,6 +22,7 @@ async function main() {
 
 // check if the contracts specified in the config file are deployed on the network, if not, deploy them (only on solo network)
 export async function checkContractsDeployment() {
+  let finalConfig: AppConfig = config
   try {
     // if contract address is not set or it does not exist on the network, consider it as not deployed
     const code = config.b3trContractAddress === "" ? "0x" : await ethers.provider.getCode(config.b3trContractAddress)
@@ -29,16 +31,65 @@ export async function checkContractsDeployment() {
       if (isSoloNetwork || isTestnetEnv) {
         // deploy the contracts and override the config file
         const newAddresses = await deployAll(getContractsConfig(env))
-
-        return await overrideLocalConfigWithNewContracts(newAddresses)
+        finalConfig = await overrideLocalConfigWithNewContracts(newAddresses)
       } else console.log(`Skipping deployment on ${network.name}`)
     } else console.log(`B3tr contract already deployed`)
   } catch (e) {
     console.log(e)
   }
+
+  // Always register with @vechain/dev-stack on solo so the shared indexer +
+  // block-explorer see this project's contracts — whether they were just
+  // deployed or were already on-chain from a prior run.
+  if (env === AppEnv.LOCAL) {
+    await registerWithDevStack(finalConfig)
+  }
 }
 
-export async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType<typeof deployAll>>) {
+// ts-node compiles this file as CommonJS (per packages/contracts/tsconfig.json's
+// `module: "commonjs"`), which rewrites `await import(...)` to `require(...)`
+// — incompatible with the ESM `@vechain/dev-stack` package. The Function
+// constructor escapes the compiler so the import runs natively at runtime.
+const dynamicImport: (specifier: string) => Promise<any> = new Function("s", "return import(s)") as (
+  specifier: string,
+) => Promise<any>
+
+async function registerWithDevStack(cfg: AppConfig): Promise<void> {
+  const { registerAddresses } = await dynamicImport("@vechain/dev-stack")
+  const devConfigPath = path.resolve("../../vechain-dev.config.mjs")
+  const devConfig = (await dynamicImport(pathToFileURL(devConfigPath).href)).default
+  const registered = await registerAddresses({
+    project: devConfig.project,
+    profiles: devConfig.profiles,
+    addresses: {
+      B3TR_CONTRACT: cfg.b3trContractAddress,
+      VOT3_CONTRACT: cfg.vot3ContractAddress,
+      EMISSIONS_CONTRACT: cfg.emissionsContractAddress,
+      B3TR_GOVERNOR_CONTRACT: cfg.b3trGovernorAddress,
+      B3TR_DBA_POOL_CONTRACT: cfg.dbaPoolContractAddress,
+      GM_NFT_CONTRACT: cfg.galaxyMemberContractAddress,
+      X_ALLOC_VOTING_CONTRACT: cfg.xAllocationVotingContractAddress,
+      CHALLENGES_CONTRACT: cfg.challengesContractAddress,
+      X_ALLOC_POOL_CONTRACT: cfg.xAllocationPoolContractAddress,
+      X2EARN_REWARDS_POOL_CONTRACT: cfg.x2EarnRewardsPoolContractAddress,
+      VOTER_REWARDS_CONTRACT: cfg.voterRewardsContractAddress,
+      TREASURY_CONTRACT: cfg.treasuryContractAddress,
+      STARGATE_NFT_CONTRACT: cfg.stargateNFTContractAddress,
+      STARGATE_DELEGATION_CONTRACT: cfg.stargateContractAddress,
+      NAVIGATOR_REGISTRY_CONTRACT: cfg.navigatorRegistryContractAddress,
+      // Block-explorer aliases for the same addresses.
+      SOLO_B3TR_ADDRESS: cfg.b3trContractAddress,
+      SOLO_VOT3_ADDRESS: cfg.vot3ContractAddress,
+      SOLO_STARGATE_NFT_ADDRESS: cfg.stargateNFTContractAddress,
+      SOLO_STARGATE_DELEGATION_ADDRESS: cfg.stargateContractAddress,
+    },
+  })
+  console.log(`Registered with dev-stack: ${registered}`)
+}
+
+export async function overrideLocalConfigWithNewContracts(
+  contracts: Awaited<ReturnType<typeof deployAll>>,
+): Promise<AppConfig> {
   const newConfig: AppConfig = {
     ...config,
     b3trContractAddress: await contracts.b3tr.getAddress(),
@@ -116,6 +167,8 @@ export async function overrideLocalConfigWithNewContracts(contracts: Awaited<Ret
   const localConfigPath = path.resolve(`../config/${fileToWrite}`)
   console.log(`Writing new config file to ${localConfigPath}`)
   fs.writeFileSync(localConfigPath, toWrite)
+
+  return newConfig
 }
 
 // We recommend this pattern to be able to use async/await everywhere
