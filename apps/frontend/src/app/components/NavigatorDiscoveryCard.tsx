@@ -8,7 +8,6 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass, LuUsers } from "react-icons/lu"
 
-import { useNavigatorMetadata } from "@/api/indexer/navigators/useNavigatorMetadata"
 import {
   useNavigatorOverview,
   useNavigators,
@@ -26,8 +25,8 @@ export const NavigatorDiscoveryCard = () => {
   const router = useRouter()
   const { account } = useWallet()
   const { data: overview, isLoading: overviewLoading } = useNavigatorOverview()
-  const { data: newestNavigators, isLoading: newestLoading } = useNavigators({
-    orderBy: "registeredAt",
+  const { data: trendingNavigators, isLoading: trendingLoading } = useNavigators({
+    orderBy: "totalDelegated",
     direction: "DESC",
     size: 3,
     status: ["ACTIVE"],
@@ -67,13 +66,13 @@ export const NavigatorDiscoveryCard = () => {
             </SimpleGrid>
           </Skeleton>
 
-          {newestNavigators && newestNavigators.length > 0 && (
-            <Skeleton loading={newestLoading}>
+          {trendingNavigators && trendingNavigators.length > 0 && (
+            <Skeleton loading={trendingLoading}>
               <VStack gap={2} mt={4} align="stretch">
                 <Heading size="sm" fontWeight="semibold">
-                  {t("Recently joined")}
+                  {t("Trending")}
                 </Heading>
-                {newestNavigators.slice(0, 3).map(nav => (
+                {trendingNavigators.slice(0, 3).map(nav => (
                   <NavigatorRow key={nav.address} nav={nav} />
                 ))}
               </VStack>
@@ -111,7 +110,6 @@ const NavigatorRow = ({ nav }: { nav: NavigatorEntityFormatted }) => {
     addressPrefix: 6,
     addressSuffix: 4,
   })
-  const { data: metadata } = useNavigatorMetadata(nav.metadataURI)
 
   return (
     <HStack
@@ -124,23 +122,32 @@ const NavigatorRow = ({ nav }: { nav: NavigatorEntityFormatted }) => {
       _hover={{ bg: "bg.subtle" }}
       onClick={() => router.push(`/navigators/${nav.address}`)}>
       <AddressIcon address={nav.address} boxSize={8} borderRadius="full" />
-      <VStack gap={0} align="start" flex={1}>
-        <Text textStyle="sm" fontWeight="semibold">
+      <VStack gap={0} align="start" flex={1} minW={0}>
+        <Text textStyle="sm" fontWeight="semibold" lineClamp={1}>
           {displayName}
         </Text>
-        {metadata?.votingStrategy && (
-          <Text textStyle="xs" color="text.subtle" lineClamp={1}>
-            {metadata.votingStrategy}
-          </Text>
-        )}
       </VStack>
-      <HStack gap={1}>
-        <Icon boxSize={3} color="text.subtle">
-          <LuUsers />
-        </Icon>
-        <Text textStyle="xs" color="text.subtle">
-          {nav.citizenCount}
-        </Text>
+      <HStack gap={3} flexShrink={0}>
+        <HStack gap={1}>
+          <Icon as={B3trSvg} boxSize={3} color="text.subtle" />
+          <Text textStyle="xs" color="text.subtle">
+            {formatter.format(Number(nav.stakeFormatted))}
+          </Text>
+        </HStack>
+        <HStack gap={1}>
+          <Icon as={Vot3Svg} boxSize={3} color="text.subtle" />
+          <Text textStyle="xs" color="text.subtle">
+            {formatter.format(Number(nav.totalDelegatedFormatted))}
+          </Text>
+        </HStack>
+        <HStack gap={1}>
+          <Icon boxSize={3} color="text.subtle">
+            <LuUsers />
+          </Icon>
+          <Text textStyle="xs" color="text.subtle">
+            {nav.citizenCount}
+          </Text>
+        </HStack>
       </HStack>
     </HStack>
   )
