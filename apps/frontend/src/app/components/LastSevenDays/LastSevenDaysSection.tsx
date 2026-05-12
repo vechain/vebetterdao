@@ -2,11 +2,12 @@ import { Heading, HStack, Skeleton, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useUserActionOverview } from "../../../api/indexer/actions/useUserActionOverview"
 import { useUserActionSummaryForDateRange } from "../../../api/indexer/actions/useUserActionSummaryForDateRange"
+import { ActivityDayModal } from "../../profile/components/ProfileBetterActions/ActivityDayModal"
 
 import { LastSevenDaysChart } from "./LastSevenDaysChart"
 import { LastSevenDaysFirstTime } from "./LastSevenDaysFirstTime"
@@ -52,10 +53,13 @@ export const LastSevenDaysSection = ({ address }: Props) => {
       const found = dailySummaries.find(s => s.date === dateStr)
       return {
         label: day.format("ddd"),
+        date: dateStr,
         actions: found?.actionsRewarded ?? 0,
       }
     })
   }, [dailySummaries, today])
+
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
 
   const lifetimeActions = overviewQuery.data?.actionsRewarded ?? 0
   const lifetimeRewards = overviewQuery.data?.totalRewardAmount ?? 0
@@ -99,7 +103,9 @@ export const LastSevenDaysSection = ({ address }: Props) => {
 
       {state === "loading" && <Skeleton h="160px" w="full" borderRadius="lg" />}
 
-      {state === "active" && <LastSevenDaysChart data={chartData} />}
+      {state === "active" && (
+        <LastSevenDaysChart data={chartData} onBarClick={bucket => setSelectedDate(bucket.date)} />
+      )}
 
       {state === "first-time" && <LastSevenDaysFirstTime />}
 
@@ -110,6 +116,13 @@ export const LastSevenDaysSection = ({ address }: Props) => {
           onCtaClick={() => router.push("/apps")}
         />
       )}
+
+      <ActivityDayModal
+        address={address}
+        isOpen={!!selectedDate}
+        onClose={() => setSelectedDate(undefined)}
+        date={selectedDate}
+      />
     </VStack>
   )
 }
