@@ -74,8 +74,7 @@ export const LastSevenDaysSection = ({ address }: Props) => {
 
   const headerHint = useMemo(() => {
     if (state === "first-time") return t("No activity yet")
-    if (state === "inactive") return t("Quiet week")
-    return t("Actions per day")
+    return undefined
   }, [state, t])
 
   const weekDays = useMemo(

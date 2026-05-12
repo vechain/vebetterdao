@@ -76,7 +76,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
                           variant="plain"
                           color="actions.secondary.text-lighter"
                           fontWeight="semibold">
-                          <NextLink href="/apps">{t("See all")}</NextLink>
+                          <NextLink href="/profile?tab=better-actions">{t("See all")}</NextLink>
                         </Link>
                       )}
                     </VStack>
