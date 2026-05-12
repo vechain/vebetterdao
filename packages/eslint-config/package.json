@@ -11,7 +11,7 @@
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "@vercel/style-guide": "^5.1.0",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-config-turbo": "^2.5.5",
     "eslint-plugin-only-warn": "^1.2.1",
     "typescript": "^5.2.2"
