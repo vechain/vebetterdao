@@ -11,7 +11,10 @@ import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAlloc
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useTransactions } from "@/api/indexer/transactions/useTransactions"
 
+import { type OnboardingPhaseResult, resolveOnboardingPhase } from "./resolveOnboardingPhase"
 import { useIsVeDelegated } from "./useIsVeDelegated"
+
+export type { OnboardingPhaseResult, UserOnboardingPhase } from "./resolveOnboardingPhase"
 
 /**
  * Where the user sits in the VeBetterDAO voter journey.
@@ -42,16 +45,7 @@ import { useIsVeDelegated } from "./useIsVeDelegated"
  * card sticks around for the rest of the current round whether they just voted or just
  * claimed.
  */
-export type UserOnboardingPhase = "onboarding" | "first-vote" | "active-voter" | null
-
-export const useUserOnboardingPhase = (): {
-  phase: UserOnboardingPhase
-  isLoading: boolean
-  hasGM: boolean
-  isEligibleThisRound: boolean
-  hasPastRoundVote: boolean
-  hasPastRoundClaim: boolean
-} => {
+export const useUserOnboardingPhase = (): OnboardingPhaseResult => {
   const { account } = useWallet()
   const { data: userGMs, isLoading: isGMsLoading } = useGetUserGMs()
   const { hasVotesAtSnapshot, isPerson, personReason, isLoading: isCanVoteLoading } = useCanUserVote()
@@ -61,7 +55,7 @@ export const useUserOnboardingPhase = (): {
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
   const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
 
-  const { data: currentRoundIdRaw } = useCurrentAllocationsRoundId()
+  const { data: currentRoundIdRaw, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
   const currentRoundId = currentRoundIdRaw ?? "0"
   const currentRoundInfo = useAllocationsRound(currentRoundId)
   const currentRoundVoteStartBlock = currentRoundInfo.data?.voteStart
@@ -91,56 +85,32 @@ export const useUserOnboardingPhase = (): {
     return claims.some(tx => Number(tx.blockNumber) < currentRoundVoteStartBlock)
   }, [claimTxData, currentRoundVoteStartBlock])
 
-  const isLoading =
-    isGMsLoading ||
-    isCanVoteLoading ||
-    isLoadingAccountLinking ||
-    isLoadingDelegator ||
-    isDelegateeLoading ||
-    isVoteTxLoading ||
-    isClaimTxLoading
-  const hasGM = (userGMs?.length ?? 0) > 0
-  const isEligibleThisRound = !!hasVotesAtSnapshot && !!isPerson
-
-  if (!account?.address || isLoading) {
-    return { phase: null, isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
-  }
-
-  // Edge cases owned by other surfaces — defer so the journey card doesn't compete for the slot.
-  // veDelegate users see DelegatingBanner; delegator/secondary/signaled/blacklisted see CantVoteCard.
-  const isUsingVeDelegate = isVeDelegated || hasAutoDeposit
-  const isSignaledOrBlacklisted =
-    !isPerson && (personReason.includes("signaled") || personReason.includes("blacklisted"))
-  if (isUsingVeDelegate || isEntity || isDelegator || isSignaledOrBlacklisted) {
-    return { phase: null, isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
-  }
-
-  // Not eligible this round → onboarding card explains what to fix. This wins over BOTH
-  // the graduated gate and the active-voter promotion: a veteran who lost actions this
-  // round still needs the "you can still vote this round" framing, and a returning voter
-  // shouldn't see a Phase-3-style roadmap that assumes they can vote.
-  if (!isEligibleThisRound) {
-    return { phase: "onboarding", isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
-  }
-
-  // Eligible + graduated (already claimed in a past round) → veteran, no journey card.
-  if (hasPastRoundClaim) {
-    return { phase: null, isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
-  }
-
-  // Eligible + past-round vote → Phase 3 bridge cycle.
-  if (hasPastRoundVote) {
-    return {
-      phase: "active-voter",
-      isLoading,
-      hasGM,
-      isEligibleThisRound,
-      hasPastRoundVote,
-      hasPastRoundClaim,
-    }
-  }
-
-  // Eligible this round with no past-round vote: first-vote phase. Covers brand-new voters
-  // and users who minted their first GM this round.
-  return { phase: "first-vote", isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
+  // Round data must be in the composite isLoading: hasPastRoundVote/Claim filter against
+  // currentRoundVoteStartBlock, and a missing block makes them silently false. Without these
+  // gates, a veteran user briefly classifies as "first-vote" between tx data and round data
+  // resolving. `!currentRoundVoteStartBlock` covers the gap between currentRoundId resolving
+  // and the round's voteStart being indexed.
+  return resolveOnboardingPhase({
+    hasAccount: !!account?.address,
+    isGMsLoading,
+    isCanVoteLoading,
+    isLoadingAccountLinking,
+    isLoadingDelegator,
+    isDelegateeLoading,
+    isVoteTxLoading,
+    isClaimTxLoading,
+    isRoundIdLoading,
+    isRoundInfoLoading: currentRoundInfo.isLoading,
+    currentRoundVoteStartBlock,
+    hasVotesAtSnapshot: !!hasVotesAtSnapshot,
+    isPerson: !!isPerson,
+    personReason,
+    isEntity: !!isEntity,
+    isDelegator: !!isDelegator,
+    isVeDelegated: !!isVeDelegated,
+    hasAutoDeposit: !!hasAutoDeposit,
+    hasGM: (userGMs?.length ?? 0) > 0,
+    hasPastRoundVote,
+    hasPastRoundClaim,
+  })
 }

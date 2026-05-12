@@ -83,7 +83,7 @@ export function VoteTab() {
     <>
       {isMobile && <VotingAlerts />}
       {shouldShowCantVoteCard && !isDelegatedToNavigator && <CantVoteCard />}
-      {shouldShowCantVoteCard && !isDelegatedToNavigator && <OnboardingCard />}
+      {!isDelegatedToNavigator && <OnboardingCard />}
       <SearchField
         placeholder={t("Search app")}
         value={localSearchQuery}

@@ -19,7 +19,7 @@ export const ProfileBetterActions = ({ address }: Props) => {
   return (
     <VStack gap={4} w="full">
       {!isLoading && !isPerson && <CantVoteCard />}
-      {!isLoading && !isPerson && <OnboardingCard />}
+      {!isLoading && <OnboardingCard />}
       <YourBetterActionsCard address={address} renderActions={false} />
       {isCalendarView ? (
         <ActivityCalendar address={address} setIsCalendarView={setIsCalendarView} />
