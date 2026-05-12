@@ -7,9 +7,9 @@ import { DashboardAllocationRounds } from "../proposals/components/components/Da
 
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
-import { FirstVoteCard } from "./CantVoteCard/FirstVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { NavigatorDiscoveryCard } from "./NavigatorDiscoveryCard"
+import { OnboardingCard } from "./OnboardingCard/OnboardingCard"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 
@@ -39,7 +39,7 @@ export const HomePageContent = () => {
             {isAboveMd && (
               <>
                 <CantVoteCard />
-                <FirstVoteCard />
+                <OnboardingCard />
                 <DashboardAllocationRounds />
                 <NavigatorDiscoveryCard />
                 <SupplyBreakdownCard />

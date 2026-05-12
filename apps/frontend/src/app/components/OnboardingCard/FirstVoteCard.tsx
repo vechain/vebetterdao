@@ -20,8 +20,6 @@ import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 import { LuCircleCheck, LuCircleDashed, LuSparkles, LuVote, LuZap } from "react-icons/lu"
 
-import { useGetUserGMs } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
@@ -31,6 +29,7 @@ import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals
 import { PowerUpModal } from "@/components/PowerUpModal"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useUserOnboardingPhase } from "@/hooks/useUserOnboardingPhase"
 import { ProposalFilter } from "@/store/useProposalFilters"
 
 import { FirstVoteInfoModal } from "./FirstVoteInfoModal"
@@ -55,8 +54,7 @@ export const FirstVoteCard = () => {
   const powerUpModal = useDisclosure()
   const infoModal = useDisclosure()
 
-  const { hasVotesAtSnapshot, isPerson, isLoading: isCanVoteLoading } = useCanUserVote()
-  const { data: userGMs, isLoading: isGMsLoading } = useGetUserGMs()
+  const { phase, isLoading: isPhaseLoading } = useUserOnboardingPhase()
   const { data: currentRoundIdRaw } = useCurrentAllocationsRoundId()
   const currentRoundId = currentRoundIdRaw ?? "0"
 
@@ -70,12 +68,12 @@ export const FirstVoteCard = () => {
   const { vot3Balance: snapshotVot3 } = useVotingPowerAtSnapshot()
   const { data: currentVot3 } = useGetVot3Balance(account?.address)
 
-  const hasGM = (userGMs?.length ?? 0) > 0
-  // Trigger: user is verified (isPerson), has no GM yet (proxy for "never claimed first GM"),
-  // and either had voting power at snapshot OR has somehow voted this round (e.g. via a Navigator
-  // delegation). Using hasVotesAtSnapshot/hasVotedAllocation instead of canUserVote keeps the card
-  // visible AFTER the user has voted, since canUserVote flips to false on hasVoted=true.
-  const isFirstTimeVoter = !!isPerson && !hasGM && (!!hasVotesAtSnapshot || !!hasVotedAllocation)
+  // Source of truth: useUserOnboardingPhase. The "first-vote" phase is "no GM yet + eligible
+  // this round" — naturally carries over if the user skips this round.
+  // We also accept hasVotedAllocation as a fallback so the card stays visible right after the
+  // user votes (e.g. via a Navigator delegation), before the GM mint settles.
+  const hasGM = phase === "active-voter"
+  const isFirstTimeVoter = phase === "first-vote" || (!hasGM && !!hasVotedAllocation)
 
   const allProposalsVoted =
     activeProposalIds.length === 0
@@ -132,9 +130,7 @@ export const FirstVoteCard = () => {
   const allComplete = steps.every(s => s.isComplete)
   const primaryAction = allComplete ? null : (steps.find(s => !s.isComplete)?.cta ?? null)
 
-  const isLoading = isCanVoteLoading || isGMsLoading
-
-  if (isLoading) return null
+  if (isPhaseLoading) return null
   if (!isFirstTimeVoter) return null
   if (allComplete) return null
 
@@ -169,7 +165,7 @@ export const FirstVoteCard = () => {
               </Text>
             </VStack>
             <Box color="status.positive.strong" w="full">
-              <Skeleton loading={isLoading}>
+              <Skeleton loading={isPhaseLoading}>
                 <List.Root variant="plain" gap="2">
                   {steps.map(step => (
                     <StepRow key={step.key} step={step} />

@@ -8,7 +8,7 @@ import { LuZap } from "react-icons/lu"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
 import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
-import { VotingRequirementsList } from "@/app/components/CantVoteCard/VotingRequirementsList"
+import { VotingRequirementsList } from "@/app/components/OnboardingCard/VotingRequirementsList"
 import { BaseModal } from "@/components/BaseModal"
 import { PowerUpModal } from "@/components/PowerUpModal"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
