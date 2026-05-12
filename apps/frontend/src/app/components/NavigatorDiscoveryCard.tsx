@@ -103,6 +103,7 @@ const StatTile = ({ icon, value, label }: { icon: ReactNode; value: ReactNode; l
 )
 
 const NavigatorRow = ({ nav }: { nav: NavigatorEntityFormatted }) => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { displayName } = useNavigatorDisplayName(nav.address, {
     domainPrefix: 12,
@@ -127,27 +128,13 @@ const NavigatorRow = ({ nav }: { nav: NavigatorEntityFormatted }) => {
           {displayName}
         </Text>
       </VStack>
-      <HStack gap={3} flexShrink={0}>
-        <HStack gap={1}>
-          <Icon as={B3trSvg} boxSize={3} color="text.subtle" />
-          <Text textStyle="xs" color="text.subtle">
-            {formatter.format(Number(nav.stakeFormatted))}
-          </Text>
-        </HStack>
-        <HStack gap={1}>
-          <Icon as={Vot3Svg} boxSize={3} color="text.subtle" />
-          <Text textStyle="xs" color="text.subtle">
-            {formatter.format(Number(nav.totalDelegatedFormatted))}
-          </Text>
-        </HStack>
-        <HStack gap={1}>
-          <Icon boxSize={3} color="text.subtle">
-            <LuUsers />
-          </Icon>
-          <Text textStyle="xs" color="text.subtle">
-            {nav.citizenCount}
-          </Text>
-        </HStack>
+      <HStack gap={1} flexShrink={0}>
+        <Icon boxSize={3} color="text.subtle">
+          <LuUsers />
+        </Icon>
+        <Text textStyle="xs" color="text.subtle">
+          {t("{{count}} citizens", { count: nav.citizenCount ?? 0 })}
+        </Text>
       </HStack>
     </HStack>
   )
