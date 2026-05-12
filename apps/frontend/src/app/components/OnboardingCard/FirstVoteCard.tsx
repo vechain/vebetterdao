@@ -20,13 +20,17 @@ import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 import { LuCircleCheck, LuCircleDashed, LuSparkles, LuVote, LuZap } from "react-icons/lu"
 
+import { useGetUserGMs } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
 import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { GetFreeNFTModal } from "@/components/GmNFTAndNodeCard/GetFreeNFTModal"
+import { MintNFTModal } from "@/components/MintNFTModal"
 import { PowerUpModal } from "@/components/PowerUpModal"
+import { useMintNFT } from "@/hooks/galaxyMember/useMintNFT"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useUserOnboardingPhase } from "@/hooks/useUserOnboardingPhase"
@@ -53,8 +57,12 @@ export const FirstVoteCard = () => {
   const router = useRouter()
   const powerUpModal = useDisclosure()
   const infoModal = useDisclosure()
+  const getFreeNftModal = useDisclosure()
+  const mintSuccessModal = useDisclosure()
 
   const { phase, isLoading: isPhaseLoading } = useUserOnboardingPhase()
+  const { data: userGMs } = useGetUserGMs()
+  const selectedGM = userGMs?.find(gm => gm.isSelected)
   const { data: currentRoundIdRaw } = useCurrentAllocationsRoundId()
   const currentRoundId = currentRoundIdRaw ?? "0"
 
@@ -68,12 +76,11 @@ export const FirstVoteCard = () => {
   const { vot3Balance: snapshotVot3 } = useVotingPowerAtSnapshot()
   const { data: currentVot3 } = useGetVot3Balance(account?.address)
 
-  // Source of truth: useUserOnboardingPhase. The "first-vote" phase is "no GM yet + eligible
-  // this round" — naturally carries over if the user skips this round.
-  // We also accept hasVotedAllocation as a fallback so the card stays visible right after the
-  // user votes (e.g. via a Navigator delegation), before the GM mint settles.
-  const hasGM = phase === "active-voter"
-  const isFirstTimeVoter = phase === "first-vote" || (!hasGM && !!hasVotedAllocation)
+  // Source of truth: useUserOnboardingPhase. The "first-vote" phase covers eligible voters
+  // who haven't yet been through a full claim cycle — including the round in which they mint
+  // their first GM (the phase hook holds them here until a past-round claim event exists).
+  const hasGM = (userGMs?.length ?? 0) > 0
+  const isFirstTimeVoter = phase === "first-vote"
 
   const allProposalsVoted =
     activeProposalIds.length === 0
@@ -87,8 +94,33 @@ export const FirstVoteCard = () => {
     const firstUnvoted = activeProposals.find(p => !hasVotedInProposals?.[p.id])
     router.push(firstUnvoted ? `/proposals/${firstUnvoted.id}` : "/proposals")
   }
-  const goToGalaxyMember = () => router.push("/galaxy-member")
   const goToApps = () => router.push("/apps")
+
+  // GM mint flow: confirmation modal → freeMint tx → celebration modal on success
+  const { sendTransaction: freeMint, resetStatus: resetFreeMintStatus } = useMintNFT({
+    transactionModalCustomUI: {
+      waitingConfirmation: { title: t("Minting your GM NFT...") },
+      success: {
+        title: t("GM NFT Minted!"),
+        description: t("Your Galaxy Member NFT has been successfully minted. Welcome to the club!"),
+        socialDescriptionEncoded:
+          "As%20a%20Voter%20in%20VeBetter%2C%20I%E2%80%99ve%20just%20minted%20my%20GM%20Earth%20NFT.%20%F0%9F%8C%8D%0A%0AGet%20yours%20here%20%F0%9F%91%89%20%20https%3A%2F%2Fgovernance.vebetterdao.org%2F%0A%0A%23GalaxyMember%20%23VeBetter",
+        onSuccess: mintSuccessModal.onOpen,
+      },
+    },
+    onFailure: () => resetFreeMintStatus(),
+  })
+  const handleClaimGM = () => getFreeNftModal.onOpen()
+  const handleConfirmMint = () => {
+    getFreeNftModal.onClose()
+    freeMint()
+  }
+  const handleMintSuccessClose = () => {
+    resetFreeMintStatus()
+    mintSuccessModal.onClose()
+    // The mint flow is fully done — send the user to their freshly minted NFT.
+    router.push("/galaxy-member")
+  }
 
   const steps: Step[] = [
     {
@@ -111,7 +143,13 @@ export const FirstVoteCard = () => {
       key: "claim-gm",
       label: t("Claim your Galaxy Member NFT"),
       isComplete: hasGM,
-      cta: hasGM ? null : { label: t("Claim NFT"), onClick: goToGalaxyMember, icon: <LuSparkles /> },
+      // GM can only be minted after the user has voted at least once; until they vote we route
+      // them to the vote step. Once they've voted, the CTA opens the in-place mint flow.
+      cta: hasGM
+        ? null
+        : hasVotedAllocation
+          ? { label: t("Claim NFT"), onClick: handleClaimGM, icon: <LuSparkles /> }
+          : { label: t("Vote now"), onClick: goToAllocations, icon: <LuVote /> },
     },
     {
       key: "keep-actions",
@@ -130,9 +168,11 @@ export const FirstVoteCard = () => {
   const allComplete = steps.every(s => s.isComplete)
   const primaryAction = allComplete ? null : (steps.find(s => !s.isComplete)?.cta ?? null)
 
+  // The card naturally retires when useUserOnboardingPhase flips to "active-voter" (next round
+  // after the user claims their first reward). We intentionally DON'T hide on allComplete —
+  // the card sticks around for the rest of this round once everything is done.
   if (isPhaseLoading) return null
   if (!isFirstTimeVoter) return null
-  if (allComplete) return null
 
   return (
     <Card.Root
@@ -202,6 +242,8 @@ export const FirstVoteCard = () => {
       </Card.Body>
       <PowerUpModal isOpen={powerUpModal.open} onClose={powerUpModal.onClose} />
       <FirstVoteInfoModal disclosure={infoModal} />
+      <GetFreeNFTModal isOpen={getFreeNftModal.open} onClose={getFreeNftModal.onClose} onCtaClick={handleConfirmMint} />
+      <MintNFTModal isOpen={mintSuccessModal.open} onClose={handleMintSuccessClose} tokenID={selectedGM?.tokenId} />
     </Card.Root>
   )
 }

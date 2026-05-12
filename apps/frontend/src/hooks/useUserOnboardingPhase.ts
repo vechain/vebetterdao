@@ -1,4 +1,5 @@
 import { useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
 
 import { useGetUserGMs } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
@@ -6,34 +7,40 @@ import { useVeDelegateAutoDeposit } from "@/api/contracts/veDelegate/hooks/useVe
 import { useAccountLinking } from "@/api/contracts/vePassport/hooks/useAccountLinking"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { useUserDelegation } from "@/api/contracts/vePassport/hooks/useUserDelegation"
+import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useTransactions } from "@/api/indexer/transactions/useTransactions"
 
 import { useIsVeDelegated } from "./useIsVeDelegated"
 
 /**
  * Where the user sits in the VeBetterDAO voter journey.
  *
- * - "onboarding"    → never voted (no Galaxy Member NFT) AND not eligible this round.
+ * - "onboarding"    → not eligible this round AND no past-round vote activity.
  *                     Has to complete the 3-step onboarding (actions → power up → hold VOT3)
  *                     before they can vote.
- * - "first-vote"    → never voted (no GM) AND eligible this round.
- *                     The card persists for the entire round; if they skip this round, it
- *                     carries over to the next round (still no GM, still eligible).
- * - "active-voter"  → has voted before (has GM). Regular cycle: claim rewards, vote again,
- *                     keep using apps, power up more.
- * - null            → cannot classify yet OR the user is in an edge-case "can't vote" state
- *                     (delegator, secondary/linked account, signaled, blacklisted, veDelegate
- *                     user). Those surfaces are owned by `CantVoteCard` / `DelegatingBanner`,
- *                     not the onboarding journey, so the hook bails out so the journey card
- *                     doesn't compete for the same slot.
+ * - "first-vote"    → eligible this round AND no past-round vote activity. Covers both the
+ *                     "no GM yet" case AND the "just minted my first GM this round" case —
+ *                     the user hasn't yet been through a full round-to-round cycle.
+ * - "active-voter"  → voted in a past round AND has never claimed in a past round. A
+ *                     one-cycle bridge: it's the round right after the user's first vote,
+ *                     where they're about to claim and rebuild voting power for the next
+ *                     round. Once they actually claim, the round after that flips them out
+ *                     of the journey entirely (phase === null) — they're a veteran from
+ *                     then on and need no special onboarding card.
+ * - null            → graduated (has past-round vote AND past-round claim), OR loading, OR
+ *                     an edge-case "can't vote" state (veDelegate, delegator, secondary,
+ *                     signaled, blacklisted). Those edge cases are owned by `CantVoteCard`
+ *                     / `DelegatingBanner`.
  *
  * Detection rationale:
- * Galaxy Member NFT is auto-minted on the user's first vote (see GmNFTAndNodeCard empty
- * state). It is therefore an on-chain, contract-enforced "ever voted" marker that does not
- * decay with time and survives wallet sessions. Combined with the existing per-round
- * eligibility signals from useCanUserVote, it gives a stable three-way classification.
- *
- * Trade-off: a user who transfers their GM away would re-enter the "onboarding"/"first-vote"
- * phases on the next eligibility check. Acceptable for an edge case.
+ * Past-round B3TR_XALLOCATION_VOTE events mark "the user has been through at least one
+ * round already" — flips on the round after the user's first vote, which is the right
+ * boundary into Phase 3. Past-round B3TR_CLAIM_REWARD events then mark "the user has
+ * already lived through a claim cycle" — once present, Phase 3 retires for good. The
+ * current-round vote/claim is excluded from both checks via block-number comparison, so the
+ * card sticks around for the rest of the current round whether they just voted or just
+ * claimed.
  */
 export type UserOnboardingPhase = "onboarding" | "first-vote" | "active-voter" | null
 
@@ -42,6 +49,8 @@ export const useUserOnboardingPhase = (): {
   isLoading: boolean
   hasGM: boolean
   isEligibleThisRound: boolean
+  hasPastRoundVote: boolean
+  hasPastRoundClaim: boolean
 } => {
   const { account } = useWallet()
   const { data: userGMs, isLoading: isGMsLoading } = useGetUserGMs()
@@ -52,13 +61,49 @@ export const useUserOnboardingPhase = (): {
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
   const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
 
+  const { data: currentRoundIdRaw } = useCurrentAllocationsRoundId()
+  const currentRoundId = currentRoundIdRaw ?? "0"
+  const currentRoundInfo = useAllocationsRound(currentRoundId)
+  const currentRoundVoteStartBlock = currentRoundInfo.data?.voteStart
+    ? Number(currentRoundInfo.data.voteStart)
+    : undefined
+
+  // Past-round vote activity — promotes the user from Phase 2 to Phase 3 the round after
+  // their first vote. Past-round claim activity — graduates them out of Phase 3 the round
+  // after their first claim. Both filters exclude current-round events via block-number
+  // comparison, so the card stays put for the rest of the current round.
+  const { data: voteTxData, isLoading: isVoteTxLoading } = useTransactions(account?.address ?? "", {
+    size: 10,
+    eventName: ["B3TR_XALLOCATION_VOTE"],
+  })
+  const { data: claimTxData, isLoading: isClaimTxLoading } = useTransactions(account?.address ?? "", {
+    size: 10,
+    eventName: ["B3TR_CLAIM_REWARD"],
+  })
+  const hasPastRoundVote = useMemo(() => {
+    if (!currentRoundVoteStartBlock) return false
+    const votes = voteTxData?.pages.flatMap(p => p.data) ?? []
+    return votes.some(tx => Number(tx.blockNumber) < currentRoundVoteStartBlock)
+  }, [voteTxData, currentRoundVoteStartBlock])
+  const hasPastRoundClaim = useMemo(() => {
+    if (!currentRoundVoteStartBlock) return false
+    const claims = claimTxData?.pages.flatMap(p => p.data) ?? []
+    return claims.some(tx => Number(tx.blockNumber) < currentRoundVoteStartBlock)
+  }, [claimTxData, currentRoundVoteStartBlock])
+
   const isLoading =
-    isGMsLoading || isCanVoteLoading || isLoadingAccountLinking || isLoadingDelegator || isDelegateeLoading
+    isGMsLoading ||
+    isCanVoteLoading ||
+    isLoadingAccountLinking ||
+    isLoadingDelegator ||
+    isDelegateeLoading ||
+    isVoteTxLoading ||
+    isClaimTxLoading
   const hasGM = (userGMs?.length ?? 0) > 0
   const isEligibleThisRound = !!hasVotesAtSnapshot && !!isPerson
 
   if (!account?.address || isLoading) {
-    return { phase: null, isLoading, hasGM, isEligibleThisRound }
+    return { phase: null, isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
   }
 
   // Edge cases owned by other surfaces — defer so the journey card doesn't compete for the slot.
@@ -67,21 +112,35 @@ export const useUserOnboardingPhase = (): {
   const isSignaledOrBlacklisted =
     !isPerson && (personReason.includes("signaled") || personReason.includes("blacklisted"))
   if (isUsingVeDelegate || isEntity || isDelegator || isSignaledOrBlacklisted) {
-    return { phase: null, isLoading, hasGM, isEligibleThisRound }
+    return { phase: null, isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
   }
 
-  // Eligibility for THIS round drives the phase. GM only refines which "eligible" sub-state
-  // applies. A previously-active voter who lost their actions (isPerson=false) this round is
-  // back in the onboarding phase — they need to do something to vote this round, exactly the
-  // same as a brand-new user. The OnboardingPhaseCard's sub-variant (new vs returning) keys
-  // off hasVotesAtSnapshot, not GM, so this routes correctly.
+  // Not eligible this round → onboarding card explains what to fix. This wins over BOTH
+  // the graduated gate and the active-voter promotion: a veteran who lost actions this
+  // round still needs the "you can still vote this round" framing, and a returning voter
+  // shouldn't see a Phase-3-style roadmap that assumes they can vote.
   if (!isEligibleThisRound) {
-    return { phase: "onboarding", isLoading, hasGM, isEligibleThisRound }
+    return { phase: "onboarding", isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
   }
-  return {
-    phase: hasGM ? "active-voter" : "first-vote",
-    isLoading,
-    hasGM,
-    isEligibleThisRound,
+
+  // Eligible + graduated (already claimed in a past round) → veteran, no journey card.
+  if (hasPastRoundClaim) {
+    return { phase: null, isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
   }
+
+  // Eligible + past-round vote → Phase 3 bridge cycle.
+  if (hasPastRoundVote) {
+    return {
+      phase: "active-voter",
+      isLoading,
+      hasGM,
+      isEligibleThisRound,
+      hasPastRoundVote,
+      hasPastRoundClaim,
+    }
+  }
+
+  // Eligible this round with no past-round vote: first-vote phase. Covers brand-new voters
+  // and users who minted their first GM this round.
+  return { phase: "first-vote", isLoading, hasGM, isEligibleThisRound, hasPastRoundVote, hasPastRoundClaim }
 }

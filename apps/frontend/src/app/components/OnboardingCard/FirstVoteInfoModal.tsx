@@ -1,4 +1,4 @@
-import { Button, Heading, HStack, Icon, Image, Text, UseDisclosureProps, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Text, UseDisclosureProps, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,13 +24,6 @@ export const FirstVoteInfoModal = ({ disclosure }: Props) => {
   return (
     <BaseModal isOpen={disclosure.open || false} onClose={onClose} showCloseButton>
       <VStack align="stretch" gap="5">
-        <Image
-          src="/assets/mascot/mascot-welcoming-left-head-2.png"
-          alt="B3MO"
-          boxSize="120px"
-          objectFit="contain"
-          alignSelf="center"
-        />
         <VStack align="stretch" gap="2">
           <Heading size="2xl" fontWeight="bold">
             {t("Why your vote matters")}

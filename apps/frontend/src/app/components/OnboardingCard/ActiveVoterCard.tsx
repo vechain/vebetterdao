@@ -13,6 +13,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { ReactNode, useCallback, useMemo } from "react"
@@ -22,10 +23,8 @@ import { LuCircleCheck, LuCircleDashed, LuGift, LuTrendingUp, LuVote, LuZap } fr
 import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
 import { useVotingPowerAtSnapshot } from "@/api/contracts/governance/hooks/useVotingPowerAtSnapshot"
 import { useVotingRewards } from "@/api/contracts/rewards/hooks/useVotingRewards"
-import { useAllocationsRound } from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useHasVotedInRound } from "@/api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { useTransactions } from "@/api/indexer/transactions/useTransactions"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { PowerUpModal } from "@/components/PowerUpModal"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
@@ -35,6 +34,8 @@ import { useUserOnboardingPhase } from "@/hooks/useUserOnboardingPhase"
 import { ProposalFilter } from "@/store/useProposalFilters"
 
 import { ActiveVoterInfoModal } from "./ActiveVoterInfoModal"
+
+const compactRewardFormatter = getCompactFormatter(2)
 
 type Step = {
   key: string
@@ -62,27 +63,6 @@ export const ActiveVoterCard = () => {
   const { data: currentRoundIdRaw } = useCurrentAllocationsRoundId()
   const currentRoundId = currentRoundIdRaw ?? "0"
   const currentRoundIdNumber = Number(currentRoundId)
-  const currentRoundInfo = useAllocationsRound(currentRoundId)
-  const currentRoundVoteStartBlock = currentRoundInfo.data?.voteStart
-    ? Number(currentRoundInfo.data.voteStart)
-    : undefined
-
-  // Journey-end detection — on-chain rather than localStorage, so it works retroactively for
-  // every existing user on release. We query the user's B3TR_CLAIM_REWARD history (page 0,
-  // size 10) and check whether any claim happened BEFORE the current round's vote-start
-  // block. If yes, the user already lived through at least one full claim-cycle in a past
-  // round, which means they've voted, claimed, and (almost certainly) minted their GM — i.e.
-  // their onboarding journey is done. The current-round claim is excluded by the block
-  // comparison, so the card stays visible for the rest of the round of completion.
-  const { data: claimTxData, isLoading: isClaimTxLoading } = useTransactions(account?.address ?? "", {
-    size: 10,
-    eventName: ["B3TR_CLAIM_REWARD"],
-  })
-  const pastClaims = useMemo(() => claimTxData?.pages.flatMap(p => p.data) ?? [], [claimTxData])
-  const hasGraduated = useMemo(() => {
-    if (!currentRoundVoteStartBlock) return false
-    return pastClaims.some(tx => Number(tx.blockNumber) < currentRoundVoteStartBlock)
-  }, [pastClaims, currentRoundVoteStartBlock])
 
   const { data: hasVotedAllocation } = useHasVotedInRound(currentRoundId, account?.address)
   const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
@@ -127,7 +107,9 @@ export const ActiveVoterCard = () => {
     {
       key: "claim-rewards",
       label: hasClaimableRewards
-        ? t("Claim your {{amount}} B3TR voter rewards", { amount: claimableTotal })
+        ? t("Claim your {{amount}} B3TR voter rewards", {
+            amount: compactRewardFormatter.format(claimableTotal),
+          })
         : t("Voter rewards claimed"),
       isComplete: !hasClaimableRewards,
       cta: hasClaimableRewards ? { label: t("Claim"), onClick: handleClaim, icon: <LuGift /> } : null,
@@ -159,12 +141,12 @@ export const ActiveVoterCard = () => {
   const allComplete = steps.every(s => s.isComplete)
   const primaryAction = allComplete ? null : (steps.find(s => !s.isComplete)?.cta ?? null)
 
-  if (isPhaseLoading || isClaimTxLoading) return null
+  // The "active-voter" phase is already gated on past-round claim activity inside
+  // useUserOnboardingPhase, so by the time we render here the user has been through one
+  // full cycle and the roadmap is appropriate. We intentionally DON'T hide on allComplete —
+  // the card sticks around for the rest of this round once everything is done.
+  if (isPhaseLoading) return null
   if (phase !== "active-voter") return null
-  // Hide permanently once the user has any past-round claim history. We DON'T hide on
-  // allComplete this round — the card sticks around until the next round opens, at which
-  // point the claim that just happened becomes a "past round" claim and trips this gate.
-  if (hasGraduated) return null
 
   return (
     <Card.Root
@@ -223,7 +205,7 @@ export const ActiveVoterCard = () => {
           <Image
             src="/assets/mascot/13_Present.webp"
             alt="B3MO"
-            boxSize={{ base: "120px", md: "160px" }}
+            boxSize={{ base: "200px", md: "200px" }}
             objectFit="contain"
             flexShrink={0}
             display={{ base: "none", sm: "block" }}

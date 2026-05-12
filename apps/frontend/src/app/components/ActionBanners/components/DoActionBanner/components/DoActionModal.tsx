@@ -61,14 +61,19 @@ export const DoActionModal = ({ doActionModal, variant = "returning" }: Props) =
   const footnote = isNew
     ? t("Once all steps are complete, you'll be eligible automatically when the next round starts.")
     : t("Actions you complete during this round still count — there's still time.")
-  const mascotSrc = isNew
-    ? "/assets/mascot/mascot-welcoming-left-head-2.png"
-    : "/assets/mascot/mascot-warning-head.webp"
 
   return (
     <BaseModal isOpen={doActionModal.open || false} onClose={doActionModal.onClose || (() => {})} showCloseButton>
       <VStack align="stretch" gap="4">
-        <Image src={mascotSrc} alt="B3MO" boxSize="120px" objectFit="contain" alignSelf="center" />
+        {!isNew && (
+          <Image
+            src={"/assets/mascot/mascot-warning-head.webp"}
+            alt="B3MO"
+            boxSize="120px"
+            objectFit="contain"
+            alignSelf="center"
+          />
+        )}
         <VStack align="stretch" gap="2">
           <Heading size="2xl" fontWeight="bold">
             {heading}
