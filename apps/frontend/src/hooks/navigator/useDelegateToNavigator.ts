@@ -6,9 +6,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback } from "react"
 
-import { getDelegateeQueryKey } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
+import { getDelegateeQueryKey, useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
-import { useIsVeDelegated } from "@/hooks/useIsVeDelegated"
 import { buildClause } from "@/utils/buildClause"
 
 import { getVotesOnBlockPrefixQueryKey } from "../../api/contracts/governance/hooks/useVotesOnBlock"
@@ -37,21 +36,23 @@ type Props = {
 export const useDelegateToNavigator = ({ onSuccess }: Props) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
-  // veDelegate routes voting qualification via passport delegation; without revoking,
-  // the navigator delegation has no effect because veDelegate keeps voting on behalf.
+  // Any active passport delegation (veDelegate is the only known production case, but the
+  // on-chain rule is general) shadows the navigator's vote. Read the delegatee directly so
+  // we don't depend on VNS resolution, which doesn't fire on non-mainnet envs.
   const {
-    isVeDelegated,
-    isLoading: isVeDelegatedLoading,
-    isError: isVeDelegatedError,
-  } = useIsVeDelegated(account?.address ?? "")
+    data: delegateeAddress,
+    isLoading: isDelegateeLoading,
+    isError: isDelegateeError,
+  } = useGetDelegatee(account?.address)
+  const isPassportDelegated = !!delegateeAddress
 
   const clauseBuilder = useCallback(
     (params: DelegateParams) => {
       // Fail loudly if the passport status is still unknown. Returning the no-revoke path
       // silently here is exactly how the bug PR #3363 fixes was reproducing in prod — the
       // delegate clause would land while the user's passport stayed delegated to veDelegate.
-      if (isVeDelegatedLoading || isVeDelegatedError) {
-        throw new Error("veDelegate passport status not yet known — try again in a moment")
+      if (isDelegateeLoading || isDelegateeError) {
+        throw new Error("Passport delegation status not yet known — try again in a moment")
       }
 
       const amountWei = ethers.parseEther(params.amount)
@@ -64,7 +65,7 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
         comment: `Delegate ${params.amount} VOT3 to navigator`,
       })
 
-      if (!isVeDelegated) return [delegateClause]
+      if (!isPassportDelegated) return [delegateClause]
 
       return [
         buildClause({
@@ -72,12 +73,12 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
           contractInterface: PassportContractInterface,
           method: "revokeDelegation",
           args: [],
-          comment: "Revoke veDelegate passport delegation",
+          comment: "Revoke passport delegation",
         }),
         delegateClause,
       ]
     },
-    [isVeDelegated, isVeDelegatedLoading, isVeDelegatedError],
+    [isPassportDelegated, isDelegateeLoading, isDelegateeError],
   )
 
   const handleSuccess = useCallback(() => {

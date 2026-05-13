@@ -25,6 +25,7 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
@@ -36,7 +37,6 @@ import { useSwitchNavigator } from "@/hooks/navigator/useSwitchNavigator"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
-import { useIsVeDelegated } from "@/hooks/useIsVeDelegated"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const formatter = getCompactFormatter(2)
@@ -68,11 +68,12 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(nav.address)
   const {
-    isVeDelegated,
-    isLoading: isVeDelegatedLoading,
-    isError: isVeDelegatedError,
-  } = useIsVeDelegated(account?.address ?? "")
-  const isVeDelegatedUnknown = isVeDelegatedLoading || isVeDelegatedError
+    data: delegateeAddress,
+    isLoading: isDelegateeLoading,
+    isError: isDelegateeError,
+  } = useGetDelegatee(account?.address)
+  const isPassportDelegated = !!delegateeAddress
+  const isPassportStatusUnknown = isDelegateeLoading || isDelegateeError
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
@@ -487,7 +488,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
         {/* veDelegate conflict warning — fires for both fresh delegations and navigator switches when the
             wallet has an active veDelegate passport delegation. Surfaces the side-effect (passport revoke
             in the same tx) right above the acknowledgment / submit button. */}
-        {(mode === "new" || mode === "switch") && isVeDelegated && (
+        {(mode === "new" || mode === "switch") && isPassportDelegated && (
           <Card.Root
             w="full"
             p={3}
@@ -508,7 +509,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
         {/* Standing-rule reminder for switch mode — the same rule is shown as item #5 inside the new-mode
             agreement card; switch has no acknowledgment block, so render it as a standalone notice. */}
-        {mode === "switch" && isVeDelegated && (
+        {mode === "switch" && isPassportDelegated && (
           <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
             <Text textStyle="xs" color="fg.muted">
               {t(
@@ -563,7 +564,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                       )}
                     </Text>
                   </HStack>
-                  {isVeDelegated && (
+                  {isPassportDelegated && (
                     <HStack gap={2} align="flex-start">
                       <Text textStyle="xs" color="fg.muted" flexShrink={0}>
                         {"5."}
@@ -604,9 +605,9 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
             w="full"
             rounded="full"
             size="lg"
-            disabled={!isValid || ((mode === "new" || mode === "switch") && isVeDelegatedUnknown)}
+            disabled={!isValid || ((mode === "new" || mode === "switch") && isPassportStatusUnknown)}
             onClick={handleSubmit}>
-            {isVeDelegatedUnknown && (mode === "new" || mode === "switch")
+            {isPassportStatusUnknown && (mode === "new" || mode === "switch")
               ? t("Checking passport status…")
               : buttonLabel}
           </Button>
