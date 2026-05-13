@@ -1,4 +1,5 @@
-import { UseDisclosureProps, VStack, Text, Heading, Link } from "@chakra-ui/react"
+import { UseDisclosureProps, VStack, Text, Heading, Button } from "@chakra-ui/react"
+import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
 import { SignalEvent } from "@/api/contracts/xApps/hooks/useUserSignalEvents"
@@ -27,9 +28,9 @@ export const SignalModal = ({ open, onClose, signals }: Props) => {
             "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue or you can file an appeal by clicking on the button below.",
           )}
         </Text>
-        <Link variant="plain" href="/appeal" colorPalette="blue" borderRadius="full">
-          {t("File an appeal")}
-        </Link>
+        <Button asChild variant="primary" size="md" alignSelf="stretch">
+          <NextLink href="/appeal">{t("File an appeal")}</NextLink>
+        </Button>
         {signals.map(signal => (
           <SignalCard key={signal.appId} appName={signal.appName} reason={signal.reason} />
         ))}
