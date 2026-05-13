@@ -1,7 +1,6 @@
 import { VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 
-import { GmNFTAndNodeCard } from "@/components/GmNFTAndNodeCard/GmNFTAndNodeCard"
 import { Leaderboard } from "@/components/Leaderboard/Leaderboard"
 
 import { ManagedAppsCard } from "../../components/ManagedAppsCard/ManagedAppsCard"
@@ -25,7 +24,6 @@ export const DashboardSideBar = () => {
       <ManagedAppsCard />
       <NavigatorDashboardCard />
       <CitizenNavigatorCard />
-      <GmNFTAndNodeCard />
       {isMobile && <NavigatorDiscoveryCard />}
       <YourBetterActionsCard address={account?.address ?? ""} />
       <Leaderboard />
