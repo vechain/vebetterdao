@@ -2,6 +2,7 @@ import { VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 
 import { Leaderboard } from "@/components/Leaderboard/Leaderboard"
+import { NotConnectedWallet } from "@/components/NotConnectedWallet"
 
 import { ManagedAppsCard } from "../../components/ManagedAppsCard/ManagedAppsCard"
 import { useBreakpoints } from "../../hooks/useBreakpoints"
@@ -19,6 +20,7 @@ export const DashboardSideBar = () => {
   const { isMobile } = useBreakpoints()
   return (
     <VStack gap={4}>
+      {!account?.address && <NotConnectedWallet />}
       {isMobile && <CantVoteCard />}
       {isMobile && <OnboardingCard />}
       <ManagedAppsCard />
