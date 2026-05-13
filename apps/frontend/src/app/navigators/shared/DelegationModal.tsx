@@ -36,6 +36,7 @@ import { useSwitchNavigator } from "@/hooks/navigator/useSwitchNavigator"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
+import { useIsVeDelegated } from "@/hooks/useIsVeDelegated"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const formatter = getCompactFormatter(2)
@@ -66,6 +67,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(nav.address)
+  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
@@ -310,6 +312,26 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           </Card.Root>
         )}
 
+        {/* veDelegate conflict warning — only on fresh delegation; navigator + veDelegate are mutually exclusive */}
+        {mode === "new" && isVeDelegated && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.warning.subtle"
+            border="1px solid"
+            borderColor="status.warning.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
+                {t(
+                  "You currently have your voting qualification delegated to veDelegate. This transaction will also revoke that delegation — veDelegate and Navigators cannot be used at the same time.",
+                )}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
+
         {/* Navigator info */}
         <HStack
           gap={3}
@@ -519,6 +541,16 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                     <Text textStyle="xs" color="fg.muted">
                       {t(
                         "You must remain eligible for voting (e.g. by performing sustainable actions) or your vote will be skipped.",
+                      )}
+                    </Text>
+                  </HStack>
+                  <HStack gap={2} align="flex-start">
+                    <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                      {"5."}
+                    </Text>
+                    <Text textStyle="xs" color="fg.muted">
+                      {t(
+                        "You cannot use veDelegate and Navigators at the same time. If you have a passport delegation to veDelegate, it will be revoked in this transaction.",
                       )}
                     </Text>
                   </HStack>
