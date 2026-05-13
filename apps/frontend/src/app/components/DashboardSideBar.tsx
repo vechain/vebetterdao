@@ -11,6 +11,7 @@ import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { CitizenNavigatorCard } from "./CitizenNavigatorCard"
 import { NavigatorDashboardCard } from "./NavigatorDashboardCard"
 import { NavigatorDiscoveryCard } from "./NavigatorDiscoveryCard"
+import { OnboardingCard } from "./OnboardingCard/OnboardingCard"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 
@@ -20,6 +21,7 @@ export const DashboardSideBar = () => {
   return (
     <VStack gap={4}>
       {isMobile && <CantVoteCard />}
+      {isMobile && <OnboardingCard />}
       <ManagedAppsCard />
       <NavigatorDashboardCard />
       <CitizenNavigatorCard />

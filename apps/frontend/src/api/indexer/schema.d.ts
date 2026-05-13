@@ -393,6 +393,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/transfers/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get latest transfer events
+         * @description Returns latest transfer events by block number descending and canonical transfer order
+         *                 within each block. Defaults to all transfer event types; use the eventType query
+         *                 parameter to filter to one or more types.
+         */
+        get: operations["getLatestTransfers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/transfers/fungible-tokens-contracts": {
         parameters: {
             query?: never;
@@ -470,6 +492,27 @@ export interface paths {
         };
         /** Get transaction by ID */
         get: operations["getTransactionById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get latest transactions
+         * @description Returns latest transactions by block number descending and canonical transaction order
+         *                 within each block.
+         */
+        get: operations["getLatestTransactions"];
         put?: never;
         post?: never;
         delete?: never;
@@ -989,6 +1032,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/safes/{safe}/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List proposed transactions for a Safe
+         * @description Returns Safe transactions proposed via the SafeEmitter contract, paginated and sorted
+         *                 newest-first by default. Per-transaction approval / execution status is available from
+         *                 `/safes/{safe}/transactions/{txHash}/state`.
+         */
+        get: operations["getTransactionsForSafe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/safes/{safe}/transactions/{txHash}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Safe transaction state
+         * @description Returns the aggregated state for a single Safe transaction (approvers, executor, and
+         *                 execution status). Returns an empty document with no approvers when the Safe has not
+         *                 seen the txHash yet, so the dapp does not need to fall back to RPC for unknown hashes.
+         */
+        get: operations["getTxState"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/safes/owner/{address}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Safes for an owner
+         * @description Returns the Safes that the supplied address is — or has been — an owner of.
+         *                 Use `membership=ALL` (default) for both current and past, `CURRENT` for only active
+         *                 ownerships, and `PAST` for ownerships that have been revoked.
+         */
+        get: operations["getSafesForOwner"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nfts": {
         parameters: {
             query?: never;
@@ -1343,6 +1452,146 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/b3tr/navigators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get navigators
+         * @description Returns a paginated list of navigators with their current state including stake, citizen count, and delegation totals. Supports filtering by status and ordering by various fields.
+         */
+        get: operations["getNavigators"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/navigators/{navigatorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get navigator by ID
+         * @description Returns a single navigator with its current state including stake, citizen count, and delegation totals.
+         */
+        get: operations["getNavigatorById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/navigators/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get navigator overview
+         * @description Returns aggregate statistics across all active navigators: total count, total B3TR staked, total citizens delegating, and total VOT3 delegated.
+         */
+        get: operations["getOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/navigators/fees/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get navigator fee summary
+         * @description Returns total fees earned and claimed for a navigator, or globally if no navigator specified.
+         */
+        get: operations["getFeeSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/navigators/fees/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get per-round fee history
+         * @description Returns a paginated list of per-round fee records for a navigator, showing deposited amount, claim status, and unlock round.
+         */
+        get: operations["getFeeHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/navigators/delegations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get delegation event history
+         * @description Returns the full chronological history of delegation events (created, updated, removed) for a navigator or citizen. Each event includes the absolute amount and a delta field showing the change (positive for increases, negative for decreases).
+         */
+        get: operations["getDelegations_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/b3tr/navigators/citizens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get citizens delegated to a navigator
+         * @description Returns a paginated list of active citizen delegations for a specific navigator. Each entry includes the citizen address, delegated VOT3 amount, and delegation start date.
+         */
+        get: operations["getCitizens"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/b3tr/galaxy-members/level-overview": {
         parameters: {
             query?: never;
@@ -1645,7 +1894,7 @@ export interface paths {
          *
          *                 The response includes individual breakdowns and a computed total.
          */
-        get: operations["getOverview"];
+        get: operations["getOverview_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1759,7 +2008,7 @@ export interface components {
             contractAddress?: string;
             tokenId?: string;
             /** @enum {string} */
-            eventName: "B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST";
+            eventName: "B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "B3TR_NAVIGATOR_DELEGATION_CREATED" | "B3TR_NAVIGATOR_DELEGATION_INCREASED" | "B3TR_NAVIGATOR_DELEGATION_DECREASED" | "B3TR_NAVIGATOR_DELEGATION_REMOVED" | "B3TR_NAVIGATOR_REGISTERED" | "B3TR_NAVIGATOR_STAKE_ADDED" | "B3TR_NAVIGATOR_STAKE_WITHDRAWN" | "B3TR_NAVIGATOR_SLASHED" | "B3TR_NAVIGATOR_MINOR_SLASHED" | "B3TR_NAVIGATOR_FEE_CLAIMED" | "B3TR_NAVIGATOR_FEE_DEPOSITED" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST";
             to?: string;
             from?: string;
             value?: string;
@@ -2083,7 +2332,8 @@ export interface components {
             blockRef: string;
             /** Format: int64 */
             expiration: number;
-            clauses: components["schemas"]["Clause"][];
+            /** @description Only returned when expanded=true. */
+            clauses?: components["schemas"]["Clause"][];
             /** Format: int64 */
             gasPriceCoef?: number;
             /** Format: int64 */
@@ -2099,7 +2349,10 @@ export interface components {
             reward: string;
             reverted: boolean;
             origin: string;
-            outputs: components["schemas"]["DecodedOutputs"][];
+            /** @description Only returned when expanded=true. */
+            outputs?: components["schemas"]["DecodedOutputs"][];
+            /** Format: int32 */
+            clauseCount: number;
         };
         PaginatedResponseIndexedTransaction: {
             data: components["schemas"]["IndexedTransaction"][];
@@ -2217,6 +2470,81 @@ export interface components {
             timestamp: number;
             /** Format: int64 */
             value: number;
+        };
+        PaginatedResponseSafeTxProposal: {
+            data: components["schemas"]["SafeTxProposal"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        SafeSubcall: {
+            target: string;
+            value: number;
+            data: string;
+            /** Format: int32 */
+            operation: number;
+            label: string;
+        };
+        SafeTxProposal: {
+            id: string;
+            safe: string;
+            txHash: string;
+            proposer?: string;
+            /** Format: int64 */
+            proposedBlock?: number;
+            /** Format: int64 */
+            proposedTimestamp?: number;
+            proposedVechainTxId?: string;
+            to?: string;
+            value?: number;
+            data?: string;
+            /** Format: int32 */
+            operation?: number;
+            nonce?: number;
+            description?: string;
+            safeTxGas?: number;
+            baseGas?: number;
+            gasPrice?: number;
+            gasToken?: string;
+            refundReceiver?: string;
+            subcalls?: components["schemas"]["SafeSubcall"][];
+        };
+        SafeTxApproval: {
+            owner: string;
+            /** Format: int64 */
+            block: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            vechainTxId: string;
+        };
+        SafeTxState: {
+            id: string;
+            safe: string;
+            txHash: string;
+            approvers: components["schemas"]["SafeTxApproval"][];
+            executed: boolean;
+            executor?: string;
+            /** Format: int64 */
+            executedBlock?: number;
+            /** Format: int64 */
+            executedTimestamp?: number;
+            vechainTxId?: string;
+            failed: boolean;
+        };
+        PaginatedResponseSafeMembership: {
+            data: components["schemas"]["SafeMembership"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        SafeMembership: {
+            id: string;
+            safe: string;
+            owner: string;
+            /** Format: int64 */
+            addedBlock: number;
+            /** Format: int64 */
+            addedTimestamp: number;
+            /** Format: int64 */
+            removedBlock?: number;
+            /** Format: int64 */
+            removedTimestamp?: number;
         };
         /** @description Error response returned by the API */
         ExceptionResponse_Public: {
@@ -2488,6 +2816,82 @@ export interface components {
             voters: number;
             totalWeight: number;
             totalPower: number;
+        };
+        Navigator: {
+            address: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "EXITING" | "DEACTIVATED";
+            stake: number;
+            /** Format: int32 */
+            citizenCount: number;
+            totalDelegated: number;
+            metadataURI?: string;
+            /** Format: int64 */
+            registeredAt: number;
+            exitAnnouncedRound?: string;
+            exitEffectiveDeadline?: string;
+            lastReportRound?: string;
+            lastReportURI?: string;
+        };
+        PaginatedResponseNavigator: {
+            data: components["schemas"]["Navigator"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        NavigatorOverview: {
+            /** Format: int64 */
+            activeNavigators: number;
+            totalStaked: number;
+            /** Format: int64 */
+            totalCitizens: number;
+            totalDelegated: number;
+        };
+        NavigatorFeeSummary: {
+            totalEarned: number;
+            totalClaimed: number;
+        };
+        NavigatorFee: {
+            id: string;
+            navigator: string;
+            /** Format: int32 */
+            roundId: number;
+            totalDeposited: number;
+            claimed: boolean;
+            /** Format: int64 */
+            claimedAt?: number;
+            /** Format: int64 */
+            depositedAt: number;
+            /** Format: int64 */
+            unlockRound: number;
+        };
+        PaginatedResponseNavigatorFee: {
+            data: components["schemas"]["NavigatorFee"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        NavigatorDelegationEvent: {
+            /** Format: int64 */
+            blockTimestamp: number;
+            txId: string;
+            navigator: string;
+            citizen: string;
+            eventType: string;
+            amount?: number;
+            delta?: number;
+        };
+        PaginatedResponseNavigatorDelegationEvent: {
+            data: components["schemas"]["NavigatorDelegationEvent"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        NavigatorCitizen: {
+            address: string;
+            navigator: string;
+            amount: number;
+            /** Format: int64 */
+            delegatedAt: number;
+            active: boolean;
+        };
+        PaginatedResponseNavigatorCitizen: {
+            data: components["schemas"]["NavigatorCitizen"][];
+            pagination: components["schemas"]["PaginationDetail"];
         };
         GMLevelOverview: {
             /** @enum {string} */
@@ -4279,6 +4683,79 @@ export interface operations {
             };
         };
     };
+    getLatestTransfers: {
+        parameters: {
+            query?: {
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The pagination cursor returned by a previous request. */
+                cursor?: string;
+                /** @description Filter by transfer event type(s) */
+                eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedTransferEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getFungibleTokensContractsByAddress: {
         parameters: {
             query: {
@@ -4673,6 +5150,82 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["IndexedTransaction"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getLatestTransactions: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Whether to return the expanded model
+                 * @example true
+                 */
+                expanded?: boolean;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The pagination cursor returned by a previous request. */
+                cursor?: string;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -6431,6 +6984,241 @@ export interface operations {
             };
         };
     };
+    getTransactionsForSafe: {
+        parameters: {
+            query?: {
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The Safe contract address.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                safe: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseSafeTxProposal"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTxState: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The Safe contract address.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                safe: string;
+                txHash: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SafeTxState"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getSafesForOwner: {
+        parameters: {
+            query?: {
+                membership?: "ALL" | "CURRENT" | "PAST";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description The address whose Safe memberships should be returned.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                address: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseSafeMembership"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getOwnedNFTs: {
         parameters: {
             query: {
@@ -7813,6 +8601,535 @@ export interface operations {
             };
         };
     };
+    getNavigators: {
+        parameters: {
+            query?: {
+                /** @description Filter by navigator status. Multiple values allowed. */
+                status?: ("ACTIVE" | "EXITING" | "DEACTIVATED")[];
+                /** @description Field to order results by. */
+                orderBy?: "stake" | "totalDelegated" | "citizenCount" | "registeredAt";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseNavigator"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getNavigatorById: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description Navigator address.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                navigatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Navigator"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getOverview: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NavigatorOverview"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getFeeSummary: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Filter by navigator address. Omit for global totals.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                navigator?: string;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["NavigatorFeeSummary"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getFeeHistory: {
+        parameters: {
+            query: {
+                /**
+                 * @description Navigator address.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                navigator: string;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseNavigatorFee"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getDelegations_1: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Filter by navigator address.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                navigator?: string;
+                /**
+                 * @description Filter by citizen address.
+                 * @example 0x3f90bf8b314c42005103b3c94505634fa680dcee
+                 */
+                citizen?: string;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseNavigatorDelegationEvent"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getCitizens: {
+        parameters: {
+            query: {
+                /**
+                 * @description Navigator address to list citizens for.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                navigator: string;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseNavigatorCitizen"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getLevelOverviews: {
         parameters: {
             query?: {
@@ -8831,7 +10148,7 @@ export interface operations {
             };
         };
     };
-    getOverview: {
+    getOverview_1: {
         parameters: {
             query?: never;
             header?: {

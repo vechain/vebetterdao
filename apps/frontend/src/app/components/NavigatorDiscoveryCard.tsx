@@ -1,10 +1,11 @@
 "use client"
 
-import { Button, Card, Heading, HStack, Icon, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, Heading, HStack, Icon, Link, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import NextLink from "next/link"
 import { useRouter } from "next/navigation"
-import type { ReactNode } from "react"
+import { useMemo, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass, LuUsers } from "react-icons/lu"
 
@@ -22,15 +23,30 @@ const formatter = getCompactFormatter(2)
 
 export const NavigatorDiscoveryCard = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { account } = useWallet()
   const { data: overview, isLoading: overviewLoading } = useNavigatorOverview()
-  const { data: trendingNavigators, isLoading: trendingLoading } = useNavigators({
+  const { data: topNavigators, isLoading: trendingLoading } = useNavigators({
     orderBy: "totalDelegated",
     direction: "DESC",
-    size: 3,
+    size: 10,
     status: ["ACTIVE"],
   })
+
+  const trendingNavigators = useMemo(() => {
+    if (!topNavigators?.length) return []
+    const maxDelegated = Math.max(...topNavigators.map(n => Number(n.totalDelegatedFormatted)))
+    const maxCitizens = Math.max(...topNavigators.map(n => n.citizenCount ?? 0))
+
+    return [...topNavigators]
+      .map(nav => ({
+        ...nav,
+        score:
+          (maxDelegated ? Number(nav.totalDelegatedFormatted) / maxDelegated : 0) * 0.6 +
+          (maxCitizens ? (nav.citizenCount ?? 0) / maxCitizens : 0) * 0.4,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+  }, [topNavigators])
 
   if (!account?.address) return null
   if (!overviewLoading && !overview?.activeNavigators) return null
@@ -81,10 +97,9 @@ export const NavigatorDiscoveryCard = () => {
         </VStack>
       </Card.Body>
       <Card.Footer justifyContent="center" mt={5}>
-        <Button variant="secondary" onClick={() => router.push("/navigators")}>
-          <LuCompass />
-          {t("Explore Navigators")}
-        </Button>
+        <Link mx="auto" asChild variant="plain" color="actions.secondary.text-lighter" fontWeight="semibold">
+          <NextLink href="/navigators">{t("See all")}</NextLink>
+        </Link>
       </Card.Footer>
     </Card.Root>
   )
@@ -128,13 +143,21 @@ const NavigatorRow = ({ nav }: { nav: NavigatorEntityFormatted }) => {
           {displayName}
         </Text>
       </VStack>
-      <HStack gap={1} flexShrink={0}>
-        <Icon boxSize={3} color="text.subtle">
-          <LuUsers />
-        </Icon>
-        <Text textStyle="xs" color="text.subtle">
-          {t("{{count}} citizens", { count: nav.citizenCount ?? 0 })}
-        </Text>
+      <HStack gap={{ base: 0, md: 3 }} flexShrink={0} flexDir={{ base: "column", md: "row" }} align="end">
+        <HStack gap={1}>
+          <Icon boxSize={3} color="text.subtle">
+            <LuUsers />
+          </Icon>
+          <Text textStyle="xs" color="text.subtle">
+            {t("{{count}} citizens", { count: nav.citizenCount ?? 0 })}
+          </Text>
+        </HStack>
+        <HStack gap={1}>
+          <Icon as={Vot3Svg} boxSize={3} color="text.subtle" />
+          <Text textStyle="xs" color="text.subtle">
+            {formatter.format(Number(nav.totalDelegatedFormatted))} {t("delegated")}
+          </Text>
+        </HStack>
       </HStack>
     </HStack>
   )

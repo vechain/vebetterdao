@@ -1,4 +1,4 @@
-import { Card, Separator, Heading, HStack, IconButton, Skeleton, Text, VStack, Button } from "@chakra-ui/react"
+import { Card, Separator, Heading, HStack, IconButton, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { NavArrowLeft, NavArrowRight } from "iconoir-react"
@@ -169,9 +169,9 @@ export const Leaderboard = () => {
               </>
             )}
           </VStack>
-          <Button asChild variant="link" fontWeight="semibold" alignSelf="center">
+          <Link mx="auto" asChild variant="plain" color="actions.secondary.text-lighter" fontWeight="semibold">
             <NextLink href={`/leaderboard/${selectedRoundId}`}>{t("See full leaderboard")}</NextLink>
-          </Button>
+          </Link>
         </VStack>
       </Card.Body>
     </Card.Root>

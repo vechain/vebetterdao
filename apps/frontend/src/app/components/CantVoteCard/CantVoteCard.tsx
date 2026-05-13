@@ -1,57 +1,33 @@
-import { VStack, Button, useDisclosure, Card, Text, Stack, HStack, Icon, List, Skeleton } from "@chakra-ui/react"
+import { Button, Card, HStack, Icon, Stack, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuCircleAlert, LuCircleCheck, LuCircleDashed } from "react-icons/lu"
-
-import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
+import { LuCircleAlert } from "react-icons/lu"
 
 import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
+import { useVeDelegateAutoDeposit } from "../../../api/contracts/veDelegate/hooks/useVeDelegateAutoDeposit"
 import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetDelegatee"
 import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
-import { useUserScore } from "../../../api/indexer/sustainability/useUserScore"
-import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
 
-type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions" | "signaled" | "blacklisted"
-type CantVoteReasonText = {
+/**
+ * Warning card for non-journey "can't vote" reasons:
+ * - delegator (account has delegated voting power away)
+ * - secondary (account is linked as a secondary/non-primary)
+ * - signaled (account flagged as suspicious)
+ * - blacklisted
+ *
+ * Onboarding/journey states (new user, first-vote, active-voter) are owned by `OnboardingCard`.
+ * veDelegate users are suppressed here too because `DelegatingBanner` already covers them.
+ */
+type CantVoteReason = "delegator" | "secondary" | "signaled" | "blacklisted"
+
+type ReasonText = {
   title: string
   description: ReactNode
   onLearnMoreClick?: () => void
-}
-
-/**
- * Uses isPerson from the contract (checked at snapshot) as source of truth for the actions check.
- * missingActions from the indexer is only used as guidance for how many more actions are needed.
- */
-export const VotingRequirementsList = ({ isPerson }: { isPerson?: boolean }) => {
-  const { t } = useTranslation()
-  const { account } = useWallet()
-  const { missingActions, isLoading: isLoadingMissingActions } = useUserScore()
-  const { data: voteBalance, isLoading: isLoadingVoteBalance } = useGetVot3Balance(account?.address)
-
-  // Contract isPerson (at snapshot) is the source of truth.
-  // If isPerson is explicitly false, the user does NOT have enough actions regardless of indexer data.
-  const hasEnoughActions = isPerson ?? missingActions <= 0
-
-  return (
-    <Skeleton loading={isLoadingMissingActions || isLoadingVoteBalance}>
-      <List.Root variant="plain">
-        <List.Item>
-          <List.Indicator asChild color="inherit">
-            {hasEnoughActions ? <LuCircleCheck /> : <LuCircleDashed />}
-          </List.Indicator>
-          {t("Complete {{count}} more Better Actions in our apps", { count: Math.max(missingActions, 1) })}
-        </List.Item>
-        <List.Item>
-          <List.Indicator asChild color="inherit">
-            {!!voteBalance?.original && Number(voteBalance.original) > 0 ? <LuCircleCheck /> : <LuCircleDashed />}
-          </List.Indicator>
-          {t("Convert your B3TR to VOT3 to gain voting power in the next round")}
-        </List.Item>
-      </List.Root>
-    </Skeleton>
-  )
 }
 
 export const CantVoteCard = () => {
@@ -60,9 +36,10 @@ export const CantVoteCard = () => {
   const router = useRouter()
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
-  const doActionModal = useDisclosure()
-
-  const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson, personReason } = useCanUserVote()
+  const { isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
+  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
+  const { isLoading: canVoteLoading, isPerson, personReason } = useCanUserVote()
 
   const handleGoToLinking = useCallback(() => {
     router.push("/profile?tab=linked-accounts")
@@ -72,19 +49,17 @@ export const CantVoteCard = () => {
     router.push("/profile?tab=governance")
   }, [router])
 
-  const handleOpenDoActionModal = useCallback(() => {
-    doActionModal.onOpen()
-  }, [doActionModal])
+  const isUsingVeDelegate = isVeDelegated || hasAutoDeposit
 
   const cantVoteReason = useMemo<CantVoteReason | null>(() => {
-    if (!account?.address || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading) return null
+    if (!account?.address || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading || isDelegateeLoading)
+      return null
+    if (isUsingVeDelegate) return null
     if (isEntity) return "secondary"
     if (isDelegator) return "delegator"
-    if (!hasVotesAtSnapshot) return "no-votes"
     if (!isPerson) {
       if (personReason.includes("signaled")) return "signaled"
       if (personReason.includes("blacklisted")) return "blacklisted"
-      return "no-actions"
     }
     return null
   }, [
@@ -94,12 +69,13 @@ export const CantVoteCard = () => {
     isLoadingDelegator,
     isDelegator,
     canVoteLoading,
-    hasVotesAtSnapshot,
+    isDelegateeLoading,
+    isUsingVeDelegate,
     isPerson,
     personReason,
   ])
 
-  const cantVoteReasonText = useMemo<CantVoteReasonText | null>(() => {
+  const reasonText = useMemo<ReasonText | null>(() => {
     switch (cantVoteReason) {
       case "delegator":
         return {
@@ -125,20 +101,12 @@ export const CantVoteCard = () => {
           title: t("You can't vote because your account has been blacklisted."),
           description: t("Contact VeBetterDAO support for more information."),
         }
-      case "no-votes":
-      case "no-actions":
-        return {
-          title: t("You're not eligible to vote yet. To vote in next round:"),
-          description: <VotingRequirementsList isPerson={isPerson} />,
-          onLearnMoreClick: handleOpenDoActionModal,
-        }
-
       default:
         return null
     }
-  }, [cantVoteReason, t, isPerson, handleGoToGovernance, handleGoToLinking, handleOpenDoActionModal])
+  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking])
 
-  if (!cantVoteReasonText) return null
+  if (!reasonText) return null
 
   return (
     <Card.Root
@@ -157,7 +125,7 @@ export const CantVoteCard = () => {
             </Icon>
             <VStack gap={0} w="full" align="flex-start">
               <Text fontWeight="bold" color="status.warning.strong" as="span">
-                {cantVoteReasonText?.title}
+                {reasonText.title}
               </Text>
               <Stack
                 flexDir={{ base: "column", md: "row" }}
@@ -167,17 +135,16 @@ export const CantVoteCard = () => {
                 alignItems={{ base: "flex-end", md: "flex-start" }}
                 w="full">
                 <Text as="div" color="status.warning.strong">
-                  {cantVoteReasonText?.description}
+                  {reasonText.description}
                 </Text>
-
-                {!!cantVoteReasonText?.onLearnMoreClick && (
+                {!!reasonText.onLearnMoreClick && (
                   <Button
                     size="sm"
                     alignItems="flex-end"
                     variant="plain"
                     _hover={{ textDecoration: "underline" }}
                     color="status.warning.strong"
-                    onClick={cantVoteReasonText.onLearnMoreClick}>
+                    onClick={reasonText.onLearnMoreClick}>
                     {t("Learn more")}
                   </Button>
                 )}
@@ -186,8 +153,6 @@ export const CantVoteCard = () => {
           </HStack>
         </VStack>
       </Card.Body>
-
-      <DoActionModal doActionModal={doActionModal} />
     </Card.Root>
   )
 }

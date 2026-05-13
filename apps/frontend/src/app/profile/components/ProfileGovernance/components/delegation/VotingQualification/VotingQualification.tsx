@@ -3,7 +3,7 @@ import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { VotingRequirementsList } from "@/app/components/CantVoteCard/CantVoteCard"
+import { VotingRequirementsList } from "@/app/components/OnboardingCard/VotingRequirementsList"
 
 import { useCanUserVote } from "../../../../../../../api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "../../../../../../../api/contracts/vePassport/hooks/useGetDelegatee"
