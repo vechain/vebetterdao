@@ -39,10 +39,21 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
   const queryClient = useQueryClient()
   // veDelegate routes voting qualification via passport delegation; without revoking,
   // the navigator delegation has no effect because veDelegate keeps voting on behalf.
-  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  const {
+    isVeDelegated,
+    isLoading: isVeDelegatedLoading,
+    isError: isVeDelegatedError,
+  } = useIsVeDelegated(account?.address ?? "")
 
   const clauseBuilder = useCallback(
     (params: DelegateParams) => {
+      // Fail loudly if the passport status is still unknown. Returning the no-revoke path
+      // silently here is exactly how the bug PR #3363 fixes was reproducing in prod — the
+      // delegate clause would land while the user's passport stayed delegated to veDelegate.
+      if (isVeDelegatedLoading || isVeDelegatedError) {
+        throw new Error("veDelegate passport status not yet known — try again in a moment")
+      }
+
       const amountWei = ethers.parseEther(params.amount)
 
       const delegateClause = buildClause({
@@ -66,7 +77,7 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
         delegateClause,
       ]
     },
-    [isVeDelegated],
+    [isVeDelegated, isVeDelegatedLoading, isVeDelegatedError],
   )
 
   const handleSuccess = useCallback(() => {

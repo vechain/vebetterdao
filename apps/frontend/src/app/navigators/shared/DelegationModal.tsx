@@ -67,7 +67,12 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(nav.address)
-  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  const {
+    isVeDelegated,
+    isLoading: isVeDelegatedLoading,
+    isError: isVeDelegatedError,
+  } = useIsVeDelegated(account?.address ?? "")
+  const isVeDelegatedUnknown = isVeDelegatedLoading || isVeDelegatedError
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
@@ -591,9 +596,19 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           </VStack>
         )}
 
+        {/* Block submission for new/switch flows until passport status is known — the clause builder
+            throws if it isn't, and we'd rather disable the button than surface that error to users. */}
         <VStack gap={2} mt={2} w="full">
-          <Button variant={buttonVariant} w="full" rounded="full" size="lg" disabled={!isValid} onClick={handleSubmit}>
-            {buttonLabel}
+          <Button
+            variant={buttonVariant}
+            w="full"
+            rounded="full"
+            size="lg"
+            disabled={!isValid || ((mode === "new" || mode === "switch") && isVeDelegatedUnknown)}
+            onClick={handleSubmit}>
+            {isVeDelegatedUnknown && (mode === "new" || mode === "switch")
+              ? t("Checking passport status…")
+              : buttonLabel}
           </Button>
           <Button variant="ghost" w="full" rounded="full" size="lg" onClick={onClose}>
             {t("Cancel")}

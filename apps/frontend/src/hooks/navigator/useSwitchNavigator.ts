@@ -40,10 +40,20 @@ export const useSwitchNavigator = ({ onSuccess }: Props) => {
   const queryClient = useQueryClient()
   // Users already in the broken state (navigator-delegated AND passport-delegated to veDelegate)
   // who switch navigators would otherwise stay broken — veDelegate keeps shadowing the new navigator's vote.
-  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  const {
+    isVeDelegated,
+    isLoading: isVeDelegatedLoading,
+    isError: isVeDelegatedError,
+  } = useIsVeDelegated(account?.address ?? "")
 
   const clauseBuilder = useCallback(
     (params: SwitchParams) => {
+      // Fail loudly if the passport status is still unknown — see useDelegateToNavigator
+      // for the same rationale (silent false reintroduces the original bug).
+      if (isVeDelegatedLoading || isVeDelegatedError) {
+        throw new Error("veDelegate passport status not yet known — try again in a moment")
+      }
+
       const amountWei = ethers.parseEther(params.amount)
 
       const undelegateClause = buildClause({
@@ -75,7 +85,7 @@ export const useSwitchNavigator = ({ onSuccess }: Props) => {
         delegateClause,
       ]
     },
-    [isVeDelegated],
+    [isVeDelegated, isVeDelegatedLoading, isVeDelegatedError],
   )
 
   const handleSuccess = useCallback(() => {
