@@ -5,7 +5,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import NextLink from "next/link"
 import { useRouter } from "next/navigation"
-import type { ReactNode } from "react"
+import { useMemo, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass, LuUsers } from "react-icons/lu"
 
@@ -25,12 +25,28 @@ export const NavigatorDiscoveryCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: overview, isLoading: overviewLoading } = useNavigatorOverview()
-  const { data: trendingNavigators, isLoading: trendingLoading } = useNavigators({
+  const { data: topNavigators, isLoading: trendingLoading } = useNavigators({
     orderBy: "totalDelegated",
     direction: "DESC",
-    size: 3,
+    size: 10,
     status: ["ACTIVE"],
   })
+
+  const trendingNavigators = useMemo(() => {
+    if (!topNavigators?.length) return []
+    const maxDelegated = Math.max(...topNavigators.map(n => Number(n.totalDelegatedFormatted)))
+    const maxCitizens = Math.max(...topNavigators.map(n => n.citizenCount ?? 0))
+
+    return [...topNavigators]
+      .map(nav => ({
+        ...nav,
+        score:
+          (maxDelegated ? Number(nav.totalDelegatedFormatted) / maxDelegated : 0) * 0.6 +
+          (maxCitizens ? (nav.citizenCount ?? 0) / maxCitizens : 0) * 0.4,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+  }, [topNavigators])
 
   if (!account?.address) return null
   if (!overviewLoading && !overview?.activeNavigators) return null
@@ -127,13 +143,21 @@ const NavigatorRow = ({ nav }: { nav: NavigatorEntityFormatted }) => {
           {displayName}
         </Text>
       </VStack>
-      <HStack gap={1} flexShrink={0}>
-        <Icon boxSize={3} color="text.subtle">
-          <LuUsers />
-        </Icon>
-        <Text textStyle="xs" color="text.subtle">
-          {t("{{count}} citizens", { count: nav.citizenCount ?? 0 })}
-        </Text>
+      <HStack gap={{ base: 0, md: 3 }} flexShrink={0} flexDir={{ base: "column", md: "row" }} align="end">
+        <HStack gap={1}>
+          <Icon boxSize={3} color="text.subtle">
+            <LuUsers />
+          </Icon>
+          <Text textStyle="xs" color="text.subtle">
+            {t("{{count}} citizens", { count: nav.citizenCount ?? 0 })}
+          </Text>
+        </HStack>
+        <HStack gap={1}>
+          <Icon as={Vot3Svg} boxSize={3} color="text.subtle" />
+          <Text textStyle="xs" color="text.subtle">
+            {formatter.format(Number(nav.totalDelegatedFormatted))} {t("delegated")}
+          </Text>
+        </HStack>
       </HStack>
     </HStack>
   )
