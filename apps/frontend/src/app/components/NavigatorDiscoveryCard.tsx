@@ -1,8 +1,9 @@
 "use client"
 
-import { Button, Card, Heading, HStack, Icon, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, Heading, HStack, Icon, Link, SimpleGrid, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import NextLink from "next/link"
 import { useRouter } from "next/navigation"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -23,7 +24,6 @@ const formatter = getCompactFormatter(2)
 
 export const NavigatorDiscoveryCard = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { account } = useWallet()
   const { data: overview, isLoading: overviewLoading } = useNavigatorOverview()
   const { data: newestNavigators, isLoading: newestLoading } = useNavigators({
@@ -82,10 +82,9 @@ export const NavigatorDiscoveryCard = () => {
         </VStack>
       </Card.Body>
       <Card.Footer justifyContent="center" mt={5}>
-        <Button variant="secondary" onClick={() => router.push("/navigators")}>
-          <LuCompass />
-          {t("Explore Navigators")}
-        </Button>
+        <Link mx="auto" asChild variant="plain" color="actions.secondary.text-lighter" fontWeight="semibold">
+          <NextLink href="/navigators">{t("See all")}</NextLink>
+        </Link>
       </Card.Footer>
     </Card.Root>
   )
