@@ -25,6 +25,7 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
@@ -67,7 +68,9 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(nav.address)
+  const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  const isPassportDelegated = !!delegateeAddress
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
@@ -312,8 +315,8 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           </Card.Root>
         )}
 
-        {/* veDelegate conflict warning — only on fresh delegation; navigator + veDelegate are mutually exclusive */}
-        {mode === "new" && isVeDelegated && (
+        {/* Passport-delegation conflict warning — only on fresh delegation; passport delegation + navigator are mutually exclusive */}
+        {mode === "new" && isPassportDelegated && (
           <Card.Root
             w="full"
             p={3}
@@ -324,9 +327,13 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
             <HStack gap={3} align="flex-start">
               <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
               <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
-                {t(
-                  "You currently have your voting qualification delegated to veDelegate. This transaction will also revoke that delegation — veDelegate and Navigators cannot be used at the same time.",
-                )}
+                {isVeDelegated
+                  ? t(
+                      "You currently have your voting qualification delegated to veDelegate. This transaction will also revoke that delegation — veDelegate and Navigators cannot be used at the same time.",
+                    )
+                  : t(
+                      "Your voting qualification is currently delegated to another address. This transaction will also revoke that delegation — passport delegation and Navigators cannot be used at the same time.",
+                    )}
               </Text>
             </HStack>
           </Card.Root>
@@ -550,7 +557,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                     </Text>
                     <Text textStyle="xs" color="fg.muted">
                       {t(
-                        "You cannot use veDelegate and Navigators at the same time. If you have a passport delegation to veDelegate, it will be revoked in this transaction.",
+                        "Passport delegation (including veDelegate) cannot be used together with Navigators. If your passport is delegated, it will be revoked in this transaction.",
                       )}
                     </Text>
                   </HStack>

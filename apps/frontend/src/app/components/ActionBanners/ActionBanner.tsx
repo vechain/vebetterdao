@@ -189,7 +189,12 @@ export const ActionBanner = () => {
     !isLoading &&
     !isDelegateeLoading &&
     (preferences?.[BannerStorageKey.SHOW_DO_ACTION] ?? true)
-  const showDelegatingBanner = !!account?.address && (isVeDelegated || hasAutoDeposit) && !isDelegateeLoading
+  // Also show when the user is navigator-delegated AND passport-delegated to a non-veDelegate
+  // address — that combination is the "broken" state the action-required variant fixes.
+  const showDelegatingBanner =
+    !!account?.address &&
+    (isVeDelegated || hasAutoDeposit || (isCurrentlyDelegated && !!delegateeAddress)) &&
+    !isDelegateeLoading
   const showEntityBanner = !!account?.address && isEntity && !isLoadingAccountLinking
 
   const showCastVoteBanner = !!account?.address && !isLoading && canUserVote && !isDelegatedToNavigator

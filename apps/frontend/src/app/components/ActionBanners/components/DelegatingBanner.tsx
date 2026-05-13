@@ -4,7 +4,9 @@ import { useTranslation, Trans } from "react-i18next"
 
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useVeDelegateAutoDeposit } from "@/api/contracts/veDelegate/hooks/useVeDelegateAutoDeposit"
+import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { useIsVeDelegated } from "@/hooks/useIsVeDelegated"
 import { useRevokeDelegation } from "@/hooks/useRevokeDelegation"
 
 export const DelegatingBanner = () => {
@@ -12,6 +14,8 @@ export const DelegatingBanner = () => {
   const { account } = useWallet()
   const { hasAutoDeposit } = useVeDelegateAutoDeposit(account?.address)
   const { data: isNavigatorDelegated } = useIsDelegated(account?.address)
+  const { data: delegateeAddress } = useGetDelegatee(account?.address)
+  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
   const { sendTransaction: sendRevoke } = useRevokeDelegation({ isDelegator: true })
 
   const whatIsVeDelegate = () => {
@@ -23,22 +27,29 @@ export const DelegatingBanner = () => {
   }
 
   // Highest-priority variant: user has delegated to a navigator but their passport is still
-  // delegated to veDelegate — the navigator's vote is being shadowed by veDelegate's auto-vote.
-  if (isNavigatorDelegated) {
+  // delegated somewhere — the navigator's vote is being shadowed by the delegatee's auto-vote.
+  // Copy specializes for veDelegate (most common case) and falls back to a generic form otherwise.
+  if (isNavigatorDelegated && !!delegateeAddress) {
     return (
       <GenericBanner
-        title={t("Action required: revoke veDelegate")}
+        title={
+          isVeDelegated ? t("Action required: revoke veDelegate") : t("Action required: revoke passport delegation")
+        }
         description={
           <Text color="text.subtle" lineClamp="4">
-            {t(
-              "You delegated to a Navigator, but your passport is still delegated to veDelegate which keeps voting on your behalf. Revoke it so your Navigator can vote for you.",
-            )}
+            {isVeDelegated
+              ? t(
+                  "You delegated to a Navigator, but your passport is still delegated to veDelegate which keeps voting on your behalf. Revoke it so your Navigator can vote for you.",
+                )
+              : t(
+                  "You delegated to a Navigator, but your passport is still delegated to another address which keeps voting on your behalf. Revoke it so your Navigator can vote for you.",
+                )}
           </Text>
         }
         illustration="/assets/logos/veDelegate.svg"
         cta={
           <Button p="0" size={{ base: "sm", md: "md" }} variant="link" onClick={() => sendRevoke()}>
-            {t("Revoke veDelegate")}
+            {isVeDelegated ? t("Revoke veDelegate") : t("Revoke delegation")}
           </Button>
         }
       />

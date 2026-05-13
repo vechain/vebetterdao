@@ -6,9 +6,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback } from "react"
 
-import { getDelegateeQueryKey } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
+import { getDelegateeQueryKey, useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
-import { useIsVeDelegated } from "@/hooks/useIsVeDelegated"
 import { buildClause } from "@/utils/buildClause"
 
 import { getVotesOnBlockPrefixQueryKey } from "../../api/contracts/governance/hooks/useVotesOnBlock"
@@ -37,9 +36,9 @@ type Props = {
 export const useDelegateToNavigator = ({ onSuccess }: Props) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
-  // veDelegate routes voting qualification via passport delegation; without revoking,
-  // the navigator delegation has no effect because veDelegate keeps voting on behalf.
-  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
+  // Passport delegation routes voting qualification away from the delegator; without revoking,
+  // the navigator delegation has no effect because the delegatee keeps voting on the user's behalf.
+  const { data: delegateeAddress } = useGetDelegatee(account?.address)
 
   const clauseBuilder = useCallback(
     (params: DelegateParams) => {
@@ -53,7 +52,7 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
         comment: `Delegate ${params.amount} VOT3 to navigator`,
       })
 
-      if (!isVeDelegated) return [delegateClause]
+      if (!delegateeAddress) return [delegateClause]
 
       return [
         buildClause({
@@ -61,12 +60,12 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
           contractInterface: PassportContractInterface,
           method: "revokeDelegation",
           args: [],
-          comment: "Revoke veDelegate passport delegation",
+          comment: "Revoke passport delegation",
         }),
         delegateClause,
       ]
     },
-    [isVeDelegated],
+    [delegateeAddress],
   )
 
   const handleSuccess = useCallback(() => {
