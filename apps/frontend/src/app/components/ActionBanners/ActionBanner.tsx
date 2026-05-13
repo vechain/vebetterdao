@@ -9,6 +9,8 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
+import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
+import { useVeDelegateOwnedTBA } from "@/api/contracts/veDelegate/hooks/useVeDelegateOwnedTBA"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
@@ -57,6 +59,7 @@ import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
 import { UndelegatedVot3Banner } from "./components/UndelegatedVot3Banner"
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
+import { VeDelegateLeftoverBanner } from "./components/VeDelegateLeftoverBanner"
 import { NodeUpgradeModal } from "./modals/NodeUpgradeModal"
 
 import "swiper/css"
@@ -77,7 +80,12 @@ export const ActionBanner = () => {
   const { data: currentRoundSnapshotBlock } = useCurrentRoundSnapshot()
   const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, currentRoundSnapshotBlock)
   const { data: isCurrentlyDelegated } = useIsDelegated(account?.address)
+  const { data: isNavigator } = useIsNavigator(account?.address)
   const { data: unlockedVot3Balance } = useGetVot3UnlockedBalance(account?.address)
+  // Detect leftover veDelegate balance: the connected wallet's deterministic veDelegate TBA address,
+  // and the VOT3 balance sitting in it (>0 means the user forgot to withdraw on veDelegate).
+  const { data: veDelegateTBA } = useVeDelegateOwnedTBA(account?.address)
+  const { data: veDelegateTBABalance } = useGetVot3Balance(veDelegateTBA)
   const { data: currentNavigatorAddress = "" } = useGetNavigator(account?.address)
   const { data: currentNavigatorData } = useNavigatorByAddress(currentNavigatorAddress ?? "")
   const { data: minStakeData } = useGetMinStake()
@@ -228,6 +236,18 @@ export const ActionBanner = () => {
     minStakeData != null &&
     BigInt(currentNavigatorData?.stake ?? 0) >= minStakeData.raw
 
+  // Leftover veDelegate balance: user has VOT3 sitting in their veDelegate TBA but is participating
+  // directly here (citizen, autovoter, or registered navigator) and is not currently routing voting
+  // qualification or B3TR through veDelegate. Prompts them to withdraw on veDelegate.vet.
+  const isParticipatingHere = !!isPerson || !!isCurrentlyDelegated || !!isNavigator
+  const showVeDelegateLeftoverBanner =
+    !!account?.address &&
+    isParticipatingHere &&
+    !isVeDelegated &&
+    !hasAutoDeposit &&
+    !!veDelegateTBA &&
+    BigInt(veDelegateTBABalance?.original ?? "0") > 0n
+
   //Show one of the banners explainining why the user can't vote
   // Only one of the following banners can be shown at a time
   // The order of the banners is as follows:
@@ -298,6 +318,7 @@ export const ActionBanner = () => {
     if (showFreshnessMultiplierBanner) bannerComponents.push(<FreshnessMultiplierBanner key="freshness-multiplier" />)
     if (showNavigatorsBanner) bannerComponents.push(<NavigatorsBanner key="navigators" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
+    if (showVeDelegateLeftoverBanner) bannerComponents.push(<VeDelegateLeftoverBanner key="vedelegate-leftover" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
     return bannerComponents
@@ -309,6 +330,7 @@ export const ActionBanner = () => {
     votingRewardsQuery.data?.claimableTotalFormatted,
     gmRewards,
     showUndelegatedVot3Banner,
+    showVeDelegateLeftoverBanner,
     showClaimTokensBanner,
     showCastVoteBanner,
     showCastVoteInProposalBanners,

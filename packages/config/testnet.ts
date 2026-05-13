@@ -29,6 +29,7 @@ const config: AppConfig = {
   dbaPoolContractAddress: "0x425ae7e120e5bf0c27d1e68e426dc8c3b4bc7c17",
   navigatorRegistryContractAddress: "0x91bdc3ca7228bc28f14990039cab813f98ea1d40",
   veDelegateAutoDepositContractAddress: "0xf5DcEfC27461480A75c328402F1633c462Bece6c",
+  veDelegateContractAddress: "",
   indexerUrl: "https://187.124.15.10.nip.io/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
