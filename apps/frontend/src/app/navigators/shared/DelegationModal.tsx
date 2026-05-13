@@ -25,7 +25,6 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
-import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
@@ -37,6 +36,7 @@ import { useSwitchNavigator } from "@/hooks/navigator/useSwitchNavigator"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
+import { useIsVeDelegated } from "@/hooks/useIsVeDelegated"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const formatter = getCompactFormatter(2)
@@ -67,8 +67,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(nav.address)
-  const { data: delegateeAddress } = useGetDelegatee(account?.address)
-  const isPassportDelegated = !!delegateeAddress
+  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
@@ -480,6 +479,40 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           <NewDelegationSummary currentDelegationNum={currentDelegatedNum} isSwitch={mode === "switch"} />
         )}
 
+        {/* veDelegate conflict warning — fires for both fresh delegations and navigator switches when the
+            wallet has an active veDelegate passport delegation. Surfaces the side-effect (passport revoke
+            in the same tx) right above the acknowledgment / submit button. */}
+        {(mode === "new" || mode === "switch") && isVeDelegated && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.warning.subtle"
+            border="1px solid"
+            borderColor="status.warning.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
+                {t(
+                  "Your wallet is currently delegating its voting qualification to veDelegate. This transaction will also revoke that delegation so your Navigator can vote for you — veDelegate and Navigators cannot be used at the same time.",
+                )}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
+
+        {/* Standing-rule reminder for switch mode — the same rule is shown as item #5 inside the new-mode
+            agreement card; switch has no acknowledgment block, so render it as a standalone notice. */}
+        {mode === "switch" && isVeDelegated && (
+          <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+            <Text textStyle="xs" color="fg.muted">
+              {t(
+                "Passport delegation (including veDelegate) cannot be used together with Navigators. If your passport is delegated, it will be revoked in this transaction.",
+              )}
+            </Text>
+          </Card.Root>
+        )}
+
         {/* Acknowledgment for first-time delegators */}
         {mode === "new" && (
           <VStack gap={3} align="stretch" w="full">
@@ -525,40 +558,21 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                       )}
                     </Text>
                   </HStack>
-                  <HStack gap={2} align="flex-start">
-                    <Text textStyle="xs" color="fg.muted" flexShrink={0}>
-                      {"5."}
-                    </Text>
-                    <Text textStyle="xs" color="fg.muted">
-                      {t(
-                        "Passport delegation (including veDelegate) cannot be used together with Navigators. If your passport is delegated, it will be revoked in this transaction.",
-                      )}
-                    </Text>
-                  </HStack>
+                  {isVeDelegated && (
+                    <HStack gap={2} align="flex-start">
+                      <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                        {"5."}
+                      </Text>
+                      <Text textStyle="xs" color="fg.muted">
+                        {t(
+                          "Passport delegation (including veDelegate) cannot be used together with Navigators. If your passport is delegated, it will be revoked in this transaction.",
+                        )}
+                      </Text>
+                    </HStack>
+                  )}
                 </VStack>
               </VStack>
             </Card.Root>
-
-            {/* veDelegate conflict warning — surfaces only when the user actually has a passport delegation,
-                so the bug fix (revokeDelegation clause) is visible right before they sign. */}
-            {isPassportDelegated && (
-              <Card.Root
-                w="full"
-                p={3}
-                bg="status.warning.subtle"
-                border="1px solid"
-                borderColor="status.warning.strong"
-                rounded="xl">
-                <HStack gap={3} align="flex-start">
-                  <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
-                  <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
-                    {t(
-                      "Your wallet is currently delegating its voting qualification to veDelegate. This transaction will also revoke that delegation so your Navigator can vote for you — veDelegate and Navigators cannot be used at the same time.",
-                    )}
-                  </Text>
-                </HStack>
-              </Card.Root>
-            )}
 
             <Checkbox.Root
               checked={ackAll}
