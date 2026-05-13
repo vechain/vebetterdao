@@ -28,6 +28,7 @@ import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { APP_CATEGORIES } from "@/types/appDetails"
 
 import { AppRadioCard } from "../../AppRadioCard"
+import { NavigatorPromoCard } from "../../NavigatorPromoCard"
 import { UserTopVotedAppsCard } from "../../UserTopVotedAppsCard"
 import { VotingAlerts } from "../../VotingAlerts"
 
@@ -287,9 +288,12 @@ export function AppCategoryTabs({
       </VStack>
 
       {!isMobile && !!account?.address && (
-        <VStack width="1/3" align="stretch" justifySelf="flex-start">
-          <Heading size="lg">{t("Your top 5 Apps")}</Heading>
-          <UserTopVotedAppsCard apps={apps} />
+        <VStack width="1/3" align="stretch" justifySelf="flex-start" gap="6">
+          <NavigatorPromoCard />
+          <VStack align="stretch" gap="2">
+            <Heading size="lg">{t("Your top 5 Apps")}</Heading>
+            <UserTopVotedAppsCard apps={apps} />
+          </VStack>
         </VStack>
       )}
     </HStack>
