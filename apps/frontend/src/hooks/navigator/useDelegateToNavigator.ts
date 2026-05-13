@@ -1,10 +1,12 @@
 import { getConfig } from "@repo/config"
 import { useQueryClient } from "@tanstack/react-query"
 import { NavigatorRegistry__factory } from "@vechain/vebetterdao-contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/factories/ve-better-passport/VeBetterPassport__factory"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback } from "react"
 
+import { getDelegateeQueryKey, useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
 import { buildClause } from "@/utils/buildClause"
 
@@ -18,7 +20,9 @@ import { getVot3BalanceQueryKey } from "../useGetVot3Balance"
 import { getVot3UnlockedBalanceQueryKey } from "../useGetVot3UnlockedBalance"
 
 const NavigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
+const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress
+const passportContractAddress = getConfig().veBetterPassportContractAddress
 
 type DelegateParams = {
   navigatorAddress: string
@@ -32,20 +36,50 @@ type Props = {
 export const useDelegateToNavigator = ({ onSuccess }: Props) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
+  // Any active passport delegation (veDelegate is the only known production case, but the
+  // on-chain rule is general) shadows the navigator's vote. Read the delegatee directly so
+  // we don't depend on VNS resolution, which doesn't fire on non-mainnet envs.
+  const {
+    data: delegateeAddress,
+    isLoading: isDelegateeLoading,
+    isError: isDelegateeError,
+  } = useGetDelegatee(account?.address)
+  const isPassportDelegated = !!delegateeAddress
 
-  const clauseBuilder = useCallback((params: DelegateParams) => {
-    const amountWei = ethers.parseEther(params.amount)
+  const clauseBuilder = useCallback(
+    (params: DelegateParams) => {
+      // Fail loudly if the passport status is still unknown. Returning the no-revoke path
+      // silently here is exactly how the bug PR #3363 fixes was reproducing in prod — the
+      // delegate clause would land while the user's passport stayed delegated to veDelegate.
+      if (isDelegateeLoading || isDelegateeError) {
+        throw new Error("Passport delegation status not yet known — try again in a moment")
+      }
 
-    return [
-      buildClause({
+      const amountWei = ethers.parseEther(params.amount)
+
+      const delegateClause = buildClause({
         to: navigatorRegistryAddress,
         contractInterface: NavigatorRegistryInterface,
         method: "delegate",
         args: [params.navigatorAddress, amountWei],
         comment: `Delegate ${params.amount} VOT3 to navigator`,
-      }),
-    ]
-  }, [])
+      })
+
+      if (!isPassportDelegated) return [delegateClause]
+
+      return [
+        buildClause({
+          to: passportContractAddress,
+          contractInterface: PassportContractInterface,
+          method: "revokeDelegation",
+          args: [],
+          comment: "Revoke passport delegation",
+        }),
+        delegateClause,
+      ]
+    },
+    [isPassportDelegated, isDelegateeLoading, isDelegateeError],
+  )
 
   const handleSuccess = useCallback(() => {
     const addr = account?.address ?? ""
@@ -56,6 +90,7 @@ export const useDelegateToNavigator = ({ onSuccess }: Props) => {
     queryClient.invalidateQueries({ queryKey: getIsNavigatorQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getVot3BalanceQueryKey(addr) })
     queryClient.invalidateQueries({ queryKey: getVot3UnlockedBalanceQueryKey(addr) })
+    queryClient.invalidateQueries({ queryKey: getDelegateeQueryKey(addr) })
     invalidateNavigatorQueries(queryClient)
     queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/citizens"] })
     queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/delegations"] })
