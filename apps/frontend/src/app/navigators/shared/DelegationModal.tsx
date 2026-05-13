@@ -37,7 +37,6 @@ import { useSwitchNavigator } from "@/hooks/navigator/useSwitchNavigator"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
-import { useIsVeDelegated } from "@/hooks/useIsVeDelegated"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const formatter = getCompactFormatter(2)
@@ -69,7 +68,6 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(nav.address)
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
-  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
   const isPassportDelegated = !!delegateeAddress
 
   const [amount, setAmount] = useState("")
@@ -315,30 +313,6 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           </Card.Root>
         )}
 
-        {/* Passport-delegation conflict warning — only on fresh delegation; passport delegation + navigator are mutually exclusive */}
-        {mode === "new" && isPassportDelegated && (
-          <Card.Root
-            w="full"
-            p={3}
-            bg="status.warning.subtle"
-            border="1px solid"
-            borderColor="status.warning.strong"
-            rounded="xl">
-            <HStack gap={3} align="flex-start">
-              <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
-              <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
-                {isVeDelegated
-                  ? t(
-                      "You currently have your voting qualification delegated to veDelegate. This transaction will also revoke that delegation — veDelegate and Navigators cannot be used at the same time.",
-                    )
-                  : t(
-                      "Your voting qualification is currently delegated to another address. This transaction will also revoke that delegation — passport delegation and Navigators cannot be used at the same time.",
-                    )}
-              </Text>
-            </HStack>
-          </Card.Root>
-        )}
-
         {/* Navigator info */}
         <HStack
           gap={3}
@@ -564,6 +538,27 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                 </VStack>
               </VStack>
             </Card.Root>
+
+            {/* veDelegate conflict warning — surfaces only when the user actually has a passport delegation,
+                so the bug fix (revokeDelegation clause) is visible right before they sign. */}
+            {isPassportDelegated && (
+              <Card.Root
+                w="full"
+                p={3}
+                bg="status.warning.subtle"
+                border="1px solid"
+                borderColor="status.warning.strong"
+                rounded="xl">
+                <HStack gap={3} align="flex-start">
+                  <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
+                  <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
+                    {t(
+                      "Your wallet is currently delegating its voting qualification to veDelegate. This transaction will also revoke that delegation so your Navigator can vote for you — veDelegate and Navigators cannot be used at the same time.",
+                    )}
+                  </Text>
+                </HStack>
+              </Card.Root>
+            )}
 
             <Checkbox.Root
               checked={ackAll}
