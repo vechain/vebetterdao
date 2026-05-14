@@ -639,7 +639,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       // Second relayer tries to vote for the same user - should fail
       await expect(
         xAllocationVoting.connect(relayer2).castVoteOnBehalfOf(user.address, roundId),
-      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorAlreadyCastVote")
+      ).to.be.revertedWithCustomError(xAllocationVoting, "VoteAlreadyProcessed")
 
       // Verify only relayer1 got credit for the vote
       const relayer1Actions = await relayerRewardsPool.totalRelayerActions(relayer1.address, roundId)
