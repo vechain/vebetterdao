@@ -3130,5 +3130,10 @@
   "{{value}} votes": "{{value}} votes",
   "{{value}}x reward weight": "{{value}}x reward weight",
   "{{wallets}} unique wallets performed {{actions}} sustainability actions": "{{wallets}} unique wallets performed {{actions}} sustainability actions",
-  "→": "→"
+  "→": "→",
+  "Available:": "Available:",
+  "Expenditure report not submitted": "Expenditure report not submitted",
+  "Next round voting power:": "Next round voting power:",
+  "No expenditure report has been submitted for this milestone. Consider requesting one from the proposer before approving the next tranche.": "No expenditure report has been submitted for this milestone. Consider requesting one from the proposer before approving the next tranche.",
+  "Split evenly": "Split evenly"
 }
