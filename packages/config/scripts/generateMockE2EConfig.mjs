@@ -47,6 +47,7 @@ export const generateMockE2EConfig = () => {
     "grantsManagerContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "relayerRewardsPoolContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "veDelegateAutoDepositContractAddress": "0xf5DcEfC27461480A75c328402F1633c462Bece6c",
+    "veDelegateContractAddress": "",
     "b3trMultiSigAddress": "0x0000000000000000000000000000000000000000",
     "nodeUrl": "http://localhost:8670",
     "network": {
