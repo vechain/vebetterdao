@@ -80,7 +80,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "X2Earn Rewards Pool": {
     name: "x2-earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
       v3: "Integrate VeBetterPassport contract",
@@ -88,6 +88,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Update X2Earn interface to include node cooldown feature",
       v6: "Add onchain metadata for rewards",
       v7: "Add optional dual-pool balance to manage rewards and treasury separately",
+      v8: "Add distributeRewardForRound variants to attribute actions to specific rounds",
     },
   },
   Emissions: {

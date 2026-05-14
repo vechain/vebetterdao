@@ -3,12 +3,12 @@
 pragma solidity 0.8.20;
 
 /**
- * @title IX2EarnRewardsPool
+ * @title IX2EarnRewardsPoolV7
  * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
  * Funds can be deposited into this contract by specifying the app id that can access the funds.
  * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
  */
-interface IX2EarnRewardsPool {
+interface IX2EarnRewardsPoolV7 {
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
    *
@@ -213,10 +213,10 @@ interface IX2EarnRewardsPool {
     bytes32 appId,
     uint256 amount,
     address receiver,
-    string[] memory proofTypes, // link, image, video, text, etc.
-    string[] memory proofValues, // "https://...", "Qm...", etc.,
-    string[] memory impactCodes, // carbon, water, etc.
-    uint256[] memory impactValues, // 100, 200, etc.,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
     string memory description
   ) external;
 
@@ -237,81 +237,12 @@ interface IX2EarnRewardsPool {
     bytes32 appId,
     uint256 amount,
     address receiver,
-    string[] memory proofTypes, // link, image, video, text, etc.
-    string[] memory proofValues, // "https://...", "Qm...", etc.,
-    string[] memory impactCodes, // carbon, water, etc.
-    uint256[] memory impactValues, // 100, 200, etc.,
-    string memory description,
-    string memory metadata // "{'country': 'Brazil', 'city': 'Brasilia'}"
-  ) external;
-
-  /**
-   * @dev Function used by x2earn apps to reward users and attribute the action to a specific round.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof deprecated argument, pass an empty string instead
-   * @param actionRound the round in which the action was actually performed
-   */
-  function distributeRewardForRound(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    string memory proof,
-    uint256 actionRound
-  ) external;
-
-  /**
-   * @dev Function used by x2earn apps to reward users with proof and attribute the action to a specific round.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proofTypes the types of the proof of the sustainable action
-   * @param proofValues the values of the proof of the sustainable action
-   * @param impactCodes the codes of the impacts of the sustainable action
-   * @param impactValues the values of the impacts of the sustainable action
-   * @param description the description of the sustainable action
-   * @param actionRound the round in which the action was actually performed
-   */
-  function distributeRewardWithProofForRound(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
     string[] memory proofTypes,
     string[] memory proofValues,
     string[] memory impactCodes,
     uint256[] memory impactValues,
     string memory description,
-    uint256 actionRound
-  ) external;
-
-  /**
-   * @dev Function used by x2earn apps to reward users with proof, metadata and attribute the action to a specific round.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proofTypes the types of the proof of the sustainable action
-   * @param proofValues the values of the proof of the sustainable action
-   * @param impactCodes the codes of the impacts of the sustainable action
-   * @param impactValues the values of the impacts of the sustainable action
-   * @param description the description of the sustainable action
-   * @param metadata the metadata of the sustainable action
-   * @param actionRound the round in which the action was actually performed
-   */
-  function distributeRewardWithProofAndMetadataForRound(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    string[] memory proofTypes,
-    string[] memory proofValues,
-    string[] memory impactCodes,
-    uint256[] memory impactValues,
-    string memory description,
-    string memory metadata,
-    uint256 actionRound
+    string memory metadata
   ) external;
 
   /**
@@ -325,10 +256,10 @@ interface IX2EarnRewardsPool {
    * @param description the description of the sustainable action
    */
   function buildProof(
-    string[] memory proofTypes, // link, photo, video, text, etc.
-    string[] memory proofValues, // "https://...", "Qm...", etc.,
-    string[] memory impactCodes, // carbon, water, etc.
-    uint256[] memory impactValues, // 100, 200, etc.,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
     string memory description
   ) external returns (string memory);
 }
