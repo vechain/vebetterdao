@@ -84,6 +84,9 @@ library XAllocationVotingStorageTypes {
     mapping(address voter => bytes32) _lastVoteFingerprint;
     // Round number when the fingerprint last changed
     mapping(address voter => uint256) _lastFingerprintChangedRound;
+    // --------------------------- V10 Addition ------------------------------------------------- //
+    // Prevents double-processing of relayer-mediated votes (auto-vote and navigator)
+    mapping(uint256 roundId => mapping(address voter => bool)) _relayerVoteProcessed;
   }
 
   struct EarningsSettingsStorage {

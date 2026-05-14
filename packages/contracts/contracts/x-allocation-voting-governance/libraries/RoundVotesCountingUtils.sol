@@ -264,4 +264,20 @@ library RoundVotesCountingUtils {
     // Update the votes received for the given app
     $._roundVotes[roundId].votesReceived[appId] += weight;
   }
+
+  // ------- Relayer Vote Processing Guard ------- //
+
+  /// @notice Check if a relayer-mediated vote has already been processed for a voter in a round
+  function isRelayerVoteProcessed(uint256 roundId, address voter) internal view returns (bool) {
+    XAllocationVotingStorageTypes.RoundVotesCountingStorage storage $ = XAllocationVotingStorageTypes
+      ._getRoundVotesCountingStorage();
+    return $._relayerVoteProcessed[roundId][voter];
+  }
+
+  /// @notice Mark a relayer-mediated vote as processed for a voter in a round
+  function markRelayerVoteProcessed(uint256 roundId, address voter) external {
+    XAllocationVotingStorageTypes.RoundVotesCountingStorage storage $ = XAllocationVotingStorageTypes
+      ._getRoundVotesCountingStorage();
+    $._relayerVoteProcessed[roundId][voter] = true;
+  }
 }

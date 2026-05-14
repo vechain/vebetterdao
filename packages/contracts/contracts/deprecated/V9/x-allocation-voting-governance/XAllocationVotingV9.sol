@@ -32,27 +32,27 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
-import { IEmissions } from "../interfaces/IEmissions.sol";
-import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
-import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
-import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
-import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
-import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
+import { IXAllocationVotingGovernor, IERC6372 } from "../../../interfaces/IXAllocationVotingGovernor.sol";
+import { IX2EarnApps } from "../../../interfaces/IX2EarnApps.sol";
+import { IEmissions } from "../../../interfaces/IEmissions.sol";
+import { IVoterRewards } from "../../../interfaces/IVoterRewards.sol";
+import { IVeBetterPassport } from "../../../interfaces/IVeBetterPassport.sol";
+import { IB3TRGovernor } from "../../../interfaces/IB3TRGovernor.sol";
+import { IRelayerRewardsPool, RelayerAction } from "../../../interfaces/IRelayerRewardsPool.sol";
+import { INavigatorRegistry } from "../../../interfaces/INavigatorRegistry.sol";
+import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
 
-// Libraries
-import { XAllocationVotingStorageTypes } from "./libraries/XAllocationVotingStorageTypes.sol";
-import { ExternalContractsUtils } from "./libraries/ExternalContractsUtils.sol";
-import { VotingSettingsUtils } from "./libraries/VotingSettingsUtils.sol";
-import { VotesUtils } from "./libraries/VotesUtils.sol";
-import { VotesQuorumFractionUtils } from "./libraries/VotesQuorumFractionUtils.sol";
-import { RoundEarningsSettingsUtils } from "./libraries/RoundEarningsSettingsUtils.sol";
-import { RoundFinalizationUtils } from "./libraries/RoundFinalizationUtils.sol";
-import { RoundsStorageUtils } from "./libraries/RoundsStorageUtils.sol";
-import { RoundVotesCountingUtils } from "./libraries/RoundVotesCountingUtils.sol";
-import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
+// Libraries (V9 uses V10 libraries — backward compatible, new mapping defaults to false)
+import { XAllocationVotingStorageTypes } from "../../../x-allocation-voting-governance/libraries/XAllocationVotingStorageTypes.sol";
+import { ExternalContractsUtils } from "../../../x-allocation-voting-governance/libraries/ExternalContractsUtils.sol";
+import { VotingSettingsUtils } from "../../../x-allocation-voting-governance/libraries/VotingSettingsUtils.sol";
+import { VotesUtils } from "../../../x-allocation-voting-governance/libraries/VotesUtils.sol";
+import { VotesQuorumFractionUtils } from "../../../x-allocation-voting-governance/libraries/VotesQuorumFractionUtils.sol";
+import { RoundEarningsSettingsUtils } from "../../../x-allocation-voting-governance/libraries/RoundEarningsSettingsUtils.sol";
+import { RoundFinalizationUtils } from "../../../x-allocation-voting-governance/libraries/RoundFinalizationUtils.sol";
+import { RoundsStorageUtils } from "../../../x-allocation-voting-governance/libraries/RoundsStorageUtils.sol";
+import { RoundVotesCountingUtils } from "../../../x-allocation-voting-governance/libraries/RoundVotesCountingUtils.sol";
+import { AutoVotingLogic } from "../../../x-allocation-voting-governance/libraries/AutoVotingLogic.sol";
 
 /**
  * @title XAllocationVoting
@@ -104,12 +104,8 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *  - setCitizenSkipWindowBlocks(uint256) governance-gated setter
  *  - VotesUtils.getVotes() returns delegated amount when citizen has active navigator at snapshot
  *  - Deprecated: getTotalVotingPower() is replaced by getVotes()
- *
- * ----- Version 10 -----
- *  - Added _relayerVoteProcessed guard to prevent double-processing of relayer-mediated votes
- *  - Both castVoteOnBehalfOf and castNavigatorVote now revert with VoteAlreadyProcessed on retry
  */
-contract XAllocationVoting is
+contract XAllocationVotingV9 is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
@@ -246,10 +242,6 @@ contract XAllocationVoting is
       revert AutoVotingNotEnabled(voter);
     }
 
-    if (RoundVotesCountingUtils.isRelayerVoteProcessed(roundId, voter)) {
-      revert VoteAlreadyProcessed(voter, roundId);
-    }
-
     _checkEarlyAccessEligibility(roundId, voter);
 
     (bool isPerson, ) = XAllocationVotingStorageTypes
@@ -275,12 +267,10 @@ contract XAllocationVoting is
           1
         );
       }
-      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, voter);
       emit AutoVoteSkipped(voter, roundId, isPerson, finalAppIds.length, votingPower);
       return;
     }
 
-    RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, voter);
     _handleCastVote(voter, roundId, finalAppIds, voteWeightsArr, true);
   }
 
@@ -308,15 +298,10 @@ contract XAllocationVoting is
     address navigator = navigatorRegistryContract.getNavigatorAtTimepoint(citizen, snapshot);
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
-    if (RoundVotesCountingUtils.isRelayerVoteProcessed(roundId, citizen)) {
-      revert VoteAlreadyProcessed(citizen, roundId);
-    }
-
     IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
 
     // Dead navigator → skip immediately (navigator can't act, personhood irrelevant)
     if (_isNavigatorDead(navigator)) {
-      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
       return;
@@ -326,7 +311,6 @@ contract XAllocationVoting is
     if (!navigatorRegistryContract.hasSetPreferences(navigator, roundId)) {
       // No preferences → skip only after window (navigator failed to act, personhood irrelevant)
       _validateSkipWindow(roundId);
-      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
       return;
@@ -338,7 +322,6 @@ contract XAllocationVoting is
       ._veBetterPassport
       .isPersonAtTimepoint(citizen, SafeCast.toUint48(snapshot));
     if (!isPerson) {
-      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
       return;
@@ -367,7 +350,6 @@ contract XAllocationVoting is
       voteWeights[0] += delegatedPower - allocated;
     }
 
-    RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
     _handleCastVoteWithPower(citizen, roundId, appIds, voteWeights, delegatedPower, false);
 
     pool.registerRelayerAction(_msgSender(), citizen, roundId, RelayerAction.VOTE);
@@ -642,7 +624,7 @@ contract XAllocationVoting is
    * @dev Returns the version of the governor.
    */
   function version() public pure returns (string memory) {
-    return "10";
+    return "9";
   }
 
   /**

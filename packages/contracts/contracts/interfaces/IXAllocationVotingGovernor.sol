@@ -137,6 +137,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error SkipWindowNotReached(uint256 roundId);
 
   /**
+   * @dev The voter has already been processed (voted or skipped) for this round
+   */
+  error VoteAlreadyProcessed(address voter, uint256 roundId);
+
+  /**
    * @dev Emitted when auto-voting is skipped.
    */
   event AutoVoteSkipped(
