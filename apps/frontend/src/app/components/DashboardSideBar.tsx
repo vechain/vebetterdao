@@ -26,9 +26,9 @@ export const DashboardSideBar = () => {
       <ManagedAppsCard />
       <NavigatorDashboardCard />
       <CitizenNavigatorCard />
-      {isMobile && <NavigatorDiscoveryCard />}
       <YourBetterActionsCard address={account?.address ?? ""} />
       <Leaderboard />
+      {isMobile && <NavigatorDiscoveryCard />}
       {isMobile && <SupplyBreakdownCard />}
     </VStack>
   )
