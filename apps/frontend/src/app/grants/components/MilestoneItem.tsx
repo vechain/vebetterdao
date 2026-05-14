@@ -1,4 +1,4 @@
-import { Button, Checkbox, Field, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import { Button, Field, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
@@ -16,7 +16,6 @@ import { useRejectGrant } from "@/hooks/useRejectGrant"
 
 import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
 import { DatePicker } from "../../../components/DatePicker/DatePicker"
-import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 type MilestoneWithState = {
   milestone?: {
@@ -82,7 +81,6 @@ export const MilestoneItem = ({
       ? dayjs(milestoneData.milestone?.durationTo * 1000).format("YYYY-MM-DD")
       : "",
   })
-  const [overrideMissingReport, setOverrideMissingReport] = useState(false)
 
   // Hooks with proper milestone context
   const { sendTransaction: approveMilestone, resetStatus: resetApproveMilestone } = useApproveMilestone({
@@ -148,11 +146,7 @@ export const MilestoneItem = ({
     )
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
-  /** Report keyed by tranche (see ExpenditureReportForm: trancheNumber = currentStep + 1). */
-  const hasTrancheExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
-
-  /** Reviewer sees a warning before Approve & Fund if no on-chain expenditure report for this payout (tranche). */
-  const shouldWarnReviewerMissingExpenditureReport = shouldShowReviewerActions && !hasTrancheExpenditureReport
+  const hasExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -225,28 +219,16 @@ export const MilestoneItem = ({
       />
 
       {/* Reviewer actions (approve/reject) - only on current pending milestone */}
-      {shouldWarnReviewerMissingExpenditureReport && (
-        <VStack align="flex-start" w="full" gap={3}>
-          <GenericAlert
-            type="warning"
-            isLoading={false}
-            title={t("Expenditure report missing for this payout")}
-            message={t(
-              "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
+      {shouldShowReviewerActions && !hasExpenditureReport && (
+        <VStack w="full" bg="orange.50" p={3} borderRadius="xl" align="flex-start">
+          <Text textStyle="sm" color="orange.700" fontWeight="semibold">
+            {t("Expenditure report not submitted")}
+          </Text>
+          <Text textStyle="sm" color="orange.600">
+            {t(
+              "No expenditure report has been submitted for this milestone. Consider requesting one from the proposer before approving the next tranche.",
             )}
-          />
-          <Checkbox.Root
-            size="md"
-            checked={overrideMissingReport}
-            onCheckedChange={({ checked }) => setOverrideMissingReport(Boolean(checked))}>
-            <Checkbox.HiddenInput />
-            <Checkbox.Control>
-              <Checkbox.Indicator />
-            </Checkbox.Control>
-            <Checkbox.Label>
-              <Text textStyle="sm">{t("Ignore missing report warning and send anyway")}</Text>
-            </Checkbox.Label>
-          </Checkbox.Root>
+          </Text>
         </VStack>
       )}
       {shouldShowReviewerActions && (
@@ -254,10 +236,7 @@ export const MilestoneItem = ({
           <Button variant="secondary" onClick={handleReject}>
             {t("Reject")}
           </Button>
-          <Button
-            variant="primary"
-            onClick={handleApprove}
-            disabled={Boolean(shouldWarnReviewerMissingExpenditureReport) && !overrideMissingReport}>
+          <Button variant="primary" onClick={handleApprove}>
             {t("Approve & Fund")}
           </Button>
         </HStack>
