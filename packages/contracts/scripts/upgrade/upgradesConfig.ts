@@ -38,7 +38,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   XAllocationVoting: {
     name: "x-allocation-voting",
     configAddressField: "xAllocationVotingContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"],
     descriptions: {
       v2: "Integrate VeBetterPassport contract",
       v3: "Update X2Earn interface to include new endorsement feature",
@@ -48,6 +48,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v7: "Proposal Execution: Count proposal deposits to x-allocation voting power",
       v8: "Add Auto-Voting functionality",
       v9: "Refactor to library architecture + freshness multiplier + hasUserVotedForApp + NavigatorRegistry",
+      v10: "Fix relayer vote double-processing (auto-vote and navigator)",
     },
   },
   "XAllocation Pool": {

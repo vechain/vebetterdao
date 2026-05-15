@@ -715,6 +715,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV6",
       "XAllocationVotingV7",
       "XAllocationVotingV8",
+      "XAllocationVotingV9",
       "XAllocationVoting",
     ],
     [
@@ -743,9 +744,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [navigatorRegistryProxyAddress, config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS], // V9: set NavigatorRegistry + skip window
+      [], // V10: no reinitializer needed
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       libraries: [
         undefined,
         undefined,
@@ -755,6 +757,17 @@ export const getOrDeployContractInstances = async ({
         undefined,
         undefined,
         { AutoVotingLogicV8: await AutoVotingLogicV8Lib.getAddress() },
+        {
+          AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+          ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+          VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+          VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+          VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+          RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+          RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+          RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+          RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
+        },
         {
           AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
           ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),

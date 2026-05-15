@@ -49,6 +49,7 @@ export const generateMockE2EConfig = () => {
     "veDelegateAutoDepositContractAddress": "0xf5DcEfC27461480A75c328402F1633c462Bece6c",
     "veDelegateContractAddress": "",
     "b3trMultiSigAddress": "0x0000000000000000000000000000000000000000",
+    "indexerUrl": "http://localhost:8080",
     "nodeUrl": "http://localhost:8670",
     "network": {
       "id": "solo-e2e",
