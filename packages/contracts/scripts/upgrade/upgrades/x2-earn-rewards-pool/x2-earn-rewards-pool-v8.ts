@@ -45,6 +45,11 @@ async function main() {
     throw new Error(`X2EarnRewardsPool version is not the expected one: ${version}`)
   }
 
+  // Set XAllocationVoting for round validation in ForRound functions
+  console.log(`Setting XAllocationVoting at ${config.xAllocationVotingContractAddress}`)
+  await x2EarnRewardsPool.setXAllocationVoting(config.xAllocationVotingContractAddress)
+  console.log(`XAllocationVoting set`)
+
   console.log("Execution completed")
   process.exit(0)
 }

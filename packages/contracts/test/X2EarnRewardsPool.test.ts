@@ -3507,6 +3507,34 @@ describe("X2EarnRewardsPool - @shard12", function () {
       ).to.be.revertedWith("X2EarnRewardsPool: actionRound is zero")
     })
 
+    it("Reverts when actionRound exceeds current round", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      await expect(
+        x2EarnRewardsPool.connect(owner).distributeRewardForRound(appId, ethers.parseEther("1"), user.address, "", 999),
+      ).to.be.revertedWith("X2EarnRewardsPool: actionRound exceeds current round")
+    })
+
     it("Only reward distributors can call distributeRewardForRound", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({

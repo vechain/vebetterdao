@@ -33,6 +33,7 @@ import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
+import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -90,6 +91,7 @@ contract X2EarnRewardsPool is
     mapping(bytes32 appId => uint256) rewardsPoolBalance; // Distributable rewards funds (when rewards pool is enabled)
     mapping(bytes32 appId => bool) isRewardsPoolEnabled; // Whether the rewards pool is enabled for the app
     mapping(bytes32 appId => bool) distributionPaused; // Whether reward distribution is paused for the app
+    IXAllocationVotingGovernor xAllocationVoting; // Used to validate actionRound in ForRound distribution
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -425,6 +427,11 @@ contract X2EarnRewardsPool is
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
+    require(
+      address($.xAllocationVoting) != address(0) && actionRound <= $.xAllocationVoting.currentRoundId(),
+      "X2EarnRewardsPool: actionRound exceeds current round"
+    );
+
     require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
@@ -749,6 +756,20 @@ contract X2EarnRewardsPool is
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.veBetterPassport = _veBetterPassport;
+  }
+
+  /**
+   * @dev Sets the XAllocationVotingGovernor contract address.
+   */
+  function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) external {
+    require(
+      hasRole(CONTRACTS_ADDRESS_MANAGER_ROLE, msg.sender) || hasRole(UPGRADER_ROLE, msg.sender),
+      "X2EarnRewardsPool: caller is not admin or upgrader"
+    );
+    require(address(_xAllocationVoting) != address(0), "X2EarnRewardsPool: xAllocationVoting is the zero address");
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.xAllocationVoting = _xAllocationVoting;
   }
 
   // ---------- Getters ---------- //
