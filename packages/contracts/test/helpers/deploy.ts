@@ -586,6 +586,7 @@ export const getOrDeployContractInstances = async ({
       "X2EarnRewardsPoolV4",
       "X2EarnRewardsPoolV5",
       "X2EarnRewardsPoolV6",
+      "X2EarnRewardsPoolV7",
       "X2EarnRewardsPool",
     ],
     [
@@ -596,9 +597,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
     },
   )) as X2EarnRewardsPool
 
@@ -1348,6 +1350,9 @@ export const getOrDeployContractInstances = async ({
   await veBetterPassport
     .connect(owner)
     .grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), await x2EarnRewardsPool.getAddress())
+
+  // Set XAllocationVoting on X2EarnRewardsPool for round validation
+  await x2EarnRewardsPool.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
 
   //Set the emissions address and the admin as the ROUND_STARTER_ROLE in XAllocationVoting
   const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()

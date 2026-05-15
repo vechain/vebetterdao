@@ -553,6 +553,7 @@ export async function deployAll(config: ContractsConfig) {
       "X2EarnRewardsPoolV3",
       "X2EarnRewardsPoolV4",
       "X2EarnRewardsPoolV5",
+      "X2EarnRewardsPoolV7",
       "X2EarnRewardsPool",
     ],
     [
@@ -571,9 +572,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       logOutput: true,
     },
   )) as X2EarnRewardsPool
@@ -1359,6 +1361,12 @@ export async function deployAll(config: ContractsConfig) {
   await veBetterPassport
     .connect(deployer)
     .grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), await x2EarnRewardsPool.getAddress())
+    .then(async (tx: TransactionResponse) => await tx.wait())
+
+  // Set XAllocationVoting on X2EarnRewardsPool for round validation
+  await x2EarnRewardsPool
+    .connect(deployer)
+    .setXAllocationVoting(await xAllocationVoting.getAddress())
     .then(async (tx: TransactionResponse) => await tx.wait())
 
   // ---------- Configure contract roles for setup ---------- //
