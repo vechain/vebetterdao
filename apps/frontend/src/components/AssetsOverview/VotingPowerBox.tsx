@@ -8,11 +8,11 @@ import { useCallback, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { formatEther, parseEther } from "viem"
 
+import { useGetCurrentEffectiveVotes } from "@/api/contracts/governance/hooks/useGetCurrentEffectiveVotes"
 import { useGetVotesOnBlock } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useCurrentRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useCurrentRoundSnapshot"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 
 import { StatCard } from "./StatCard"
 import { VotingPowerBottomSheet } from "./VotingPowerBottomSheet"
@@ -27,27 +27,23 @@ export const VotingPowerBox = () => {
 
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: snapshotBlock, isLoading: isSnapshotBlockLoading } = useCurrentRoundSnapshot()
-  const { data: bestBlock, isLoading: isBestBlockLoading } = useBestBlockCompressed()
 
   // getVotes handles delegation (returns delegated amount) and includes deposits
   const { data: snapshotVotes, isLoading: isSnapshotLoading } = useGetVotesOnBlock(
     snapshotBlock ? Number(snapshotBlock) : undefined,
     account?.address,
   )
-  // getPastVotes requires timepoint < block.number, so use bestBlock - 1
-  const { data: currentVotes, isLoading: isCurrentLoading } = useGetVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
-    account?.address,
-  )
+  // Composed from current-state methods so it reflects post-tx state without waiting a block
+  const { data: currentVotes, isLoading: isCurrentLoading } = useGetCurrentEffectiveVotes(account?.address)
 
   const formatted = snapshotVotes ? (parseEther(snapshotVotes) === 0n ? "0" : humanNumber(snapshotVotes)) : "-"
 
   const votingPowerNextRound = useMemo(() => {
     if (!snapshotVotes || !currentVotes) return 0n
-    return parseEther(currentVotes) - parseEther(snapshotVotes)
+    return currentVotes.raw - parseEther(snapshotVotes)
   }, [snapshotVotes, currentVotes])
 
-  const allLoading = isSnapshotBlockLoading || isBestBlockLoading || isSnapshotLoading || isCurrentLoading
+  const allLoading = isSnapshotBlockLoading || isSnapshotLoading || isCurrentLoading
 
   return (
     <>

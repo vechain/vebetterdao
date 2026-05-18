@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react"
 
 import { buildClause } from "@/utils/buildClause"
 
+import { getCurrentEffectiveVotesPrefixQueryKey } from "../api/contracts/governance/hooks/useGetCurrentEffectiveVotes"
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
 import { getDepositsVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useTotalVotesOnBlock"
@@ -54,6 +55,7 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
       getVot3UnlockedBalanceQueryKey(account?.address ?? ""),
       getDepositsVotesOnBlockPrefixQueryKey(),
       getVotesOnBlockPrefixQueryKey(),
+      getCurrentEffectiveVotesPrefixQueryKey(),
       ["bestBlockCompressed"],
     ],
     [account, proposalId],

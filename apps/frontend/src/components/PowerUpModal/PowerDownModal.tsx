@@ -15,7 +15,10 @@ import { parseEther } from "viem"
 
 import { getConvertedB3TRQueryKey, useB3trConverted } from "@/api/contracts/b3tr/hooks/useB3trConverted"
 import { getB3TrTokenDetailsQueryKey } from "@/api/contracts/b3tr/hooks/useB3trTokenDetails"
-import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
+import {
+  getCurrentEffectiveVotesPrefixQueryKey,
+  useGetCurrentEffectiveVotes,
+} from "@/api/contracts/governance/hooks/useGetCurrentEffectiveVotes"
 import { getVotesOnBlockPrefixQueryKey } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import {
   getGetDelegatedAmountQueryKey,
@@ -30,7 +33,6 @@ import { BaseModal } from "@/components/BaseModal"
 import { VOT3Icon } from "@/components/Icons/VOT3Icon"
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { getB3trBalanceQueryKey } from "@/hooks/useGetB3trBalance"
-import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { getVot3BalanceQueryKey, useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { getVot3UnlockedBalanceQueryKey, useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -69,11 +71,8 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   const { data: unlockedVot3Balance } = useGetVot3UnlockedBalance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
   const { data: delegatedAmount } = useGetDelegatedAmount(account?.address ?? undefined)
-  const { data: bestBlock } = useBestBlockCompressed()
-  const { data: currentVotingPower } = useTotalVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
-    account?.address,
-  )
+  // Composed from current-state reads (no bestBlock-1 workaround); see useGetCurrentEffectiveVotes
+  const { data: currentVotingPower } = useGetCurrentEffectiveVotes(account?.address)
 
   const delegatedLocked = delegatedAmount?.raw ?? 0n
   const isDelegated = delegatedLocked > 0n
@@ -108,7 +107,7 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
   ])
 
   const showTransferredVOT3Warning = walletOriginal > swappableOriginal
-  const lockedForSupport = Number(currentVotingPower?.depositsVotes ?? "0")
+  const lockedForSupport = Number(currentVotingPower?.depositsScaled ?? "0")
 
   const amountWei = useMemo(() => {
     const trimmed = removingExcessDecimals(amount)
@@ -174,6 +173,7 @@ export const PowerDownModal = ({ isOpen, onClose }: Props) => {
       getB3TrTokenDetailsQueryKey(),
       getConvertedB3TRQueryKey(account?.address ?? ""),
       getVotesOnBlockPrefixQueryKey(),
+      getCurrentEffectiveVotesPrefixQueryKey(),
       getGetDelegatedAmountQueryKey(account?.address ?? ""),
       getGetNavigatorQueryKey(account?.address ?? ""),
       getIsDelegatedQueryKey(account?.address ?? ""),
