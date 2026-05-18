@@ -174,7 +174,12 @@ export const ActionBanner = () => {
 
   // Feature announcement banners
   const showFreshnessMultiplierBanner = preferences?.[BannerStorageKey.SHOW_FRESHNESS_MULTIPLIER] ?? true
-  const showNavigatorsBanner = preferences?.[BannerStorageKey.SHOW_NAVIGATORS] ?? true
+  // Only pitch Navigators to connected users who aren't already participating as a citizen or navigator
+  const showNavigatorsBanner =
+    !!account?.address &&
+    !isCurrentlyDelegated &&
+    !isNavigator &&
+    (preferences?.[BannerStorageKey.SHOW_NAVIGATORS] ?? true)
 
   // Claim tokens (VOT3 deposits) banner logic
   const { data: { totalClaimableDeposits, claimableDeposits } = { totalClaimableDeposits: 0, claimableDeposits: [] } } =
