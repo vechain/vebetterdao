@@ -104,7 +104,7 @@
     "contracts:advance-round": "dotenv -e .env -v NEXT_PUBLIC_APP_ENV=local -- turbo run advance-round:local --filter=@vechain/vebetterdao-contracts"
   },
   "dependencies": {
-    "@vechain/dev-stack": "file:.yalc/@vechain/dev-stack",
+    "@vechain/dev-stack": "^0.1.2",
     "dotenv-cli": "latest",
     "turbo": "^2.5.0"
   },
