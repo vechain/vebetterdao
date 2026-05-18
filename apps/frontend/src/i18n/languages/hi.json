@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "आपने इस राउंड में वोट नहीं किया है",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "आप थ्रेशोल्ड तक पहुंच गए! {{prize}} क्लेम करें — {{slots}} स्लॉट बचे।",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "आप थ्रेशोल्ड तक पहुंच गए! सभी स्लॉट खत्म होने से पहले {{prize}} क्लेम करें।",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "आप राउंड के बीच में Navigator से जुड़े। अगले राउंड से वे आपकी ओर से वोट करेंगे।",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "आप राउंड के बीच में Navigator से जुड़े। इस राउंड का वोट आपको स्वयं डालना होगा।",
   "You joined mid-round — vote yourself this round": "आप राउंड के बीच में शामिल हुए — इस राउंड में स्वयं वोट करें",
   "You joined this B3MO quest": "आपने इस B3MO क्वेस्ट में शामिल हुए",
   "You joined this quest": "आपने इस क्वेस्ट में शामिल हुए",

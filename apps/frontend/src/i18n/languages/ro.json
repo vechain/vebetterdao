@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "Nu ai votat în această rundă",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "Ai atins pragul! Revendică {{prize}} — {{slots}} sloturi rămase.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "Ai atins pragul! Revendică {{prize}} înainte să se ocupe toate sloturile.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "Te-ai alăturat unui Navigator la mijlocul rundei. Va vota în numele tău începând cu runda următoare.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "Te-ai alăturat unui Navigator la mijlocul rundei. Trebuie să votezi manual în această rundă.",
   "You joined mid-round — vote yourself this round": "Te-ai alăturat la mijlocul rundei — votează singur în această rundă",
   "You joined this B3MO quest": "Te-ai alăturat acestei B3MO misiuni",
   "You joined this quest": "Te-ai inscris la acest quest",

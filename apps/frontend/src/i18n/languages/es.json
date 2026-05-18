@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "No has votado en esta ronda",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "¡Alcanzaste el umbral! Reclama {{prize}} — quedan {{slots}} cupos.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "¡Alcanzaste el umbral! Reclama {{prize}} antes de que se acaben los cupos.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "Te uniste a un Navigator a mitad de ronda. Votará por ti a partir de la próxima ronda.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "Te uniste a un Navigator a mitad de ronda. Debes emitir tu voto de esta ronda manualmente.",
   "You joined mid-round — vote yourself this round": "Te uniste a mitad de ronda — vota tú mismo esta ronda",
   "You joined this B3MO quest": "Te uniste a esta B3MO misión",
   "You joined this quest": "Te uniste a esta misión",

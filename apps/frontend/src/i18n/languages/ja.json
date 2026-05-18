@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "このラウンドではまだ投票していません",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "閾値に達しました！{{prize}}を請求 — 残り{{slots}}スロット。",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "閾値に達しました！スロットがなくなる前に{{prize}}を請求しましょう。",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "ラウンド途中で Navigator に参加しました。次のラウンドからあなたの代わりに投票します。",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "ラウンド途中で Navigator に参加しました。このラウンドはご自身で投票してください。",
   "You joined mid-round — vote yourself this round": "ラウンドの途中で参加しました — このラウンドはご自身で投票してください",
   "You joined this B3MO quest": "このB3MO クエストに参加しました",
   "You joined this quest": "このクエストに参加しました",

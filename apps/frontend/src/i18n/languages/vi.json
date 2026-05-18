@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "Bạn chưa bình chọn trong vòng này",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "Đạt ngưỡng! Nhận {{prize}} — còn {{slots}} suất.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "Bạn đã đạt ngưỡng! Nhận {{prize}} trước khi hết suất.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "Bạn đã tham gia một Navigator giữa vòng. Họ sẽ bỏ phiếu thay bạn từ vòng tiếp theo.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "Bạn đã tham gia một Navigator giữa vòng. Bạn phải tự bỏ phiếu cho vòng này.",
   "You joined mid-round — vote yourself this round": "Bạn đã tham gia giữa vòng — hãy tự bỏ phiếu vòng này",
   "You joined this B3MO quest": "Bạn đã tham gia nhiệm vụ này",
   "You joined this quest": "Bạn đã tham gia nhiệm vụ này",

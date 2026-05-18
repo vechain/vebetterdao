@@ -5,11 +5,15 @@ import { useContext, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useVotingThreshold } from "@/api/contracts/governance/hooks/useVotingThreshold"
+import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetNavigatorAtTimepoint } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigatorAtTimepoint"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useAllocationRoundSnapshot } from "@/api/contracts/xAllocations/hooks/useAllocationRoundSnapshot"
 
 import { AllocationAlertCard } from "./AllocationAlertCard"
 import { AllocationTabsContext, MAX_SELECTED_APPS } from "./tabs/AllocationTabsProvider"
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 /**
  * VotingAlerts component that displays alerts based on voting state.
@@ -39,6 +43,12 @@ export const VotingAlerts = () => {
   // Resolve the navigator that holds the user's voting power for this round, so the link points
   // to the navigator actually voting on their behalf (relevant when delegation is exiting/changing).
   const { data: snapshotNavigatorAddress } = useGetNavigatorAtTimepoint(account?.address, roundSnapshotBlock)
+  // Current delegation state — used to detect citizens who joined a navigator
+  // mid-round (currently delegated, but not at this round's snapshot).
+  const { data: isCurrentlyDelegated } = useIsDelegated(account?.address)
+  const { data: currentNavigatorAddress } = useGetNavigator(account?.address)
+  const joinedMidRound = !!isCurrentlyDelegated && !isDelegatedToNavigator
+  const hasCurrentNavigator = !!currentNavigatorAddress && currentNavigatorAddress !== ZERO_ADDRESS
   const isAtSelectionLimit = selectedAppIds.size >= MAX_SELECTED_APPS
 
   const shouldShowInsufficientPowerAlert = useMemo(
@@ -76,6 +86,34 @@ export const VotingAlerts = () => {
                 size="xs"
                 variant="secondary"
                 onClick={() => router.push(`/navigators/${snapshotNavigatorAddress}`)}>
+                {t("View navigator")}
+              </Button>
+            )}
+          </VStack>
+        }
+      />
+    )
+  }
+
+  // Citizen joined a navigator mid-round: snapshot was already taken, so the
+  // navigator can't vote with their stake this round. They either vote
+  // manually now, or wait — the navigator takes over from the next round.
+  if (joinedMidRound) {
+    return (
+      <AllocationAlertCard
+        status="info"
+        message={
+          <VStack alignItems="flex-start" gap="2" w="full">
+            <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
+              {hasVoted
+                ? t("You joined a navigator mid-round. They will vote on your behalf from the next round.")
+                : t("You joined a navigator mid-round. You must cast this round's vote manually.")}
+            </Text>
+            {hasVoted && hasCurrentNavigator && (
+              <Button
+                size="xs"
+                variant="secondary"
+                onClick={() => router.push(`/navigators/${currentNavigatorAddress}`)}>
                 {t("View navigator")}
               </Button>
             )}

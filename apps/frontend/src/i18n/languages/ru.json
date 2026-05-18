@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "Вы не голосовали в этом раунде",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "Вы достигли порога! Заберите {{prize}} — осталось {{slots}} мест.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "Вы достигли порога! Заберите {{prize}}, пока есть свободные места.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "Вы присоединились к Navigator в середине раунда. Он будет голосовать за вас со следующего раунда.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "Вы присоединились к Navigator в середине раунда. В этом раунде вы должны проголосовать вручную.",
   "You joined mid-round — vote yourself this round": "Вы присоединились в середине раунда — голосуйте сами в этом раунде",
   "You joined this B3MO quest": "Вы присоединились к этому квесту",
   "You joined this quest": "Вы присоединились к этому квесту",

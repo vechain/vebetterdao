@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "您在此輪次中尚未投票",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "達到門檻！領取 {{prize}} — 剩餘 {{slots}} 個名額。",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "你達到門檻了！在所有名額用完前領取 {{prize}}。",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "你在回合中途加入 Navigator。下一回合起，他們將代你投票。",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "你在回合中途加入 Navigator。本回合的投票仍須由你手動完成。",
   "You joined mid-round — vote yourself this round": "你在回合中途加入 — 本回合請自行投票",
   "You joined this B3MO quest": "您已加入此B3MO 任務",
   "You joined this quest": "您已加入此任務",

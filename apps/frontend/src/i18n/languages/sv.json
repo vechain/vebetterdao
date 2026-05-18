@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "Du har inte röstat i denna omgång",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "Du nådde tröskeln! Ta {{prize}} — {{slots}} platser kvar.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "Du nådde tröskeln! Ta {{prize}} innan alla platser är slut.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "Du gick med en navigator mitt i rundan. De röstar åt dig från och med nästa runda.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "Du gick med en navigator mitt i rundan. Du måste rösta manuellt i denna runda.",
   "You joined mid-round — vote yourself this round": "Du gick med mitt i rundan — rösta själv denna runda",
   "You joined this B3MO quest": "Du gick med i denna B3MO quest",
   "You joined this quest": "Du gick med i denna quest",

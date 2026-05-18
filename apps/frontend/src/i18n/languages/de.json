@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "Sie haben in dieser Runde nicht abgestimmt",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "Du hast die Schwelle erreicht! Sichere dir {{prize}} — {{slots}} Plätze verbleiben.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "Du hast die Schwelle erreicht! Sichere dir {{prize}}, bevor alle Plätze vergeben sind.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "Du bist einem Navigator mitten in der Runde beigetreten. Er wird ab der nächsten Runde für dich abstimmen.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "Du bist einem Navigator mitten in der Runde beigetreten. Du musst die Stimme dieser Runde manuell abgeben.",
   "You joined mid-round — vote yourself this round": "Du bist mitten in der Runde beigetreten — stimme diese Runde selbst ab",
   "You joined this B3MO quest": "Du bist dieser B3MO Quest beigetreten",
   "You joined this quest": "Du bist dieser Quest beigetreten",

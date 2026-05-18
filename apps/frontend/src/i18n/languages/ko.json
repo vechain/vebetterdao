@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "이번 라운드에 투표하지 않았습니다",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "임계값에 도달! {{prize}}를 청구하세요 — {{slots}}슬롯 남음.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "임계값에 도달했습니다! 슬롯이 마감되기 전에 {{prize}}를 청구하세요.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "라운드 중간에 Navigator에 참여했습니다. 다음 라운드부터 당신을 대신해 투표합니다.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "라운드 중간에 Navigator에 참여했습니다. 이번 라운드는 직접 투표해야 합니다.",
   "You joined mid-round — vote yourself this round": "라운드 중간에 참여하셨습니다 — 이번 라운드는 직접 투표하세요",
   "You joined this B3MO quest": "이 B3MO 퀘스트에 참여했습니다",
   "You joined this quest": "이 퀘스트에 참여했습니다",

@@ -2965,6 +2965,8 @@
   "You haven't voted in this round": "You haven't voted in this round",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "You hit the threshold! Claim {{prize}} now before all slots run out.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "You joined a navigator mid-round. They will vote on your behalf from the next round.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "You joined a navigator mid-round. You must cast this round's vote manually.",
   "You joined mid-round — vote yourself this round": "You joined mid-round — vote yourself this round",
   "You joined this B3MO quest": "You joined this B3MO quest",
   "You joined this quest": "You joined this quest",

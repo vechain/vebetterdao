@@ -2959,6 +2959,8 @@
   "You haven't voted in this round": "Je hebt in deze ronde niet gestemd",
   "You hit the threshold! Claim {{prize}} now — {{slots}} slots remaining.": "Je hebt de drempel bereikt! Claim {{prize}} — {{slots}} plekken over.",
   "You hit the threshold! Claim {{prize}} now before all slots run out.": "Je hebt de drempel bereikt! Claim {{prize}} voordat alle plekken vol zijn.",
+  "You joined a navigator mid-round. They will vote on your behalf from the next round.": "Je bent halverwege de ronde lid geworden van een navigator. Zij stemmen vanaf de volgende ronde namens jou.",
+  "You joined a navigator mid-round. You must cast this round's vote manually.": "Je bent halverwege de ronde lid geworden van een navigator. Je moet de stem voor deze ronde zelf uitbrengen.",
   "You joined mid-round — vote yourself this round": "Je bent halverwege de ronde lid geworden — stem deze ronde zelf",
   "You joined this B3MO quest": "Je hebt je aangesloten bij deze B3MO quest",
   "You joined this quest": "Je hebt je aangesloten bij deze quest",
