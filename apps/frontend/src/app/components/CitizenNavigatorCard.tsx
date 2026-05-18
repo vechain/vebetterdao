@@ -16,6 +16,7 @@ import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
+import { useUserVotesInAllRounds } from "@/api/contracts/xApps/hooks/useUserVotesInAllRounds"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -91,6 +92,18 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
     account?.address,
     currentRound ? String(currentRound.voteStart) : undefined,
   )
+  const joinedAfterSnapshot = wasDelegatedAtRoundSnapshot === false
+
+  // Whether the citizen already cast their own allocation vote this round —
+  // used to hide the "vote yourself" footer warning once they've acted.
+  const { data: userVoteEvents } = useUserVotesInAllRounds(account?.address)
+  const userVotedThisRound = useMemo(
+    () => !!currentRound && !!userVoteEvents?.some(ev => ev.roundId === currentRound.roundId),
+    [userVoteEvents, currentRound],
+  )
+
+  const showMidRoundWarning =
+    !!currentRound && currentRound.isRoundStillOpen && joinedAfterSnapshot && !userVotedThisRound
 
   const wasSlashedRecently = useMemo(() => {
     if (!slashedByRound) return false
@@ -191,12 +204,23 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
                   round={currentRound}
                   roundVote={roundVotesMap.get(currentRound.roundId) ?? null}
                   navigatorAddress={navigatorAddress}
-                  joinedAfterSnapshot={wasDelegatedAtRoundSnapshot === false}
+                  joinedAfterSnapshot={joinedAfterSnapshot}
                   onViewReport={setViewReportURI}
                   onSelectAllocationVote={setSelectedRoundVote}
                   onSelectProposal={setSelectedProposalId}
                 />
               </>
+            )}
+
+            {showMidRoundWarning && (
+              <HStack gap={2} p={2} borderRadius="md" bg="status.warning.subtle">
+                <Icon boxSize={4} color="status.warning.primary">
+                  <LuTriangleAlert />
+                </Icon>
+                <Text textStyle="xs" color="status.warning.primary" fontWeight="medium">
+                  {t("You joined mid-round — vote yourself this round")}
+                </Text>
+              </HStack>
             )}
           </VStack>
         </Card.Body>
@@ -249,22 +273,23 @@ const CurrentRoundTasks = ({
         ? "missed"
         : "notDue"
 
+  // When the citizen joined after the round snapshot, the navigator's vote
+  // doesn't include their stake (and the freshness multiplier isn't theirs).
+  // Use neutral copy that still describes the navigator's action without
+  // implying it's on the citizen's behalf.
   const allocationLabel = joinedAfterSnapshot
-    ? round.isRoundStillOpen
-      ? t("You joined mid-round — vote yourself this round")
-      : t("Navigator could not vote for you (joined mid-round)")
+    ? {
+        done: t("Voted this round"),
+        late: t("Voted this round (late)"),
+        missed: t("Missed voting this round"),
+        pending: t("Waiting to vote this round"),
+      }[round.allocationStatus]
     : {
         done: t("Voted on your behalf"),
         late: t("Voted on your behalf (late)"),
         missed: t("Missed voting on your behalf"),
         pending: t("Waiting to vote on your behalf"),
       }[round.allocationStatus]
-
-  const allocationStatus: ReportRowStatus = joinedAfterSnapshot
-    ? round.isRoundStillOpen
-      ? "pending"
-      : "notDue"
-    : round.allocationStatus
 
   const reportLabel = {
     done: t("Uploaded report"),
@@ -275,10 +300,12 @@ const CurrentRoundTasks = ({
     optionalOpen: t("Report optional"),
   }[reportStatus]
 
-  const canClickAllocation =
-    !joinedAfterSnapshot && (round.allocationStatus === "done" || round.allocationStatus === "late")
+  const canClickAllocation = round.allocationStatus === "done" || round.allocationStatus === "late"
   const canClickReport = round.reportSubmitted && !!round.reportURI
 
+  // Hide the freshness multiplier when the citizen joined mid-round — it's the
+  // navigator's multiplier, not theirs, so showing it next to the row would be
+  // misleading.
   const freshnessExtra =
     !joinedAfterSnapshot && roundVote?.freshnessLabel ? (
       <HStack gap={0.5}>
@@ -298,7 +325,7 @@ const CurrentRoundTasks = ({
       <TaskRow
         icon={<LuVote />}
         label={allocationLabel}
-        status={allocationStatus}
+        status={round.allocationStatus}
         onClick={canClickAllocation && roundVote ? () => onSelectAllocationVote(roundVote) : undefined}
         extra={freshnessExtra}
       />
