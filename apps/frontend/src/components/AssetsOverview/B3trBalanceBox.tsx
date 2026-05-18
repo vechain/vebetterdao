@@ -24,7 +24,7 @@ export const B3trBalanceBox = () => {
     <>
       <StatCard
         variant="info"
-        title={t("Your balance")}
+        title={t("Balance")}
         icon={isMobile ? undefined : <B3TRIcon />}
         onClick={() => setIsOpen(true)}
         subtitle={
