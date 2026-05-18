@@ -14,6 +14,7 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
@@ -51,6 +52,7 @@ type ContentProps = { navigatorAddress: string }
 const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { account } = useWallet()
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(navigatorAddress)
   const { displayName } = useNavigatorDisplayName(navigatorAddress, {
@@ -81,6 +83,14 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   }, [delegationInfo])
 
   const currentRound = useMemo(() => rounds.find(r => r.isRoundStillOpen) ?? rounds[0], [rounds])
+
+  // If the citizen wasn't delegated to a navigator at the round's snapshot, the
+  // navigator's vote does NOT include their voting power — they joined mid-round
+  // and need to vote themselves (or did already, depending on round state).
+  const { data: wasDelegatedAtRoundSnapshot } = useIsDelegatedAtSnapshot(
+    account?.address,
+    currentRound ? String(currentRound.voteStart) : undefined,
+  )
 
   const wasSlashedRecently = useMemo(() => {
     if (!slashedByRound) return false
@@ -181,6 +191,7 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
                   round={currentRound}
                   roundVote={roundVotesMap.get(currentRound.roundId) ?? null}
                   navigatorAddress={navigatorAddress}
+                  joinedAfterSnapshot={wasDelegatedAtRoundSnapshot === false}
                   onViewReport={setViewReportURI}
                   onSelectAllocationVote={setSelectedRoundVote}
                   onSelectProposal={setSelectedProposalId}
@@ -211,6 +222,8 @@ type CurrentRoundTasksProps = {
   round: RoundCompliance
   roundVote: RoundVote | null
   navigatorAddress: string
+  /** Citizen wasn't delegated at this round's snapshot — navigator's vote doesn't include them. */
+  joinedAfterSnapshot: boolean
   onViewReport: (uri: string) => void
   onSelectAllocationVote: (rv: RoundVote) => void
   onSelectProposal: (proposalId: string) => void
@@ -219,6 +232,7 @@ type CurrentRoundTasksProps = {
 const CurrentRoundTasks = ({
   round,
   roundVote,
+  joinedAfterSnapshot,
   onViewReport,
   onSelectAllocationVote,
   onSelectProposal,
@@ -235,12 +249,22 @@ const CurrentRoundTasks = ({
         ? "missed"
         : "notDue"
 
-  const allocationLabel = {
-    done: t("Voted on your behalf"),
-    late: t("Voted on your behalf (late)"),
-    missed: t("Missed voting on your behalf"),
-    pending: t("Waiting to vote on your behalf"),
-  }[round.allocationStatus]
+  const allocationLabel = joinedAfterSnapshot
+    ? round.isRoundStillOpen
+      ? t("You joined mid-round — vote yourself this round")
+      : t("Navigator could not vote for you (joined mid-round)")
+    : {
+        done: t("Voted on your behalf"),
+        late: t("Voted on your behalf (late)"),
+        missed: t("Missed voting on your behalf"),
+        pending: t("Waiting to vote on your behalf"),
+      }[round.allocationStatus]
+
+  const allocationStatus: ReportRowStatus = joinedAfterSnapshot
+    ? round.isRoundStillOpen
+      ? "pending"
+      : "notDue"
+    : round.allocationStatus
 
   const reportLabel = {
     done: t("Uploaded report"),
@@ -251,17 +275,19 @@ const CurrentRoundTasks = ({
     optionalOpen: t("Report optional"),
   }[reportStatus]
 
-  const canClickAllocation = round.allocationStatus === "done" || round.allocationStatus === "late"
+  const canClickAllocation =
+    !joinedAfterSnapshot && (round.allocationStatus === "done" || round.allocationStatus === "late")
   const canClickReport = round.reportSubmitted && !!round.reportURI
 
-  const freshnessExtra = roundVote?.freshnessLabel ? (
-    <HStack gap={0.5}>
-      <Icon as={Sparks} boxSize={3} color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"} />
-      <Text textStyle="xs" fontWeight="semibold" color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"}>
-        {roundVote.freshnessLabel}
-      </Text>
-    </HStack>
-  ) : null
+  const freshnessExtra =
+    !joinedAfterSnapshot && roundVote?.freshnessLabel ? (
+      <HStack gap={0.5}>
+        <Icon as={Sparks} boxSize={3} color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"} />
+        <Text textStyle="xs" fontWeight="semibold" color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"}>
+          {roundVote.freshnessLabel}
+        </Text>
+      </HStack>
+    ) : null
 
   return (
     <VStack gap={1} align="stretch">
@@ -272,7 +298,7 @@ const CurrentRoundTasks = ({
       <TaskRow
         icon={<LuVote />}
         label={allocationLabel}
-        status={round.allocationStatus}
+        status={allocationStatus}
         onClick={canClickAllocation && roundVote ? () => onSelectAllocationVote(roundVote) : undefined}
         extra={freshnessExtra}
       />
