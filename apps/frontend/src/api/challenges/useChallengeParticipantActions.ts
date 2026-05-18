@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 
 const abi = B3TRChallenges__factory.abi as any
 const address = getConfig().challengesContractAddress as `0x${string}`
@@ -107,12 +107,22 @@ export const useChallengeParticipantActions = (challengeId: number, participants
     enabled: !!thor && !!challengeId && total > 0 && contractOk,
   })
 
+  // Auto-fetch remaining pages so the leaderboard ranks across ALL participants,
+  // not just the first page. Without this, a top scorer past index PAGE_SIZE in
+  // the contract's join-ordered `participants[]` would be missing from top-N
+  // (and a viewer in that range would render in the footer instead of in-rank).
+  useEffect(() => {
+    if (query.hasNextPage && !query.isFetchingNextPage && !query.isLoading) {
+      query.fetchNextPage()
+    }
+  }, [query.hasNextPage, query.isFetchingNextPage, query.isLoading, query.fetchNextPage])
+
   const loadedItems = useMemo(() => query.data?.pages.flatMap(p => p.items) ?? [], [query.data])
 
   // Competition ranking: tied scores share the same rank (e.g. 1, 1, 3) so all
-  // top-scorers are surfaced as winners by downstream UI. Sort is computed on
-  // currently-loaded pages only — in active challenges the leaderboard grows
-  // as the user loads more pages.
+  // top-scorers are surfaced as winners by downstream UI. We rank across all
+  // participants because the auto-fetch effect above pulls every page before
+  // `isLoading` flips to false.
   //
   // When `winners` is provided (SplitWin), items whose address is in `winners`
   // are pulled to the top in claim order (the order of the `winners[]` array);
@@ -152,7 +162,11 @@ export const useChallengeParticipantActions = (challengeId: number, participants
   // React Query returns isLoading=false when enabled=false (e.g. thor not
   // yet initialised). Treat "participants exist but no data yet" as loading
   // so consumers show skeletons instead of an empty/zero-score leaderboard.
-  const isLoading = query.isLoading || (total > 0 && contractOk && !query.data)
+  // Also stay in loading state while we're auto-paginating remaining pages —
+  // the partial ranks computed from page 1 can be misleading (a tied top
+  // scorer on page 2 would be missing from the displayed top-N).
+  const isLoading =
+    query.isLoading || (total > 0 && contractOk && !query.data) || query.hasNextPage || query.isFetchingNextPage
 
   return {
     leaderboard,
