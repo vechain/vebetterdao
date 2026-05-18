@@ -118,11 +118,14 @@ export const useCastAllocationVotes = ({
       getXAppRoundEarningsQueryKey(roundId),
       getParticipatedInGovernanceQueryKey(account?.address ?? ""),
     ]
+    if (account?.address) {
+      // Drives the citizen "joined mid-round" warning — needs refresh for any voter, not just navigators.
+      keys.push(getUserVotesInAllRoundsQueryKey(account.address))
+    }
     if (isNavigator && account?.address) {
       keys.push(getHasSetPreferencesQueryKey(account.address, roundId))
       keys.push(getGetPreferencesSetBlockQueryKey(account.address, roundId))
       keys.push(getNavigatorPreferenceEventsKey(account.address))
-      keys.push(getUserVotesInAllRoundsQueryKey(account.address))
     }
     return keys
   }, [roundId, account?.address, isNavigator])
