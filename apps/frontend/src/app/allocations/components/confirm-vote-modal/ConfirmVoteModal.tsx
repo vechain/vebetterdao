@@ -34,6 +34,8 @@ interface ConfirmVoteModalProps {
   roundId?: string
   snapshotBlock?: string
   isNavigator?: boolean
+  /** Citizen is currently delegating — hide auto-vote toggle since the navigator will take over. */
+  isCurrentlyDelegated?: boolean
 }
 
 export const ConfirmVoteModal = ({
@@ -51,6 +53,7 @@ export const ConfirmVoteModal = ({
   roundId,
   snapshotBlock,
   isNavigator = false,
+  isCurrentlyDelegated = false,
 }: ConfirmVoteModalProps) => {
   const { t } = useTranslation()
   const [isCustomising, setIsCustomising] = useState(false)
@@ -210,7 +213,7 @@ export const ConfirmVoteModal = ({
           </>
         )}
 
-        {!isNavigator && (
+        {!isNavigator && !isCurrentlyDelegated && (
           <>
             <AutomationToggleCard
               checked={isAutoVotingEnabled}

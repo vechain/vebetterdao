@@ -1,9 +1,12 @@
 "use client"
 
 import { Button, Card, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useContext } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 
 import { AllocationTabsContext } from "./tabs/AllocationTabsProvider"
 
@@ -11,8 +14,13 @@ export const NavigatorPromoCard = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const context = useContext(AllocationTabsContext)
+  const { account } = useWallet()
+  // Hide for users currently delegating (not just at snapshot — context's
+  // isDelegatedToNavigator is snapshot-based and would still show this pitch
+  // to someone who just delegated mid-round).
+  const { data: isCurrentlyDelegated } = useIsDelegated(account?.address)
 
-  if (!context || context.isDelegatedToNavigator || context.isNavigator) return null
+  if (!context || isCurrentlyDelegated || context.isNavigator) return null
 
   return (
     <Card.Root variant="primary" p="8">

@@ -49,7 +49,7 @@ export const VotingPowerBox = () => {
     <>
       <StatCard
         variant="positive"
-        title={t("Your voting power")}
+        title={t("Voting power")}
         icon={isMobile ? undefined : <Flash />}
         isLoading={allLoading}
         onClick={() => setIsOpen(true)}

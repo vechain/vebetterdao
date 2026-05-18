@@ -14,7 +14,9 @@ import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMi
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useNavigatorStatus } from "@/api/contracts/navigatorRegistry/hooks/useNavigatorStatus"
+import { useUserVotesInAllRounds } from "@/api/contracts/xApps/hooks/useUserVotesInAllRounds"
 import { useMyDelegationInfo } from "@/api/indexer/navigators/useMyDelegationInfo"
 import { useNavigatorByAddress } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -51,6 +53,7 @@ type ContentProps = { navigatorAddress: string }
 const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { account } = useWallet()
 
   const { data: nav, isLoading: navLoading } = useNavigatorByAddress(navigatorAddress)
   const { displayName } = useNavigatorDisplayName(navigatorAddress, {
@@ -81,6 +84,26 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
   }, [delegationInfo])
 
   const currentRound = useMemo(() => rounds.find(r => r.isRoundStillOpen) ?? rounds[0], [rounds])
+
+  // If the citizen wasn't delegated to a navigator at the round's snapshot, the
+  // navigator's vote does NOT include their voting power — they joined mid-round
+  // and need to vote themselves (or did already, depending on round state).
+  const { data: wasDelegatedAtRoundSnapshot } = useIsDelegatedAtSnapshot(
+    account?.address,
+    currentRound ? String(currentRound.voteStart) : undefined,
+  )
+  const joinedAfterSnapshot = wasDelegatedAtRoundSnapshot === false
+
+  // Whether the citizen already cast their own allocation vote this round —
+  // used to hide the "vote yourself" footer warning once they've acted.
+  const { data: userVoteEvents } = useUserVotesInAllRounds(account?.address)
+  const userVotedThisRound = useMemo(
+    () => !!currentRound && !!userVoteEvents?.some(ev => ev.roundId === currentRound.roundId),
+    [userVoteEvents, currentRound],
+  )
+
+  const showMidRoundWarning =
+    !!currentRound && currentRound.isRoundStillOpen && joinedAfterSnapshot && !userVotedThisRound
 
   const wasSlashedRecently = useMemo(() => {
     if (!slashedByRound) return false
@@ -181,11 +204,23 @@ const CitizenNavigatorCardContent = ({ navigatorAddress }: ContentProps) => {
                   round={currentRound}
                   roundVote={roundVotesMap.get(currentRound.roundId) ?? null}
                   navigatorAddress={navigatorAddress}
+                  joinedAfterSnapshot={joinedAfterSnapshot}
                   onViewReport={setViewReportURI}
                   onSelectAllocationVote={setSelectedRoundVote}
                   onSelectProposal={setSelectedProposalId}
                 />
               </>
+            )}
+
+            {showMidRoundWarning && (
+              <HStack gap={2} p={2} borderRadius="md" bg="status.warning.subtle">
+                <Icon boxSize={4} color="status.warning.primary">
+                  <LuTriangleAlert />
+                </Icon>
+                <Text textStyle="xs" color="status.warning.primary" fontWeight="medium">
+                  {t("You joined mid-round — vote yourself this round")}
+                </Text>
+              </HStack>
             )}
           </VStack>
         </Card.Body>
@@ -211,6 +246,8 @@ type CurrentRoundTasksProps = {
   round: RoundCompliance
   roundVote: RoundVote | null
   navigatorAddress: string
+  /** Citizen wasn't delegated at this round's snapshot — navigator's vote doesn't include them. */
+  joinedAfterSnapshot: boolean
   onViewReport: (uri: string) => void
   onSelectAllocationVote: (rv: RoundVote) => void
   onSelectProposal: (proposalId: string) => void
@@ -219,6 +256,7 @@ type CurrentRoundTasksProps = {
 const CurrentRoundTasks = ({
   round,
   roundVote,
+  joinedAfterSnapshot,
   onViewReport,
   onSelectAllocationVote,
   onSelectProposal,
@@ -235,12 +273,23 @@ const CurrentRoundTasks = ({
         ? "missed"
         : "notDue"
 
-  const allocationLabel = {
-    done: t("Voted on your behalf"),
-    late: t("Voted on your behalf (late)"),
-    missed: t("Missed voting on your behalf"),
-    pending: t("Waiting to vote on your behalf"),
-  }[round.allocationStatus]
+  // When the citizen joined after the round snapshot, the navigator's vote
+  // doesn't include their stake (and the freshness multiplier isn't theirs).
+  // Use neutral copy that still describes the navigator's action without
+  // implying it's on the citizen's behalf.
+  const allocationLabel = joinedAfterSnapshot
+    ? {
+        done: t("Voted this round"),
+        late: t("Voted this round (late)"),
+        missed: t("Missed voting this round"),
+        pending: t("Waiting to vote this round"),
+      }[round.allocationStatus]
+    : {
+        done: t("Voted on your behalf"),
+        late: t("Voted on your behalf (late)"),
+        missed: t("Missed voting on your behalf"),
+        pending: t("Waiting to vote on your behalf"),
+      }[round.allocationStatus]
 
   const reportLabel = {
     done: t("Uploaded report"),
@@ -254,14 +303,18 @@ const CurrentRoundTasks = ({
   const canClickAllocation = round.allocationStatus === "done" || round.allocationStatus === "late"
   const canClickReport = round.reportSubmitted && !!round.reportURI
 
-  const freshnessExtra = roundVote?.freshnessLabel ? (
-    <HStack gap={0.5}>
-      <Icon as={Sparks} boxSize={3} color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"} />
-      <Text textStyle="xs" fontWeight="semibold" color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"}>
-        {roundVote.freshnessLabel}
-      </Text>
-    </HStack>
-  ) : null
+  // Hide the freshness multiplier when the citizen joined mid-round — it's the
+  // navigator's multiplier, not theirs, so showing it next to the row would be
+  // misleading.
+  const freshnessExtra =
+    !joinedAfterSnapshot && roundVote?.freshnessLabel ? (
+      <HStack gap={0.5}>
+        <Icon as={Sparks} boxSize={3} color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"} />
+        <Text textStyle="xs" fontWeight="semibold" color={roundVote.freshnessLabel === "x1" ? "orange.fg" : "green.fg"}>
+          {roundVote.freshnessLabel}
+        </Text>
+      </HStack>
+    ) : null
 
   return (
     <VStack gap={1} align="stretch">

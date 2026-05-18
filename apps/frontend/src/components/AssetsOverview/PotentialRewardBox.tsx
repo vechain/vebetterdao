@@ -217,7 +217,7 @@ export const PotentialRewardBox = () => {
     <>
       <StatCard
         variant="warning"
-        title={t("Your rewards")}
+        title={t("Rewards")}
         icon={isMobile ? undefined : <Gift />}
         onClick={() => setIsOpen(true)}
         subtitle={
