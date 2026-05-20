@@ -25,7 +25,7 @@
     "dev:xapps-unendorsed": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- vechain-dev up",
     "dev:down": "vechain-dev down",
     "dev:reset": "rm -f packages/config/local.ts && vechain-dev reset",
-    "dev:redeploy": "yarn contracts:compile && rm -f packages/config/local.ts && yarn dev",
+    "dev:redeploy": "yarn contracts:compile && yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- vechain-dev up --redeploy",
     "dev:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env -- turbo dev:staging --",
     "dev:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
     "dev:mainnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -e .env -- turbo dev:mainnet --",
@@ -104,11 +104,11 @@
     "contracts:advance-round": "dotenv -e .env -v NEXT_PUBLIC_APP_ENV=local -- turbo run advance-round:local --filter=@vechain/vebetterdao-contracts"
   },
   "dependencies": {
-    "@vechain/dev-stack": "^0.1.2",
     "dotenv-cli": "latest",
     "turbo": "^2.5.0"
   },
   "devDependencies": {
+    "@vechain/dev-stack": "^0.1.10",
     "@datadog/browser-rum": "^6.33.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
