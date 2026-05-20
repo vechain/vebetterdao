@@ -1,6 +1,5 @@
 import { ethers, network } from "hardhat"
 import { getConfig, getContractsConfig } from "@repo/config"
-import { AppConfig } from "@repo/config"
 import { AppEnv } from "@repo/config/contracts"
 import { deployAll } from "./deploy/deployAll"
 import { overrideLocalConfigWithNewContracts, registerWithDevStack } from "./helpers/devStack"
@@ -23,27 +22,25 @@ async function main() {
 // deploy command when needed, so the in-repo getCode check is intentionally
 // absent here (it relied on `local.ts` which is not part of the shared state).
 export async function checkContractsDeployment() {
-  let finalConfig: AppConfig = config
-  try {
-    if (env === AppEnv.LOCAL) {
-      const newAddresses = await deployAll(getContractsConfig(env))
-      finalConfig = await overrideLocalConfigWithNewContracts(newAddresses)
-    } else {
-      const code = config.b3trContractAddress === "" ? "0x" : await ethers.provider.getCode(config.b3trContractAddress)
-      if (code === "0x") {
-        console.log(`B3tr contract not deployed at address ${config.b3trContractAddress}`)
-        if (isTestnetEnv) {
-          const newAddresses = await deployAll(getContractsConfig(env))
-          finalConfig = await overrideLocalConfigWithNewContracts(newAddresses)
-        } else console.log(`Skipping deployment on ${network.name}`)
-      } else console.log(`B3tr contract already deployed`)
-    }
-  } catch (e) {
-    console.log(e)
+  if (env === AppEnv.LOCAL) {
+    const newAddresses = await deployAll(getContractsConfig(env))
+    const finalConfig = await overrideLocalConfigWithNewContracts(newAddresses)
+    await registerWithDevStack(finalConfig)
+    return
   }
 
-  if (env === AppEnv.LOCAL) {
-    await registerWithDevStack(finalConfig)
+  const code = config.b3trContractAddress === "" ? "0x" : await ethers.provider.getCode(config.b3trContractAddress)
+  if (code !== "0x") {
+    console.log(`B3tr contract already deployed`)
+    return
+  }
+
+  console.log(`B3tr contract not deployed at address ${config.b3trContractAddress}`)
+  if (isTestnetEnv) {
+    const newAddresses = await deployAll(getContractsConfig(env))
+    await overrideLocalConfigWithNewContracts(newAddresses)
+  } else {
+    console.log(`Skipping deployment on ${network.name}`)
   }
 }
 

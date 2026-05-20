@@ -108,7 +108,7 @@
     "turbo": "^2.5.0"
   },
   "devDependencies": {
-    "@vechain/dev-stack": "^0.1.10",
+    "@vechain/dev-stack": "^0.1.11",
     "@datadog/browser-rum": "^6.33.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",

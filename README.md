@@ -82,7 +82,7 @@ cp .env.example .env
 yarn dev
 ```
 
-`yarn dev` delegates to [`@vechain/dev-stack`](../dev-stack), the shared local dev environment used by other VeChain projects. It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, registers their addresses with the stack, restarts the indexer + explorer to pick up the new env, and exec's the frontend dev server.
+`yarn dev` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects. It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, registers their addresses with the stack, restarts the indexer + explorer to pick up the new env, and exec's the frontend dev server.
 
 If the contracts are already deployed and the chain is intact, the deploy step short-circuits and just re-uses `packages/config/local.ts`. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
 
