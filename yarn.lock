@@ -4411,15 +4411,24 @@
   resolved "https://registry.npmjs.org/@privy-io/chains/-/chains-0.0.2.tgz#0734f5e196cd08817e4c5f80ecc2b817f6ba938e"
   integrity sha512-vT+EcPstcKbvrPyGA2YDD1W8YxaJhKFKYGmS9PaycODpL9HvMsPpkJ1y6SddmVAKL+WIow+nH9cV1/q0aCmPXA==
 
-"@privy-io/cross-app-connect@0.2.2":
-  version "0.2.2"
-  resolved "https://registry.npmjs.org/@privy-io/cross-app-connect/-/cross-app-connect-0.2.2.tgz#6ebad32f496320f222298a91923ffb2b47841957"
-  integrity sha512-uTCacOBHjvlM4fn/2GIR/gC5fF9kCFDkkaQUr3easkCNoGdU+w0tbHP4gF0reolgo8fE16nQLNSYMg1DKv3nZQ==
+"@privy-io/cross-app-connect@0.5.8":
+  version "0.5.8"
+  resolved "https://registry.yarnpkg.com/@privy-io/cross-app-connect/-/cross-app-connect-0.5.8.tgz#eaced4eeef1687a9c02a1dd54e723420110f24d0"
+  integrity sha512-CNupYLlalJ0vp0YLE3cz6buU0ZTKKfoWJFh83iYVSqR2Kfl4Mfp4r69awFjZaNAKCAVrncNzxXyMJQL4X3kQ9A==
   dependencies:
     "@noble/curves" "^1.5.0"
-    "@noble/hashes" "1.3.2"
+    "@noble/hashes" "^1.8.0"
+    "@privy-io/encoding" "0.1.3"
+    "@privy-io/popup" "0.0.4"
     "@scure/base" "~1.1.2"
     fflate "0.8.2"
+
+"@privy-io/encoding@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@privy-io/encoding/-/encoding-0.1.3.tgz#042a991500c5ba89076d4c9dcfa8bafdf58bde6e"
+  integrity sha512-tvSuC0umDmkfmdKe339P/IZzqh04y7WQ7fOB5iU0aQoxdEivjO0hAD4GHxNOTdn9be9hS2WfIp7u/q6h7ZvvTg==
+  dependencies:
+    "@scure/base" "^1.2.6"
 
 "@privy-io/ethereum@0.0.2":
   version "0.0.2"
@@ -4448,6 +4457,11 @@
     libphonenumber-js "^1.10.44"
     set-cookie-parser "^2.6.0"
     uuid ">=8 <10"
+
+"@privy-io/popup@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@privy-io/popup/-/popup-0.0.4.tgz#f01acc9ddd877ce2e89001ffe5a40c55b80e8de5"
+  integrity sha512-Lk5BqB//F9naVOR9tkHbrcGs55fM4ILS50tdsgIQ76Kr9i7Og4Ob5IRGIKb75P11f5hXTwAjMezRmWM/7uAsrw==
 
 "@privy-io/public-api@2.45.0":
   version "2.45.0"
@@ -5123,7 +5137,7 @@
   resolved "https://registry.npmjs.org/@safe-global/safe-gateway-typescript-sdk/-/safe-gateway-typescript-sdk-3.23.1.tgz#1e86d471bcd2adb0f777246ccbea6fa39618e02c"
   integrity sha512-6ORQfwtEJYpalCeVO21L4XXGSdbEMfyp2hEv6cP82afKXSwvse6d3sdelgaPWUxHIsFRkWvHDdzh8IyyKHZKxw==
 
-"@scure/base@1.2.6", "@scure/base@^1.1.3", "@scure/base@^1.2.4", "@scure/base@^1.2.5", "@scure/base@~1.2.2", "@scure/base@~1.2.4", "@scure/base@~1.2.5":
+"@scure/base@1.2.6", "@scure/base@^1.1.3", "@scure/base@^1.2.4", "@scure/base@^1.2.5", "@scure/base@^1.2.6", "@scure/base@~1.2.2", "@scure/base@~1.2.4", "@scure/base@~1.2.5":
   version "1.2.6"
   resolved "https://registry.npmjs.org/@scure/base/-/base-1.2.6.tgz#ca917184b8231394dd8847509c67a0be522e59f6"
   integrity sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==
@@ -7749,15 +7763,15 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.9.0":
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.9.0.tgz#605aaa1554cb7f0ad24d1e6a629c418bef7646ca"
-  integrity sha512-PwSLYYFDMD28aZllLqtwuqsgZeBzLhop02BWvD07ZAvM6eFash3/BahX+1JNFB1lI8dlOIxkT7+4SL3QOq51pA==
+"@vechain/vechain-kit@2.10.0":
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.10.0.tgz#63b2eae6eb98488b8a34660f5db1c6978de03c0d"
+  integrity sha512-LBBPjb7SkFbkwWkHiOvR8oH3o1nznvR6wiWh/LEgpkubHqwOhuxrv7qh/Qs1tJizUhSyPZ20DPVKLnQIJvmMug==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
     "@emotion/styled" "^11.14.1"
-    "@privy-io/cross-app-connect" "0.2.2"
+    "@privy-io/cross-app-connect" "0.5.8"
     "@privy-io/react-auth" "2.25.0"
     "@solana/web3.js" "^1.98.0"
     "@tanstack/react-query" "^5.64.2"
