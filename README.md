@@ -34,7 +34,6 @@ VeBetterDAO is the monorepo behind the [VeBetterDAO](https://governance.vebetter
 | --- | --- |
 | `apps/frontend` | Next.js 16 governance dApp |
 | `packages/contracts` | VeBetterDAO Solidity smart contracts (Hardhat) |
-| `packages/indexer` | Docker-compose for the [VeChain indexer](https://github.com/vechain/vechain-indexer) + MongoDB + block explorer |
 | `packages/lambda` | AWS Lambda functions (round automation, relayer, NFT minting, etc.) |
 | `packages/config` | Per-environment configuration and contract addresses |
 | `packages/constants` | Shared constants |
@@ -79,14 +78,15 @@ yarn install
 
 ```
 cp .env.example .env
-yarn dev
+yarn dev:up         # join shared @vechain/dev-stack, deploy contracts to thor-solo
+yarn frontend:dev   # start the frontend (run in a separate terminal)
 ```
 
-`yarn dev` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects. It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, registers their addresses with the stack, restarts the indexer + explorer to pick up the new env, and exec's the frontend dev server.
+`yarn dev:up` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects (stargate, multisig). It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, and registers their addresses with the stack. `yarn frontend:dev` then runs the Next.js dev server.
 
 If the contracts are already deployed and the chain is intact, the deploy step short-circuits and just re-uses `packages/config/local.ts`. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
 
-> **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn dev`.
+> **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn frontend:dev`.
 
 > **First run note:** the script compiles and deploys ~30 contracts to thor-solo. **This can take up to 5 minutes.** Log lines will appear continuously — do not Ctrl-C.
 
@@ -99,18 +99,18 @@ yarn dev:down
 To tear down everything (shared infra + volumes + all projects' registered addresses):
 
 ```
-yarn dev:reset
+yarn dev:clean
 ```
 
 To force a fresh redeploy of the contracts (e.g. after pulling new contract changes):
 
 ```
-yarn dev:redeploy
+yarn dev:deploy
 ```
 
 ### Block Explorer & Indexer (Local)
 
-Both the block explorer and the indexer are provided by `@vechain/dev-stack` and come up automatically as part of `yarn dev`. No separate commands required.
+Both the block explorer and the indexer are provided by `@vechain/dev-stack` and come up automatically as part of `yarn dev:up`. No separate commands required.
 
 | Service        | Port  | URL                       |
 | -------------- | ----- | ------------------------- |
@@ -119,7 +119,7 @@ Both the block explorer and the indexer are provided by `@vechain/dev-stack` and
 | Indexer API    | 8089  | http://localhost:8089     |
 | MongoDB        | 27017 | mongodb://localhost:27017 |
 
-B3TR's registered config (profiles + addresses) lives at `~/.vechain-dev/config/b3tr.json` after the first successful `yarn dev`.
+B3TR's registered config (profiles + addresses) lives at `~/.vechain-dev/config/b3tr.json` after the first successful `yarn dev:up`.
 
 ### Spin up the project pointing to the staging environment
 
@@ -162,7 +162,7 @@ Run this command to install the dependencies:
 yarn install
 ```
 
-If you want to test/deploy contracts against vechain thor solo, you need to have the shared dev-stack up. The simplest way is `yarn dev` from the repo root — it brings up thor-solo (via `@vechain/dev-stack`) and runs the deploy as part of its flow. Use `yarn dev:down` to stop and `yarn dev:reset` to wipe.
+If you want to test/deploy contracts against vechain thor solo, you need to have the shared dev-stack up. The simplest way is `yarn dev:up` from the repo root — it brings up thor-solo (via `@vechain/dev-stack`) and runs the deploy as part of its flow. Use `yarn dev:down` to stop and `yarn dev:clean` to wipe.
 
 Each environment has its own configuration file under `./packages/config/contracts/envs` folder:
 
@@ -198,10 +198,10 @@ yarn contracts:test
 
 This will run tests against the hardhat local network.
 
-If you want to run tests against vechain thor solo, you need to have the solo node running. You can start the solo node by running:
+If you want to run tests against vechain thor solo, you need to have the solo node running. You can start it on its own (without deploying contracts) with:
 
 ```
-make solo-up
+yarn solo:up
 ```
 
 Then run the tests with:
@@ -209,6 +209,8 @@ Then run the tests with:
 ```
 yarn contracts:test:thor-solo
 ```
+
+Use `yarn solo:down` to stop and `yarn solo:clean` to wipe the chain volume.
 
 ### Test coverage
 
@@ -234,14 +236,13 @@ The governance contracts are forked from the `openzeppelin-contracts` library. A
 #### Deploy to local thor solo
 
 ```
-make solo-up
-```
-
-```
-yarn contracts:deploy
+yarn solo:up
+yarn contracts:deploy:local
 ```
 
 The addresses will be outputted in the console. If you want the frontend to use those addresses then copy them in the `local.ts` file inside `./packages/config/`.
+
+> For the normal local-dev flow you should use `yarn dev:up` instead — it brings up the shared `@vechain/dev-stack` (thor-solo + mongo + indexer + block-explorer) and deploys contracts in one step.
 
 #### Deploy to self hosted solo
 
@@ -308,13 +309,21 @@ Read more about the verification process in the [packages/contracts/scripts/veri
 
 ## Simulating rounds
 
-It is possible to simulate x-app voting rounds. Simply run a clean version of the app using `make solo-down && make solo-up && yarn dev:simulation`. The simulation will only work against thor solo in your local environment.
+It is possible to simulate x-app voting rounds. Start from a clean shared dev-stack and run the simulation against thor-solo:
+
+```
+yarn dev:clean                                          # wipe shared infra + addresses
+yarn dev:up                                             # bring up thor-solo + indexer + explorer, deploy contracts
+yarn workspace @vechain/vebetterdao-contracts simulation
+```
+
+The simulation only works against thor-solo in your local environment.
 
 The simulation will airdrop `B3TR` and `VTHO` to a number of accounts and then simulate all of the voting rounds. After each voting round, emissions will be distributed and voter rewards claimed. For our test accounts we will swap all B3TR for VOT3 and vote on x-apps using a random formula.
 
-The number of accounts can be adjusted by changing the `NUM_USERS_TO_SEED` variable in `simulateRounds.ts`. If you wish to increase the number of users please ensure the voting round is sufficiently long to allow voting to complete. Roughly 50 votes will occur per block so you can use this as a rough guide. For example if you want 1000 accounts you would need at lease `1000/50 = 20` blocks. Add a health buffer to ensure there are no issues.
+The number of accounts can be adjusted by changing the `NUM_USERS_TO_SEED` variable in `packages/contracts/scripts/deploy/simulateRounds.ts`. If you wish to increase the number of users please ensure the voting round is sufficiently long to allow voting to complete. Roughly 50 votes will occur per block so you can use this as a rough guide. For example if you want 1000 accounts you would need at lease `1000/50 = 20` blocks. Add a health buffer to ensure there are no issues.
 
-The seeding strategy can be adjusted by changing the `SEED_STRATEGY` variable in `simulateRounds.ts`. Supported strategies are:
+The seeding strategy can be adjusted by changing the `SEED_STRATEGY` variable in the same file. Supported strategies are:
 
 - `RANDOM` - Will seed accounts within the range `5-1000` with a weighting towards selecting more accounts with values on the low end of this range
 - `FIXED` - All accounts receive `500` tokens

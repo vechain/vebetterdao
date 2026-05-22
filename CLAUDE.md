@@ -58,7 +58,7 @@ export const useHookName = (param: string) => {
 
 # Environments
 
-- local: Local development (shared thor-solo via `@vechain/dev-stack`, started by `yarn dev`)
+- local: Local development (shared thor-solo via `@vechain/dev-stack`, started by `yarn dev:up` + `yarn frontend:dev`)
 - testnet-staging: Staging testnet
 - testnet: VeChain testnet
 - mainnet: VeChain mainnet
@@ -69,18 +69,25 @@ export const useHookName = (param: string) => {
 nvm use
 yarn install
 cp .env.example .env
-yarn dev   # joins shared dev-stack: thor-solo + indexer + block-explorer, deploys, then runs frontend
+yarn dev:up        # joins shared dev-stack: thor-solo + indexer + block-explorer, deploys contracts
+yarn frontend:dev  # start the Next.js frontend (separate terminal)
 ```
 
-Stop: `yarn dev:down` (leaves shared stack running for other projects) | Reset: `yarn dev:reset` (tears down everything)
+Stop: `yarn dev:down` (leaves shared stack running for other projects) | Wipe: `yarn dev:clean` (tears down everything) | Redeploy contracts: `yarn dev:deploy`
 
 # Common commands
 
 ## Development
 
-- `yarn dev`: Local dev with endorsed xapps
-- `yarn dev:<env>`: Dev for specific environment (staging/testnet/mainnet)
+- `yarn dev:up`: Bring up shared dev-stack + deploy contracts (endorsed xapps); then run `yarn frontend:dev`
+- `yarn dev:up:xapps-unendorsed`: Same as above but xapps are left unendorsed
+- `yarn dev:down`: Stop this project (shared stack stays up for other projects)
+- `yarn dev:clean`: Tear down everything (shared infra + addresses)
+- `yarn dev:deploy`: Force a fresh contract redeploy against the running stack
+- `yarn dev:<env>`: Dev frontend pointing at staging/testnet/mainnet (no local chain)
 - `yarn start:<env>`: Production build for specific environment
+- `yarn solo:up` / `solo:down` / `solo:logs` / `solo:clean`: Manage thor-solo only (no deploys)
+- `yarn indexer:up` / `indexer:down` / `indexer:logs` / `indexer:recreate` / `indexer:clean`: Manage indexer only
 
 ## Building
 
