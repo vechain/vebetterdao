@@ -18,8 +18,8 @@ NAV_CONTRACTS=cd packages/contracts
 # Contracts
 contracts-compile: #@ Compile the contracts.
 	$(NAV_CONTRACTS); yarn compile
-contracts-deploy: contracts-compile #@ Deploy the contracts.
-	$(NAV_CONTRACTS); yarn deploy:local
+contracts-deploy: #@ Deploy the contracts to local thor-solo.
+	yarn contracts:deploy:local
 contracts-test: contracts-compile #@ Test the contracts.
 	$(NAV_CONTRACTS); yarn test
 
