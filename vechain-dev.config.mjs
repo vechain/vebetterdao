@@ -2,9 +2,9 @@
  * Configuration for @vechain/dev-stack — the shared local dev environment
  * (thor-solo + indexer + block-explorer) shared with other VeChain projects.
  *
- * `yarn dev` joins the shared stack: deploys VeBetterDAO contracts to solo,
- * registers their addresses with the stack, restarts the indexer to pick them
- * up, then exec's the frontend dev server.
+ * `yarn dev:up` joins the shared stack: deploys VeBetterDAO contracts to
+ * solo, registers their addresses, and restarts the indexer to pick them
+ * up. Run `yarn frontend:dev` separately to start the frontend.
  */
 export default {
   project: 'b3tr',
@@ -22,5 +22,4 @@ export default {
     'transfers',
   ],
   deploy: 'yarn contracts:deploy:local',
-  dev: 'yarn workspace frontend dev',
 }
