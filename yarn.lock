@@ -8006,10 +8006,10 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.10.0":
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.10.0.tgz#63b2eae6eb98488b8a34660f5db1c6978de03c0d"
-  integrity sha512-LBBPjb7SkFbkwWkHiOvR8oH3o1nznvR6wiWh/LEgpkubHqwOhuxrv7qh/Qs1tJizUhSyPZ20DPVKLnQIJvmMug==
+"@vechain/vechain-kit@2.10.1":
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.10.1.tgz#e1f0f5f0a36218ac3a7d9ebae57d651b120d3c95"
+  integrity sha512-OhpBcWoVqmaVv+JsFCpkoJ84D7YCzefI9rhN/9NDBnilF7uZEJluPILkm49sXfEvhHJZf0SW16Kkqk04WN8Zhw==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
