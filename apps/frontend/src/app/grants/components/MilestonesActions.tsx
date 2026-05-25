@@ -31,8 +31,6 @@ import { uploadBlobToIPFS } from "@/utils/ipfs"
 
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
-import { ExpenditureReportForm } from "./ExpenditureReportForm"
-import { ExpenditureReportView } from "./ExpenditureReportView"
 import { MilestoneItem } from "./MilestoneItem"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
@@ -50,7 +48,8 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const { metadataUploading } = useUploadGrantProposalMetadata()
   const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
   const { submitReport } = useSubmitExpenditureReport()
-  const [showReportForm, setShowReportForm] = useState(false)
+  /** Tracks which milestone (by index) is showing the inline ExpenditureReportForm. Only one at a time. */
+  const [reportFormMilestoneIndex, setReportFormMilestoneIndex] = useState<number | null>(null)
   const [isPublishingReport, setIsPublishingReport] = useState(false)
 
   const isGrantReceiver = useMemo(() => {
@@ -94,7 +93,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
           return
         }
         await updateMilestoneMetadata(cid)
-        setShowReportForm(false)
+        setReportFormMilestoneIndex(null)
         toaster.create({ description: t("Expenditure report submitted successfully"), type: "success", closable: true })
       } catch {
         toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
@@ -123,11 +122,6 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     )
     return firstPendingIndex >= 0 ? firstPendingIndex : Math.max(0, milestones.length - 1)
   }, [milestones])
-
-  const existingReport = useMemo(() => {
-    const tranche = currentStep + 1
-    return proposal?.expenditureReports?.find(r => r.trancheNumber === tranche)
-  }, [proposal?.expenditureReports, currentStep])
 
   const handleSaveEdit = useCallback(
     async (clickedIndex: number) => {
@@ -216,34 +210,6 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   // ==========================================
   return (
     <Skeleton loading={isLoading}>
-      {/* Expenditure Report Section — proposer, grants receiver, or grant approver can submit/update. */}
-      {isInDevelopment && canSubmitExpenditureReport && !showReportForm && (
-        <VStack align="flex-start" gap={3} pb={4}>
-          <Button variant="secondary" size="sm" onClick={() => setShowReportForm(true)}>
-            {existingReport ? t("Update expenditure report") : t("Submit expenditure report")}
-          </Button>
-        </VStack>
-      )}
-
-      {showReportForm && proposal && (
-        <VStack pb={6}>
-          <ExpenditureReportForm
-            proposal={proposal}
-            currentMilestoneIndex={currentStep}
-            totalMilestones={milestones.length}
-            onSubmit={handleReportSubmit}
-            onCancel={() => setShowReportForm(false)}
-            isSubmitting={isPublishingReport}
-          />
-        </VStack>
-      )}
-
-      {existingReport && !showReportForm && (
-        <VStack pb={6} p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary">
-          <ExpenditureReportView report={existingReport} />
-        </VStack>
-      )}
-
       <Steps.Root
         orientation="vertical"
         defaultStep={0}
@@ -311,6 +277,14 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                           proposal={proposal}
                           isCurrentStep={index === currentStep}
                           milestoneIndex={index}
+                          totalMilestones={milestones.length}
+                          expenditureReport={proposal.expenditureReports?.find(r => r.trancheNumber === index + 1)}
+                          canSubmitExpenditureReport={Boolean(isInDevelopment && canSubmitExpenditureReport)}
+                          isReportFormOpen={reportFormMilestoneIndex === index}
+                          isPublishingReport={isPublishingReport}
+                          onOpenReportForm={() => setReportFormMilestoneIndex(index)}
+                          onCancelReportForm={() => setReportFormMilestoneIndex(null)}
+                          onSubmitReport={handleReportSubmit}
                         />
                       )}
                       {getFirstRejectedMilestone() === index && (

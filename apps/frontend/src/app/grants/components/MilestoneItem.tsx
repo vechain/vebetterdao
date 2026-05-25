@@ -9,7 +9,7 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
+import { ExpenditureReport, GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimMilestone } from "@/hooks/useClaimMilestone"
 import { useRejectGrant } from "@/hooks/useRejectGrant"
@@ -17,6 +17,9 @@ import { useRejectGrant } from "@/hooks/useRejectGrant"
 import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
 import { DatePicker } from "../../../components/DatePicker/DatePicker"
 import { GenericAlert } from "../../components/Alert/GenericAlert"
+
+import { ExpenditureReportForm } from "./ExpenditureReportForm"
+import { ExpenditureReportView } from "./ExpenditureReportView"
 
 type MilestoneWithState = {
   milestone?: {
@@ -34,8 +37,19 @@ type MilestoneItemProps = {
   proposal: GrantProposalEnriched
   isCurrentStep: boolean
   milestoneIndex: number
+  totalMilestones: number
   mode?: "read" | "edit"
   onDateChange: (durationFrom: string, durationTo: string) => void
+  /** Tranche-keyed expenditure report for this milestone, if one has been submitted. */
+  expenditureReport?: ExpenditureReport
+  /** Whether the connected wallet is allowed to submit/update reports (proposer / receiver / approver). */
+  canSubmitExpenditureReport: boolean
+  /** True when this milestone's inline ExpenditureReportForm is the one currently open. */
+  isReportFormOpen: boolean
+  isPublishingReport: boolean
+  onOpenReportForm: () => void
+  onCancelReportForm: () => void
+  onSubmitReport: (report: ExpenditureReport) => Promise<void>
 }
 const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType; title: string; value?: string }) => (
   <HStack w="full" align="flex">
@@ -67,8 +81,16 @@ export const MilestoneItem = ({
   proposal,
   isCurrentStep,
   milestoneIndex,
+  totalMilestones,
   mode = "read",
   onDateChange,
+  expenditureReport,
+  canSubmitExpenditureReport,
+  isReportFormOpen,
+  isPublishingReport,
+  onOpenReportForm,
+  onCancelReportForm,
+  onSubmitReport,
 }: MilestoneItemProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -148,8 +170,7 @@ export const MilestoneItem = ({
     )
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
-  /** Report keyed by tranche (see ExpenditureReportForm: trancheNumber = currentStep + 1). */
-  const hasTrancheExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
+  const hasTrancheExpenditureReport = !!expenditureReport
 
   /**
    * Anyone viewing the current funding milestone sees a warning when no on-chain expenditure
@@ -283,6 +304,30 @@ export const MilestoneItem = ({
             {t("Claim Reward")}
           </Button>
         </HStack>
+      )}
+
+      {/* Per-milestone expenditure report: read-only history if a report exists, edit CTA + form for the current step. */}
+      {expenditureReport && !isReportFormOpen && (
+        <VStack w="full" p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary" align="stretch">
+          <ExpenditureReportView report={expenditureReport} />
+        </VStack>
+      )}
+      {canSubmitExpenditureReport && isCurrentStep && !isReportFormOpen && (
+        <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
+          {expenditureReport ? t("Update expenditure report") : t("Submit expenditure report")}
+        </Button>
+      )}
+      {isReportFormOpen && (
+        <VStack w="full" pt={2}>
+          <ExpenditureReportForm
+            proposal={proposal}
+            currentMilestoneIndex={milestoneIndex}
+            totalMilestones={totalMilestones}
+            onSubmit={onSubmitReport}
+            onCancel={onCancelReportForm}
+            isSubmitting={isPublishingReport}
+          />
+        </VStack>
       )}
     </VStack>
   )
