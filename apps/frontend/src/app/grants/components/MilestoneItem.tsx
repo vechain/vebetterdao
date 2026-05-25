@@ -318,16 +318,17 @@ export const MilestoneItem = ({
         </VStack>
       )}
       {/*
-        Per-milestone expenditure report. The card documents how this milestone's funds were spent,
-        which is the proof reviewers need before approving the next milestone. So the CTA stays
-        available on any milestone the user has permission for (no longer tied to current step),
-        and the card sits above the Reject / Approve & Fund / Claim row.
+        Per-milestone expenditure report. The report documents how *this* milestone's funds were
+        spent — which only makes sense after the receiver has actually claimed them. So:
+          - Submit CTA shows only on Claimed milestones (and only to authorized wallets).
+          - Update CTA in the existing report header follows the same rule.
+        Other milestones still render the read-only report card if one exists (historical view).
       */}
       {(() => {
         const canManageReport =
           canSubmitExpenditureReport &&
           proposal.state === ProposalState.InDevelopment &&
-          milestoneData.state !== MilestoneState.Rejected
+          milestoneData.state === MilestoneState.Claimed
 
         if (expenditureReport) {
           return (
