@@ -180,14 +180,10 @@ export const ExpenditureReportForm = ({
     <VStack align="stretch" gap={6} w="full">
       <VStack align="flex-start" gap={1}>
         <Text textStyle="lg" fontWeight="semibold">
-          {t("Grant Expenditure Report")}
+          {t("Expenditure Report for Milestone {{milestone}}", { milestone: currentMilestoneIndex + 1 })}
         </Text>
         <Text textStyle="sm" color="text.subtle">
-          {t("Tranche {{current}} of {{total}} - {{project}}", {
-            current: currentMilestoneIndex + 1,
-            total: totalMilestones,
-            project: proposal.projectName,
-          })}
+          {proposal.projectName}
         </Text>
       </VStack>
 

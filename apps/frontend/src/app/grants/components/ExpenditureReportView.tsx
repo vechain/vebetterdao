@@ -34,10 +34,7 @@ export const ExpenditureReportView = ({ report }: ExpenditureReportViewProps) =>
       {/* Header */}
       <HStack justify="space-between" w="full">
         <Text textStyle="md" fontWeight="semibold">
-          {t("Expenditure Report - Tranche {{current}} of {{total}}", {
-            current: report.trancheNumber,
-            total: report.totalTranches,
-          })}
+          {t("Expenditure Report for Milestone {{milestone}}", { milestone: report.trancheNumber })}
         </Text>
         <Text textStyle="sm" color="text.subtle">
           {dayjs(report.dateSubmitted * 1000).format("MMM D, YYYY")}
