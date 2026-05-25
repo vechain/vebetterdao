@@ -14,6 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
+import { getConfig } from "@repo/config"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
@@ -271,7 +272,15 @@ export const MilestoneSection = ({
     // Calculate 12-month limit from first milestone start
     const twelveMonthLimit = firstMilestoneStart ? dayjs.unix(firstMilestoneStart).add(12, "months").unix() : null
     const startMinDate = isFirst ? now : previousMilestoneEnd || now
-    const startMinPickableDate = dayjs.unix(startMinDate).add(1, "day").unix()
+    // Mainnet: enforce at least one day gap. Non-mainnet: allow same-day so testers can chain milestones immediately.
+    const isMainnet = (() => {
+      try {
+        return getConfig().environment === "mainnet"
+      } catch {
+        return false
+      }
+    })()
+    const startMinPickableDate = isMainnet ? dayjs.unix(startMinDate).add(1, "day").unix() : startMinDate
 
     return {
       startMinDate: startMinPickableDate,
