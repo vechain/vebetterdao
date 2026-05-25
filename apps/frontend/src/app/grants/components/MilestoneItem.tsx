@@ -297,7 +297,7 @@ export const MilestoneItem = ({
       )}
       {shouldShowReviewerActions && (
         <HStack w="full">
-          <Button variant="secondary" onClick={handleReject}>
+          <Button variant="secondary" colorPalette="red" onClick={handleReject}>
             {t("Reject")}
           </Button>
           <Button
