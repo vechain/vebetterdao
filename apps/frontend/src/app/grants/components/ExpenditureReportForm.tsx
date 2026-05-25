@@ -363,9 +363,14 @@ export const ExpenditureReportForm = ({
                 <Input
                   type="number"
                   min={0}
+                  step={1}
+                  inputMode="numeric"
                   placeholder="0"
                   value={item.amount || ""}
-                  onChange={e => updateExpenditure(index, "amount", Number(e.target.value))}
+                  onChange={e => {
+                    const cleaned = e.target.value.replace(/\D/g, "")
+                    updateExpenditure(index, "amount", cleaned === "" ? 0 : Number(cleaned))
+                  }}
                   borderRadius="xl"
                 />
               </Field.Root>
@@ -399,9 +404,14 @@ export const ExpenditureReportForm = ({
               <Input
                 type="number"
                 min={0}
+                step={1}
+                inputMode="numeric"
                 placeholder="0"
                 value={totalReceived || ""}
-                onChange={e => setTotalReceived(Number(e.target.value))}
+                onChange={e => {
+                  const cleaned = e.target.value.replace(/\D/g, "")
+                  setTotalReceived(cleaned === "" ? 0 : Number(cleaned))
+                }}
                 borderRadius="xl"
               />
             </Field.Root>
