@@ -22,14 +22,14 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
         step={activeStep}
         count={steps.length}
         display="flex"
-        overflowX="hidden"
         w="full"
-        maxW="80vw"
         gap={{ base: 2, md: 4 }}>
         <Steps.List gap={{ base: 2, md: 4 }} py={2}>
           {steps.map((step, index) => {
             const isActiveStep = activeStep === index
-            const showStepTitle = (isMobile && isActiveStep) || !isMobile
+            // With 5 steps, full titles on every step overflow even on desktop.
+            // Show titles only for the active step on mobile/tablet; show all titles on lg+ screens.
+            const showStepTitle = isActiveStep || !isMobile
             return (
               <Steps.Item key={step.key} index={index}>
                 <Steps.Indicator
