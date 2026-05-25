@@ -12,6 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -108,13 +109,20 @@ export const MilestoneItem = ({
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address)
 
+  /** Non-mainnet envs may emit timestamped strings (YYYY-MM-DDTHH:mm) for milestone date editing. */
+  const milestoneDateTimeEnabled = useMemo(() => {
+    try {
+      return getConfig().environment !== "mainnet"
+    } catch {
+      return false
+    }
+  }, [])
+  const dateFormat = milestoneDateTimeEnabled ? "YYYY-MM-DDTHH:mm" : "YYYY-MM-DD"
   const [duration, setDuration] = useState<{ from: string; to: string }>({
     from: milestoneData.milestone?.durationFrom
-      ? dayjs(milestoneData.milestone?.durationFrom * 1000).format("YYYY-MM-DD")
+      ? dayjs(milestoneData.milestone?.durationFrom * 1000).format(dateFormat)
       : "",
-    to: milestoneData.milestone?.durationTo
-      ? dayjs(milestoneData.milestone?.durationTo * 1000).format("YYYY-MM-DD")
-      : "",
+    to: milestoneData.milestone?.durationTo ? dayjs(milestoneData.milestone?.durationTo * 1000).format(dateFormat) : "",
   })
   const [overrideMissingReport, setOverrideMissingReport] = useState(false)
 
@@ -235,6 +243,7 @@ export const MilestoneItem = ({
               <Field.Label>{t("From")}</Field.Label>
               <DatePicker
                 variant="single"
+                enableTimeSelection={milestoneDateTimeEnabled}
                 startDate={duration.from}
                 placeholder={
                   milestoneData.milestone?.durationFrom
@@ -252,6 +261,7 @@ export const MilestoneItem = ({
               <Field.Label>{t("To")}</Field.Label>
               <DatePicker
                 variant="single"
+                enableTimeSelection={milestoneDateTimeEnabled}
                 startDate={duration.to}
                 placeholder={
                   milestoneData.milestone?.durationTo

@@ -25,7 +25,7 @@ dayjs.updateLocale("en", {
   weekStart: 1,
 })
 export type DatePickerProps = {
-  // Start date in ISO format (YYYY-MM-DD)
+  // Start date in ISO format (YYYY-MM-DD), or YYYY-MM-DDTHH:mm when enableTimeSelection is on
   startDate?: string
   // End date in ISO format (YYYY-MM-DD)
   endDate?: string
@@ -39,6 +39,12 @@ export type DatePickerProps = {
   placeholder?: string
   variant?: "range" | "single"
   value?: string
+  /**
+   * When true (single variant only), exposes hour + minute inputs so callers can stamp a precise
+   * timestamp on the selected day. Emits "YYYY-MM-DDTHH:mm" instead of "YYYY-MM-DD". Used by the
+   * milestone edit flow on non-mainnet envs to test grants minutes apart.
+   */
+  enableTimeSelection?: boolean
 }
 export const DatePicker = ({
   startDate = "",
@@ -50,10 +56,19 @@ export const DatePicker = ({
   placeholder,
   variant = "range",
   value,
+  enableTimeSelection = false,
 }: DatePickerProps) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isMobile] = useMediaQuery(["(max-width: 768px)"])
+  const timePickerActive = enableTimeSelection && variant === "single"
+
+  // Parse the day component out of a potentially time-bearing string.
+  const dayOf = useCallback((iso: string) => (iso ? iso.slice(0, 10) : ""), [])
+  const [selectedHour, setSelectedHour] = useState(() => (timePickerActive && startDate ? dayjs(startDate).hour() : 0))
+  const [selectedMinute, setSelectedMinute] = useState(() =>
+    timePickerActive && startDate ? dayjs(startDate).minute() : 0,
+  )
 
   // Responsive placement based on screen size
   const placement = useBreakpointValue<"bottom-start" | undefined>({
@@ -104,6 +119,13 @@ export const DatePicker = ({
       const selectedDate = currentDate.date(day).format("YYYY-MM-DD")
 
       if (variant === "single") {
+        if (timePickerActive) {
+          // Emit with current time; keep popover open so the tester can adjust HH:mm.
+          const hh = String(selectedHour).padStart(2, "0")
+          const mm = String(selectedMinute).padStart(2, "0")
+          onChange(`${selectedDate}T${hh}:${mm}`, "")
+          return
+        }
         onChange(selectedDate, "")
         setIsOpen(false)
         return
@@ -154,12 +176,29 @@ export const DatePicker = ({
 
   const displayValue = useMemo(() => {
     if (variant === "single") {
-      return startDate ? dayjs(startDate).format("D MMM, YYYY") : ""
+      if (!startDate) return ""
+      return timePickerActive ? dayjs(startDate).format("D MMM, YYYY HH:mm") : dayjs(startDate).format("D MMM, YYYY")
     }
     if (!startDate && !endDate) return ""
     if (startDate && !endDate) return dayjs(startDate).format("D MMM, YYYY")
     return `${dayjs(startDate).format("D MMM, YYYY")} - ${dayjs(endDate).format("D MMM, YYYY")}`
-  }, [startDate, endDate, variant])
+  }, [startDate, endDate, variant, timePickerActive])
+
+  const handleTimeChange = useCallback(
+    (hour: number, minute: number) => {
+      const safeHour = Math.max(0, Math.min(23, hour))
+      const safeMinute = Math.max(0, Math.min(59, minute))
+      setSelectedHour(safeHour)
+      setSelectedMinute(safeMinute)
+      const day = dayOf(startDate)
+      if (day) {
+        const hh = String(safeHour).padStart(2, "0")
+        const mm = String(safeMinute).padStart(2, "0")
+        onChange(`${day}T${hh}:${mm}`, "")
+      }
+    },
+    [dayOf, startDate, onChange],
+  )
 
   const isDayInRange = useCallback(
     (day: number) => {
@@ -282,6 +321,44 @@ export const DatePicker = ({
                     )
                   })}
                 </Grid>
+
+                {timePickerActive && (
+                  <HStack gap={2} align="center">
+                    <Text textStyle="sm" color="text.subtle">
+                      {"Time"}
+                    </Text>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={23}
+                      step={1}
+                      inputMode="numeric"
+                      value={String(selectedHour).padStart(2, "0")}
+                      onChange={e => handleTimeChange(Number(e.target.value), selectedMinute)}
+                      w="14"
+                      size="sm"
+                      rounded="md"
+                      textAlign="center"
+                    />
+                    <Text>{":"}</Text>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={59}
+                      step={1}
+                      inputMode="numeric"
+                      value={String(selectedMinute).padStart(2, "0")}
+                      onChange={e => handleTimeChange(selectedHour, Number(e.target.value))}
+                      w="14"
+                      size="sm"
+                      rounded="md"
+                      textAlign="center"
+                    />
+                    <Button size="sm" variant="solid" ml="auto" onClick={() => setIsOpen(false)}>
+                      {"Done"}
+                    </Button>
+                  </HStack>
+                )}
 
                 <HStack justify="space-between">
                   <Button size="sm" variant="ghost" onClick={resetSelection}>
