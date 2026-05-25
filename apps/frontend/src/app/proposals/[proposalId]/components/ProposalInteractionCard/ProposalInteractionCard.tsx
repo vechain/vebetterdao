@@ -20,6 +20,7 @@ import { useProposalQuorumNumeratorByType } from "@/api/contracts/governance/hoo
 import { useProposalSnapshot } from "@/api/contracts/governance/hooks/useProposalSnapshot"
 import { useProposalTotalVotes } from "@/api/contracts/governance/hooks/useProposalTotalVotes"
 import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
+import { useSimulateExecuteProposal } from "@/api/contracts/governance/hooks/useSimulateExecuteProposal"
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
@@ -161,6 +162,16 @@ export const ProposalInteractionCard = ({
   const secondsUntilExecutable = proposalEta ? Math.max(0, proposalEta - nowSeconds) : 0
   const isAwaitingTimelock = isExecutable && !!proposalEta && secondsUntilExecutable > 0
 
+  // Dry-run the execute() once the timelock is clear — surfaces underlying reverts (e.g. Treasury
+  // transfer-limit, missing role on a sub-call) so the user doesn't pay gas just to see a revert.
+  const { data: simulatedExecution } = useSimulateExecuteProposal({
+    proposal,
+    caller: account?.address,
+    enabled: isExecutable && !isAwaitingTimelock,
+  })
+  const executeWouldRevert = Boolean(simulatedExecution?.wouldRevert)
+  const executeRevertReason = simulatedExecution?.revertReason
+
   const formattedTimeUntilExecutable = useMemo(() => {
     if (!isAwaitingTimelock) return ""
     const days = Math.floor(secondsUntilExecutable / 86_400)
@@ -266,8 +277,9 @@ export const ProposalInteractionCard = ({
 
     //User has permissions to execute or queue
     if (isExecutable) {
-      // Gate the Execute button while the timelock delay hasn't elapsed — otherwise the tx reverts.
-      return !currentUserCanExecute || isAwaitingTimelock
+      // Gate the Execute button while the timelock delay hasn't elapsed, or when the simulation
+      // tells us the underlying call would revert anyway.
+      return !currentUserCanExecute || isAwaitingTimelock || executeWouldRevert
     }
 
     return false
@@ -281,6 +293,7 @@ export const ProposalInteractionCard = ({
     currentUserCanExecute,
     isGrantProposerInSupportPhase,
     isAwaitingTimelock,
+    executeWouldRevert,
   ])
 
   // ===== VOTING DATA PROCESSING =====
@@ -500,6 +513,21 @@ export const ProposalInteractionCard = ({
                   </Alert.Indicator>
                   <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
                     {t("Available to execute in {{time}}", { time: formattedTimeUntilExecutable })}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
+
+            {isExecutable && !isAwaitingTimelock && executeWouldRevert && (
+              <Alert.Root status="error" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.negative.strong">
+                    {t("Execution would revert: {{reason}}", {
+                      reason: executeRevertReason ?? t("unknown error"),
+                    })}
                   </Text>
                 </HStack>
               </Alert.Root>
