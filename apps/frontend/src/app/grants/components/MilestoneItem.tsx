@@ -182,20 +182,27 @@ export const MilestoneItem = ({
     )
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
-  const hasTrancheExpenditureReport = !!expenditureReport
-
   /**
-   * Anyone viewing the current funding milestone sees a warning when no on-chain expenditure
-   * report exists yet — covers both the pre-approval (Pending) and pre-claim (Approved) windows.
+   * The expenditure report attached to *this* milestone documents how the funds for it were spent.
+   * Reports are produced after each milestone is claimed and become the proof needed to unlock
+   * the next milestone — i.e. funding Milestone N+1 requires the report for Milestone N.
+   * Milestone 1 (index 0) has no predecessor, so its approval is never gated on a report.
    */
-  const shouldWarnMissingExpenditureReport =
+  const previousMilestoneReport = useMemo(
+    () => (milestoneIndex > 0 ? proposal.expenditureReports?.find(r => r.trancheNumber === milestoneIndex) : undefined),
+    [proposal.expenditureReports, milestoneIndex],
+  )
+  const requiresPreviousReport = milestoneIndex > 0
+  const isPreviousReportMissing = requiresPreviousReport && !previousMilestoneReport
+
+  const shouldWarnMissingPreviousReport =
     isCurrentStep &&
-    !hasTrancheExpenditureReport &&
+    isPreviousReportMissing &&
     proposal.state === ProposalState.InDevelopment &&
     (milestoneData.state === MilestoneState.Pending || milestoneData.state === MilestoneState.Approved)
 
-  /** Approver's Approve & Fund button stays gated by override on the missing-report case. */
-  const shouldGateReviewerApproval = shouldShowReviewerActions && !hasTrancheExpenditureReport
+  /** Approver's Approve & Fund button is gated by an override only when the previous report is missing. */
+  const shouldGateReviewerApproval = shouldShowReviewerActions && isPreviousReportMissing
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -267,18 +274,23 @@ export const MilestoneItem = ({
         value={milestoneData.milestone?.description ?? ""}
       />
 
-      {/* Missing-report warning — visible to anyone on the current milestone (proposer/approver/receiver). */}
-      {shouldWarnMissingExpenditureReport && (
+      {/*
+        Missing-previous-report warning — visible to anyone on the current milestone. The report
+        for the previous milestone (whose funds were already claimed) is what reviewers use to
+        decide whether to fund the next one, so the warning lives next to the Approve & Fund action.
+      */}
+      {shouldWarnMissingPreviousReport && (
         <VStack align="flex-start" w="full" gap={3}>
           <GenericAlert
             type="warning"
             isLoading={false}
-            title={t("Expenditure report missing for this payout")}
+            title={t("Expenditure report missing for the previous milestone")}
             message={t(
-              "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
+              "No expenditure report for Milestone {{previous}} is recorded on chain. Confirm before funding Milestone {{current}}.",
+              { previous: milestoneIndex, current: milestoneIndex + 1 },
             )}
           />
-          {/* Approver-only override — required to enable Approve & Fund when no report exists. */}
+          {/* Approver-only override — required to enable Approve & Fund when the previous report is missing. */}
           {shouldGateReviewerApproval && (
             <Checkbox.Root
               size="md"
@@ -296,31 +308,42 @@ export const MilestoneItem = ({
         </VStack>
       )}
       {/*
-        Per-milestone expenditure report. When a report exists, the Update CTA lives inside the
-        card header; otherwise we show a standalone Submit button. Both render *above* the
-        Reject / Approve & Fund / Claim action buttons so the report is part of the decision context.
+        Per-milestone expenditure report. The card documents how this milestone's funds were spent,
+        which is the proof reviewers need before approving the next milestone. So the CTA stays
+        available on any milestone the user has permission for (no longer tied to current step),
+        and the card sits above the Reject / Approve & Fund / Claim row.
       */}
-      {expenditureReport ? (
-        <VStack w="full" p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary" align="stretch">
-          <ExpenditureReportView
-            report={expenditureReport}
-            headerAction={
-              canSubmitExpenditureReport && isCurrentStep ? (
-                <Button variant="secondary" size="xs" onClick={onOpenReportForm}>
-                  {t("Update")}
-                </Button>
-              ) : undefined
-            }
-          />
-        </VStack>
-      ) : (
-        canSubmitExpenditureReport &&
-        isCurrentStep && (
-          <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
-            {t("Submit expenditure report")}
-          </Button>
-        )
-      )}
+      {(() => {
+        const canManageReport =
+          canSubmitExpenditureReport &&
+          proposal.state === ProposalState.InDevelopment &&
+          milestoneData.state !== MilestoneState.Rejected
+
+        if (expenditureReport) {
+          return (
+            <VStack w="full" p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary" align="stretch">
+              <ExpenditureReportView
+                report={expenditureReport}
+                headerAction={
+                  canManageReport ? (
+                    <Button variant="secondary" size="xs" onClick={onOpenReportForm}>
+                      {t("Update")}
+                    </Button>
+                  ) : undefined
+                }
+              />
+            </VStack>
+          )
+        }
+        if (canManageReport) {
+          return (
+            <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
+              {t("Submit expenditure report")}
+            </Button>
+          )
+        }
+        return null
+      })()}
 
       {shouldShowReviewerActions && (
         <HStack w="full">
