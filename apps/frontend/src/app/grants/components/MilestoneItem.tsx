@@ -336,7 +336,8 @@ export const MilestoneItem = ({
           if (!e.open) onCancelReportForm()
         }}
         size={{ base: "full", md: "lg" }}
-        scrollBehavior="inside">
+        scrollBehavior="inside"
+        closeOnInteractOutside={false}>
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
