@@ -20,7 +20,7 @@ async function main() {
 // packages/config/<env>.ts. If the on-chain bytecode at that address is empty,
 // redeploy and rewrite the config. The shared dev-stack registration is only
 // touched when SKIP_DEV_STACK_REGISTER is unset (i.e. from `dev:up`/`dev:deploy`),
-// so a redeploy triggered by `frontend:dev` updates only local.ts and leaves
+// so a redeploy triggered by `fe:dev` updates only local.ts and leaves
 // the shared indexer/explorer registration alone.
 export async function checkContractsDeployment() {
   const code = config.b3trContractAddress === "" ? "0x" : await ethers.provider.getCode(config.b3trContractAddress)

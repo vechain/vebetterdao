@@ -4,7 +4,7 @@
  *
  * `yarn dev:up` joins the shared stack: deploys VeBetterDAO contracts to
  * solo, registers their addresses, and restarts the indexer to pick them
- * up. Run `yarn frontend:dev` separately to start the frontend.
+ * up. Run `yarn fe:dev` separately to start the frontend.
  */
 export default {
   project: 'b3tr',
