@@ -1,5 +1,6 @@
 import { Badge, Grid, GridItem, HStack, Icon, Link, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { Receipt } from "iconoir-react"
 import { Fragment } from "react"
 import { useTranslation } from "react-i18next"
 import { PiLinkSimple } from "react-icons/pi"
@@ -31,14 +32,17 @@ export const ExpenditureReportView = ({ report }: ExpenditureReportViewProps) =>
 
   return (
     <VStack align="stretch" gap={5} w="full">
-      {/* Header */}
-      <HStack justify="space-between" w="full">
-        <Text textStyle="md" fontWeight="semibold">
-          {t("Expenditure Report for Milestone {{milestone}}", { milestone: report.trancheNumber })}
-        </Text>
-        <Text textStyle="sm" color="text.subtle">
-          {dayjs(report.dateSubmitted * 1000).format("MMM D, YYYY")}
-        </Text>
+      {/* Header — mirrors the MilestoneItemContent rows (Amount to grant, Duration, Description). */}
+      <HStack w="full" align="flex-start">
+        <Icon as={Receipt} boxSize={4} color="icon.subtle" />
+        <VStack w="full" align="flex-start" gap={0}>
+          <Text textStyle="sm" fontWeight="semibold">
+            {t("Expenditure Report for Milestone {{milestone}}", { milestone: report.trancheNumber })}
+          </Text>
+          <Text textStyle="sm" color="text.subtle">
+            {dayjs(report.dateSubmitted * 1000).format("MMM D, YYYY")}
+          </Text>
+        </VStack>
       </HStack>
 
       {/* Milestone Completion */}
