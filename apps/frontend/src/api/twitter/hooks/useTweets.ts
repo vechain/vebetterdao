@@ -2,11 +2,37 @@ import { useQueries, useQuery } from "@tanstack/react-query"
 import { type Tweet } from "react-tweet/api"
 
 const TWITTER_API_URL = "https://react-tweet.vercel.app"
+
+// The syndication API sometimes omits entity sub-arrays; enrichTweet iterates them
+// unconditionally and throws "X is not iterable". Normalize so all are guaranteed arrays.
+const normalizeEntities = <T extends { entities?: Tweet["entities"] }>(t: T): T => {
+  const entities = t.entities ?? ({} as Tweet["entities"])
+  return {
+    ...t,
+    entities: {
+      ...entities,
+      hashtags: entities.hashtags ?? [],
+      urls: entities.urls ?? [],
+      user_mentions: entities.user_mentions ?? [],
+      symbols: entities.symbols ?? [],
+    },
+  }
+}
+
+const normalizeTweet = (tweet: Tweet): Tweet => {
+  if (!tweet) return tweet
+  const normalized = normalizeEntities(tweet)
+  if (normalized.quoted_tweet) {
+    normalized.quoted_tweet = normalizeEntities(normalized.quoted_tweet)
+  }
+  return normalized
+}
+
 export async function getTweet(tweetId?: string): Promise<Tweet> {
   if (!tweetId) return Promise.reject("No tweet id provided")
   const res = await fetch(`${TWITTER_API_URL}/api/tweet/${tweetId}`)
   const data = (await res.json()) as { data: Tweet }
-  return data.data
+  return normalizeTweet(data.data)
 }
 export const getTweetQueryKey = (tweetId?: string) => ["tweet", tweetId]
 /**
