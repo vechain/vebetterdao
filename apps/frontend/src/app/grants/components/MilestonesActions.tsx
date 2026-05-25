@@ -77,9 +77,9 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
 
   const handleReportSubmit = useCallback(
     async (report: ExpenditureReport) => {
+      // Errors propagate to the form so it can show an inline message — no toasts on this flow.
       if (!proposal?.id || !proposal.milestones?.length) {
-        toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
-        return
+        throw new Error(t("Failed to submit expenditure report"))
       }
       setIsPublishingReport(true)
       try {
@@ -88,15 +88,9 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
           report,
           fallbackMilestones: proposal.milestones,
         })
-        if (!cid) {
-          toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
-          return
-        }
+        if (!cid) throw new Error(t("Failed to upload report to IPFS"))
         await updateMilestoneMetadata(cid)
         setReportFormMilestoneIndex(null)
-        toaster.create({ description: t("Expenditure report submitted successfully"), type: "success", closable: true })
-      } catch {
-        toaster.create({ description: t("Failed to submit expenditure report"), type: "error", closable: true })
       } finally {
         setIsPublishingReport(false)
       }

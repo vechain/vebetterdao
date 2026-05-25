@@ -12,16 +12,26 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
-import { useCallback, useState } from "react"
+import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { toaster } from "@/components/ui/toaster"
 import {
   EvidenceLink,
   ExpenditureLineItem,
   ExpenditureReport,
   GrantProposalEnriched,
 } from "@/hooks/proposals/grants/types"
+
+type FormErrors = {
+  milestoneGoal?: string
+  milestoneAchievedExplanation?: string
+  evidenceLinks?: string
+  evidenceLinkUrls?: Record<number, string>
+  expenditureItems?: string
+  totalReceived?: string
+  submit?: string
+}
 
 const MAX_NOTES_LENGTH = 1500
 const EVIDENCE_TYPES = ["GitHub", "Demo", "Dashboard", "Audit Report", "Other"] as const
@@ -74,6 +84,22 @@ export const ExpenditureReportForm = ({
   )
   const [totalReceived, setTotalReceived] = useState(existingReport?.totalReceivedForTranche ?? 0)
   const [notes, setNotes] = useState(existingReport?.notes ?? "")
+  const [errors, setErrors] = useState<FormErrors>({})
+
+  /**
+   * Auto-fill "Total received for this tranche" from the milestone's on-chain B3TR amount × current
+   * B3TR/USD price. Only runs once at mount when there's no existing report — the user can still
+   * override the value, and we never overwrite an Update flow.
+   */
+  const { data: b3trUsdPrice } = useGetTokenUsdPrice("B3TR")
+  const milestoneB3trAmount = proposal.milestones?.[currentMilestoneIndex]?.fundingAmount ?? 0
+  const autoFilledRef = useRef(!!existingReport)
+  useEffect(() => {
+    if (autoFilledRef.current) return
+    if (!b3trUsdPrice || !milestoneB3trAmount) return
+    autoFilledRef.current = true
+    setTotalReceived(Math.round(milestoneB3trAmount * Number(b3trUsdPrice)))
+  }, [b3trUsdPrice, milestoneB3trAmount])
 
   const totalSpent = expenditureItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
   const unspentAmount = totalReceived - totalSpent
@@ -107,50 +133,38 @@ export const ExpenditureReportForm = ({
   }
 
   const handleSubmit = useCallback(async () => {
-    // Validate required fields
-    if (!milestoneGoal.trim()) {
-      toaster.create({ description: t("Please describe the milestone goal"), type: "error", closable: true })
-      return
-    }
+    const nextErrors: FormErrors = {}
+
+    if (!milestoneGoal.trim()) nextErrors.milestoneGoal = t("Please describe the milestone goal")
 
     if (milestoneAchieved !== "yes" && !milestoneAchievedExplanation.trim()) {
-      toaster.create({ description: t("Please explain the milestone status"), type: "error", closable: true })
-      return
+      nextErrors.milestoneAchievedExplanation = t("Please explain the milestone status")
     }
 
-    const validLinks = evidenceLinks.filter(link => link.url.trim())
-    if (validLinks.length === 0) {
-      toaster.create({ description: t("Please add at least one evidence link"), type: "error", closable: true })
-      return
-    }
-
-    if (validLinks.some(link => !isValidEvidenceUrl(link.url))) {
-      toaster.create({
-        description: t("Please enter a valid URL starting with http:// or https://"),
-        type: "error",
-        closable: true,
+    const filledLinks = evidenceLinks.filter(link => link.url.trim())
+    if (filledLinks.length === 0) {
+      nextErrors.evidenceLinks = t("Please add at least one evidence link")
+    } else {
+      const urlErrors: Record<number, string> = {}
+      evidenceLinks.forEach((link, i) => {
+        if (link.url.trim() && !isValidEvidenceUrl(link.url)) {
+          urlErrors[i] = t("Please enter a valid URL starting with http:// or https://")
+        }
       })
-      return
+      if (Object.keys(urlErrors).length > 0) nextErrors.evidenceLinkUrls = urlErrors
     }
 
     const validItems = expenditureItems.filter(item => item.category.trim() && item.amount > 0)
     if (validItems.length === 0) {
-      toaster.create({
-        description: t("Please add at least one expenditure item"),
-        type: "error",
-        closable: true,
-      })
-      return
+      nextErrors.expenditureItems = t("Please add at least one expenditure item (category + amount)")
     }
 
     if (totalReceived <= 0) {
-      toaster.create({
-        description: t("Please specify the total amount received"),
-        type: "error",
-        closable: true,
-      })
-      return
+      nextErrors.totalReceived = t("Please specify the total amount received")
     }
+
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
 
     const report: ExpenditureReport = {
       projectName: proposal.projectName,
@@ -161,7 +175,7 @@ export const ExpenditureReportForm = ({
       milestoneGoal,
       milestoneAchieved,
       milestoneAchievedExplanation: milestoneAchieved !== "yes" ? milestoneAchievedExplanation : undefined,
-      evidenceLinks: validLinks,
+      evidenceLinks: filledLinks,
       expenditureItems: validItems,
       totalSpent,
       totalReceivedForTranche: totalReceived,
@@ -169,7 +183,11 @@ export const ExpenditureReportForm = ({
       notes,
     }
 
-    await onSubmit(report)
+    try {
+      await onSubmit(report)
+    } catch (err) {
+      setErrors({ submit: err instanceof Error ? err.message : t("Failed to submit expenditure report") })
+    }
   }, [
     milestoneGoal,
     milestoneAchieved,
@@ -205,18 +223,22 @@ export const ExpenditureReportForm = ({
         </Text>
         <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4} w="full">
           <GridItem colSpan={{ base: 1, md: 2 }}>
-            <Field.Root>
+            <Field.Root invalid={!!errors.milestoneGoal}>
               <Field.Label textStyle="sm" color="text.default">
                 {t("Milestone goal")}
               </Field.Label>
               <Textarea
                 placeholder={t("Brief description of the objective for this tranche")}
                 value={milestoneGoal}
-                onChange={e => setMilestoneGoal(e.target.value)}
+                onChange={e => {
+                  setMilestoneGoal(e.target.value)
+                  if (errors.milestoneGoal) setErrors(prev => ({ ...prev, milestoneGoal: undefined }))
+                }}
                 borderRadius="xl"
                 minH="80px"
                 resize="vertical"
               />
+              {errors.milestoneGoal && <Field.ErrorText>{errors.milestoneGoal}</Field.ErrorText>}
             </Field.Root>
           </GridItem>
           <GridItem>
@@ -237,18 +259,25 @@ export const ExpenditureReportForm = ({
           </GridItem>
           {milestoneAchieved !== "yes" && (
             <GridItem colSpan={{ base: 1, md: 2 }}>
-              <Field.Root>
+              <Field.Root invalid={!!errors.milestoneAchievedExplanation}>
                 <Field.Label textStyle="sm" color="text.default">
                   {t("Explanation")}
                 </Field.Label>
                 <Textarea
                   placeholder={t("Explain the current status")}
                   value={milestoneAchievedExplanation}
-                  onChange={e => setMilestoneAchievedExplanation(e.target.value)}
+                  onChange={e => {
+                    setMilestoneAchievedExplanation(e.target.value)
+                    if (errors.milestoneAchievedExplanation)
+                      setErrors(prev => ({ ...prev, milestoneAchievedExplanation: undefined }))
+                  }}
                   borderRadius="xl"
                   minH="60px"
                   resize="vertical"
                 />
+                {errors.milestoneAchievedExplanation && (
+                  <Field.ErrorText>{errors.milestoneAchievedExplanation}</Field.ErrorText>
+                )}
               </Field.Root>
             </GridItem>
           )}
@@ -295,16 +324,33 @@ export const ExpenditureReportForm = ({
               </Field.Root>
             </GridItem>
             <GridItem>
-              <Field.Root>
+              <Field.Root invalid={!!errors.evidenceLinkUrls?.[index]}>
                 <Field.Label textStyle="sm" color="text.default">
                   {t("URL")}
                 </Field.Label>
                 <Input
                   placeholder="https://..."
                   value={link.url}
-                  onChange={e => updateEvidence(index, "url", e.target.value)}
+                  onChange={e => {
+                    updateEvidence(index, "url", e.target.value)
+                    if (errors.evidenceLinkUrls?.[index] || errors.evidenceLinks) {
+                      setErrors(prev => {
+                        const next = { ...prev }
+                        if (next.evidenceLinkUrls) {
+                          const copy = { ...next.evidenceLinkUrls }
+                          delete copy[index]
+                          next.evidenceLinkUrls = Object.keys(copy).length > 0 ? copy : undefined
+                        }
+                        next.evidenceLinks = undefined
+                        return next
+                      })
+                    }
+                  }}
                   borderRadius="xl"
                 />
+                {errors.evidenceLinkUrls?.[index] && (
+                  <Field.ErrorText>{errors.evidenceLinkUrls[index]}</Field.ErrorText>
+                )}
               </Field.Root>
             </GridItem>
             {evidenceLinks.length > 1 && (
@@ -320,6 +366,11 @@ export const ExpenditureReportForm = ({
           <Icon as={UilPlus} />
           {t("Add evidence link")}
         </Button>
+        {errors.evidenceLinks && (
+          <Text textStyle="sm" color="status.negative.strong">
+            {errors.evidenceLinks}
+          </Text>
+        )}
       </VStack>
 
       {/* Expenditure Breakdown */}
@@ -388,6 +439,11 @@ export const ExpenditureReportForm = ({
           <Icon as={UilPlus} />
           {t("Add expenditure item")}
         </Button>
+        {errors.expenditureItems && (
+          <Text textStyle="sm" color="status.negative.strong">
+            {errors.expenditureItems}
+          </Text>
+        )}
       </VStack>
 
       {/* Unspent Funds Summary */}
@@ -397,7 +453,7 @@ export const ExpenditureReportForm = ({
         </Text>
         <Grid templateColumns={{ base: "1fr", md: "1fr 1fr 1fr" }} gap={4} w="full">
           <GridItem>
-            <Field.Root>
+            <Field.Root invalid={!!errors.totalReceived}>
               <Field.Label textStyle="sm" color="text.default">
                 {t("Total received for this tranche (USD)")}
               </Field.Label>
@@ -411,9 +467,18 @@ export const ExpenditureReportForm = ({
                 onChange={e => {
                   const cleaned = e.target.value.replace(/\D/g, "")
                   setTotalReceived(cleaned === "" ? 0 : Number(cleaned))
+                  if (errors.totalReceived) setErrors(prev => ({ ...prev, totalReceived: undefined }))
                 }}
                 borderRadius="xl"
               />
+              {milestoneB3trAmount > 0 && (
+                <Field.HelperText textStyle="xs" color="text.subtle">
+                  {t("Auto-filled from {{b3tr}} B3TR at the current B3TR/USD rate. Edit if needed.", {
+                    b3tr: milestoneB3trAmount.toLocaleString(),
+                  })}
+                </Field.HelperText>
+              )}
+              {errors.totalReceived && <Field.ErrorText>{errors.totalReceived}</Field.ErrorText>}
             </Field.Root>
           </GridItem>
           <GridItem>
@@ -463,6 +528,12 @@ export const ExpenditureReportForm = ({
           </Text>
         </HStack>
       </VStack>
+
+      {errors.submit && (
+        <Text textStyle="sm" color="status.negative.strong">
+          {errors.submit}
+        </Text>
+      )}
 
       {/* Actions */}
       <Grid templateColumns={{ base: "1fr", md: "auto auto" }} gap={4} justifyContent="flex-start">
