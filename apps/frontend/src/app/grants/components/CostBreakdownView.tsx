@@ -72,7 +72,7 @@ export const CostBreakdownView = ({ proposal }: CostBreakdownViewProps) => {
               </Fragment>
             ))}
           </Grid>
-          <VStack align="flex-end" w="full" px={2} pt={2} borderTopWidth="1px" borderColor="border.primary">
+          <VStack align="flex-end" w="full" px={2} pt={2}>
             <Text textStyle="sm" fontWeight="semibold">
               {t("Total")}
               {": $"}
