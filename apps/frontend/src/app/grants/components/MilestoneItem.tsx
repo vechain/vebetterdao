@@ -1,4 +1,16 @@
-import { Button, Checkbox, Field, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Checkbox,
+  CloseButton,
+  Dialog,
+  Field,
+  HStack,
+  Icon,
+  Portal,
+  SimpleGrid,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
@@ -306,29 +318,46 @@ export const MilestoneItem = ({
         </HStack>
       )}
 
-      {/* Per-milestone expenditure report: read-only history if a report exists, edit CTA + form for the current step. */}
-      {expenditureReport && !isReportFormOpen && (
+      {/* Per-milestone expenditure report: read-only history if a report exists, edit CTA opens a modal form. */}
+      {expenditureReport && (
         <VStack w="full" p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary" align="stretch">
           <ExpenditureReportView report={expenditureReport} />
         </VStack>
       )}
-      {canSubmitExpenditureReport && isCurrentStep && !isReportFormOpen && (
+      {canSubmitExpenditureReport && isCurrentStep && (
         <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
           {expenditureReport ? t("Update expenditure report") : t("Submit expenditure report")}
         </Button>
       )}
-      {isReportFormOpen && (
-        <VStack w="full" pt={2}>
-          <ExpenditureReportForm
-            proposal={proposal}
-            currentMilestoneIndex={milestoneIndex}
-            totalMilestones={totalMilestones}
-            onSubmit={onSubmitReport}
-            onCancel={onCancelReportForm}
-            isSubmitting={isPublishingReport}
-          />
-        </VStack>
-      )}
+
+      <Dialog.Root
+        open={isReportFormOpen}
+        onOpenChange={e => {
+          if (!e.open) onCancelReportForm()
+        }}
+        size={{ base: "full", md: "lg" }}
+        scrollBehavior="inside">
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Body p={{ base: 4, md: 6 }}>
+                <ExpenditureReportForm
+                  proposal={proposal}
+                  currentMilestoneIndex={milestoneIndex}
+                  totalMilestones={totalMilestones}
+                  onSubmit={onSubmitReport}
+                  onCancel={onCancelReportForm}
+                  isSubmitting={isPublishingReport}
+                />
+              </Dialog.Body>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="sm" />
+              </Dialog.CloseTrigger>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </VStack>
   )
 }
