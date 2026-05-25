@@ -26,7 +26,7 @@
     "dev:down": "vechain-dev down",
     "dev:clean": "rm -f packages/config/local.ts && vechain-dev clean",
     "dev:deploy": "yarn contracts:compile && yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- vechain-dev deploy",
-    "fe:dev": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- sh -c 'yarn workspace @repo/config check-or-generate-local-config && yarn workspace @vechain/vebetterdao-contracts check-contracts-deployment && yarn workspace frontend dev'",
+    "dev:fe": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- sh -c 'yarn workspace @repo/config check-or-generate-local-config && yarn workspace @vechain/vebetterdao-contracts check-contracts-deployment && yarn workspace frontend dev'",
     "solo:up": "vechain-dev solo up",
     "solo:down": "vechain-dev solo down",
     "solo:logs": "vechain-dev solo logs -f",

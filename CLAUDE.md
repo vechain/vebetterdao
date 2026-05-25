@@ -58,7 +58,7 @@ export const useHookName = (param: string) => {
 
 # Environments
 
-- local: Local development (shared thor-solo via `@vechain/dev-stack`, started by `yarn dev:up` + `yarn fe:dev`)
+- local: Local development (shared thor-solo via `@vechain/dev-stack`, started by `yarn dev:up` + `yarn dev:fe`)
 - testnet-staging: Staging testnet
 - testnet: VeChain testnet
 - mainnet: VeChain mainnet
@@ -70,7 +70,7 @@ nvm use
 yarn install
 cp .env.example .env
 yarn dev:up        # joins shared dev-stack: thor-solo + indexer + block-explorer, deploys contracts
-yarn fe:dev  # start the Next.js frontend (separate terminal)
+yarn dev:fe  # start the Next.js frontend (separate terminal)
 ```
 
 Stop: `yarn dev:down` (leaves shared stack running for other projects) | Wipe: `yarn dev:clean` (tears down everything) | Redeploy contracts: `yarn dev:deploy`
@@ -79,7 +79,7 @@ Stop: `yarn dev:down` (leaves shared stack running for other projects) | Wipe: `
 
 ## Development
 
-- `yarn dev:up`: Bring up shared dev-stack + deploy contracts (endorsed xapps); then run `yarn fe:dev`
+- `yarn dev:up`: Bring up shared dev-stack + deploy contracts (endorsed xapps); then run `yarn dev:fe`
 - `yarn dev:up:xapps-unendorsed`: Same as above but xapps are left unendorsed
 - `yarn dev:down`: Stop this project (shared stack stays up for other projects)
 - `yarn dev:clean`: Tear down everything (shared infra + addresses)

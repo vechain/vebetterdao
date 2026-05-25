@@ -79,14 +79,14 @@ yarn install
 ```
 cp .env.example .env
 yarn dev:up         # join shared @vechain/dev-stack, deploy contracts to thor-solo
-yarn fe:dev   # start the frontend (run in a separate terminal)
+yarn dev:fe   # start the frontend (run in a separate terminal)
 ```
 
-`yarn dev:up` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects (stargate, multisig). It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, and registers their addresses with the stack. `yarn fe:dev` then runs the Next.js dev server.
+`yarn dev:up` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects (stargate, multisig). It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, and registers their addresses with the stack. `yarn dev:fe` then runs the Next.js dev server.
 
 If the contracts are already deployed and the chain is intact, the deploy step short-circuits and just re-uses `packages/config/local.ts`. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
 
-> **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn fe:dev`.
+> **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn dev:fe`.
 
 > **First run note:** the script compiles and deploys ~30 contracts to thor-solo. **This can take up to 5 minutes.** Log lines will appear continuously — do not Ctrl-C.
 
