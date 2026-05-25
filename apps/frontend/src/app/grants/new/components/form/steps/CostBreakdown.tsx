@@ -7,7 +7,13 @@ import { useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
 
+import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "../../../../../../constants/proposals"
+import { GenericAlert } from "../../../../../components/Alert/GenericAlert"
+
 const MAX_SPENDING_PLAN_LENGTH = 1500
+
+const getMaxGrantAmount = (grantType?: string): number =>
+  grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT
 
 interface CostBreakdownProps {
   register: UseFormRegister<GrantFormData>
@@ -24,10 +30,14 @@ export const CostBreakdown = ({ register, setValue, getValues, setData, errors, 
   // so totalBudget updates live as amounts are typed — not only on add/remove.
   const watchedCostBreakdown = useWatch({ control, name: "costBreakdown" })
   const costBreakdown = useMemo(() => watchedCostBreakdown ?? [], [watchedCostBreakdown])
+  const grantType = useWatch({ control, name: "grantType" })
 
   const totalBudget = useMemo(() => {
     return costBreakdown.reduce((acc, item) => acc + (Number(item?.amount) || 0), 0)
   }, [costBreakdown])
+
+  const maxGrantAmount = useMemo(() => getMaxGrantAmount(grantType), [grantType])
+  const isTotalBudgetValid = totalBudget <= maxGrantAmount
 
   const syncToStore = () => {
     const current = getValues("costBreakdown")
@@ -135,6 +145,16 @@ export const CostBreakdown = ({ register, setValue, getValues, setData, errors, 
           {totalBudget.toLocaleString()} {"USD"}
         </Text>
       </VStack>
+
+      {!isTotalBudgetValid && (
+        <GenericAlert
+          isLoading={false}
+          type="error"
+          message={t("The maximum amount for this grant type is {{value}} USD", {
+            value: maxGrantAmount,
+          })}
+        />
+      )}
 
       <VStack align="flex-start" gap={1} pt={4}>
         <Text textStyle="lg" fontWeight="semibold">
