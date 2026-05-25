@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
+import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { getIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
 import { toaster } from "@/components/ui/toaster"
 import {
@@ -41,6 +42,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const { account } = useWallet()
   const thor = useThor()
   const { data: milestoneStatesData, isLoading } = useAllMilestoneStates(proposal)
+  const { data: permissions } = useAccountPermissions(account?.address)
   const { t } = useTranslation()
   const [accordionValue, setAccordionValue] = useState<string[]>([])
   const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
@@ -62,6 +64,15 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
       ? compareAddresses(account.address, proposal.proposerAddress)
       : false
   }, [account?.address, proposal?.proposerAddress])
+
+  const isGrantApprover = permissions?.isGrantApprover ?? false
+
+  /**
+   * In production the grant manager wallet is the proposer for nearly every grant, so the
+   * receiving app cannot submit reports unless we widen the allow-list. GrantsManager V3
+   * accepts proposer + grants receiver + GRANTS_APPROVER_ROLE.
+   */
+  const canSubmitExpenditureReport = isProposer || isGrantReceiver || isGrantApprover
 
   const isInDevelopment = proposal?.state === ProposalState.InDevelopment
 
@@ -205,18 +216,13 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   // ==========================================
   return (
     <Skeleton loading={isLoading}>
-      {/* Expenditure Report Section — on-chain metadata is updated by the proposal proposer */}
-      {isInDevelopment && isProposer && !showReportForm && (
+      {/* Expenditure Report Section — proposer, grants receiver, or grant approver can submit/update. */}
+      {isInDevelopment && canSubmitExpenditureReport && !showReportForm && (
         <VStack align="flex-start" gap={3} pb={4}>
           <Button variant="secondary" size="sm" onClick={() => setShowReportForm(true)}>
             {existingReport ? t("Update expenditure report") : t("Submit expenditure report")}
           </Button>
         </VStack>
-      )}
-      {isInDevelopment && isGrantReceiver && !isProposer && (
-        <Text textStyle="sm" color="text.subtle" pb={4}>
-          {t("Expenditure reports are submitted by the proposal proposer wallet.")}
-        </Text>
       )}
 
       {showReportForm && proposal && (

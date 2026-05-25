@@ -144,9 +144,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Grants Manager": {
     name: "grants-manager",
     configAddressField: "grantsManagerContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Align with B3TRGovernor v8 new proposal state management",
+      v3: "Allow grants receiver and GRANTS_APPROVER_ROLE to update milestone metadata URI (expenditure reports)",
     },
   },
   "X2Earn Creator": {

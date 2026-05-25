@@ -151,8 +151,18 @@ export const MilestoneItem = ({
   /** Report keyed by tranche (see ExpenditureReportForm: trancheNumber = currentStep + 1). */
   const hasTrancheExpenditureReport = !!proposal.expenditureReports?.some(r => r.trancheNumber === milestoneIndex + 1)
 
-  /** Reviewer sees a warning before Approve & Fund if no on-chain expenditure report for this payout (tranche). */
-  const shouldWarnReviewerMissingExpenditureReport = shouldShowReviewerActions && !hasTrancheExpenditureReport
+  /**
+   * Anyone viewing the current funding milestone sees a warning when no on-chain expenditure
+   * report exists yet — covers both the pre-approval (Pending) and pre-claim (Approved) windows.
+   */
+  const shouldWarnMissingExpenditureReport =
+    isCurrentStep &&
+    !hasTrancheExpenditureReport &&
+    proposal.state === ProposalState.InDevelopment &&
+    (milestoneData.state === MilestoneState.Pending || milestoneData.state === MilestoneState.Approved)
+
+  /** Approver's Approve & Fund button stays gated by override on the missing-report case. */
+  const shouldGateReviewerApproval = shouldShowReviewerActions && !hasTrancheExpenditureReport
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -224,8 +234,8 @@ export const MilestoneItem = ({
         value={milestoneData.milestone?.description ?? ""}
       />
 
-      {/* Reviewer actions (approve/reject) - only on current pending milestone */}
-      {shouldWarnReviewerMissingExpenditureReport && (
+      {/* Missing-report warning — visible to anyone on the current milestone (proposer/approver/receiver). */}
+      {shouldWarnMissingExpenditureReport && (
         <VStack align="flex-start" w="full" gap={3}>
           <GenericAlert
             type="warning"
@@ -235,18 +245,21 @@ export const MilestoneItem = ({
               "No standardized expenditure report for this funding milestone is recorded on chain. Confirm before approving funds.",
             )}
           />
-          <Checkbox.Root
-            size="md"
-            checked={overrideMissingReport}
-            onCheckedChange={({ checked }) => setOverrideMissingReport(Boolean(checked))}>
-            <Checkbox.HiddenInput />
-            <Checkbox.Control>
-              <Checkbox.Indicator />
-            </Checkbox.Control>
-            <Checkbox.Label>
-              <Text textStyle="sm">{t("Ignore missing report warning and send anyway")}</Text>
-            </Checkbox.Label>
-          </Checkbox.Root>
+          {/* Approver-only override — required to enable Approve & Fund when no report exists. */}
+          {shouldGateReviewerApproval && (
+            <Checkbox.Root
+              size="md"
+              checked={overrideMissingReport}
+              onCheckedChange={({ checked }) => setOverrideMissingReport(Boolean(checked))}>
+              <Checkbox.HiddenInput />
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+              <Checkbox.Label>
+                <Text textStyle="sm">{t("Ignore missing report warning and send anyway")}</Text>
+              </Checkbox.Label>
+            </Checkbox.Root>
+          )}
         </VStack>
       )}
       {shouldShowReviewerActions && (
@@ -257,7 +270,7 @@ export const MilestoneItem = ({
           <Button
             variant="primary"
             onClick={handleApprove}
-            disabled={Boolean(shouldWarnReviewerMissingExpenditureReport) && !overrideMissingReport}>
+            disabled={Boolean(shouldGateReviewerApproval) && !overrideMissingReport}>
             {t("Approve & Fund")}
           </Button>
         </HStack>
