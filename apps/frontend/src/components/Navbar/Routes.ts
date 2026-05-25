@@ -34,6 +34,11 @@ export const Routes: Route[] = [
         description: "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
         onClick: "/allocations",
       },
+      {
+        name: "Endorsement",
+        description: "Manage your nodes and endorse apps to support the ecosystem.",
+        onClick: "/nodes",
+      },
     ],
   },
   {
@@ -79,7 +84,6 @@ export const Routes: Route[] = [
     subRoutes: [
       { name: "My Profile", description: "View your profile, activity and stats", onClick: "/profile" },
       { name: "GM", description: "Manage your Galaxy Member NFT for extra rewards", onClick: "/galaxy-member" },
-      { name: "Nodes", description: "Manage your VeChain nodes and endorse apps", onClick: "/nodes" },
     ],
   },
   { name: "Admin", onClick: "/admin", isVisible: true, icon: LuSettings },

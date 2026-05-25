@@ -508,7 +508,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("9")
+      expect(await xAllocationVoting.version()).to.equal("10")
     })
 
     it("Should not break storage when upgrading to V2, V3, V4, V5, V6, V7 and V8", async () => {
@@ -841,7 +841,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
         },
       )) as XAllocationVoting
 
-      expect(await xAllocationVoting.version()).to.equal("9")
+      expect(await xAllocationVoting.version()).to.equal("10")
     })
   })
 

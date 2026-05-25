@@ -25,13 +25,21 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
       apps: data?.uniqueXAppInteractions.length ?? 0,
     }
   }, [data])
+
+  // Muted styling when the user has never performed any action yet.
+  const isEmpty = !isLoading && parsedData.totalActions === 0
+  const iconColor = isEmpty ? "text.subtle" : "brand.secondary"
+  const numberColor = isEmpty ? "text.subtle" : undefined
+
   return (
     <HStack gap={8} justify="space-between">
       <VStack align="flex-start" gap={1}>
         <HStack>
-          <Icon as={TbLeaf} color="brand.secondary" boxSize={4} />
+          <Icon as={TbLeaf} color={iconColor} boxSize={4} opacity={isEmpty ? 0.6 : 1} />
           <Skeleton loading={isLoading}>
-            <Heading size="xl">{compactFormatter.format(parsedData.totalActions)}</Heading>
+            <Heading size="xl" color={numberColor} opacity={isEmpty ? 0.6 : 1}>
+              {compactFormatter.format(parsedData.totalActions)}
+            </Heading>
           </Skeleton>
         </HStack>
         <Text textStyle={["xs", "sm"]} color="text.subtle">
@@ -40,9 +48,11 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
       </VStack>
       <VStack align="flex-start" gap={1}>
         <HStack>
-          <Icon as={B3TRIcon} boxSize={6} color="brand.secondary" />
+          <Icon as={B3TRIcon} boxSize={6} color={iconColor} opacity={isEmpty ? 0.6 : 1} />
           <Skeleton loading={isLoading}>
-            <Heading size="xl">{compactFormatter.format(parsedData.totalRewards)}</Heading>
+            <Heading size="xl" color={numberColor} opacity={isEmpty ? 0.6 : 1}>
+              {compactFormatter.format(parsedData.totalRewards)}
+            </Heading>
           </Skeleton>
         </HStack>
         <Text textStyle={["xs", "sm"]} color="text.subtle">
@@ -51,9 +61,11 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
       </VStack>
       <VStack align="flex-start" gap={1}>
         <HStack>
-          <Icon as={IoGridOutline} color="brand.secondary" boxSize={4} />
+          <Icon as={IoGridOutline} color={iconColor} boxSize={4} opacity={isEmpty ? 0.6 : 1} />
           <Skeleton loading={isLoading}>
-            <Heading size="xl">{parsedData.apps}</Heading>
+            <Heading size="xl" color={numberColor} opacity={isEmpty ? 0.6 : 1}>
+              {parsedData.apps}
+            </Heading>
           </Skeleton>
         </HStack>
         <Text textStyle={["xs", "sm"]} color="text.subtle">

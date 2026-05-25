@@ -1,7 +1,7 @@
 import { Card, HStack, Skeleton, VStack } from "@chakra-ui/react"
 import React from "react"
 
-import { ActivityItem } from "@/hooks/activities/types"
+import { ActivityItem, ActivityType } from "@/hooks/activities/types"
 import { useActivityFeed } from "@/hooks/activities/useActivityFeed"
 
 import { ActivityCard } from "./ActivityCard"
@@ -40,6 +40,7 @@ const SkeletonCard = () => (
 
 export const ActivityFeed: React.FC<Props> = ({ roundId }) => {
   const { data, isLoading } = useActivityFeed(roundId)
+  const activities = data.filter(a => a.type !== ActivityType.GM_UPGRADED)
 
   if (isLoading) {
     return (
@@ -51,11 +52,11 @@ export const ActivityFeed: React.FC<Props> = ({ roundId }) => {
     )
   }
 
-  if (data.length === 0) return null
+  if (activities.length === 0) return null
 
   return (
     <VStack gap="3" w="full">
-      {data.map(activity => (
+      {activities.map(activity => (
         <ActivityCard key={getActivityKey(activity)} activity={activity} />
       ))}
     </VStack>

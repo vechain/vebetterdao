@@ -104,6 +104,10 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *  - setCitizenSkipWindowBlocks(uint256) governance-gated setter
  *  - VotesUtils.getVotes() returns delegated amount when citizen has active navigator at snapshot
  *  - Deprecated: getTotalVotingPower() is replaced by getVotes()
+ *
+ * ----- Version 10 -----
+ *  - Added _relayerVoteProcessed guard to prevent double-processing of relayer-mediated votes
+ *  - Both castVoteOnBehalfOf and castNavigatorVote now revert with VoteAlreadyProcessed on retry
  */
 contract XAllocationVoting is
   Initializable,
@@ -242,6 +246,10 @@ contract XAllocationVoting is
       revert AutoVotingNotEnabled(voter);
     }
 
+    if (RoundVotesCountingUtils.isRelayerVoteProcessed(roundId, voter)) {
+      revert VoteAlreadyProcessed(voter, roundId);
+    }
+
     _checkEarlyAccessEligibility(roundId, voter);
 
     (bool isPerson, ) = XAllocationVotingStorageTypes
@@ -267,10 +275,12 @@ contract XAllocationVoting is
           1
         );
       }
+      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, voter);
       emit AutoVoteSkipped(voter, roundId, isPerson, finalAppIds.length, votingPower);
       return;
     }
 
+    RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, voter);
     _handleCastVote(voter, roundId, finalAppIds, voteWeightsArr, true);
   }
 
@@ -298,10 +308,15 @@ contract XAllocationVoting is
     address navigator = navigatorRegistryContract.getNavigatorAtTimepoint(citizen, snapshot);
     if (navigator == address(0)) revert NotDelegatedToNavigator(citizen);
 
+    if (RoundVotesCountingUtils.isRelayerVoteProcessed(roundId, citizen)) {
+      revert VoteAlreadyProcessed(citizen, roundId);
+    }
+
     IRelayerRewardsPool pool = XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool;
 
     // Dead navigator → skip immediately (navigator can't act, personhood irrelevant)
     if (_isNavigatorDead(navigator)) {
+      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
       return;
@@ -311,6 +326,7 @@ contract XAllocationVoting is
     if (!navigatorRegistryContract.hasSetPreferences(navigator, roundId)) {
       // No preferences → skip only after window (navigator failed to act, personhood irrelevant)
       _validateSkipWindow(roundId);
+      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
       return;
@@ -322,6 +338,7 @@ contract XAllocationVoting is
       ._veBetterPassport
       .isPersonAtTimepoint(citizen, SafeCast.toUint48(snapshot));
     if (!isPerson) {
+      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
       pool.reduceUserAllocationVote(roundId, citizen);
       emit NavigatorVoteSkipped(citizen, navigator, roundId);
       return;
@@ -350,6 +367,7 @@ contract XAllocationVoting is
       voteWeights[0] += delegatedPower - allocated;
     }
 
+    RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
     _handleCastVoteWithPower(citizen, roundId, appIds, voteWeights, delegatedPower, false);
 
     pool.registerRelayerAction(_msgSender(), citizen, roundId, RelayerAction.VOTE);
@@ -624,7 +642,7 @@ contract XAllocationVoting is
    * @dev Returns the version of the governor.
    */
   function version() public pure returns (string memory) {
-    return "9";
+    return "10";
   }
 
   /**

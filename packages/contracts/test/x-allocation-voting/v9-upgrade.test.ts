@@ -5,12 +5,12 @@ import { describe, it } from "mocha"
 
 import { getOrDeployContractInstances } from "../helpers"
 
-describe("XAllocationVoting - V9 Upgrade - @shard14a", function () {
-  it("Should deploy through full upgrade chain and report version 9", async () => {
+describe("XAllocationVoting - V10 Upgrade - @shard14a", function () {
+  it("Should deploy through full upgrade chain and report version 10", async () => {
     const config = createLocalConfig()
     const { xAllocationVoting } = await getOrDeployContractInstances({ forceDeploy: true, config })
 
-    expect(await xAllocationVoting.version()).to.equal("9")
+    expect(await xAllocationVoting.version()).to.equal("10")
     expect(await xAllocationVoting.getAddress()).to.not.equal(ethers.ZeroAddress)
   })
 

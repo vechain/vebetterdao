@@ -251,5 +251,6 @@ export const resolveChallengeDetail = ({
     isParticipating,
     isHistorical,
     wasInvited: isInvitationEligible,
+    viewerActions: Number(participantActions),
   }
 }

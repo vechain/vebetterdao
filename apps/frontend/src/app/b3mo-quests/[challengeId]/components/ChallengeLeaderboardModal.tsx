@@ -95,11 +95,17 @@ export const ChallengeLeaderboardModal = ({
           <ChallengeActionsRow
             position={0}
             address={account.address}
-            score={0}
+            score={challenge.viewerActions}
             isYou
             isWinner={isWinnerAddress(account.address, 0)}
             hideScore={isPending}
-            onClick={() => setSelectedParticipant({ address: account.address!, position: 0, score: 0 })}
+            onClick={() =>
+              setSelectedParticipant({
+                address: account.address!,
+                position: 0,
+                score: challenge.viewerActions,
+              })
+            }
           />
         </>
       )}

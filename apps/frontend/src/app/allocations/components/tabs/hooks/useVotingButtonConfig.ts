@@ -40,6 +40,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     onSaveAutoVote,
     onEnableAutoVoting,
     isDelegatedToNavigator,
+    isCurrentlyDelegated,
     isNavigator,
   } = context
 
@@ -48,9 +49,12 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
   return useMemo(() => {
     if (isDelegatedToNavigator) return null
 
+    // Citizens currently delegating to a navigator (incl. mid-round joins) can't
+    // also use auto-vote — the navigator takes over from next round.
+    const canUseAutoVote = !isNavigator && !isCurrentlyDelegated
+
     // Case 1: User is editing auto-vote preferences - show cancel/save buttons
-    // Navigators cannot use auto-vote so skip this entirely
-    if (isEditingAutoVote && !isNavigator) {
+    if (isEditingAutoVote && canUseAutoVote) {
       return {
         type: "editing" as const,
         primaryText: t("Save"),
@@ -62,8 +66,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     }
 
     // Case 2: Auto-voting active (current status OR in current round) - show edit button
-    // Navigators cannot use auto-vote so skip this
-    if ((isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && !isNavigator) {
+    if ((isAutoVotingEnabled || isAutoVotingEnabledInCurrentRound) && canUseAutoVote) {
       return {
         type: "edit" as const,
         primaryText: hasExistingPreferences ? t("Edit auto-vote settings") : t("Enable auto-vote"),
@@ -91,8 +94,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     }
 
     // Case 4: User has voted + auto-voting NOT enabled - show enable button
-    // Navigators cannot use auto-vote
-    if (isNavigator) return null
+    if (!canUseAutoVote) return null
 
     return {
       type: "enable" as const,
@@ -102,6 +104,7 @@ export const useVotingButtonConfig = (): VotingButtonConfig | null => {
     }
   }, [
     isDelegatedToNavigator,
+    isCurrentlyDelegated,
     isNavigator,
     hasVoted,
     isEditingAutoVote,

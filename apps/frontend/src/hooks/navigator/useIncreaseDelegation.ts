@@ -8,6 +8,7 @@ import { useCallback } from "react"
 import { invalidateNavigatorQueries } from "@/api/indexer/navigators/useNavigators"
 import { buildClause } from "@/utils/buildClause"
 
+import { getCurrentEffectiveVotesPrefixQueryKey } from "../../api/contracts/governance/hooks/useGetCurrentEffectiveVotes"
 import { getVotesOnBlockPrefixQueryKey } from "../../api/contracts/governance/hooks/useVotesOnBlock"
 import { getGetDelegatedAmountQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { getGetNavigatorQueryKey } from "../../api/contracts/navigatorRegistry/hooks/useGetNavigator"
@@ -58,6 +59,7 @@ export const useIncreaseDelegation = ({ onSuccess }: Props) => {
     queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/citizens"] })
     queryClient.invalidateQueries({ queryKey: ["get", "/api/v1/b3tr/navigators/delegations"] })
     queryClient.invalidateQueries({ queryKey: getVotesOnBlockPrefixQueryKey() })
+    queryClient.invalidateQueries({ queryKey: getCurrentEffectiveVotesPrefixQueryKey() })
     queryClient.invalidateQueries({ queryKey: ["bestBlockCompressed"] })
     onSuccess?.()
   }, [queryClient, account, onSuccess])

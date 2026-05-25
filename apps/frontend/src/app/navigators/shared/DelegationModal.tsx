@@ -18,12 +18,14 @@ import { InfoCircle, WarningTriangle } from "iconoir-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuArrowLeftRight, LuUsers } from "react-icons/lu"
+import { formatEther, parseEther } from "viem"
 
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
+import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
@@ -33,6 +35,7 @@ import { useDelegateToNavigator } from "@/hooks/navigator/useDelegateToNavigator
 import { useIncreaseDelegation } from "@/hooks/navigator/useIncreaseDelegation"
 import { useSwitchNavigator } from "@/hooks/navigator/useSwitchNavigator"
 import { useReduceDelegation, useUndelegate } from "@/hooks/navigator/useUndelegateFromNavigator"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
@@ -55,12 +58,22 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
   const { data: vot3Balance, isLoading: balanceLoading } = useGetVot3UnlockedBalance(account?.address)
+  // Total VOT3 balance (including delegated portion) — used as the upper bound for max in manage mode
+  // to avoid stale-while-revalidate races between unlockedBalance and getDelegatedAmount queries.
+  const { data: vot3TotalBalance } = useGetVot3Balance(account?.address)
   const { data: domainData } = useVechainDomain(nav.address)
   const { data: isDelegated } = useIsDelegated(account?.address)
   const { data: currentNavigator } = useGetNavigator(account?.address)
   const { data: currentDelegation } = useGetDelegatedAmount(account?.address)
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(nav.address)
+  const {
+    data: delegateeAddress,
+    isLoading: isDelegateeLoading,
+    isError: isDelegateeError,
+  } = useGetDelegatee(account?.address)
+  const isPassportDelegated = !!delegateeAddress
+  const isPassportStatusUnknown = isDelegateeLoading || isDelegateeError
 
   const [amount, setAmount] = useState("")
   const [ackAll, setAckAll] = useState(false)
@@ -88,6 +101,9 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
   const displayName = domainData?.domain ? humanDomain(domainData.domain, 15, 10) : humanAddress(nav.address, 6, 4)
   const balanceNum = vot3Balance ? Number(vot3Balance.scaled) : 0
+  // Total balanceOf — invariant under delegation state, so safe even when unlockedBalance and
+  // currentDelegated queries are transiently desynced post-tx.
+  const totalBalanceNum = vot3TotalBalance ? Number(vot3TotalBalance.scaled) : 0
   const availableBalance = vot3Balance?.scaled ?? "0"
   const amountNum = Number(amount) || 0
 
@@ -103,16 +119,43 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
 
   // For switch, undelegating frees currentDelegatedNum back into usable balance
   const effectiveBalance = mode === "switch" ? balanceNum + currentDelegatedNum : balanceNum
-  const maxAmount =
-    mode === "manage"
-      ? Math.min(currentDelegatedNum + balanceNum, remainingCapacity)
-      : Math.min(effectiveBalance, remainingCapacity)
+
+  // Precise wei-based max for "Use max". Going through Number drops digits past ~15 sig figs,
+  // so a balance like 2618.003912366415308023 rounds to 2618.0039123664155 and parseEther on
+  // that produces 2618003912366415500000 — 191977 wei above the actual balance, which the
+  // pre-fix contract accepted as an over-delegation.
+  const maxAmountExact = useMemo(() => {
+    const bigMin = (a: bigint, b: bigint) => (a < b ? a : b)
+    const stakeWei = parseEther(nav.stakeFormatted ?? "0")
+    const totalDelegatedWei = parseEther(nav.totalDelegatedFormatted ?? "0")
+    const navCapWei = stakeWei * 10n
+    const remainingCapacityWei =
+      mode === "manage" ? navCapWei - totalDelegatedWei + (currentDelegation?.raw ?? 0n) : navCapWei - totalDelegatedWei
+    const remainingCapacityWeiClamped = remainingCapacityWei > 0n ? remainingCapacityWei : 0n
+
+    // manage: input is the new total delegation, bounded by full balanceOf.
+    // switch: undelegate frees currentDelegated back into unlocked balance.
+    // new: bounded by current unlockedBalance.
+    const applicableBalanceWei =
+      mode === "manage"
+        ? BigInt(vot3TotalBalance?.original ?? "0")
+        : mode === "switch"
+          ? BigInt(vot3Balance?.original ?? "0") + (currentDelegation?.raw ?? 0n)
+          : BigInt(vot3Balance?.original ?? "0")
+
+    return formatEther(bigMin(applicableBalanceWei, remainingCapacityWeiClamped))
+  }, [
+    mode,
+    nav.stakeFormatted,
+    nav.totalDelegatedFormatted,
+    vot3Balance?.original,
+    vot3TotalBalance?.original,
+    currentDelegation?.raw,
+  ])
 
   const exceedsCapacity = amountNum > remainingCapacity
   const exceedsBalance =
-    mode === "manage"
-      ? amountNum - currentDelegatedNum > balanceNum && amountNum > currentDelegatedNum
-      : amountNum > effectiveBalance
+    mode === "manage" ? amountNum > totalBalanceNum && amountNum > currentDelegatedNum : amountNum > effectiveBalance
 
   /** Must be 0 (full exit) or >= 1 VOT3; values in (0, 1) are invalid on-chain for manage. */
   const violatesMinDelegation = amountNum > 0 && amountNum < MIN_DELEGATION
@@ -178,10 +221,16 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     } else {
       if (manageValidation.isFullRemoval) {
         sendUndelegate({})
-      } else if (manageValidation.isDecreasing) {
-        sendReduce({ amount: Math.abs(manageValidation.delta).toString() })
-      } else if (manageValidation.isIncreasing) {
-        sendIncrease({ amount: manageValidation.delta.toString() })
+        return
+      }
+      // Compute delta in wei from the input string and current delegation. Number subtraction
+      // would lose precision past ~15 sig figs and could send a tx that drifts above balance.
+      const inputWei = parseEther(amount || "0")
+      const currentWei = currentDelegation?.raw ?? 0n
+      if (inputWei > currentWei) {
+        sendIncrease({ amount: formatEther(inputWei - currentWei) })
+      } else if (inputWei < currentWei) {
+        sendReduce({ amount: formatEther(currentWei - inputWei) })
       }
     }
   }, [
@@ -189,7 +238,8 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
     mode,
     amount,
     nav.address,
-    manageValidation,
+    manageValidation.isFullRemoval,
+    currentDelegation?.raw,
     sendDelegate,
     sendSwitch,
     sendUndelegate,
@@ -364,7 +414,7 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                   height="5"
                   size="sm"
                   p="0"
-                  onClick={() => setAmount(handleAmountInput(maxAmount.toString()))}>
+                  onClick={() => setAmount(handleAmountInput(maxAmountExact))}>
                   {t("Use max")}
                 </Button>
               </Field.Label>
@@ -435,6 +485,40 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           <NewDelegationSummary currentDelegationNum={currentDelegatedNum} isSwitch={mode === "switch"} />
         )}
 
+        {/* veDelegate conflict warning — fires for both fresh delegations and navigator switches when the
+            wallet has an active veDelegate passport delegation. Surfaces the side-effect (passport revoke
+            in the same tx) right above the acknowledgment / submit button. */}
+        {(mode === "new" || mode === "switch") && isPassportDelegated && (
+          <Card.Root
+            w="full"
+            p={3}
+            bg="status.warning.subtle"
+            border="1px solid"
+            borderColor="status.warning.strong"
+            rounded="xl">
+            <HStack gap={3} align="flex-start">
+              <Icon as={WarningTriangle} boxSize="5" color="status.warning.strong" mt="0.5" flexShrink={0} />
+              <Text textStyle="xs" color="status.warning.strong" fontWeight="semibold">
+                {t(
+                  "Your wallet is currently delegating its voting qualification to veDelegate. This transaction will also revoke that delegation so your Navigator can vote for you — veDelegate and Navigators cannot be used at the same time.",
+                )}
+              </Text>
+            </HStack>
+          </Card.Root>
+        )}
+
+        {/* Standing-rule reminder for switch mode — the same rule is shown as item #5 inside the new-mode
+            agreement card; switch has no acknowledgment block, so render it as a standalone notice. */}
+        {mode === "switch" && isPassportDelegated && (
+          <Card.Root w="full" p={3} bg="card.default" border="1px solid" borderColor="border.secondary" rounded="xl">
+            <Text textStyle="xs" color="fg.muted">
+              {t(
+                "Passport delegation (including veDelegate) cannot be used together with Navigators. If your passport is delegated, it will be revoked in this transaction.",
+              )}
+            </Text>
+          </Card.Root>
+        )}
+
         {/* Acknowledgment for first-time delegators */}
         {mode === "new" && (
           <VStack gap={3} align="stretch" w="full">
@@ -480,6 +564,18 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
                       )}
                     </Text>
                   </HStack>
+                  {isPassportDelegated && (
+                    <HStack gap={2} align="flex-start">
+                      <Text textStyle="xs" color="fg.muted" flexShrink={0}>
+                        {"5."}
+                      </Text>
+                      <Text textStyle="xs" color="fg.muted">
+                        {t(
+                          "Passport delegation (including veDelegate) cannot be used together with Navigators. If your passport is delegated, it will be revoked in this transaction.",
+                        )}
+                      </Text>
+                    </HStack>
+                  )}
                 </VStack>
               </VStack>
             </Card.Root>
@@ -501,9 +597,19 @@ export const DelegationModal = ({ isOpen, onClose, navigator: nav, exitMode = fa
           </VStack>
         )}
 
+        {/* Block submission for new/switch flows until passport status is known — the clause builder
+            throws if it isn't, and we'd rather disable the button than surface that error to users. */}
         <VStack gap={2} mt={2} w="full">
-          <Button variant={buttonVariant} w="full" rounded="full" size="lg" disabled={!isValid} onClick={handleSubmit}>
-            {buttonLabel}
+          <Button
+            variant={buttonVariant}
+            w="full"
+            rounded="full"
+            size="lg"
+            disabled={!isValid || ((mode === "new" || mode === "switch") && isPassportStatusUnknown)}
+            onClick={handleSubmit}>
+            {isPassportStatusUnknown && (mode === "new" || mode === "switch")
+              ? t("Checking passport status…")
+              : buttonLabel}
           </Button>
           <Button variant="ghost" w="full" rounded="full" size="lg" onClick={onClose}>
             {t("Cancel")}

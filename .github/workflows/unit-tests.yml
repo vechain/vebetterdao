@@ -197,6 +197,8 @@ jobs:
             label: X-Allocation Voting - Upgrade
           - shard: shard14b
             label: X-Allocation Voting - Auto Voting
+          - shard: shard14c
+            label: X-Allocation Voting - Double Process Prevention
           - shard: shard15a
             label: X-Apps - Core Features
           - shard: shard15b

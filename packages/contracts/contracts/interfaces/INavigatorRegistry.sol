@@ -71,6 +71,9 @@ interface INavigatorRegistry {
   /// @notice Thrown when a navigator tries to delegate to themselves
   error SelfDelegationNotAllowed(address account);
 
+  /// @notice Thrown when delegation would exceed the citizen's unlocked VOT3 balance
+  error InsufficientUnlockedBalance(address citizen, uint256 requested, uint256 available);
+
   // -- Voting --
 
   /// @notice Thrown when appIds and percentages arrays have different lengths
@@ -614,7 +617,10 @@ interface INavigatorRegistry {
   /// @param roundId The round ID
   /// @return slashed True if slashed for this round
   /// @return infractionFlags Bitmask of infractions found when slashed
-  function isSlashedForRound(address navigator, uint256 roundId) external view returns (bool slashed, uint256 infractionFlags);
+  function isSlashedForRound(
+    address navigator,
+    uint256 roundId
+  ) external view returns (bool slashed, uint256 infractionFlags);
 
   /// @notice Get the preference cutoff period (in blocks before round end)
   /// @return The cutoff period in blocks

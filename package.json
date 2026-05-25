@@ -107,10 +107,10 @@
   },
   "dependencies": {
     "dotenv-cli": "latest",
-    "turbo": "^2.5.0"
+    "turbo": "^2.9.14"
   },
   "devDependencies": {
-    "@datadog/browser-rum": "^5.23.0",
+    "@datadog/browser-rum": "^6.33.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv": "^16.4.5",
@@ -148,7 +148,7 @@
     "react-dom": "18.3.1",
     "fast-xml-parser": "5.5.7",
     "handlebars": "4.7.9",
-    "next": "16.2.3",
+    "next": "16.2.6",
     "undici": "6.24.0",
     "picomatch": "4.0.4",
     "axios": "1.15.0"

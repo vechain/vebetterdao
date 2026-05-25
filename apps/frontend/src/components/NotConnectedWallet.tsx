@@ -1,7 +1,7 @@
 import { Card, Stack, Text, Image } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-import { ConnectWalletButton } from "../../ConnectWalletButton/ConnectWalletButton"
+import { ConnectWalletButton } from "./ConnectWalletButton/ConnectWalletButton"
 
 export const NotConnectedWallet = () => {
   const { t } = useTranslation()

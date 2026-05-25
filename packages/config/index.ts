@@ -72,6 +72,9 @@ export type AppConfig = {
   dbaPoolContractAddress: string
   navigatorRegistryContractAddress: string
   veDelegateAutoDepositContractAddress: string
+  // VeDelegate ERC721 factory (vechain-energy/vedelegate-for-dapps).
+  // Empty on non-mainnet envs since veDelegate is only deployed on mainnet.
+  veDelegateContractAddress: string
   nodeUrl: string
   indexerUrl?: string
   network: Network

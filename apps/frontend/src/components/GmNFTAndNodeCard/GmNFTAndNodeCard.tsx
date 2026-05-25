@@ -18,7 +18,6 @@ import { useBreakpoints } from "../../hooks/useBreakpoints"
 import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
 import { GmActionButton } from "../GmActionButton"
 
-import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { GmCard } from "./GmCard"
 import { GmEmptyStateCard } from "./GmEmptyStateCard"
 
@@ -47,11 +46,15 @@ export const GmNFTAndNodeCard = () => {
   const totalPoints = userNodesInfo?.totalEndorsementScore?.toString() ?? "0"
 
   if (!account?.address && !viewMode) {
-    return <NotConnectedWallet />
+    return null
   }
 
   if (isLoading) {
     return <Skeleton height={isMobile ? "96" : "64"} width="full" rounded="xl" />
+  }
+
+  if (userHasNoNodeOrGm && !hasCreatorNFT) {
+    return null
   }
 
   return (

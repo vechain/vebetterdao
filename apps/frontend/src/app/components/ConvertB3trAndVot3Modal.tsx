@@ -67,13 +67,23 @@ export const ConvertB3trAndVot3Modal = ({ title = "Convert tokens", isOpen, onCl
   const [convertTo, setConvertTo] = useState<"vot3" | "b3tr">("vot3")
   const [amount, setAmount] = useState("0")
 
-  const maxBalance = convertTo === "vot3" ? b3trBalance?.scaled : swappableVot3Balance?.scaled
-
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
   const { open: openUpgradeModal } = useUpgradeSmartAccountModal({ accentColor: "#004CFC" })
 
+  // Effective VOT3 → B3TR cap: convertToB3TR enforces both convertedB3trOf >= amount AND the
+  // VOT3 transfer-lock (balanceOf − amount >= delegated). So the real cap is min(swappable, unlocked).
+  // Showing only `swappable` would mislead delegated citizens (reverts on submit).
+  const effectiveSwappableScaled = useMemo(() => {
+    const swappableWei = BigInt(swappableVot3Balance?.original ?? "0")
+    const unlockedWei = BigInt(vot3Balance?.original ?? "0")
+    const min = swappableWei < unlockedWei ? swappableWei : unlockedWei
+    return formatUnits(min, 18)
+  }, [swappableVot3Balance?.original, vot3Balance?.original])
+
+  const maxBalance = convertTo === "vot3" ? b3trBalance?.scaled : effectiveSwappableScaled
+
   const b3trBalanceScaled = useMemo(() => b3trBalance?.scaled ?? "0", [b3trBalance?.scaled])
-  const vot3BalanceScaled = useMemo(() => swappableVot3Balance?.scaled ?? "0", [swappableVot3Balance?.scaled])
+  const vot3BalanceScaled = effectiveSwappableScaled
 
   const handleAmountChange = (value: string) =>
     setAmount(
@@ -402,7 +412,7 @@ export const ConvertB3trAndVot3Modal = ({ title = "Convert tokens", isOpen, onCl
                           transition="font-size 0.15s ease-out"
                         />
                       </NumberInput.Root>
-                      {convertTo === "vot3" && !!amount && Number.isNaN(Number(amount)) === false && (
+                      {convertTo === "vot3" && !!amount && Number(amount) > 0 && (
                         <Field.HelperText w="full" lineClamp={2}>
                           <Text
                             textStyle="xs"

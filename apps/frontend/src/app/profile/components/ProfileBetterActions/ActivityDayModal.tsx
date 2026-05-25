@@ -27,7 +27,13 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
       isOpen={isOpen}
       onClose={onClose}
       ariaTitle={`ActivityDayModal for ${date}`}
-      ariaDescription={`ActivityDayModal for ${date}`}>
+      ariaDescription={`ActivityDayModal for ${date}`}
+      modalContentProps={{ maxH: "80vh" }}
+      modalBodyProps={{
+        overflowY: "auto",
+        scrollbarWidth: "none",
+        css: { "&::-webkit-scrollbar": { display: "none" } },
+      }}>
       <VStack gap={3} align="stretch">
         <Text fontWeight="semibold" color="#848484">
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}

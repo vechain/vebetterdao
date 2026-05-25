@@ -553,6 +553,7 @@ export async function deployAll(config: ContractsConfig) {
       "X2EarnRewardsPoolV3",
       "X2EarnRewardsPoolV4",
       "X2EarnRewardsPoolV5",
+      "X2EarnRewardsPoolV7",
       "X2EarnRewardsPool",
     ],
     [
@@ -571,9 +572,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       logOutput: true,
     },
   )) as X2EarnRewardsPool
@@ -739,6 +741,7 @@ export async function deployAll(config: ContractsConfig) {
       "XAllocationVotingV6",
       "XAllocationVotingV7",
       "XAllocationVotingV8",
+      "XAllocationVotingV9",
       "XAllocationVoting",
     ],
     [
@@ -767,9 +770,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [navigatorRegistryProxyAddress, config.XALLOCATION_CITIZEN_SKIP_WINDOW_BLOCKS], // V9: set NavigatorRegistry + skip window
+      [], // V10: no reinitializer needed
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       libraries: [
         undefined,
         undefined,
@@ -779,6 +783,17 @@ export async function deployAll(config: ContractsConfig) {
         undefined,
         undefined,
         { AutoVotingLogicV8: await AutoVotingLogic.getAddress() },
+        {
+          AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
+          ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
+          VotingSettingsUtils: await xAllocLibs.VotingSettingsUtils.getAddress(),
+          VotesUtils: await xAllocLibs.VotesUtils.getAddress(),
+          VotesQuorumFractionUtils: await xAllocLibs.VotesQuorumFractionUtils.getAddress(),
+          RoundEarningsSettingsUtils: await xAllocLibs.RoundEarningsSettingsUtils.getAddress(),
+          RoundFinalizationUtils: await xAllocLibs.RoundFinalizationUtils.getAddress(),
+          RoundsStorageUtils: await xAllocLibs.RoundsStorageUtils.getAddress(),
+          RoundVotesCountingUtils: await xAllocLibs.RoundVotesCountingUtils.getAddress(),
+        },
         {
           AutoVotingLogic: await xAllocLibs.AutoVotingLogic.getAddress(),
           ExternalContractsUtils: await xAllocLibs.ExternalContractsUtils.getAddress(),
@@ -1359,6 +1374,12 @@ export async function deployAll(config: ContractsConfig) {
   await veBetterPassport
     .connect(deployer)
     .grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), await x2EarnRewardsPool.getAddress())
+    .then(async (tx: TransactionResponse) => await tx.wait())
+
+  // Set XAllocationVoting on X2EarnRewardsPool for round validation
+  await x2EarnRewardsPool
+    .connect(deployer)
+    .setXAllocationVoting(await xAllocationVoting.getAddress())
     .then(async (tx: TransactionResponse) => await tx.wait())
 
   // ---------- Configure contract roles for setup ---------- //

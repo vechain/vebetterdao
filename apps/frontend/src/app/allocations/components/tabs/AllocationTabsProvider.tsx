@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { useRef, createContext, useState, useCallback, useMemo, useEffect } from "react"
 
 import { useCanUserVote } from "@/api/contracts/governance/hooks/useCanUserVote"
+import { useIsDelegated } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegated"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
 import { useIsNavigator } from "@/api/contracts/navigatorRegistry/hooks/useIsNavigator"
 import { useGetDelegatee } from "@/api/contracts/vePassport/hooks/useGetDelegatee"
@@ -56,6 +57,8 @@ interface AllocationTabsContextType {
   onEnableAutoVoting: () => void
   isAtSelectionLimit: boolean
   isDelegatedToNavigator: boolean
+  /** Citizen is currently delegating (regardless of round snapshot) — used to suppress auto-vote UI. */
+  isCurrentlyDelegated: boolean
   isNavigator: boolean
 }
 
@@ -75,6 +78,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
   const { account } = useWallet()
   const { data: roundSnapshotBlock } = useAllocationRoundSnapshot(roundDetails.id.toString())
   const { data: isDelegatedToNavigator } = useIsDelegatedAtSnapshot(account?.address, roundSnapshotBlock)
+  const { data: isCurrentlyDelegated } = useIsDelegated(account?.address)
   const { data: isNavigator } = useIsNavigator(account?.address)
   const { data: delegateeAddress } = useGetDelegatee(account?.address)
   const {
@@ -278,6 +282,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         onEnableAutoVoting: handleEnableAutoVoting,
         isAtSelectionLimit,
         isDelegatedToNavigator: isDelegatedToNavigator ?? false,
+        isCurrentlyDelegated: isCurrentlyDelegated ?? false,
         isNavigator: isNavigator ?? false,
       }}>
       <Box ref={sentinelRef} height="1px" />
@@ -322,6 +327,7 @@ export function AllocationTabsProvider({ roundDetails, children }: AllocationTab
         hasVoted={hasVoted ?? false}
         roundId={roundDetails.id.toString()}
         isNavigator={isNavigator ?? false}
+        isCurrentlyDelegated={isCurrentlyDelegated ?? false}
       />
 
       <NavigatorsIntroModal isOpen={isNavigatorsIntroOpen} onClose={handleCloseNavigatorsIntro} />

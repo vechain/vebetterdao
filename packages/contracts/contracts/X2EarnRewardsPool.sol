@@ -33,6 +33,7 @@ import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
+import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -59,6 +60,10 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Added 2 new storage variables: rewardsPoolBalance and isRewardsPoolEnabled
  * - Modified withdrawal access control to only admin
  * - Rewards distribution can be paused by admin
+ * ----- Version 8 -----
+ * - Added distributeRewardForRound / distributeRewardWithProofForRound / distributeRewardWithProofAndMetadataForRound
+ *   that accept an actionRound parameter so apps can attribute actions to the round they actually occurred in,
+ *   calling veBetterPassport.registerActionForRound instead of registerAction.
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -86,6 +91,7 @@ contract X2EarnRewardsPool is
     mapping(bytes32 appId => uint256) rewardsPoolBalance; // Distributable rewards funds (when rewards pool is enabled)
     mapping(bytes32 appId => bool) isRewardsPoolEnabled; // Whether the rewards pool is enabled for the app
     mapping(bytes32 appId => bool) distributionPaused; // Whether reward distribution is paused for the app
+    IXAllocationVotingGovernor xAllocationVoting; // Used to validate actionRound in ForRound distribution
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -313,6 +319,59 @@ contract X2EarnRewardsPool is
   }
 
   /**
+   * @dev See {IX2EarnRewardsPool-distributeRewardForRound}
+   */
+  function distributeRewardForRound(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string memory /*proof*/,
+    uint256 actionRound
+  ) external {
+    emit RewardDistributed(amount, appId, receiver, "", msg.sender);
+
+    _distributeRewardForRound(appId, amount, receiver, actionRound);
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool-distributeRewardWithProofForRound}
+   */
+  function distributeRewardWithProofForRound(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
+    string memory description,
+    uint256 actionRound
+  ) external {
+    _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
+    _distributeRewardForRound(appId, amount, receiver, actionRound);
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool-distributeRewardWithProofAndMetadataForRound}
+   */
+  function distributeRewardWithProofAndMetadataForRound(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
+    string memory description,
+    string memory metadata,
+    uint256 actionRound
+  ) external {
+    _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
+    _emitMetadata(appId, amount, receiver, metadata);
+    _distributeRewardForRound(appId, amount, receiver, actionRound);
+  }
+
+  /**
    * @dev See {IX2EarnRewardsPool-distributeReward}
    * @notice The impact is an array of integers and codes that represent the impact of the action.
    * Each index of the array represents a different impact.
@@ -352,6 +411,46 @@ contract X2EarnRewardsPool is
       emit RegisterActionFailed(reason, "");
     } catch (bytes memory lowLevelData) {
       // If the call reverts without a revert reason or with a custom error, this block is executed.
+      emit RegisterActionFailed("Low-level error", lowLevelData);
+    }
+  }
+
+  /**
+   * @dev Distributes reward and registers the action in a specific round instead of the current one.
+   * @param appId the app id that is emitting the reward
+   * @param amount the amount of B3TR token the user is rewarded with
+   * @param receiver the address of the user that performed the sustainable action
+   * @param actionRound the round in which the action was actually performed
+   */
+  function _distributeRewardForRound(bytes32 appId, uint256 amount, address receiver, uint256 actionRound) internal nonReentrant {
+    require(actionRound > 0, "X2EarnRewardsPool: actionRound is zero");
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+
+    require(
+      address($.xAllocationVoting) != address(0) && actionRound <= $.xAllocationVoting.currentRoundId(),
+      "X2EarnRewardsPool: actionRound exceeds current round"
+    );
+
+    require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+    require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
+    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
+
+    if ($.isRewardsPoolEnabled[appId]) {
+      require($.rewardsPoolBalance[appId] >= amount, "X2EarnRewardsPool: not enough funds in the rewards pool");
+      $.rewardsPoolBalance[appId] -= amount;
+    } else {
+      require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient available funds");
+      $.availableFunds[appId] -= amount;
+    }
+
+    require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
+
+    try $.veBetterPassport.registerActionForRound(receiver, appId, actionRound) {
+    } catch Error(string memory reason) {
+      emit RegisterActionFailed(reason, "");
+    } catch (bytes memory lowLevelData) {
       emit RegisterActionFailed("Low-level error", lowLevelData);
     }
   }
@@ -659,6 +758,20 @@ contract X2EarnRewardsPool is
     $.veBetterPassport = _veBetterPassport;
   }
 
+  /**
+   * @dev Sets the XAllocationVotingGovernor contract address.
+   */
+  function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) external {
+    require(
+      hasRole(CONTRACTS_ADDRESS_MANAGER_ROLE, msg.sender) || hasRole(UPGRADER_ROLE, msg.sender),
+      "X2EarnRewardsPool: caller is not admin or upgrader"
+    );
+    require(address(_xAllocationVoting) != address(0), "X2EarnRewardsPool: xAllocationVoting is the zero address");
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.xAllocationVoting = _xAllocationVoting;
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -705,7 +818,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "7";
+    return "8";
   }
 
   /**

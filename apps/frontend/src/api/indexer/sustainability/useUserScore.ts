@@ -39,6 +39,10 @@ export const useUserScore = (user?: string) => {
   const scoreNeeded = Math.max(Number(scoreThresholdAtRoundStart ?? 0) - Number(userScore ?? 0), 0)
   const missingActions =
     Number(easyActionScore ?? 0) && scoreNeeded ? Math.ceil(scoreNeeded / Number(easyActionScore ?? 0)) : 0
+  const totalActions = Number(easyActionScore ?? 0)
+    ? Math.ceil(Number(scoreThresholdAtRoundStart ?? 0) / Number(easyActionScore ?? 0))
+    : 0
+  const doneActions = Math.min(Math.max(0, totalActions - missingActions), totalActions)
   return {
     isUserDelegatee: !!delegatorAddress,
     delegatorAddress,
@@ -46,6 +50,8 @@ export const useUserScore = (user?: string) => {
     scoreThresholdAtRoundStart,
     userScore,
     missingActions,
+    totalActions,
+    doneActions,
     isLoading:
       isScoreThresholdAtRoundStartLoading ||
       isUserRoundScoreLoading ||

@@ -52,9 +52,12 @@ export type EmissionsActivityMeta = {
   appsAmount: string
   treasuryAmount: string
   votersAmount: string
+  gmAmount: string
   percentageChange: number
-  nextDecreaseRound: string
-  nextDecreasePercentage: number
+  nextEmissionsDecreaseRound: string
+  nextEmissionsDecreasePercentage: number
+  nextVoterShiftRound: string
+  nextVoterShiftPercentage: number
 }
 
 export type GrantActivityMeta = {

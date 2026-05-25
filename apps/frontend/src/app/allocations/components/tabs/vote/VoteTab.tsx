@@ -7,9 +7,11 @@ import { useCallback, useContext, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
+import { OnboardingCard } from "@/app/components/OnboardingCard/OnboardingCard"
 import { SearchField } from "@/components/SearchField/SearchField"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
+import { NavigatorPromoCard } from "../../NavigatorPromoCard"
 import { VotingAlerts } from "../../VotingAlerts"
 import { AllocationTabsContext } from "../AllocationTabsProvider"
 
@@ -82,6 +84,8 @@ export function VoteTab() {
     <>
       {isMobile && <VotingAlerts />}
       {shouldShowCantVoteCard && !isDelegatedToNavigator && <CantVoteCard />}
+      {!isDelegatedToNavigator && <OnboardingCard />}
+
       <SearchField
         placeholder={t("Search app")}
         value={localSearchQuery}
@@ -114,6 +118,8 @@ export function VoteTab() {
           isAtSelectionLimit={isAtSelectionLimit}
         />
       </Bleed>
+
+      {isMobile && !!account?.address && <NavigatorPromoCard />}
     </>
   )
 }

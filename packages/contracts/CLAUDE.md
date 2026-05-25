@@ -560,6 +560,38 @@ When to use libraries:
    }
    ```
 
+5. **Resource Guards on Every Write Path** - When a function inscribes a value bounded by a user's owned resource (balance, stake, deposit, capacity, allowance), check the resource on the WRITE path. Do **not** assume an unrelated guard (e.g. a transfer lock) covers it. Locks gate **outflow**; they do **not** bound what can be inscribed.
+
+   ```solidity
+   // BAD — relies on VOT3 transfer lock; the lock stops withdrawals, not inscriptions
+   function delegate(uint256 amount) external {
+       require(amount >= MIN_DELEGATION, "min");
+       // no balance check → user can inscribe locked = 2× balance over two calls
+       _delegate(msg.sender, amount);
+   }
+
+   // GOOD — explicit balance check on the write path
+   function delegate(uint256 amount) external {
+       uint256 available = IVOT3(vot3).unlockedBalance(msg.sender);
+       if (amount > available) revert InsufficientUnlockedBalance(msg.sender, amount, available);
+       _delegate(msg.sender, amount);
+   }
+   ```
+
+   For every protected resource ask: **can the inscribed amount grow past the actual resource via any sequence of writes?** If yes, every write needs a balance guard. The matching read-side check on the resource (transfer/burn restriction) is not enough.
+
+   When you add a guard to one entrypoint, grep the codebase for sibling entrypoints that mutate the same storage (`delegate` ↔ `increaseDelegation` ↔ auto-clear paths) and add the same guard. Missing path-symmetry is the #1 source of high-severity findings on this codebase — the navigator over-delegation incident (`delegate(3k)` + `increaseDelegation(3k)` from a 3k balance) was exactly this.
+
+6. **Adversarial Path Coverage in Tests** - A feature is not done when the happy path is green. Before declaring done, enumerate and add a test for each:
+
+   - **All sibling entrypoints** mutating the same storage (writes, reductions, auto-clears, migrations).
+   - **Sequences a user can chain**: `max → increase`, `delegate → switch → delegate`, `claim → claim again`, `enter → exit → re-enter`.
+   - **Boundaries**: 0, 1 wei, MIN, MIN-1, MAX, MAX+1, exact-balance, balance+1.
+   - **Cross-contract assumptions**: stale reads, lazy invalidation, contract paused, oracle returning a different value than last block.
+   - **State transitions during the action**: navigator dies mid-flow, round ends, reward cycle rolls over, balance drops between read and write.
+
+   "It works for the path I coded" is the bug. The user's path is *every* path the contract permits. Before submitting, write down: "could a user reach state X by any sequence?" — and prove the answer with a test, not by reading code.
+
 ### Preserve Core Logic
 
 **CRITICAL: Existing tests define expected behavior.** Before modifying any contract:
@@ -578,6 +610,8 @@ Before submitting contract changes:
 - [ ] Access control on admin functions (`onlyRole`)
 - [ ] Events emitted for all state changes
 - [ ] Input validation on all parameters
+- [ ] Every write to a resource-bounded variable has a balance/capacity guard, on every entrypoint that writes to it (path-symmetry)
+- [ ] Tests cover sibling entrypoints, chained sequences, boundary values (0, 1, MIN, MAX), and adversarial cross-contract states — not only happy paths
 - [ ] All existing tests still pass
 - [ ] New functionality has test coverage
 

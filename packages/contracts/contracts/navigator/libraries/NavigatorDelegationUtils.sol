@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { NavigatorStorageTypes } from "./NavigatorStorageTypes.sol";
 import { NavigatorLifecycleUtils } from "./NavigatorLifecycleUtils.sol";
 import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
+import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
@@ -75,6 +76,9 @@ library NavigatorDelegationUtils {
   /// @notice Thrown when navigator tries to delegate to themselves
   error SelfDelegationNotAllowed(address account);
 
+  /// @notice Thrown when delegation would exceed the citizen's unlocked VOT3 balance
+  error InsufficientUnlockedBalance(address citizen, uint256 requested, uint256 available);
+
   // ======================== Delegation ======================== //
 
   /// @notice Delegate VOT3 to a navigator (first-time only)
@@ -104,6 +108,10 @@ library NavigatorDelegationUtils {
       }
     }
 
+    // After any auto-clear, getDelegatedAmount returns 0, so unlockedBalance == balanceOf.
+    // In a switch tx (undelegate clause then delegate clause), undelegate runs first, so
+    // unlockedBalance also reads as full balanceOf here.
+    _validateUnlockedBalance($, citizen, amount);
     _validateNavigatorCanAccept($, navigator, amount);
 
     $.citizenToNavigator[citizen].push(SafeCast.toUint48(block.number), uint208(uint160(navigator)));
@@ -128,6 +136,7 @@ library NavigatorDelegationUtils {
     if (currentNavigator == address(0)) revert NotDelegated(citizen);
     if (_isNavigatorDead($, currentNavigator)) revert NotDelegated(citizen);
 
+    _validateUnlockedBalance($, citizen, amount);
     _validateNavigatorCanAccept($, currentNavigator, amount);
 
     uint256 currentAmount = _currentDelegatedAmount($, citizen);
@@ -190,6 +199,41 @@ library NavigatorDelegationUtils {
     $.navigatorCitizenCount[currentNavigator]--;
 
     emit DelegationRemoved(citizen, currentNavigator, amount);
+  }
+
+  // ======================== Migration ======================== //
+
+  /// @notice Cap each citizen's delegation at their current VOT3 balance.
+  /// @dev One-shot migration helper to fix over-delegation introduced by a missing balance check
+  /// in earlier `delegate`/`increaseDelegation` calls. For each citizen with `delegated > balance`,
+  /// rewrites the citizen's delegation checkpoint to `balance` and decrements the navigator's total
+  /// by the same delta. Emits `DelegationDecreased` so indexers treat it as a normal user reduction.
+  ///
+  /// Citizens with no delegation, or whose navigator is dead (lazy-invalidated), are skipped.
+  /// MIN_DELEGATION invariant is preserved automatically: the first valid `delegate()` required
+  /// `amount >= 1 VOT3`, and the VOT3 transfer lock keeps `balanceOf >= delegated` for alive
+  /// navigators, so the capped value is always >= 1 VOT3.
+  /// @param citizens Addresses to evaluate and correct (idempotent — safe to re-run).
+  function correctOverDelegations(address[] calldata citizens) external {
+    NavigatorStorageTypes.NavigatorStorage storage $ = NavigatorStorageTypes.getNavigatorStorage();
+    for (uint256 i; i < citizens.length; i++) {
+      _correctOverDelegation($, citizens[i]);
+    }
+  }
+
+  function _correctOverDelegation(NavigatorStorageTypes.NavigatorStorage storage $, address citizen) private {
+    address navigator = _currentNavigator($, citizen);
+    if (navigator == address(0)) return;
+    if (_isNavigatorDead($, navigator)) return;
+
+    uint256 delegated = _currentDelegatedAmount($, citizen);
+    uint256 balance = IVOT3($.vot3Token).balanceOf(citizen);
+    if (delegated <= balance) return;
+
+    uint256 reduction = delegated - balance;
+    $.delegatedAmount[citizen].push(SafeCast.toUint48(block.number), SafeCast.toUint208(balance));
+    _pushTotalDelegated($, navigator, -int256(reduction));
+    emit DelegationDecreased(citizen, navigator, reduction, balance);
   }
 
   // ======================== Getters ======================== //
@@ -400,6 +444,19 @@ library NavigatorDelegationUtils {
   ) private view returns (uint256) {
     if ($.totalDelegatedCitizens.length() == 0) return 0;
     return uint256($.totalDelegatedCitizens.latest());
+  }
+
+  /// @dev Validate that the citizen has enough unlocked VOT3 to delegate `amount` more.
+  /// Reads VOT3.unlockedBalance(), which is balanceOf - currentDelegatedAmount.
+  function _validateUnlockedBalance(
+    NavigatorStorageTypes.NavigatorStorage storage $,
+    address citizen,
+    uint256 amount
+  ) private view {
+    uint256 available = IVOT3($.vot3Token).unlockedBalance(citizen);
+    if (amount > available) {
+      revert InsufficientUnlockedBalance(citizen, amount, available);
+    }
   }
 
   /// @dev Clear a citizen's delegation checkpoint

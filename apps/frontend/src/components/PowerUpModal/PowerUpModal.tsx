@@ -14,6 +14,7 @@ import { formatEther, parseEther } from "viem"
 
 import { getB3TrTokenDetailsQueryKey } from "@/api/contracts/b3tr/hooks/useB3trTokenDetails"
 import { buildB3trApprovesTx } from "@/api/contracts/b3tr/utils/buildB3trApprovesTx"
+import { getCurrentEffectiveVotesPrefixQueryKey } from "@/api/contracts/governance/hooks/useGetCurrentEffectiveVotes"
 import { getVotesOnBlockPrefixQueryKey } from "@/api/contracts/governance/hooks/useVotesOnBlock"
 import { getGetDelegatedAmountQueryKey } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetMinStake } from "@/api/contracts/navigatorRegistry/hooks/useGetMinStake"
@@ -139,6 +140,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
       getB3trBalanceQueryKey(config.vot3ContractAddress),
       getB3TrTokenDetailsQueryKey(),
       getVotesOnBlockPrefixQueryKey(),
+      getCurrentEffectiveVotesPrefixQueryKey(),
       getGetDelegatedAmountQueryKey(account?.address ?? ""),
       ["indexer", "navigators"],
       ["bestBlockCompressed"],

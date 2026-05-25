@@ -41,7 +41,9 @@ export function groupVotesByRound(
 }
 
 export const statusIcon = (status: ReportRowStatus) => {
-  if (status === "done") return <LuCheck />
+  // "late" means the action was completed past the cutoff — still a checkmark
+  // (the orange color + "Overdue" badge convey the tardiness).
+  if (status === "done" || status === "late") return <LuCheck />
   if (status === "missed") return <LuX />
   return <LuCircle />
 }

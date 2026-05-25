@@ -24,7 +24,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { LuUsers } from "react-icons/lu"
 import { formatEther } from "viem"
 
-import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useGetCurrentEffectiveVotes } from "@/api/contracts/governance/hooks/useGetCurrentEffectiveVotes"
 import { useGetDelegatedAmount } from "@/api/contracts/navigatorRegistry/hooks/useGetDelegatedAmount"
 import { useGetNavigator } from "@/api/contracts/navigatorRegistry/hooks/useGetNavigator"
 import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
@@ -36,7 +36,6 @@ import { ActivityItemProps, ActivityList } from "@/components/AssetsOverview/Act
 import { NavigatorDelegationCard } from "@/components/AssetsOverview/NavigatorDelegationCard"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { PowerUpModal, PowerDownModal } from "@/components/PowerUpModal"
-import { useBestBlockCompressed } from "@/hooks/useGetBestBlockCompressed"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 
 type Props = {
@@ -207,12 +206,8 @@ const VotingPowerContent = ({
 
   // Current composition: wallet VOT3 balance + deposit voting power at current block
   const { data: currentVot3Balance } = useGetVot3UnlockedBalance(account?.address)
-  const { data: bestBlock } = useBestBlockCompressed()
-  // bestBlock - 1: getPastVotes requires timepoint < block.number
-  const { data: currentVotes } = useTotalVotesOnBlock(
-    bestBlock?.number ? Number(bestBlock.number) - 1 : undefined,
-    account?.address,
-  )
+  // Composed from current-state reads (no bestBlock-1 workaround); see useGetCurrentEffectiveVotes
+  const { data: currentVotes } = useGetCurrentEffectiveVotes(account?.address)
   const { data: currentDelegated } = useGetDelegatedAmount(isDelegated ? account?.address : undefined)
   const { data: isNavigator } = useIsNavigator(account?.address)
   const { data: navigatorStake } = useGetStake(isNavigator ? (account?.address ?? "") : "")
@@ -235,8 +230,8 @@ const VotingPowerContent = ({
   }, [currentDelegated])
 
   const depositsFormatted = useMemo(() => {
-    if (!currentVotes?.depositsVotesWei || currentVotes.depositsVotesWei === 0n) return null
-    return FormattingUtils.humanNumber(currentVotes.depositsVotes)
+    if (!currentVotes?.depositsRaw || currentVotes.depositsRaw === 0n) return null
+    return FormattingUtils.humanNumber(currentVotes.depositsScaled)
   }, [currentVotes])
 
   return (

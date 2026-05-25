@@ -20,7 +20,8 @@ export const UserSignaledBanner = () => {
   const allApps = apps?.allApps ?? []
   const signals = activeSignalEvents || []
   function getAppName(appId: string): string {
-    const found = allApps.find(app => app.id === appId)
+    const target = appId?.toLowerCase()
+    const found = allApps.find(app => app.id?.toLowerCase() === target)
     return found ? found.name : "Unknown"
   }
   const enrichedSignals = signals.map(signal => ({
@@ -51,13 +52,13 @@ export const UserSignaledBanner = () => {
   return (
     <>
       <GenericBanner
-        title={t("You've been signalled by {{app}}", appSignals)}
+        title={t("You've been signalled by {{app}}", { app: appSignals })}
         description={t(
           "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
         )}
         illustration="/assets/icons/info-bell.webp"
         cta={
-          <Button padding="0" variant="link" onClick={onOpen}>
+          <Button size={{ base: "sm", md: "md" }} variant="primary" onClick={onOpen}>
             {t("Appeal here")}
           </Button>
         }

@@ -38,7 +38,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   XAllocationVoting: {
     name: "x-allocation-voting",
     configAddressField: "xAllocationVotingContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"],
     descriptions: {
       v2: "Integrate VeBetterPassport contract",
       v3: "Update X2Earn interface to include new endorsement feature",
@@ -48,6 +48,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v7: "Proposal Execution: Count proposal deposits to x-allocation voting power",
       v8: "Add Auto-Voting functionality",
       v9: "Refactor to library architecture + freshness multiplier + hasUserVotedForApp + NavigatorRegistry",
+      v10: "Fix relayer vote double-processing (auto-vote and navigator)",
     },
   },
   "XAllocation Pool": {
@@ -80,7 +81,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "X2Earn Rewards Pool": {
     name: "x2-earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
       v3: "Integrate VeBetterPassport contract",
@@ -88,6 +89,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Update X2Earn interface to include node cooldown feature",
       v6: "Add onchain metadata for rewards",
       v7: "Add optional dual-pool balance to manage rewards and treasury separately",
+      v8: "Add distributeRewardForRound variants to attribute actions to specific rounds",
     },
   },
   Emissions: {
@@ -170,6 +172,15 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     versions: ["v2"] as const,
     descriptions: {
       v2: "Set NavigatorRegistry for delegation lock enforcement",
+    },
+  },
+  "Navigator Registry": {
+    name: "navigator-registry",
+    configAddressField: "navigatorRegistryContractAddress",
+    versions: ["v1-hotfix"] as const,
+    descriptions: {
+      "v1-hotfix":
+        "Add VOT3 unlocked-balance check on delegate/increaseDelegation; reinitializer caps over-delegated citizens at their balance",
     },
   },
 } as const

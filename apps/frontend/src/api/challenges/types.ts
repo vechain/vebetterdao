@@ -130,6 +130,7 @@ export interface ChallengeDetail extends ChallengeView {
   declined: string[]
   selectedApps: string[]
   winners: string[]
+  viewerActions: number
 }
 
 export interface PaginatedChallengeSection {

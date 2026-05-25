@@ -1,6 +1,7 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { getCurrentEffectiveVotesPrefixQueryKey } from "../api/contracts/governance/hooks/useGetCurrentEffectiveVotes"
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
 import { getDepositsVotesOnBlockPrefixQueryKey } from "../api/contracts/governance/hooks/useTotalVotesOnBlock"
@@ -47,6 +48,7 @@ export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: 
     queryKeys.push(getVot3UnlockedBalanceQueryKey(account?.address ?? ""))
     queryKeys.push(getDepositsVotesOnBlockPrefixQueryKey())
     queryKeys.push(getVotesOnBlockPrefixQueryKey())
+    queryKeys.push(getCurrentEffectiveVotesPrefixQueryKey())
     queryKeys.push(["bestBlockCompressed"])
     return queryKeys
   }, [account, proposalDeposits])

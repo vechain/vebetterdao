@@ -1,5 +1,5 @@
 "use client"
-import { useToken } from "@chakra-ui/react"
+import { useChakraContext } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { NETWORK_TYPE } from "@repo/constants"
 import { useCurrentLanguage } from "@vechain/vechain-kit"
@@ -50,16 +50,16 @@ export function VechainKitProviderWrapper({ children }: Props) {
   const networkType = getConfig().network.type
   const allowCustomTokens = networkType === ("test" as NETWORK_TYPE)
 
-  const [bgPrimary, primaryDefault, primaryText, primaryHover, secondaryDefault, secondaryHover, borderSecondary] =
-    useToken("colors", [
-      "bg.primary",
-      "actions.primary.default",
-      "actions.primary.text",
-      "actions.primary.hover",
-      "card.subtle",
-      "card.hover",
-      "border.secondary",
-    ])
+  const sys = useChakraContext()
+  const tokVar = (p: string) => sys.token.var(`colors.${p}`) as string
+
+  const bgPrimary = tokVar("bg.primary")
+  const primaryDefault = tokVar("actions.primary.default")
+  const primaryText = tokVar("actions.primary.text")
+  const primaryHover = tokVar("actions.primary.hover")
+  const secondaryDefault = tokVar("card.subtle")
+  const secondaryHover = tokVar("card.hover")
+  const borderSecondary = tokVar("border.secondary")
 
   // Sync VeChainKit language changes to app i18n
   const handleLanguageChange = (language: string) => {
@@ -119,9 +119,10 @@ export function VechainKitProviderWrapper({ children }: Props) {
         },
       }}
       loginMethods={[
-        { method: "vechain", gridColumn: 4 },
-        { method: "dappkit", gridColumn: 4 },
-        { method: "ecosystem", gridColumn: 4 },
+        { method: "veworld", gridColumn: 4 },
+        { method: "google", gridColumn: 4 },
+        { method: "apple", gridColumn: 4 },
+        { method: "more", gridColumn: 4 },
       ]}
       darkMode={isDarkMode}
       language={i18nInstance.language}

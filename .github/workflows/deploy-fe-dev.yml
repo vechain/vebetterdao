@@ -1,10 +1,8 @@
-# Deploy to Dev when PR is merged to main
+# Deploy to Dev (manual only - auto-deploy on main merge disabled)
 name: Deploy Frontend - Dev
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   prepare:

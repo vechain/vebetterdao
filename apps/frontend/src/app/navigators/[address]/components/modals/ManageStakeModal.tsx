@@ -60,25 +60,35 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
 
   const amountNum = Number(amount) || 0
   const delta = amountNum - currentStake
-  const isIncreasing = delta > 0
-  const isDecreasing = delta < 0
   const hasChanged = delta !== 0
+
+  // Wei-precise values for balance/max checks — "Use max" must round-trip without
+  // floating-point drift falsely triggering "Insufficient B3TR balance".
+  const balanceWei = useMemo(() => BigInt(b3trBalance?.original ?? "0"), [b3trBalance?.original])
+  const stakeWei = useMemo(() => parseEther(nav.stakeFormatted ?? "0"), [nav.stakeFormatted])
+  const maxStakeWei = maxStakeData?.raw ?? 0n
+  const inputWei = useMemo(() => {
+    try {
+      return parseEther(amount || "0")
+    } catch {
+      return 0n
+    }
+  }, [amount])
+  const isIncreasing = inputWei > stakeWei
+  const isDecreasing = inputWei < stakeWei
 
   // Precise wei-based max for "Use max" to avoid floating-point drift causing reverts
   const maxAmountExact = useMemo(() => {
-    const balanceWei = BigInt(b3trBalance?.original ?? "0")
-    const stakeWei = parseEther(nav.stakeFormatted ?? "0")
-    const maxStakeWei = maxStakeData?.raw ?? 0n
     const total = stakeWei + balanceWei
     if (maxStakeWei > 0n && total > maxStakeWei) return formatEther(maxStakeWei)
     return formatEther(total)
-  }, [b3trBalance?.original, nav.stakeFormatted, maxStakeData?.raw])
+  }, [balanceWei, stakeWei, maxStakeWei])
 
   const headroom = maxStake > 0 ? Math.max(maxStake - currentStake, 0) : Infinity
   const isCapBinding = maxStake > 0 && balanceNum > headroom
 
-  const exceedsBalance = isIncreasing && delta > balanceNum
-  const exceedsMax = isIncreasing && amountNum > maxStake && maxStake > 0
+  const exceedsBalance = isIncreasing && inputWei - stakeWei > balanceWei
+  const exceedsMax = isIncreasing && maxStakeWei > 0n && inputWei > maxStakeWei
   const belowMin = amountNum > 0 && amountNum < effectiveMin
 
   const errorMessage = useMemo(() => {
