@@ -9,6 +9,8 @@ import { ExpenditureReport } from "@/hooks/proposals/grants/types"
 
 interface ExpenditureReportViewProps {
   report: ExpenditureReport
+  /** Optional action node rendered in the header (e.g. an Update button). */
+  headerAction?: React.ReactNode
 }
 
 const KNOWN_EVIDENCE_TYPES = ["GitHub", "Demo", "Dashboard", "Audit Report", "Other"] as const
@@ -27,22 +29,25 @@ const AchievementBadge = ({ status }: { status: "yes" | "no" | "partially" }) =>
   )
 }
 
-export const ExpenditureReportView = ({ report }: ExpenditureReportViewProps) => {
+export const ExpenditureReportView = ({ report, headerAction }: ExpenditureReportViewProps) => {
   const { t } = useTranslation()
 
   return (
     <VStack align="stretch" gap={5} w="full">
       {/* Header — mirrors the MilestoneItemContent rows (Amount to grant, Duration, Description). */}
-      <HStack w="full" align="flex-start">
-        <Icon as={Reports} boxSize={4} color="icon.subtle" />
-        <VStack w="full" align="flex-start" gap={0}>
-          <Text textStyle="sm" fontWeight="semibold">
-            {t("Expenditure Report for Milestone {{milestone}}", { milestone: report.trancheNumber })}
-          </Text>
-          <Text textStyle="sm" color="text.subtle">
-            {dayjs(report.dateSubmitted * 1000).format("MMM D, YYYY")}
-          </Text>
-        </VStack>
+      <HStack w="full" align="flex-start" justify="space-between">
+        <HStack align="flex-start" flex={1}>
+          <Icon as={Reports} boxSize={4} color="icon.subtle" />
+          <VStack w="full" align="flex-start" gap={0}>
+            <Text textStyle="sm" fontWeight="semibold">
+              {t("Expenditure Report for Milestone {{milestone}}", { milestone: report.trancheNumber })}
+            </Text>
+            <Text textStyle="sm" color="text.subtle">
+              {dayjs(report.dateSubmitted * 1000).format("MMM D, YYYY")}
+            </Text>
+          </VStack>
+        </HStack>
+        {headerAction}
       </HStack>
 
       {/* Milestone Completion */}

@@ -295,6 +295,33 @@ export const MilestoneItem = ({
           )}
         </VStack>
       )}
+      {/*
+        Per-milestone expenditure report. When a report exists, the Update CTA lives inside the
+        card header; otherwise we show a standalone Submit button. Both render *above* the
+        Reject / Approve & Fund / Claim action buttons so the report is part of the decision context.
+      */}
+      {expenditureReport ? (
+        <VStack w="full" p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary" align="stretch">
+          <ExpenditureReportView
+            report={expenditureReport}
+            headerAction={
+              canSubmitExpenditureReport && isCurrentStep ? (
+                <Button variant="secondary" size="xs" onClick={onOpenReportForm}>
+                  {t("Update")}
+                </Button>
+              ) : undefined
+            }
+          />
+        </VStack>
+      ) : (
+        canSubmitExpenditureReport &&
+        isCurrentStep && (
+          <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
+            {t("Submit expenditure report")}
+          </Button>
+        )
+      )}
+
       {shouldShowReviewerActions && (
         <HStack w="full">
           <Button variant="secondary" colorPalette="red" onClick={handleReject}>
@@ -316,18 +343,6 @@ export const MilestoneItem = ({
             {t("Claim Reward")}
           </Button>
         </HStack>
-      )}
-
-      {/* Per-milestone expenditure report: read-only history if a report exists, edit CTA opens a modal form. */}
-      {expenditureReport && (
-        <VStack w="full" p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary" align="stretch">
-          <ExpenditureReportView report={expenditureReport} />
-        </VStack>
-      )}
-      {canSubmitExpenditureReport && isCurrentStep && (
-        <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
-          {expenditureReport ? t("Update expenditure report") : t("Submit expenditure report")}
-        </Button>
       )}
 
       <Dialog.Root
