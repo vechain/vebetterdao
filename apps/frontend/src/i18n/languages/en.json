@@ -2326,6 +2326,7 @@
   "The ID of your app on the testnet.": "The ID of your app on the testnet.",
   "The manager won't be able to transfer or sell your Node.": "The manager won't be able to transfer or sell your Node.",
   "The maximum amount for this grant type is {{value}} USD": "The maximum amount for this grant type is {{value}} USD",
+  "The milestone total (${{milestonesTotal}} USD) does not match the budget total (${{breakdownTotal}} USD).": "The milestone total (${{milestonesTotal}} USD) does not match the budget total (${{breakdownTotal}} USD).",
   "The maximum amount is {{threshold}}": "The maximum amount is {{threshold}}",
   "The maximum amount of VOT3 you can convert is ": "The maximum amount of VOT3 you can convert is ",
   "The more VOT3 in your balance, the more ": "The more VOT3 in your balance, the more ",

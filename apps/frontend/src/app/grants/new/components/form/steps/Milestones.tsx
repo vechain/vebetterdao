@@ -490,13 +490,20 @@ export const Milestones = ({
     const canRemoveAnyMilestone = milestones.length > Number(milestoneMinimumAmount ?? 3)
     const totalRequestedAmount = calculateTotalAmount(milestones)
     const isTotalRequestedAmountValid = totalRequestedAmount <= getMaxGrantAmount(grantType)
+    const breakdownTotal = (costBreakdown ?? []).reduce((acc, item) => acc + (Number(item?.amount) || 0), 0)
+    // Non-blocking nudge: milestones should sum to the user's declared cost-breakdown total.
+    // Only nudge once both sides are populated, otherwise we'd alert the user before they've even typed.
+    const mismatchesBreakdown =
+      breakdownTotal > 0 && totalRequestedAmount > 0 && totalRequestedAmount !== breakdownTotal
 
     return {
       canRemoveAnyMilestone,
       totalRequestedAmount,
       isTotalRequestedAmountValid,
+      breakdownTotal,
+      mismatchesBreakdown,
     }
-  }, [milestones, milestoneMinimumAmount, grantType])
+  }, [milestones, milestoneMinimumAmount, grantType, costBreakdown])
 
   // Event handlers
   const handleAddMilestone = () => {
@@ -584,6 +591,22 @@ export const Milestones = ({
               message={t("The maximum amount for this grant type is {{value}} USD", {
                 value: getMaxGrantAmount(grantType),
               })}
+            />
+          </GridItem>
+        )}
+
+        {computedValues.mismatchesBreakdown && computedValues.isTotalRequestedAmountValid && (
+          <GridItem colSpan={2}>
+            <GenericAlert
+              isLoading={false}
+              type="warning"
+              message={t(
+                "The milestone total (${{milestonesTotal}} USD) does not match the budget total (${{breakdownTotal}} USD).",
+                {
+                  milestonesTotal: computedValues.totalRequestedAmount.toLocaleString(),
+                  breakdownTotal: computedValues.breakdownTotal.toLocaleString(),
+                },
+              )}
             />
           </GridItem>
         )}
