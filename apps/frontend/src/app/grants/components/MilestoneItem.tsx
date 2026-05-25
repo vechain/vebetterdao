@@ -365,6 +365,7 @@ export const MilestoneItem = ({
                   onSubmit={onSubmitReport}
                   onCancel={onCancelReportForm}
                   isSubmitting={isPublishingReport}
+                  existingReport={expenditureReport}
                 />
               </Dialog.Body>
               <Dialog.CloseTrigger asChild>

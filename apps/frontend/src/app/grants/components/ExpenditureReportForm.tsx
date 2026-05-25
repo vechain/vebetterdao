@@ -42,6 +42,8 @@ interface ExpenditureReportFormProps {
   onSubmit: (report: ExpenditureReport) => Promise<void>
   onCancel: () => void
   isSubmitting?: boolean
+  /** When present, the form opens in "Update" mode and is prefilled with this report's values. */
+  existingReport?: ExpenditureReport
 }
 
 export const ExpenditureReportForm = ({
@@ -51,18 +53,27 @@ export const ExpenditureReportForm = ({
   onSubmit,
   onCancel,
   isSubmitting,
+  existingReport,
 }: ExpenditureReportFormProps) => {
   const { t } = useTranslation()
 
-  const [milestoneGoal, setMilestoneGoal] = useState("")
-  const [milestoneAchieved, setMilestoneAchieved] = useState<"yes" | "no" | "partially">("yes")
-  const [milestoneAchievedExplanation, setMilestoneAchievedExplanation] = useState("")
-  const [evidenceLinks, setEvidenceLinks] = useState<EvidenceLink[]>([{ url: "", type: "GitHub", label: "" }])
-  const [expenditureItems, setExpenditureItems] = useState<ExpenditureLineItem[]>([
-    { category: "", description: "", amount: 0 },
-  ])
-  const [totalReceived, setTotalReceived] = useState(0)
-  const [notes, setNotes] = useState("")
+  const [milestoneGoal, setMilestoneGoal] = useState(existingReport?.milestoneGoal ?? "")
+  const [milestoneAchieved, setMilestoneAchieved] = useState<"yes" | "no" | "partially">(
+    existingReport?.milestoneAchieved ?? "yes",
+  )
+  const [milestoneAchievedExplanation, setMilestoneAchievedExplanation] = useState(
+    existingReport?.milestoneAchievedExplanation ?? "",
+  )
+  const [evidenceLinks, setEvidenceLinks] = useState<EvidenceLink[]>(
+    existingReport?.evidenceLinks?.length ? existingReport.evidenceLinks : [{ url: "", type: "GitHub", label: "" }],
+  )
+  const [expenditureItems, setExpenditureItems] = useState<ExpenditureLineItem[]>(
+    existingReport?.expenditureItems?.length
+      ? existingReport.expenditureItems
+      : [{ category: "", description: "", amount: 0 }],
+  )
+  const [totalReceived, setTotalReceived] = useState(existingReport?.totalReceivedForTranche ?? 0)
+  const [notes, setNotes] = useState(existingReport?.notes ?? "")
 
   const totalSpent = expenditureItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
   const unspentAmount = totalReceived - totalSpent
