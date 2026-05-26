@@ -304,14 +304,16 @@ library GovernorProposalLogic {
   /** ------------------ SETTERS ------------------ **/
 
   /**
-   * @notice Proposes a new governance action.
-   * @dev Creates a new proposal and validates the proposal parameters.
+   * @notice Proposes a new Standard governance action with an optional Community-Execution max budget.
+   * @dev V11 unified entrypoint. `maxBudget == 0` means "no payout flow"; `maxBudget > 0` is the hard cap
+   *      that will later be paid out to registered developer payees via {markAsInDevelopment}.
    * @param targets The addresses of the contracts to call.
    * @param values The values to send to the contracts.
    * @param calldatas The function signatures and arguments.
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
    * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param maxBudget Maximum implementation budget in B3TR wei. Set to 0 for proposals without a payout flow.
    * @return The proposal id.
    */
   function propose(
@@ -320,47 +322,9 @@ library GovernorProposalLogic {
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
-    uint256 depositAmount
-  ) external returns (uint256) {
-    return _proposeStandard(targets, values, calldatas, description, startRoundId, depositAmount, 0);
-  }
-
-  /**
-   * @notice Proposes a new Standard governance action with a Community-Execution maximum budget.
-   * @dev V11 addition. The 6-arg {propose} remains unchanged for backwards compatibility
-   *      with existing callers; the new 7-arg overload simply records the maximum B3TR
-   *      budget (`maxBudget`) the proposal will be allowed to pay out to registered
-   *      developer payees after completion.
-   * @param targets The addresses of the contracts to call.
-   * @param values The values to send to the contracts.
-   * @param calldatas The function signatures and arguments.
-   * @param description The description of the proposal.
-   * @param startRoundId The round in which the proposal should be active.
-   * @param depositAmount The amount of tokens the proposer intends to deposit.
-   * @param maxBudget Maximum implementation budget in B3TR wei (hard cap for community execution payouts).
-   * @return The proposal id.
-   */
-  function proposeWithBudget(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
     uint256 depositAmount,
     uint256 maxBudget
   ) external returns (uint256) {
-    return _proposeStandard(targets, values, calldatas, description, startRoundId, depositAmount, maxBudget);
-  }
-
-  function _proposeStandard(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
-    uint256 depositAmount,
-    uint256 maxBudget
-  ) private returns (uint256) {
     address proposer = msg.sender;
 
     uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
@@ -626,43 +590,6 @@ library GovernorProposalLogic {
     }
 
     return _cancel(proposalId, account, reason);
-  }
-
-  /**
-   * @notice Mark a proposal as in development
-   * @param proposalId The id of the proposal.
-   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
-   * - Only Standard proposals are allowed here.
-   * - Can only mark as in development if proposal is executed or succeeded
-   * - If the proposal is executable and the state is succeeded, it cannot be marked as in development
-   * - Otherwise could skip the queue + execution steps
-   * - The proposal development state is set to InDevelopment
-   * - The event ProposalInDevelopment is emitted
-   */
-  function markAsInDevelopment(uint256 proposalId) external {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    GovernorTypes.ProposalType proposalType = $.proposalType[proposalId];
-    GovernorTypes.ProposalCore storage proposal = $.proposals[proposalId];
-
-    // Only Standard proposals are allowed here.
-    // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
-    if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposal(proposalId, proposalType);
-    }
-
-    // Can only mark as in development if proposal is executed or succeeded
-    GovernorStateLogic.validateStateBitmap(
-      proposalId,
-      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) |
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded)
-    );
-    if (proposal.isExecutable && GovernorStateLogic._state(proposalId) == GovernorTypes.ProposalState.Succeeded) {
-      revert GovernorRestrictedProposal(proposalId, proposalType);
-    }
-
-    $.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
-    //Emit event
-    emit ProposalInDevelopment(proposalId);
   }
 
   /**

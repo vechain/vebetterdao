@@ -512,10 +512,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function hasVoted(uint256 proposalId, address account) external view returns (bool);
 
   /**
-   * @dev Create a new proposal. Specify the allocation round when vote should become active.
+   * @dev Create a new Standard proposal. Specify the allocation round when vote should become active.
    * The duration is specified by {IGovernor-votingPeriod}.
+   * `maxBudget` (V11) is the optional Community-Execution budget cap in B3TR wei — set to 0 for
+   * proposals without a developer payout flow.
    *
-   * Emits a {ProposalCreated} and {ProposalCreatedWithType} event.
+   * Emits a {ProposalCreated}, {ProposalCreatedWithType}, and (when maxBudget > 0) {ProposalBudgetSet} event.
    */
   function propose(
     address[] memory targets,
@@ -523,7 +525,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
-    uint256 depositAmount
+    uint256 depositAmount,
+    uint256 maxBudget
   ) external returns (uint256 proposalId);
 
   /**
@@ -737,8 +740,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   /// @dev Caller is neither the proposal proposer nor a PROPOSAL_STATE_MANAGER_ROLE holder.
   error UnauthorizedCommunityExecution(address caller, uint256 proposalId);
 
-  /// @dev The targeted proposal is not a Standard proposal.
-  error RestrictedProposalType(uint256 proposalId, GovernorTypes.ProposalType proposalType);
+  // Note: V11 also reuses the existing GovernorRestrictedProposal error declared above
+  // (line ~173) when the proposal is not a Standard proposal.
 
   /// @dev No max budget was recorded for the proposal.
   error MissingProposalBudget(uint256 proposalId);
@@ -792,19 +795,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 amount
   );
 
-  /// @notice Create a new Standard proposal with a Community-Execution maximum budget.
-  function proposeWithBudget(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
-    uint256 depositAmount,
-    uint256 maxBudget
-  ) external returns (uint256 proposalId);
-
-  /// @notice Mark a proposal as InDevelopment and register developer payees + metadata.
-  function markAsInDevelopmentWithPayees(
+  /// @notice Mark a proposal as InDevelopment and optionally register developer payees + metadata.
+  ///         Pass `payees: []` for proposals created with `maxBudget == 0`.
+  function markAsInDevelopment(
     uint256 proposalId,
     GovernorTypes.Payee[] calldata payees,
     string calldata devNickname,

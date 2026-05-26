@@ -729,7 +729,7 @@ describe("VeBetterPassport Upgrades - @shard8d", function () {
       // create a new proposal active from round 2
       const address = await b3tr.getAddress()
       const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
-      const tx = await governor.connect(owner).propose([address], [0], [encodedFunctionCall], "test", "2", 0, {
+      const tx = await governor.connect(owner).propose([address], [0], [encodedFunctionCall], "test", "2", 0, 0, {
         gasLimit: 10_000_000,
       })
 

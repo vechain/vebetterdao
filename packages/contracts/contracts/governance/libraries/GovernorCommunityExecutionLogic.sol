@@ -75,7 +75,7 @@ library GovernorCommunityExecutionLogic {
   error UnauthorizedCommunityExecution(address caller, uint256 proposalId);
 
   /// @dev The targeted proposal is not a Standard proposal (e.g. it is a Grant).
-  error RestrictedProposalType(uint256 proposalId, GovernorTypes.ProposalType proposalType);
+  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
 
   /// @dev No max budget was recorded for the proposal; the new flow cannot be used.
   error MissingProposalBudget(uint256 proposalId);
@@ -122,24 +122,29 @@ library GovernorCommunityExecutionLogic {
 
   // ------------------ EXTERNAL: STATE-CHANGING ------------------ //
 
-  /// @notice Mark a proposal as InDevelopment and register the developer payees and metadata.
-  /// @dev Authorized to the proposer OR the PROPOSAL_STATE_MANAGER_ROLE caller. The role check
-  ///      is performed by the Governor wrapper and forwarded as `callerHasManagerRole`.
-  ///      Requirements:
-  ///      - Proposal must be a Standard proposal
-  ///      - Proposal state must be `Succeeded` (non-executable) or `Executed` — matches the
-  ///        guard in the legacy {GovernorProposalLogic.markAsInDevelopment}
-  ///      - Budget must have been registered at proposal creation
-  ///      - Payee list size in [1, maxPayeesPerProposal]
-  ///      - Every payee account != address(0) and amount > 0
-  ///      - sum(amounts) <= maxBudget
+  /// @notice Mark a proposal as InDevelopment. Optionally register developer payees + metadata.
+  /// @dev Unified V11 entrypoint — replaces the legacy admin-only `markAsInDevelopment(uint256)`.
+  ///      Authorized to the proposer OR a PROPOSAL_STATE_MANAGER_ROLE caller; the role check is
+  ///      performed by the Governor wrapper and forwarded as `callerHasManagerRole`.
+  ///
+  ///      Validation matrix (budget = proposalMaxBudget[id]):
+  ///      | budget | payees     | result                                                           |
+  ///      |--------|------------|------------------------------------------------------------------|
+  ///      | 0      | []         | OK — pure state transition, no payout flow                       |
+  ///      | 0      | n > 0      | revert MissingProposalBudget (no budget to back the payouts)     |
+  ///      | > 0    | []         | revert InvalidPayeeCount (budget orphaned)                       |
+  ///      | > 0    | n ∈ [1, m] | OK — full validation: sum ≤ budget, no zero amounts/addresses    |
+  ///
+  ///      Other requirements (always):
+  ///      - Proposal must be a Standard proposal (Grants use their own milestone flow)
+  ///      - Proposal state must be `Executed`, or `Succeeded` when not executable
   ///      - Function must not have been called before for this proposal
   /// @param proposalId       The proposal id.
-  /// @param payees           The payees being registered.
+  /// @param payees           The payees being registered (may be empty for non-payout proposals).
   /// @param devNickname      Developer nickname / display identifier (stored on chain).
   /// @param discussionLink   URL to the Discourse / discussion thread (stored on chain).
   /// @param callerHasManagerRole True iff `msg.sender` holds PROPOSAL_STATE_MANAGER_ROLE on the Governor.
-  function markAsInDevelopmentWithPayees(
+  function markAsInDevelopment(
     uint256 proposalId,
     GovernorTypes.Payee[] calldata payees,
     string calldata devNickname,
@@ -155,10 +160,11 @@ library GovernorCommunityExecutionLogic {
 
     GovernorTypes.ProposalType proposalType = $.proposalType[proposalId];
     if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert RestrictedProposalType(proposalId, proposalType);
+      revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
-    // Mirror legacy markAsInDevelopment guards: allowed states + executable-not-yet-executed reject.
+    // Same state guards as the legacy markAsInDevelopment: allowed states are
+    // Executed (executable, already executed) or Succeeded (non-executable, can't queue/execute).
     GovernorStateLogic.validateStateBitmap(
       proposalId,
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) |
@@ -167,7 +173,7 @@ library GovernorCommunityExecutionLogic {
     if (
       proposal.isExecutable && GovernorStateLogic._state(proposalId) == GovernorTypes.ProposalState.Succeeded
     ) {
-      revert RestrictedProposalType(proposalId, proposalType);
+      revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
     if ($.proposalPayeesFinalized[proposalId]) {
@@ -175,24 +181,29 @@ library GovernorCommunityExecutionLogic {
     }
 
     uint256 budget = $.proposalMaxBudget[proposalId];
+
+    // Budget / payees consistency invariant (see validation matrix above).
     if (budget == 0) {
-      revert MissingProposalBudget(proposalId);
+      if (payees.length > 0) {
+        revert MissingProposalBudget(proposalId);
+      }
+    } else {
+      // budget > 0 — require non-empty payees and run full validation.
+      _validatePayees($, payees, budget);
+      $.proposalPayeesFinalized[proposalId] = true;
+      for (uint256 i; i < payees.length; ++i) {
+        $.proposalPayees[proposalId].push(payees[i]);
+      }
     }
 
-    _validatePayees($, payees, budget);
-
-    // Persist payees + metadata.
-    $.proposalPayeesFinalized[proposalId] = true;
-    for (uint256 i; i < payees.length; ++i) {
-      $.proposalPayees[proposalId].push(payees[i]);
-    }
+    // Always persist metadata (nickname + link) for transparency.
     $.proposalDevNickname[proposalId] = devNickname;
     $.proposalDiscussionLink[proposalId] = discussionLink;
 
     // Transition development state.
     $.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
 
-    // Emit both legacy + new events so existing indexers keep working.
+    // Emit lifecycle events. ProposalInDevelopment keeps its V8 signature so existing indexers work.
     emit ProposalInDevelopment(proposalId);
     emit ProposalInDevelopmentDetails(proposalId, devNickname, discussionLink);
     for (uint256 i; i < payees.length; ++i) {

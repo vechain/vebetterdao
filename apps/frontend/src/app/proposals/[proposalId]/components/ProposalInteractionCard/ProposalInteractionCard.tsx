@@ -44,7 +44,6 @@ import { useClaimAllPayouts } from "@/hooks/useClaimAllPayouts"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useMarkProposalCompleted } from "@/hooks/useMarkProposalCompleted"
-import { useMarkProposalInDevelopment } from "@/hooks/useMarkProposalInDevelopment"
 import { useQueueProposal } from "@/hooks/useQueueProposal"
 import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
 
@@ -116,14 +115,12 @@ export const ProposalInteractionCard = ({
   // ===== CONTRACT TRANSACTION HOOKS =====
   const { sendTransaction: queueProposal } = useQueueProposal({ proposalId })
   const { sendTransaction: executeProposal } = useExecuteProposal({ proposalId })
-  const { sendTransaction: markProposalInDevelopment } = useMarkProposalInDevelopment({ proposalId })
   const { sendTransaction: markProposalCompleted } = useMarkProposalCompleted({ proposalId })
   const { sendTransaction: claimAllPayouts } = useClaimAllPayouts({ proposalId })
 
   // V11: per-proposal community-execution data
   const { data: proposalMaxBudget } = useProposalBudget(proposalId)
   const { data: proposalPayees } = useProposalPayees(proposalId)
-  const hasBudget = !!proposalMaxBudget && proposalMaxBudget > 0n
   const isPayeeMember = useMemo(
     () =>
       !!account?.address &&
@@ -136,14 +133,10 @@ export const ProposalInteractionCard = ({
 
   const handleExecuteProposal = useCallback(() => executeProposal(), [executeProposal])
 
+  // V11: marking as InDevelopment always goes through the modal (which collects payees when budget > 0).
   const handleMarkProposalInDevelopment = useCallback(() => {
-    // V11: when a budget is set, open the payees modal; otherwise fall back to legacy single-tx flow.
-    if (hasBudget) {
-      setIsMarkInDevModalOpen(true)
-      return
-    }
-    markProposalInDevelopment()
-  }, [hasBudget, markProposalInDevelopment])
+    setIsMarkInDevModalOpen(true)
+  }, [])
 
   const handleMarkProposalCompleted = useCallback(() => markProposalCompleted(), [markProposalCompleted])
 
@@ -193,10 +186,9 @@ export const ProposalInteractionCard = ({
   const canMarkInDevelopment = useMemo(() => {
     if (proposal?.type === ProposalType.Grant) return false
     if (proposal?.state !== ProposalState.Executed && proposal?.state !== ProposalState.Succeeded) return false
-    // V11: when budget > 0, the proposer is also authorized to register payees + mark InDevelopment.
-    if (hasBudget && isProposer) return true
-    return hasProposalStateRole
-  }, [hasProposalStateRole, isProposer, hasBudget, proposal?.state, proposal?.type])
+    // V11: proposer can always mark their own proposal as InDevelopment; admins can also do it.
+    return isProposer || hasProposalStateRole
+  }, [hasProposalStateRole, isProposer, proposal?.state, proposal?.type])
 
   const canMarkCompleted = useMemo(() => {
     if (proposal?.type === ProposalType.Grant || !hasProposalStateRole) {
@@ -570,15 +562,13 @@ export const ProposalInteractionCard = ({
         onClose={() => setIsCancelModalOpen(false)}
       />
 
-      {/* V11: Mark In Development with payees modal */}
-      {hasBudget && (
-        <MarkInDevelopmentModal
-          proposalId={proposalId}
-          maxBudget={proposalMaxBudget ?? 0n}
-          isOpen={isMarkInDevModalOpen}
-          onClose={() => setIsMarkInDevModalOpen(false)}
-        />
-      )}
+      {/* V11: Mark In Development modal — always available; modal hides payee rows when maxBudget == 0. */}
+      <MarkInDevelopmentModal
+        proposalId={proposalId}
+        maxBudget={proposalMaxBudget ?? 0n}
+        isOpen={isMarkInDevModalOpen}
+        onClose={() => setIsMarkInDevModalOpen(false)}
+      />
     </>
   )
 }

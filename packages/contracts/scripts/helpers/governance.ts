@@ -136,6 +136,7 @@ export const proposeUpgradeGovernance = async (
     metadataUri,
     currentRoundId + 1n,
     0,
+    0, // V11: maxBudget (0 = no Community-Execution payout flow)
     {
       gasLimit: 10_000_000,
     },

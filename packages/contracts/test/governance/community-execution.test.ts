@@ -28,7 +28,7 @@ import {
  *
  * Validates the new flow on top of the existing markAsInDevelopment /
  * markAsCompleted state machine: max budget at proposal creation,
- * payee registration via markAsInDevelopmentWithPayees (proposer OR admin),
+ * payee registration via markAsInDevelopment (proposer OR admin),
  * admin-only updatePayees, anyone-can-call claimPayout / claimAllPayouts,
  * idempotency, budget cap, legacy backwards compatibility.
  */
@@ -78,11 +78,9 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
     const description = opts.description ?? `desc-${Math.random().toString(36).slice(2, 10)}`
     const startRoundId = (await getRoundId()) + 1
 
-    const tx = opts.budget
-      ? await governor
-          .connect(proposer)
-          .proposeWithBudget(targets, values, calldatas, description, startRoundId, 0, opts.budget)
-      : await governor.connect(proposer).propose(targets, values, calldatas, description, startRoundId, 0)
+    const tx = await governor
+      .connect(proposer)
+      .propose(targets, values, calldatas, description, startRoundId, 0, opts.budget ?? 0)
 
     const proposalId = await getProposalIdFromTx(tx)
 
@@ -112,8 +110,8 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
 
   // ------------------- propose(7) / budget storage ------------------- //
 
-  describe("proposeWithBudget", () => {
-    it("records the maxBudget on chain and emits ProposalBudgetSet", async () => {
+  describe("propose budget", () => {
+    it("records maxBudget > 0 on chain and emits ProposalBudgetSet", async () => {
       const budget = E(1000)
       const targets: string[] = []
       const values: bigint[] = []
@@ -122,10 +120,9 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
       const startRoundId = (await getRoundId()) + 1
 
       await expect(
-        governor.connect(proposer).proposeWithBudget(targets, values, calldatas, description, startRoundId, 0, budget),
+        governor.connect(proposer).propose(targets, values, calldatas, description, startRoundId, 0, budget),
       ).to.emit(governor, "ProposalBudgetSet")
 
-      // proposalId is the hash regardless of which overload we used.
       const proposalId = await governor.hashProposal(
         targets,
         values,
@@ -135,21 +132,21 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
       expect(await governor.getProposalBudget(proposalId)).to.equal(budget)
     })
 
-    it("the legacy propose(6) records no budget", async () => {
+    it("propose with maxBudget == 0 records no budget", async () => {
       const targets: string[] = []
       const values: bigint[] = []
       const calldatas: string[] = []
       const description = `legacy-${Date.now()}`
       const startRoundId = (await getRoundId()) + 1
-      const tx = await governor.connect(proposer).propose(targets, values, calldatas, description, startRoundId, 0)
+      const tx = await governor.connect(proposer).propose(targets, values, calldatas, description, startRoundId, 0, 0)
       const proposalId = await getProposalIdFromTx(tx)
       expect(await governor.getProposalBudget(proposalId)).to.equal(0n)
     })
   })
 
-  // ------------------- markAsInDevelopmentWithPayees ------------------- //
+  // ------------------- markAsInDevelopment ------------------- //
 
-  describe("markAsInDevelopmentWithPayees", () => {
+  describe("markAsInDevelopment", () => {
     it("proposer can register payees and transitions to InDevelopment", async () => {
       const budget = E(1000)
       const proposalId = await createAndPassTextProposal({ budget })
@@ -159,9 +156,7 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
         { account: otherAccounts[6].address, amount: E(400) },
       ]
       await expect(
-        governor
-          .connect(proposer)
-          .markAsInDevelopmentWithPayees(proposalId, payees, "alice", "https://forum.example/123"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "alice", "https://forum.example/123"),
       )
         .to.emit(governor, "ProposalInDevelopment")
         .and.to.emit(governor, "ProposalInDevelopmentDetails")
@@ -180,9 +175,8 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
     it("PROPOSAL_STATE_MANAGER_ROLE admin can register on behalf of the proposer", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(500) })
       const payees = [{ account: otherAccounts[5].address, amount: E(500) }]
-      await expect(
-        governor.connect(owner).markAsInDevelopmentWithPayees(proposalId, payees, "bob", "https://x.example"),
-      ).to.not.be.reverted
+      await expect(governor.connect(owner).markAsInDevelopment(proposalId, payees, "bob", "https://x.example")).to.not
+        .be.reverted
       expect(await governor.state(proposalId)).to.equal(8)
     })
 
@@ -191,18 +185,33 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
       await expect(
         governor
           .connect(otherAccounts[7])
-          .markAsInDevelopmentWithPayees(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l"),
+          .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l"),
       ).to.be.revertedWithCustomError(governor, "UnauthorizedCommunityExecution")
     })
 
-    it("reverts when no budget was registered for the proposal", async () => {
-      // create via legacy propose(6) → no budget
+    it("reverts when no budget was registered AND payees were provided", async () => {
+      // budget == 0 + payees.length > 0 → MissingProposalBudget
       const proposalId = await createAndPassTextProposal({})
       await expect(
         governor
           .connect(proposer)
-          .markAsInDevelopmentWithPayees(proposalId, [{ account: otherAccounts[5].address, amount: E(1) }], "n", "l"),
+          .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(1) }], "n", "l"),
       ).to.be.revertedWithCustomError(governor, "MissingProposalBudget")
+    })
+
+    it("allows budget == 0 with empty payees (pure state transition, no payout flow)", async () => {
+      const proposalId = await createAndPassTextProposal({})
+      await expect(
+        governor.connect(proposer).markAsInDevelopment(proposalId, [], "alice", "https://x.example"),
+      ).to.emit(governor, "ProposalInDevelopment")
+      expect(await governor.state(proposalId)).to.equal(8)
+      // Metadata is still stored even when no payees registered.
+      const [nickname, link] = await governor.getProposalDevInfo(proposalId)
+      expect(nickname).to.equal("alice")
+      expect(link).to.equal("https://x.example")
+      // No payees recorded → no payout flow possible.
+      const stored = await governor.getProposalPayees(proposalId)
+      expect(stored.length).to.equal(0)
     })
 
     it("reverts when payee sum exceeds the budget", async () => {
@@ -212,14 +221,14 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
         { account: otherAccounts[6].address, amount: E(500) },
       ]
       await expect(
-        governor.connect(proposer).markAsInDevelopmentWithPayees(proposalId, payees, "n", "l"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l"),
       ).to.be.revertedWithCustomError(governor, "BudgetExceeded")
     })
 
     it("reverts on empty payees", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
       await expect(
-        governor.connect(proposer).markAsInDevelopmentWithPayees(proposalId, [], "n", "l"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, [], "n", "l"),
       ).to.be.revertedWithCustomError(governor, "InvalidPayeeCount")
     })
 
@@ -228,23 +237,23 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
       await expect(
         governor
           .connect(proposer)
-          .markAsInDevelopmentWithPayees(proposalId, [{ account: ethers.ZeroAddress, amount: E(1) }], "n", "l"),
+          .markAsInDevelopment(proposalId, [{ account: ethers.ZeroAddress, amount: E(1) }], "n", "l"),
       ).to.be.revertedWithCustomError(governor, "InvalidPayee")
       await expect(
         governor
           .connect(proposer)
-          .markAsInDevelopmentWithPayees(proposalId, [{ account: otherAccounts[5].address, amount: 0 }], "n", "l"),
+          .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: 0 }], "n", "l"),
       ).to.be.revertedWithCustomError(governor, "InvalidPayee")
     })
 
     it("calling twice reverts (state already InDevelopment)", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
       const payees = [{ account: otherAccounts[5].address, amount: E(100) }]
-      await governor.connect(proposer).markAsInDevelopmentWithPayees(proposalId, payees, "n", "l")
+      await governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l")
       // After first call the state is InDevelopment which is NOT in {Succeeded, Executed},
       // so validateStateBitmap reverts before reaching the PayeesAlreadyFinalized guard.
       await expect(
-        governor.connect(proposer).markAsInDevelopmentWithPayees(proposalId, payees, "n", "l"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l"),
       ).to.be.revertedWithCustomError(governor, "GovernorUnexpectedProposalState")
     })
   })
@@ -256,7 +265,7 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
       const proposalId = await createAndPassTextProposal({ budget: E(1000) })
       await governor
         .connect(proposer)
-        .markAsInDevelopmentWithPayees(proposalId, [{ account: otherAccounts[5].address, amount: E(500) }], "n", "l")
+        .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(500) }], "n", "l")
 
       const newPayees = [
         { account: otherAccounts[6].address, amount: E(400) },
@@ -273,7 +282,7 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
       await governor
         .connect(proposer)
-        .markAsInDevelopmentWithPayees(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l")
+        .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l")
       await expect(
         governor.connect(proposer).updatePayees(proposalId, [{ account: otherAccounts[6].address, amount: E(100) }]),
       ).to.be.reverted
@@ -290,7 +299,7 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
         { account: otherAccounts[5].address, amount: E(300) },
         { account: otherAccounts[6].address, amount: E(600) },
       ]
-      await governor.connect(proposer).markAsInDevelopmentWithPayees(proposalId, payees, "n", "l")
+      await governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l")
       await governor.connect(owner).markAsCompleted(proposalId)
 
       // Fund Treasury so transfers can succeed.
@@ -323,7 +332,7 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
       await governor
         .connect(proposer)
-        .markAsInDevelopmentWithPayees(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l")
+        .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l")
       // not yet marked Completed
       await b3tr.connect(minterAccount).mint(await treasury.getAddress(), E(100))
       await expect(governor.connect(owner).claimPayout(proposalId, 0)).to.be.revertedWithCustomError(
@@ -339,7 +348,7 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
         { account: otherAccounts[5].address, amount: E(400) },
         { account: otherAccounts[6].address, amount: E(600) },
       ]
-      await governor.connect(proposer).markAsInDevelopmentWithPayees(proposalId, payees, "n", "l")
+      await governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l")
       await governor.connect(owner).markAsCompleted(proposalId)
       await b3tr.connect(minterAccount).mint(await treasury.getAddress(), budget)
 
@@ -361,18 +370,9 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
     })
   })
 
-  // ------------------- backwards compatibility ------------------- //
+  // ------------------- misc ------------------- //
 
-  describe("backwards compatibility", () => {
-    it("legacy markAsInDevelopment(uint256) still works for budget==0 proposals", async () => {
-      const proposalId = await createAndPassTextProposal({})
-      await governor.connect(owner).markAsInDevelopment(proposalId)
-      expect(await governor.state(proposalId)).to.equal(8)
-      // payees array is empty so no payout flow available
-      const stored = await governor.getProposalPayees(proposalId)
-      expect(stored.length).to.equal(0)
-    })
-
+  describe("misc", () => {
     it("version() reports 11", async () => {
       expect(await governor.version()).to.equal("11")
     })
@@ -380,14 +380,14 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
     it("treasury() / maxPayeesPerProposal are accessible via the new initialized storage", async () => {
       // No public getter for these in V11 to save contract size — verify via behavior:
       // a claim path requires treasury to be set + budget validations require cap > 0.
-      // markAsInDevelopmentWithPayees with valid sum but oversize array would revert InvalidPayeeCount.
+      // markAsInDevelopment with valid sum but oversize array would revert InvalidPayeeCount.
       const proposalId = await createAndPassTextProposal({ budget: E(21) })
       const payees = Array.from({ length: 21 }, (_, i) => ({
         account: otherAccounts[i % otherAccounts.length].address,
         amount: E(1),
       }))
       await expect(
-        governor.connect(proposer).markAsInDevelopmentWithPayees(proposalId, payees, "n", "l"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l"),
       ).to.be.revertedWithCustomError(governor, "InvalidPayeeCount")
     })
   })

@@ -171,7 +171,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       const tx = await governor
         .connect(owner)
-        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n, 0, {
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n, 0, 0, {
           gasLimit: 10_000_000,
         })
 
@@ -218,7 +218,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
       // start new round
       await emissions.distribute()
 
-      // create a new proposal
+      // create a new proposal — newGovernor is attached as V1, which still has the 6-arg propose.
       const newTx = await newGovernor
         .connect(owner)
         .propose(
@@ -301,7 +301,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       const tx = await governor
         .connect(owner)
-        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n, 0, {
+        .propose([await governor.getAddress()], [0], [encodedFunctionCall], description, currentRoundId + 1n, 0, 0, {
           gasLimit: 10_000_000,
         })
 
@@ -1001,6 +1001,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       const tx0 = await governorV4
         .connect(owner)
+        // V4 governor still has the 6-arg propose signature.
         .propose([address], [0], [encodedFunctionCall], "Update Quorum Percentage", roundId.toString(), 0, {
           gasLimit: 10_000_000,
         })
@@ -2077,9 +2078,18 @@ describe("Governor and TimeLock - @shard4a1", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
@@ -2138,19 +2148,19 @@ describe("Governor and TimeLock - @shard4a1", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n
 
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.be.reverted
     })
 
@@ -2185,19 +2195,19 @@ describe("Governor and TimeLock - @shard4a1", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n
 
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.be.reverted
     })
 
@@ -2232,7 +2242,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, {
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, 0, {
           gasLimit: 10_000_000,
         })
 
@@ -2296,19 +2306,19 @@ describe("Governor and TimeLock - @shard4a1", function () {
       await bootstrapAndStartEmissions()
 
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
-      const tx = await governor
-        .connect(proposer)
-        .propose(
-          [await b3tr.getAddress()],
-          [0],
-          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
-          "Creating some random proposal",
-          (await xAllocationVoting.currentRoundId()) + 1n,
-          ethers.parseEther("1000"),
-          {
-            gasLimit: 10_000_000,
-          },
-        )
+      const tx = await governor.connect(proposer).propose(
+        [await b3tr.getAddress()],
+        [0],
+        [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+        "Creating some random proposal",
+        (await xAllocationVoting.currentRoundId()) + 1n,
+        ethers.parseEther("1000"),
+        0,
+
+        {
+          gasLimit: 10_000_000,
+        },
+      )
 
       const proposalId = await getProposalIdFromTx(tx, true)
 
@@ -2376,6 +2386,8 @@ describe("Governor and TimeLock - @shard4a1", function () {
           "Creating some random proposal",
           (await xAllocationVoting.currentRoundId()) + 2n,
           ethers.parseEther("1000"),
+          0,
+
           {
             gasLimit: 10_000_000,
           },
@@ -2453,19 +2465,19 @@ describe("Governor and TimeLock - @shard4a1", function () {
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("2000"))
 
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [await b3tr.getAddress()],
-            [0],
-            [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [await b3tr.getAddress()],
+          [0],
+          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.be.reverted
 
       // simulate start of new round with enough voting delay
@@ -2482,19 +2494,19 @@ describe("Governor and TimeLock - @shard4a1", function () {
       voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [await b3tr.getAddress()],
-            [0],
-            [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [await b3tr.getAddress()],
+          [0],
+          [B3trContract.interface.encodeFunctionData("tokenDetails", [])],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.not.be.reverted
     })
 
@@ -2526,7 +2538,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, {
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, 0, {
           gasLimit: 10_000_000,
         })
 
@@ -2582,7 +2594,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
       // Now we can create a new proposal
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), deposit, {
+      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), deposit, 0, {
         gasLimit: 10_000_000,
       })
 
@@ -2644,7 +2656,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
       // Now we can create a new proposal
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
-      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), 0, {
+      const tx = await governor.connect(proposer).propose([], [], [], "", voteStartsInRoundId.toString(), 0, 0, {
         gasLimit: 10_000_000,
       })
 
@@ -2693,51 +2705,51 @@ describe("Governor and TimeLock - @shard4a1", function () {
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
       // Parameters must have the same length
       await catchRevert(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0, 1],
-            [encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0, 1],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       )
 
       await catchRevert(
-        governor
-          .connect(proposer)
-          .propose(
-            [address, address],
-            [0],
-            [encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address, address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       )
 
       await catchRevert(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall, encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall, encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       )
     })
 
@@ -2770,7 +2782,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
       await vot3.connect(proposer).approve(await governor.getAddress(), deposit)
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, {
+        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), deposit, 0, {
           gasLimit: 10_000_000,
         })
 
@@ -2820,9 +2832,11 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
       await expect(
-        governor.connect(proposer).propose([address], [0], [encodedFunctionCall], "", 1n, ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        }),
+        governor
+          .connect(proposer)
+          .propose([address], [0], [encodedFunctionCall], "", 1n, ethers.parseEther("1000"), 0, {
+            gasLimit: 10_000_000,
+          }),
       ).to.be.reverted
     })
 
@@ -2853,7 +2867,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", 2n, ethers.parseEther("1000"), {
+        .propose([address], [0], [encodedFunctionCall], "", 2n, ethers.parseEther("1000"), 0, {
           gasLimit: 10_000_000,
         })
 
@@ -2925,7 +2939,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
       await expect(
         governor
           .connect(proposer)
-          .propose([address], [0], [encodedFunctionCall], "", roundToStart, ethers.parseEther("1000"), {
+          .propose([address], [0], [encodedFunctionCall], "", roundToStart, ethers.parseEther("1000"), 0, {
             gasLimit: 10_000_000,
           }),
       ).to.not.be.reverted
@@ -2933,7 +2947,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
       await expect(
         governor
           .connect(proposer)
-          .propose([address], [0], [encodedFunctionCall], "", roundToStart, ethers.parseEther("1000"), {
+          .propose([address], [0], [encodedFunctionCall], "", roundToStart, ethers.parseEther("1000"), 0, {
             gasLimit: 10_000_000,
           }),
       ).to.be.reverted
@@ -2962,36 +2976,36 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
       await catchRevert(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       )
 
       voteStartsInRoundId = await xAllocationVoting.currentRoundId() // starts in current round
       await catchRevert(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       )
     })
 
@@ -3141,70 +3155,70 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("3000"))
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "#proposer=" + proposer.address,
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "#proposer=" + proposer.address,
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.not.be.reverted
 
       // with proposer suffix but bad address part (XYZ are not a valid hex char)
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "#proposer=0x3C44CdDdB6a900fa2b585dd299e03d12FA429XYZ",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "#proposer=0x3C44CdDdB6a900fa2b585dd299e03d12FA429XYZ",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.not.be.reverted
 
       // with wrong suffix
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "#wrong-suffix=" + proposer.address,
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "#wrong-suffix=" + proposer.address,
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.not.be.reverted
 
       // with protection via proposer suffix but wrong proposer
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "#proposer=" + otherAccounts[1].address,
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "#proposer=" + otherAccounts[1].address,
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.be.reverted
     })
 
@@ -3224,19 +3238,19 @@ describe("Governor and TimeLock - @shard4a1", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
       await expect(
-        governor
-          .connect(proposer)
-          .propose(
-            [address],
-            [0],
-            [encodedFunctionCall],
-            "",
-            voteStartsInRoundId.toString(),
-            ethers.parseEther("1000"),
-            {
-              gasLimit: 10_000_000,
-            },
-          ),
+        governor.connect(proposer).propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+
+          {
+            gasLimit: 10_000_000,
+          },
+        ),
       ).to.be.reverted
     })
 
@@ -5211,9 +5225,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 10 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("10"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("10"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposeReceipt = await tx.wait()
       expect(proposeReceipt).not.to.be.null
@@ -5283,9 +5306,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
@@ -5362,9 +5394,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.proposalDepositReached(proposalId)).to.eql(false)
@@ -5436,9 +5477,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.getProposalDeposits(proposalId)).to.eql(ethers.parseEther("1000"))
@@ -5510,9 +5560,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
 
@@ -5574,9 +5633,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 1000 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
 
@@ -5637,9 +5705,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 10 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
@@ -5700,9 +5777,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 10 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
@@ -5754,9 +5840,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 10 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
@@ -5817,9 +5912,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
       expect(await governor.getUserDeposit(proposalId, proposer)).to.eql(ethers.parseEther("1000"))
@@ -5877,19 +5981,19 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
 
       // Create a proposal with a deposit
-      const tx = await governor
-        .connect(proposer)
-        .propose(
-          [address],
-          [0],
-          [encodedFunctionCall],
-          "",
-          voteStartsInRoundId.toString(),
-          ethers.parseEther(depositAmountToPay),
-          {
-            gasLimit: 10_000_000,
-          },
-        )
+      const tx = await governor.connect(proposer).propose(
+        [address],
+        [0],
+        [encodedFunctionCall],
+        "",
+        voteStartsInRoundId.toString(),
+        ethers.parseEther(depositAmountToPay),
+        0,
+
+        {
+          gasLimit: 10_000_000,
+        },
+      )
 
       const proposalId = await getProposalIdFromTx(tx, true)
 
@@ -5940,9 +6044,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 10 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
 
@@ -5976,9 +6089,18 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
       // Create a proposal with a deposit of 10 VOT3
       const tx = await governor
         .connect(proposer)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
+        .propose(
+          [address],
+          [0],
+          [encodedFunctionCall],
+          "",
+          voteStartsInRoundId.toString(),
+          ethers.parseEther("1000"),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
 
       const proposalId = await getProposalIdFromTx(tx, true)
 

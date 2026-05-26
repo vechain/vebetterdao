@@ -784,41 +784,18 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
 
   /**
    * @notice See {IB3TRGovernor-propose}.
-   * Callable only when contract is not paused.
+   * @dev V11 consolidated entrypoint. Single `propose` function with mandatory `maxBudget`
+   *      parameter — pass `0` for proposals without a community-execution payout flow.
    * @param targets The list of target addresses
    * @param values The list of values to send
    * @param calldatas The list of call data
    * @param description The proposal description
    * @param startRoundId The round in which the proposal should start
    * @param depositAmount The amount of deposit for the proposal
+   * @param maxBudget Maximum implementation budget in B3TR wei (0 = no payout flow)
    * @return uint256 The proposal id
    */
   function propose(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
-    uint256 depositAmount
-  ) external whenNotPaused returns (uint256) {
-    return GovernorProposalLogic.propose(targets, values, calldatas, description, startRoundId, depositAmount);
-  }
-
-  /**
-   * @notice V11: propose a Standard proposal with a Community-Execution maximum B3TR budget.
-   * @dev Identical to {propose} but additionally records `maxBudget` as the hard cap that may
-   *      later be paid out to registered developer payees once the proposal is marked Completed.
-   *      For `maxBudget == 0` this behaves like the 6-arg {propose}.
-   * @param targets The list of target addresses
-   * @param values The list of values to send
-   * @param calldatas The list of call data
-   * @param description The proposal description
-   * @param startRoundId The round in which the proposal should start
-   * @param depositAmount The amount of deposit for the proposal
-   * @param maxBudget Maximum implementation budget in B3TR wei
-   * @return uint256 The proposal id
-   */
-  function proposeWithBudget(
     address[] memory targets,
     uint256[] memory values,
     bytes[] memory calldatas,
@@ -828,7 +805,7 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
     uint256 maxBudget
   ) external whenNotPaused returns (uint256) {
     return
-      GovernorProposalLogic.proposeWithBudget(
+      GovernorProposalLogic.propose(
         targets,
         values,
         calldatas,
@@ -1135,14 +1112,6 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
   }
 
   /**
-   * @notice Mark a proposal as in development
-   * @param proposalId The id of the proposal
-   */
-  function markAsInDevelopment(uint256 proposalId) public onlyRole(PROPOSAL_STATE_MANAGER_ROLE) {
-    GovernorProposalLogic.markAsInDevelopment(proposalId);
-  }
-
-  /**
    * @notice Mark a proposal as completed
    * @param proposalId The id of the proposal
    */
@@ -1153,21 +1122,24 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
   // ------------------ V11: Community Execution Framework ------------------ //
 
   /**
-   * @notice V11: Mark a proposal as InDevelopment and register the developer payees + metadata.
-   * @dev Callable by the proposal proposer or by an address holding PROPOSAL_STATE_MANAGER_ROLE.
-   *      Sum of payee amounts must not exceed the budget recorded at proposal creation.
-   * @param proposalId    The proposal id.
-   * @param payees        Array of (account, amount) payee entries to record.
-   * @param devNickname   On-chain developer nickname / identifier.
+   * @notice V11: Mark a proposal as InDevelopment. Optionally register developer payees + metadata.
+   * @dev Single consolidated entrypoint — replaces the legacy admin-only `markAsInDevelopment(uint256)`.
+   *      Callable by the proposal proposer or by an address holding PROPOSAL_STATE_MANAGER_ROLE.
+   *      - `maxBudget == 0` requires empty `payees` (pure state transition, no payout flow).
+   *      - `maxBudget > 0` requires non-empty `payees` with sum(amounts) ≤ maxBudget.
+   *      Grants reject (Grants follow the milestone-based payout flow, not community execution).
+   * @param proposalId     The proposal id.
+   * @param payees         Array of (account, amount) payee entries (may be empty when budget == 0).
+   * @param devNickname    On-chain developer nickname / identifier.
    * @param discussionLink Discourse / external discussion link recorded on chain.
    */
-  function markAsInDevelopmentWithPayees(
+  function markAsInDevelopment(
     uint256 proposalId,
     GovernorTypes.Payee[] calldata payees,
     string calldata devNickname,
     string calldata discussionLink
   ) external whenNotPaused {
-    GovernorCommunityExecutionLogic.markAsInDevelopmentWithPayees(
+    GovernorCommunityExecutionLogic.markAsInDevelopment(
       proposalId,
       payees,
       devNickname,

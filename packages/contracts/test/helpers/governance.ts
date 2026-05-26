@@ -123,7 +123,8 @@ export const upgradeGovernanceToV2 = async (): Promise<B3TRGovernor> => {
 
   const txGovernorUpgrade = await governor
     .connect(owner)
-    .propose([await governor.getAddress()], [0], [encodedFunctionCall], descriptionUpgrade, currentRoundId + 1n, 0, {
+    // V11: 7th arg is maxBudget (0 = no Community-Execution payout flow).
+    .propose([await governor.getAddress()], [0], [encodedFunctionCall], descriptionUpgrade, currentRoundId + 1n, 0, 0, {
       gasLimit: 10_000_000,
     })
 
