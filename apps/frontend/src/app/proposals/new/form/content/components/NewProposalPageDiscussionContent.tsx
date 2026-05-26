@@ -1,5 +1,18 @@
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Box, Button, Card, Field, HStack, Heading, Input, InputGroup, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  Field,
+  HStack,
+  Heading,
+  Input,
+  InputGroup,
+  Link,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useGetTokenUsdPrice, useWallet } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
@@ -8,6 +21,7 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import rehypeSanitize from "rehype-sanitize"
 
+import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants/AnalyticsEvents"
 
 import {
@@ -153,47 +167,75 @@ export const NewProposalPageDiscussionContent = () => {
             </Stack>
           </Field.Root>
 
-          <Field.Root invalid={!!errors.maxBudget}>
-            <Field.Label>{t("Maximum implementation budget (B3TR)")}</Field.Label>
-            <Controller
-              name="maxBudget"
-              control={control}
-              rules={{
-                validate: value => {
-                  if (!value || value.trim() === "") return true // optional
-                  const n = Number(value)
-                  if (!Number.isFinite(n) || n <= 0) return t("Budget must be a positive number")
-                  return true
-                },
-              }}
-              render={({ field }) => (
-                <InputGroup>
-                  <Input
-                    data-testid="proposal-max-budget-input"
-                    type="number"
-                    min={0}
-                    step={1}
-                    placeholder="0"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                </InputGroup>
+          <VStack gap={2} align="flex-start" w="full">
+            <Heading size={["sm", "md"]}>{t("How much B3TR is the maximum implementation budget?")}</Heading>
+            <Text textStyle="sm" color="gray.500">
+              {t(
+                "Hard cap (in B3TR) that may later be paid out from the Treasury to the developers selected to implement this proposal. Set to 0 if the proposal does not require a payout.",
               )}
-            />
-            {errors.maxBudget ? (
-              <Field.ErrorText>{errors.maxBudget.message}</Field.ErrorText>
-            ) : (
-              <Field.HelperText color="gray.500" textStyle="sm">
-                {maxBudgetUsd
-                  ? t("Approx. {{usd}} USD — hard cap that may later be paid out to selected developers.", {
-                      usd: maxBudgetUsd.toLocaleString(undefined, { maximumFractionDigits: 2 }),
-                    })
-                  : t(
-                      "Optional. Hard cap (in B3TR) that may later be paid out to selected developers once the proposal is completed.",
-                    )}
-              </Field.HelperText>
-            )}
-          </Field.Root>
+            </Text>
+
+            <Field.Root invalid={!!errors.maxBudget}>
+              <Controller
+                name="maxBudget"
+                control={control}
+                rules={{
+                  validate: value => {
+                    if (!value || value.trim() === "") return true
+                    const n = Number(value)
+                    if (!Number.isFinite(n) || n < 0) return t("Budget must be a non-negative number")
+                    return true
+                  },
+                }}
+                render={({ field }) => (
+                  <InputGroup
+                    w="full"
+                    mt={4}
+                    startElement={<B3TRIcon boxSize={8} colorVariant="dark" />}
+                    startElementProps={{
+                      p: 1,
+                      pointerEvents: "none",
+                    }}
+                    endElement={
+                      maxBudgetUsd !== undefined ? (
+                        <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500">
+                          {`≈ $${maxBudgetUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                        </Heading>
+                      ) : undefined
+                    }>
+                    <Input
+                      data-testid="proposal-max-budget-input"
+                      type="number"
+                      min={0}
+                      step={1}
+                      placeholder="0"
+                      value={field.value}
+                      onChange={field.onChange}
+                      w="full"
+                      textStyle={["xl", "xl", "3xl"]}
+                    />
+                  </InputGroup>
+                )}
+              />
+              {errors.maxBudget ? (
+                <Field.ErrorText fontStyle="sm" color="red.500">
+                  {errors.maxBudget.message}
+                </Field.ErrorText>
+              ) : (
+                <Field.HelperText fontStyle="sm" color="gray.500">
+                  {t("Do not know how much this could cost? Head over to the")}{" "}
+                  <Link
+                    href="https://vechain.discourse.group/c/vebetterdao/47"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="underline">
+                    {t("Discourse forum")}
+                  </Link>{" "}
+                  {t("and chat with other community builders.")}
+                </Field.HelperText>
+              )}
+            </Field.Root>
+          </VStack>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
             <Button data-testid="go-back" variant="link" onClick={router.back} disabled={isMetadataUploading}>

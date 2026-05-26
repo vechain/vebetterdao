@@ -1,12 +1,14 @@
 "use client"
-import { Box, Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Heading, Separator, Text, VStack } from "@chakra-ui/react"
 import MDEditor from "@uiw/react-md-editor"
+import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import "@uiw/react-md-editor/markdown-editor.css"
 import { ethers } from "ethers"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 
 import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
@@ -34,6 +36,17 @@ export const PublishAndPreviewPageContent = () => {
   } = useProposalFormStore()
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
   const { data: threshold } = useDepositThreshold()
+  const { data: b3trUsdPrice } = useGetTokenUsdPrice("B3TR")
+  const maxBudgetNumber = useMemo(() => {
+    const n = Number(maxBudget)
+    return Number.isFinite(n) && n > 0 ? n : 0
+  }, [maxBudget])
+  const maxBudgetUsd = useMemo(() => {
+    if (maxBudgetNumber <= 0) return undefined
+    const price = Number(b3trUsdPrice)
+    if (!Number.isFinite(price) || price <= 0) return undefined
+    return maxBudgetNumber * price
+  }, [maxBudgetNumber, b3trUsdPrice])
   // We call the hashProposal function to precalculate the proposal id
   // so we can redirect the user to the proposal page after the tx is confirmed
   const { data: expectedProposalId } = useHashProposal(
@@ -134,6 +147,34 @@ export const PublishAndPreviewPageContent = () => {
               canAddAnotherTransaction={false}
             />
           )}
+
+          <VStack gap={2} align="flex-start" w="full">
+            <Heading size={["sm", "md"]}>{t("Maximum implementation budget")}</Heading>
+            {maxBudgetNumber > 0 ? (
+              <>
+                <Text textStyle="sm" color="gray.500">
+                  {t(
+                    "Hard cap that may be paid out from the Treasury to the developers selected to implement this proposal.",
+                  )}
+                </Text>
+                <HStack gap={3} align="center" mt={2}>
+                  <B3TRIcon boxSize={8} colorVariant="dark" />
+                  <Heading size={["lg", "lg", "2xl"]}>
+                    {`${maxBudgetNumber.toLocaleString(undefined, { maximumFractionDigits: 4 })} B3TR`}
+                  </Heading>
+                  {maxBudgetUsd !== undefined && (
+                    <Heading size={["md", "md", "xl"]} color="gray.500">
+                      {`≈ $${maxBudgetUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                    </Heading>
+                  )}
+                </HStack>
+              </>
+            ) : (
+              <Text textStyle="sm" color="gray.500">
+                {t("This proposal has no implementation budget — no developer payout flow will be available.")}
+              </Text>
+            )}
+          </VStack>
 
           <VStack gap={4} align="flex-start" w="full">
             <Heading size={["sm", "md"]}>{t("Voting session")}</Heading>

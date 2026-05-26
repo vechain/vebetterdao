@@ -116,7 +116,7 @@ describe("Governance - V9 Compatibility - @shard4h", function () {
       const stateAfterExecute = await governor.state(proposalId)
       expect(stateAfterExecute).to.equal(6) // Executed
       // Mark as in development
-      await governor.connect(owner).markAsInDevelopment(proposalId)
+      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
       const stateAfterMarkInDev = await governor.state(proposalId)
       expect(stateAfterMarkInDev).to.equal(8) // InDevelopment
       // Mark as completed
