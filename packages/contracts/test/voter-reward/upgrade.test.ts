@@ -1420,17 +1420,20 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     // CRITICAL: Update emissions to distribute rewards to our upgraded VoterRewards V6
     await emissionsLatest.connect(owner).setVote2EarnAddress(await voterRewardsV6.getAddress())
 
-    await upgradeProxy("B3TRGovernorV6", "B3TRGovernor", await governor.getAddress(), [], {
+    // Target the deprecated V10 contract explicitly — "B3TRGovernor" is now V11 which
+    // requires the additional GovernorCommunityExecutionLogic link and V11 initializer args.
+    // V10 lib bytecode is API-compatible with the latest lib instances.
+    await upgradeProxy("B3TRGovernorV6", "B3TRGovernorV10", await governor.getAddress(), [], {
       version: 10,
       libraries: {
-        GovernorClockLogic: await governorClockLogicLib.getAddress(),
-        GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-        GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-        GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-        GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-        GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-        GovernorStateLogic: await governorStateLogicLib.getAddress(),
-        GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        GovernorClockLogicV10: await governorClockLogicLib.getAddress(),
+        GovernorConfiguratorV10: await governorConfiguratorLib.getAddress(),
+        GovernorDepositLogicV10: await governorDepositLogicLib.getAddress(),
+        GovernorFunctionRestrictionsLogicV10: await governorFunctionRestrictionsLogicLib.getAddress(),
+        GovernorProposalLogicV10: await governorProposalLogicLib.getAddress(),
+        GovernorQuorumLogicV10: await governorQuorumLogicLib.getAddress(),
+        GovernorStateLogicV10: await governorStateLogicLib.getAddress(),
+        GovernorVotesLogicV10: await governorVotesLogicLib.getAddress(),
       },
     })
 

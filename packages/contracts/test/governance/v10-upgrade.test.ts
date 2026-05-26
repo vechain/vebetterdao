@@ -6,11 +6,12 @@ import { describe, it } from "mocha"
 import { getOrDeployContractInstances } from "../helpers"
 
 describe("Governance - V10 Upgrade - @shard4g", function () {
-  it("Should deploy through full upgrade chain and report version 10", async () => {
+  it("Should deploy through full upgrade chain and report the latest version", async () => {
     const config = createLocalConfig()
     const { governor } = await getOrDeployContractInstances({ forceDeploy: true, config })
 
-    expect(await governor.version()).to.equal("10")
+    // The full chain now ends at V11 (community execution framework); V10 is an intermediate step.
+    expect(await governor.version()).to.equal("11")
     expect(await governor.getAddress()).to.not.equal(ethers.ZeroAddress)
   })
 

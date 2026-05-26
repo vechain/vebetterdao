@@ -82,7 +82,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
 
       // check version
       const version = await governor.version()
-      expect(version).to.eql("10")
+      expect(version).to.eql("11")
 
       // STANDARD deposit threshold is set correctly
       const standardDepositThreshold = await governor.depositThresholdPercentageByProposalType(STANDARD_PROPOSAL_TYPE)
@@ -829,6 +829,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
         otherAccount,
         governorStateLogicLib,
         governorVotesLogicLib,
+        governorCommunityExecutionLogicLib,
         governorClockLogicLibV1,
         governorConfiguratorLibV1,
         governorDepositLogicLibV1,
@@ -1067,6 +1068,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
           GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await governorStateLogicLib.getAddress(),
           GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorCommunityExecutionLogic: await governorCommunityExecutionLogicLib.getAddress(),
         },
       })
       const implementationv5 = await ContractV7.deploy()
@@ -1109,6 +1111,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
         governorQuorumLogicLib,
         governorStateLogicLib,
         governorVotesLogicLib,
+        governorCommunityExecutionLogicLib,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1123,6 +1126,7 @@ describe("Governor and TimeLock - @shard4a1", function () {
           GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await governorStateLogicLib.getAddress(),
           GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorCommunityExecutionLogic: await governorCommunityExecutionLogicLib.getAddress(),
         },
       })
     })
@@ -4370,6 +4374,7 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
         governorQuorumLogicLib,
         governorStateLogicLib,
         governorVotesLogicLib,
+        governorCommunityExecutionLogicLib,
         veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -4410,6 +4415,7 @@ describe("Governor and TimeLock - Part 2 - @shard4a2", function () {
           GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await governorStateLogicLib.getAddress(),
           GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorCommunityExecutionLogic: await governorCommunityExecutionLogicLib.getAddress(),
         },
       })
 
