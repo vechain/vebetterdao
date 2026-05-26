@@ -23,24 +23,23 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorTypes } from "./GovernorTypes.sol";
-import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
-import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IVOT3 } from "../../interfaces/IVOT3.sol";
+import { GovernorTypesV10 } from "./GovernorTypesV10.sol";
+import { IVoterRewards } from "../../../../interfaces/IVoterRewards.sol";
+import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TR } from "../../../../interfaces/IB3TR.sol";
+import { IVOT3 } from "../../../../interfaces/IVOT3.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
-import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
-import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
-import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
-import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
-import { ITreasury } from "../../interfaces/ITreasury.sol";
+import { IVeBetterPassport } from "../../../../interfaces/IVeBetterPassport.sol";
+import { IGrantsManager } from "../../../../interfaces/IGrantsManager.sol";
+import { IGalaxyMember } from "../../../../interfaces/IGalaxyMember.sol";
+import { INavigatorRegistry } from "../../../../interfaces/INavigatorRegistry.sol";
+import { IRelayerRewardsPool } from "../../../../interfaces/IRelayerRewardsPool.sol";
 
-/// @title GovernorStorageTypes
+/// @title GovernorStorageTypesV10
 /// @notice Library for defining storage types used in the Governor contract.
-library GovernorStorageTypes {
+library GovernorStorageTypesV10 {
   // keccak256(abi.encode(uint256(keccak256("GovernorStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GovernorStorageLocation = 0xd09a0aaf4ab3087bae7fa25ef74ddd4e5a4950980903ce417e66228cf7dc7b00;
 
@@ -56,7 +55,7 @@ library GovernorStorageTypes {
 
     // ------------------------------- General Storage -------------------------------
     string name; // name of the Governor
-    mapping(uint256 proposalId => GovernorTypes.ProposalCore) proposals;
+    mapping(uint256 proposalId => GovernorTypesV10.ProposalCore) proposals;
     // This queue keeps track of the governor operating on itself. Calls to functions protected by the {onlyGovernance}
     // modifier needs to be whitelisted in this queue. Whitelisting is set in {execute}, consumed by the
     // {onlyGovernance} modifier and eventually reset after {_executeOperations} completes. This ensures that the
@@ -95,7 +94,7 @@ library GovernorStorageTypes {
     uint256 depositThresholdPercentage_DEPRECATED;
     // ------------------------------- Voting Storage -------------------------------
     // mapping to store the votes for a proposal
-    mapping(uint256 => GovernorTypes.ProposalVote) proposalVotes;
+    mapping(uint256 => GovernorTypesV10.ProposalVote) proposalVotes;
     // mapping to store that a user has voted at least one time
     mapping(address => bool) hasVotedOnce;
     // mapping to store the total votes for a proposal
@@ -115,21 +114,21 @@ library GovernorStorageTypes {
 
     // ------------------------------- Version 7 -------------------------------
     // mapping to store the proposal type for each proposal
-    mapping(uint256 => GovernorTypes.ProposalType) proposalType;
+    mapping(uint256 => GovernorTypesV10.ProposalType) proposalType;
     // mapping to store the deposit threshold percentage for each proposal type
-    mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdPercentage;
+    mapping(GovernorTypesV10.ProposalType => uint256) proposalTypeDepositThresholdPercentage;
     // mapping to store the voting threshold for each proposal type
-    mapping(GovernorTypes.ProposalType => uint256) proposalTypeVotingThreshold;
+    mapping(GovernorTypesV10.ProposalType => uint256) proposalTypeVotingThreshold;
     // mapping to store the quorum history for each proposal type
-    mapping(GovernorTypes.ProposalType => Checkpoints.Trace208) proposalTypeQuorum;
+    mapping(GovernorTypesV10.ProposalType => Checkpoints.Trace208) proposalTypeQuorum;
     // mapping to store the deposit threshold cap for each proposal type
-    mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdCap;
+    mapping(GovernorTypesV10.ProposalType => uint256) proposalTypeDepositThresholdCap;
     // GrantsManager contract
     IGrantsManager grantsManager;
     // GalaxyMember contract
     IGalaxyMember galaxyMember;
     // mapping to store the GM weight required for each proposal type
-    mapping(GovernorTypes.ProposalType => uint256) requiredGMLevelByProposalType;
+    mapping(GovernorTypesV10.ProposalType => uint256) requiredGMLevelByProposalType;
     // Checkpoints to store the deposits user
     mapping(address user => Checkpoints.Trace208 timepoint) depositsVotingPower;
     // ------------------------------- Version 8 -------------------------------
@@ -138,7 +137,7 @@ library GovernorStorageTypes {
     // - PendingDevelopment: Proposal is not in a development phase
     // - InDevelopment: Development phase is in progress
     // - Completed: Development phase is completed
-    mapping(uint256 proposalId => GovernorTypes.ProposalDevelopmentState) proposalDevelopmentState;
+    mapping(uint256 proposalId => GovernorTypesV10.ProposalDevelopmentState) proposalDevelopmentState;
     // ------------------------------- Version 10 (navigator + relayer integration) -------------------------------
     // NavigatorRegistry (navigator delegation voting); RelayerRewardsPool (governance vote action registration)
     INavigatorRegistry navigatorRegistry;
@@ -147,22 +146,5 @@ library GovernorStorageTypes {
     mapping(uint256 => uint256[]) proposalsForRound;
     // V10: configurable skip window for navigator governance vote skipping (blocks before proposal deadline)
     uint256 governanceSkipWindowBlocks;
-    // ------------------------------- Version 11 (Community Execution Framework) -------------------------------
-    // Treasury used to pay registered developer payees after proposal completion.
-    ITreasury treasury;
-    // Safety cap on the number of payees that can be registered for a single proposal.
-    uint256 maxPayeesPerProposal;
-    // Per-proposal max B3TR budget (wei). Set immutably at proposal creation.
-    mapping(uint256 proposalId => uint256) proposalMaxBudget;
-    // Per-proposal developer payees registered via markAsInDevelopmentWithPayees.
-    mapping(uint256 proposalId => GovernorTypes.Payee[]) proposalPayees;
-    // True once payees were registered for a proposal (guards markAsInDevelopmentWithPayees idempotency).
-    mapping(uint256 proposalId => bool) proposalPayeesFinalized;
-    // Per-payee idempotent claim flag: proposalId => payeeIndex => claimed.
-    mapping(uint256 proposalId => mapping(uint256 payeeIndex => bool)) proposalPayeeClaimed;
-    // On-chain dev nickname registered alongside payees.
-    mapping(uint256 proposalId => string) proposalDevNickname;
-    // On-chain Discourse / discussion link registered alongside payees.
-    mapping(uint256 proposalId => string) proposalDiscussionLink;
   }
 }

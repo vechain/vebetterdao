@@ -22,8 +22,16 @@ import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadi
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
-  const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount, metadataUri } =
-    useProposalFormStore()
+  const {
+    actions,
+    markdownDescription,
+    title,
+    shortDescription,
+    votingStartRoundId,
+    depositAmount,
+    metadataUri,
+    maxBudget,
+  } = useProposalFormStore()
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
   const { data: threshold } = useDepositThreshold()
   // We call the hashProposal function to precalculate the proposal id
@@ -89,6 +97,7 @@ export const PublishAndPreviewPageContent = () => {
       description: uploadedMetadataUri,
       startRoundId: votingStartRoundId,
       depositAmount: depositAmount.toString(),
+      maxBudget,
     })
   }, [
     createProposalMutation,
@@ -100,6 +109,7 @@ export const PublishAndPreviewPageContent = () => {
     votingStartRoundId,
     actions,
     onMetadataUpload,
+    maxBudget,
   ])
 
   return (

@@ -5,17 +5,17 @@ pragma solidity 0.8.20;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
-import { IB3TR } from "./IB3TR.sol";
-import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
-import { IVeBetterPassport } from "./IVeBetterPassport.sol";
-import { IGalaxyMember } from "./IGalaxyMember.sol";
-import { IGrantsManager } from "./IGrantsManager.sol";
-import { IRelayerRewardsPool } from "./IRelayerRewardsPool.sol";
+import { IB3TR } from "../../../interfaces/IB3TR.sol";
+import { IVoterRewards } from "../../../interfaces/IVoterRewards.sol";
+import { IXAllocationVotingGovernor } from "../../../interfaces/IXAllocationVotingGovernor.sol";
+import { GovernorTypesV10 } from "../governance/libraries/GovernorTypesV10.sol";
+import { IVeBetterPassport } from "../../../interfaces/IVeBetterPassport.sol";
+import { IGalaxyMember } from "../../../interfaces/IGalaxyMember.sol";
+import { IGrantsManager } from "../../../interfaces/IGrantsManager.sol";
+import { IRelayerRewardsPool } from "../../../interfaces/IRelayerRewardsPool.sol";
 
 /**
- * @dev Interface of the {B3TRGovernor} core.
+ * @dev Interface of the {B3TRGovernorV10} core.
  *
  * Modifications to original forked contract from OZ:
  * - Removed votingDelay()
@@ -26,7 +26,7 @@ import { IRelayerRewardsPool } from "./IRelayerRewardsPool.sol";
  * - Added new state `DepositNotMet` to ProposalState enum
  * - Added depositThreshold() to get the minimum required deposit for a proposal and removed proposalThreshold
  */
-interface IB3TRGovernor is IERC165, IERC6372 {
+interface IB3TRGovernorV10 is IERC165, IERC6372 {
   /**
    * @dev Empty proposal or a mismatch between the parameters length for a proposal call.
    */
@@ -96,7 +96,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   error GovernorUnexpectedProposalState(
     uint256 proposalId,
-    GovernorTypes.ProposalState current,
+    GovernorTypesV10.ProposalState current,
     bytes32 expectedStates
   );
 
@@ -170,7 +170,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * Some actions are restricted to Standard proposals only, others to Grant proposals only.
    * eg. Executable proposals cannot be marked as in development if not executed yet but Succeeded.
    */
-  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
+  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypesV10.ProposalType proposalType);
 
   /// @dev The governance skip window has not been reached yet
   error GovernanceSkipWindowNotReached(uint256 proposalId);
@@ -267,7 +267,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when a proposal is created with type information.
    */
-  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
+  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypesV10.ProposalType proposalType);
 
   /**
    * @dev Emitted when the quorum numerator for a specific proposal type is updated.
@@ -275,13 +275,13 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event QuorumNumeratorUpdatedByType(
     uint256 oldNumerator,
     uint256 newNumerator,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypesV10.ProposalType proposalType
   );
   /**
    * @dev Emitted when the `votingThreshold` for a proposal type is set.
    */
   event VotingThresholdSetV2(
-    GovernorTypes.ProposalType proposalType,
+    GovernorTypesV10.ProposalType proposalType,
     uint256 oldVotingThreshold,
     uint256 newVotingThreshold
   );
@@ -290,7 +290,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Emitted when the deposit threshold percentage for a proposal type is set.
    */
   event DepositThresholdSetV2(
-    GovernorTypes.ProposalType proposalType,
+    GovernorTypesV10.ProposalType proposalType,
     uint256 oldDepositThreshold,
     uint256 newDepositThreshold
   );
@@ -298,7 +298,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Emitted when the deposit threshold cap for a proposal type is set.
    */
   event DepositThresholdCapSet(
-    GovernorTypes.ProposalType proposalType,
+    GovernorTypesV10.ProposalType proposalType,
     uint256 oldDepositThresholdCap,
     uint256 newDepositThresholdCap
   );
@@ -379,7 +379,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev Current state of a proposal, following Compound's convention
    */
-  function state(uint256 proposalId) external view returns (GovernorTypes.ProposalState);
+  function state(uint256 proposalId) external view returns (GovernorTypesV10.ProposalState);
 
   /**
    * @notice module:core
@@ -415,21 +415,21 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev The number of votes in support of a proposal required in order for a proposal to become active.
    */
-  function depositThresholdByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+  function depositThresholdByProposalType(GovernorTypesV10.ProposalType proposalTypeValue) external view returns (uint256);
 
   /**
    * @notice module:core
    * @dev The proposal Threshold Percentage for all type of proposal
    */
   function depositThresholdPercentageByProposalType(
-    GovernorTypes.ProposalType proposalTypeValue
+    GovernorTypesV10.ProposalType proposalTypeValue
   ) external view returns (uint256);
 
   /**
    * @notice module:core
    * @dev The voting threshold for a proposal type
    */
-  function votingThresholdByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+  function votingThresholdByProposalType(GovernorTypesV10.ProposalType proposalTypeValue) external view returns (uint256);
 
   /**
    * @notice module:core
@@ -658,7 +658,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev The type of a proposal.
    */
-  function proposalType(uint256 proposalId) external view returns (GovernorTypes.ProposalType);
+  function proposalType(uint256 proposalId) external view returns (GovernorTypesV10.ProposalType);
 
   /**
    * @notice Set the GalaxyMember contract
@@ -696,7 +696,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @return The GM weight for the proposal type
    */
   function getRequiredGMLevelByProposalType(
-    GovernorTypes.ProposalType proposalTypeValue
+    GovernorTypesV10.ProposalType proposalTypeValue
   ) external view returns (uint256);
 
   /**
@@ -705,7 +705,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @param newGMWeight The new GM weight for the proposal type
    * @notice e.g. setRequiredGMLevelByProposalType(0, 1) = GM level 1 is required to create a standard proposal
    */
-  function setRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) external;
+  function setRequiredGMLevelByProposalType(GovernorTypesV10.ProposalType proposalTypeValue, uint256 newGMWeight) external;
 
   /**
    * @notice Returns the deposit threshold cap for a proposal type.
@@ -713,7 +713,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @return uint256 The deposit threshold cap for the proposal type.
    */
   function depositThresholdCapByProposalType(
-    GovernorTypes.ProposalType proposalTypeValue
+    GovernorTypesV10.ProposalType proposalTypeValue
   ) external view returns (uint256);
 
   /**
@@ -728,109 +728,4 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice Returns currently active proposal IDs.
    */
   function getActiveProposals() external view returns (uint256[] memory);
-
-  // ------------------------------- Version 11 (Community Execution Framework) -------------------------------
-
-  // V11 Community Execution Framework errors (re-declared here so they appear in the
-  // contract ABI and can be matched by chai matchers / decoded by indexers).
-
-  /// @dev Caller is neither the proposal proposer nor a PROPOSAL_STATE_MANAGER_ROLE holder.
-  error UnauthorizedCommunityExecution(address caller, uint256 proposalId);
-
-  /// @dev The targeted proposal is not a Standard proposal.
-  error RestrictedProposalType(uint256 proposalId, GovernorTypes.ProposalType proposalType);
-
-  /// @dev No max budget was recorded for the proposal.
-  error MissingProposalBudget(uint256 proposalId);
-
-  /// @dev Payees array length is outside the allowed bounds.
-  error InvalidPayeeCount(uint256 provided, uint256 max);
-
-  /// @dev A payee entry has a zero address or zero amount.
-  error InvalidPayee(uint256 payeeIndex);
-
-  /// @dev Sum of payee amounts exceeds the recorded max budget.
-  error BudgetExceeded(uint256 requested, uint256 maxBudget);
-
-  /// @dev markAsInDevelopmentWithPayees was already called for this proposal.
-  error PayeesAlreadyFinalized(uint256 proposalId);
-
-  /// @dev Cannot update payees because at least one payout has already been claimed.
-  error PayoutAlreadyOccurred(uint256 proposalId, uint256 payeeIndex);
-
-  /// @dev Payee index out of bounds for the registered list.
-  error PayeeIndexOutOfBounds(uint256 proposalId, uint256 payeeIndex, uint256 length);
-
-  /// @dev The targeted payee has already been paid.
-  error PayoutAlreadyClaimed(uint256 proposalId, uint256 payeeIndex);
-
-  /// @dev claimAllPayouts found no unclaimed entries.
-  error NothingToClaim(uint256 proposalId);
-
-  /// @notice Emitted when a maximum implementation budget is recorded for a proposal.
-  event ProposalBudgetSet(uint256 indexed proposalId, uint256 maxBudget);
-
-  /// @notice Off-chain metadata registered alongside payees when entering development.
-  event ProposalInDevelopmentDetails(uint256 indexed proposalId, string devNickname, string discussionLink);
-
-  /// @notice Emitted once per payee at registration or after updatePayees.
-  event ProposalPayeeRegistered(
-    uint256 indexed proposalId,
-    uint256 indexed payeeIndex,
-    address indexed account,
-    uint256 amount
-  );
-
-  /// @notice Emitted when the registered payee list is replaced via updatePayees.
-  event ProposalPayeesReset(uint256 indexed proposalId);
-
-  /// @notice Emitted when a single payee successfully pulls their payout from Treasury.
-  event ProposalPayoutClaimed(
-    uint256 indexed proposalId,
-    uint256 indexed payeeIndex,
-    address indexed account,
-    uint256 amount
-  );
-
-  /// @notice Create a new Standard proposal with a Community-Execution maximum budget.
-  function proposeWithBudget(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
-    uint256 depositAmount,
-    uint256 maxBudget
-  ) external returns (uint256 proposalId);
-
-  /// @notice Mark a proposal as InDevelopment and register developer payees + metadata.
-  function markAsInDevelopmentWithPayees(
-    uint256 proposalId,
-    GovernorTypes.Payee[] calldata payees,
-    string calldata devNickname,
-    string calldata discussionLink
-  ) external;
-
-  /// @notice Replace the registered developer payees for an InDevelopment proposal.
-  function updatePayees(uint256 proposalId, GovernorTypes.Payee[] calldata payees) external;
-
-  /// @notice Pull payout for a single registered payee. Permissionless.
-  function claimPayout(uint256 proposalId, uint256 payeeIndex) external;
-
-  /// @notice Pull payouts for every unclaimed registered payee. Permissionless.
-  function claimAllPayouts(uint256 proposalId) external;
-
-  /// @notice The maximum implementation budget (B3TR wei) recorded for a proposal.
-  function getProposalBudget(uint256 proposalId) external view returns (uint256);
-
-  /// @notice The registered payee list for a proposal.
-  function getProposalPayees(uint256 proposalId) external view returns (GovernorTypes.Payee[] memory);
-
-  /// @notice True iff the payout at the given index for the given proposal has been claimed.
-  function isPayoutClaimed(uint256 proposalId, uint256 payeeIndex) external view returns (bool);
-
-  /// @notice The developer nickname and discussion link registered for a proposal.
-  function getProposalDevInfo(
-    uint256 proposalId
-  ) external view returns (string memory devNickname, string memory discussionLink);
 }

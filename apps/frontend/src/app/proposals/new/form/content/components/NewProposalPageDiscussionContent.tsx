@@ -1,9 +1,9 @@
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Box, Button, Card, Field, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { Box, Button, Card, Field, HStack, Heading, Input, InputGroup, Stack, Text, VStack } from "@chakra-ui/react"
+import { useGetTokenUsdPrice, useWallet } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import rehypeSanitize from "rehype-sanitize"
@@ -22,25 +22,40 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 type FormData = {
   markdownDescription: string
   metadataUri: string
+  maxBudget: string
 }
 export const NewProposalPageDiscussionContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
-  const { title, shortDescription, markdownDescription, actions, setData, metadataUri } = useProposalFormStore()
+  const { title, shortDescription, markdownDescription, actions, setData, metadataUri, maxBudget } =
+    useProposalFormStore()
   const { onMetadataUpload, metadataUploading: isMetadataUploading } = useUploadProposalMetadata()
-  const { control, formState, handleSubmit, setValue } = useForm<FormData>({
+  const { data: b3trUsdPrice } = useGetTokenUsdPrice("B3TR")
+  const { control, formState, handleSubmit, setValue, watch } = useForm<FormData>({
     defaultValues: {
       markdownDescription,
       metadataUri,
+      maxBudget: maxBudget ?? "",
     },
   })
   const { errors } = formState
+  const maxBudgetValue = watch("maxBudget")
+  const maxBudgetUsd = useMemo(() => {
+    const n = Number(maxBudgetValue)
+    if (!Number.isFinite(n) || n <= 0) return undefined
+    const price = Number(b3trUsdPrice)
+    if (!Number.isFinite(price) || price <= 0) return undefined
+    return n * price
+  }, [maxBudgetValue, b3trUsdPrice])
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (!title || !shortDescription || !data.markdownDescription)
         return control.setError("markdownDescription", { message: "Missing data" })
-      setData({ markdownDescription: data.markdownDescription })
+      setData({
+        markdownDescription: data.markdownDescription,
+        maxBudget: data.maxBudget?.trim() || undefined,
+      })
       const metadataUri = await onMetadataUpload({
         title,
         shortDescription,
@@ -136,6 +151,48 @@ export const NewProposalPageDiscussionContent = () => {
                 {t("Reset to default")}
               </Button>
             </Stack>
+          </Field.Root>
+
+          <Field.Root invalid={!!errors.maxBudget}>
+            <Field.Label>{t("Maximum implementation budget (B3TR)")}</Field.Label>
+            <Controller
+              name="maxBudget"
+              control={control}
+              rules={{
+                validate: value => {
+                  if (!value || value.trim() === "") return true // optional
+                  const n = Number(value)
+                  if (!Number.isFinite(n) || n <= 0) return t("Budget must be a positive number")
+                  return true
+                },
+              }}
+              render={({ field }) => (
+                <InputGroup>
+                  <Input
+                    data-testid="proposal-max-budget-input"
+                    type="number"
+                    min={0}
+                    step={1}
+                    placeholder="0"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </InputGroup>
+              )}
+            />
+            {errors.maxBudget ? (
+              <Field.ErrorText>{errors.maxBudget.message}</Field.ErrorText>
+            ) : (
+              <Field.HelperText color="gray.500" textStyle="sm">
+                {maxBudgetUsd
+                  ? t("Approx. {{usd}} USD — hard cap that may later be paid out to selected developers.", {
+                      usd: maxBudgetUsd.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+                    })
+                  : t(
+                      "Optional. Hard cap (in B3TR) that may later be paid out to selected developers once the proposal is completed.",
+                    )}
+              </Field.HelperText>
+            )}
           </Field.Root>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>

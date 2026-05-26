@@ -12,8 +12,10 @@ import { useGetProposalDeposits } from "@/api/contracts/governance/hooks/useGetP
 import { useGovernorVotesOnBlock } from "@/api/contracts/governance/hooks/useGovernorVotesOnBlock"
 import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasVotedInProposals"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { useProposalBudget } from "@/api/contracts/governance/hooks/useProposalBudget"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useProposalDepositThreshold } from "@/api/contracts/governance/hooks/useProposalDepositThreshold"
+import { useProposalPayees } from "@/api/contracts/governance/hooks/useProposalPayees"
 import { useProposalQuorumByType } from "@/api/contracts/governance/hooks/useProposalQuorumByType"
 import { useProposalQuorumNumeratorByType } from "@/api/contracts/governance/hooks/useProposalQuorumNumeratorByType"
 import { useProposalSnapshot } from "@/api/contracts/governance/hooks/useProposalSnapshot"
@@ -38,6 +40,7 @@ import {
   ProposalState,
   ProposalType,
 } from "@/hooks/proposals/grants/types"
+import { useClaimAllPayouts } from "@/hooks/useClaimAllPayouts"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
 import { useGetVot3UnlockedBalance } from "@/hooks/useGetVot3UnlockedBalance"
 import { useMarkProposalCompleted } from "@/hooks/useMarkProposalCompleted"
@@ -45,6 +48,7 @@ import { useMarkProposalInDevelopment } from "@/hooks/useMarkProposalInDevelopme
 import { useQueueProposal } from "@/hooks/useQueueProposal"
 import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
 
+import { MarkInDevelopmentModal } from "../MarkInDevelopmentModal/MarkInDevelopmentModal"
 import { ProposalCancelModal } from "../ProposalCancelModal/ProposalCancelModal"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
@@ -73,6 +77,7 @@ export const ProposalInteractionCard = ({
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
+  const [isMarkInDevModalOpen, setIsMarkInDevModalOpen] = useState(false)
   const proposalId = proposal?.id ?? ""
   // ===== HOOKS =====
   const { t } = useTranslation()
@@ -113,14 +118,36 @@ export const ProposalInteractionCard = ({
   const { sendTransaction: executeProposal } = useExecuteProposal({ proposalId })
   const { sendTransaction: markProposalInDevelopment } = useMarkProposalInDevelopment({ proposalId })
   const { sendTransaction: markProposalCompleted } = useMarkProposalCompleted({ proposalId })
+  const { sendTransaction: claimAllPayouts } = useClaimAllPayouts({ proposalId })
+
+  // V11: per-proposal community-execution data
+  const { data: proposalMaxBudget } = useProposalBudget(proposalId)
+  const { data: proposalPayees } = useProposalPayees(proposalId)
+  const hasBudget = !!proposalMaxBudget && proposalMaxBudget > 0n
+  const isPayeeMember = useMemo(
+    () =>
+      !!account?.address &&
+      !!proposalPayees &&
+      proposalPayees.some(p => compareAddresses(p.account, account.address ?? "")),
+    [account?.address, proposalPayees],
+  )
 
   const handleQueueProposal = useCallback(() => queueProposal(), [queueProposal])
 
   const handleExecuteProposal = useCallback(() => executeProposal(), [executeProposal])
 
-  const handleMarkProposalInDevelopment = useCallback(() => markProposalInDevelopment(), [markProposalInDevelopment])
+  const handleMarkProposalInDevelopment = useCallback(() => {
+    // V11: when a budget is set, open the payees modal; otherwise fall back to legacy single-tx flow.
+    if (hasBudget) {
+      setIsMarkInDevModalOpen(true)
+      return
+    }
+    markProposalInDevelopment()
+  }, [hasBudget, markProposalInDevelopment])
 
   const handleMarkProposalCompleted = useCallback(() => markProposalCompleted(), [markProposalCompleted])
+
+  const handlePayDevs = useCallback(() => claimAllPayouts(), [claimAllPayouts])
 
   // ===== COMPUTED VALUES =====
   const isProposer = compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
@@ -164,12 +191,12 @@ export const ProposalInteractionCard = ({
   }, [currentDepositAmount, proposalDepositThreshold])
 
   const canMarkInDevelopment = useMemo(() => {
-    if (proposal?.type === ProposalType.Grant || !hasProposalStateRole) {
-      return false
-    }
-
-    return proposal?.state === ProposalState.Executed || proposal?.state === ProposalState.Succeeded
-  }, [hasProposalStateRole, proposal?.state, proposal?.type])
+    if (proposal?.type === ProposalType.Grant) return false
+    if (proposal?.state !== ProposalState.Executed && proposal?.state !== ProposalState.Succeeded) return false
+    // V11: when budget > 0, the proposer is also authorized to register payees + mark InDevelopment.
+    if (hasBudget && isProposer) return true
+    return hasProposalStateRole
+  }, [hasProposalStateRole, isProposer, hasBudget, proposal?.state, proposal?.type])
 
   const canMarkCompleted = useMemo(() => {
     if (proposal?.type === ProposalType.Grant || !hasProposalStateRole) {
@@ -178,6 +205,15 @@ export const ProposalInteractionCard = ({
 
     return proposal?.state === ProposalState.InDevelopment
   }, [hasProposalStateRole, proposal?.state, proposal?.type])
+
+  // V11: Pay devs is visible to admin / proposer / any registered payee when the proposal is Completed
+  // and at least one payee hasn't been paid yet.
+  const canPayDevs = useMemo(() => {
+    if (proposal?.type === ProposalType.Grant) return false
+    if (proposal?.state !== ProposalState.Completed) return false
+    if (!proposalPayees || proposalPayees.length === 0) return false
+    return hasProposalStateRole || isProposer || isPayeeMember
+  }, [hasProposalStateRole, isProposer, isPayeeMember, proposalPayees, proposal?.state, proposal?.type])
 
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
@@ -480,6 +516,11 @@ export const ProposalInteractionCard = ({
                   {t("Mark as completed")}
                 </Button>
               )}
+              {canPayDevs && (
+                <Button variant="primary" w="full" flex={1} onClick={handlePayDevs}>
+                  {t("Pay devs")}
+                </Button>
+              )}
             </HStack>
           </Card.Body>
         </Card.Root>
@@ -528,6 +569,16 @@ export const ProposalInteractionCard = ({
         proposalTypeText={proposalTypeText}
         onClose={() => setIsCancelModalOpen(false)}
       />
+
+      {/* V11: Mark In Development with payees modal */}
+      {hasBudget && (
+        <MarkInDevelopmentModal
+          proposalId={proposalId}
+          maxBudget={proposalMaxBudget ?? 0n}
+          isOpen={isMarkInDevModalOpen}
+          onClose={() => setIsMarkInDevModalOpen(false)}
+        />
+      )}
     </>
   )
 }

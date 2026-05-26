@@ -16,6 +16,8 @@ export type ProposalFormStoreState = {
   votingStartRoundId?: number
   depositAmount?: number
   metadataUri?: string
+  /** V11: maximum B3TR budget cap for community-execution payouts, ether units as typed by the user. */
+  maxBudget?: string
   setData: (data: Partial<ProposalFormStoreState>) => void
   clearData: () => void
 }
@@ -32,6 +34,7 @@ export const useProposalFormStore = create<ProposalFormStoreState>()(
         actions: [],
         votingStartRoundId: undefined,
         metadataUri: undefined,
+        maxBudget: undefined,
         setData: (data: Partial<ProposalFormStoreState>) =>
           set(state => ({
             ...state,
@@ -45,6 +48,7 @@ export const useProposalFormStore = create<ProposalFormStoreState>()(
             actions: [],
             votingStartRoundId: undefined,
             metadataUri: undefined,
+            maxBudget: undefined,
           }),
       }),
       {
