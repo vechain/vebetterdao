@@ -30,14 +30,14 @@ VeBetterDAO is the monorepo behind the [VeBetterDAO](https://governance.vebetter
 
 ## What's in here
 
-| Path | What it is |
-| --- | --- |
-| `apps/frontend` | Next.js 16 governance dApp |
-| `packages/contracts` | VeBetterDAO Solidity smart contracts (Hardhat) |
-| `packages/lambda` | AWS Lambda functions (round automation, relayer, NFT minting, etc.) |
-| `packages/config` | Per-environment configuration and contract addresses |
-| `packages/constants` | Shared constants |
-| `packages/utils` | Shared utilities |
+| Path                 | What it is                                                          |
+| -------------------- | ------------------------------------------------------------------- |
+| `apps/frontend`      | Next.js 16 governance dApp                                          |
+| `packages/contracts` | VeBetterDAO Solidity smart contracts (Hardhat)                      |
+| `packages/lambda`    | AWS Lambda functions (round automation, relayer, NFT minting, etc.) |
+| `packages/config`    | Per-environment configuration and contract addresses                |
+| `packages/constants` | Shared constants                                                    |
+| `packages/utils`     | Shared utilities                                                    |
 
 **Related repos:**
 
@@ -60,12 +60,12 @@ We recommend installing the [Monorepo Workspace](https://marketplace.visualstudi
 
 ### Prerequisites
 
-| Tool | Version / Notes |
-| --- | --- |
+| Tool        | Version / Notes                                   |
+| ----------- | ------------------------------------------------- |
 | **Node.js** | See `.nvmrc` (currently v20.19.0) — use `nvm use` |
-| **Yarn** | 1.x (classic) |
-| **Docker** | With the Compose plugin (`docker compose`) |
-| **Make** | Pre-installed on macOS/Linux |
+| **Yarn**    | 1.x (classic)                                     |
+| **Docker**  | With the Compose plugin (`docker compose`)        |
+| **Make**    | Pre-installed on macOS/Linux                      |
 
 ### Install packages
 
@@ -79,14 +79,14 @@ yarn install
 ```
 cp .env.example .env
 yarn dev:up         # join shared @vechain/dev-stack, deploy contracts to thor-solo
-yarn frontend:dev   # start the frontend (run in a separate terminal)
+yarn dev:local   # start the frontend (run in a separate terminal)
 ```
 
-`yarn dev:up` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects (stargate, multisig). It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, and registers their addresses with the stack. `yarn frontend:dev` then runs the Next.js dev server.
+`yarn dev:up` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects (stargate, multisig). It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, and registers their addresses with the stack. `yarn dev:local` then runs the Next.js dev server.
 
 If the contracts are already deployed and the chain is intact, the deploy step short-circuits and just re-uses `packages/config/local.ts`. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
 
-> **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn frontend:dev`.
+> **Chakra typegen:** to avoid Chakra ESLint errors on a fresh checkout (or after theme changes), run `yarn chakra:typegen` once, or `yarn chakra:typegen:watch` in a separate terminal alongside `yarn dev:local`.
 
 > **First run note:** the script compiles and deploys ~30 contracts to thor-solo. **This can take up to 5 minutes.** Log lines will appear continuously — do not Ctrl-C.
 
