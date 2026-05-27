@@ -74,7 +74,7 @@ export const AdminPageContent = () => {
             {canSeePauseTab && <option value="pausing">{"Pausing"}</option>}
             {canSeeVeBetterPassportTab && <option value="vebetter-passport">{"VeBetter Passport"}</option>}
             {canSeeGalaxyMemberTab && <option value="galaxy-member">{"Galaxy Member"}</option>}
-            {canSeeMigrationTab && <option value="migration">{"Migration"}</option>}
+            {canSeeMigrationTab && <option value="roles-migration">{"Roles Migration"}</option>}
           </NativeSelect.Field>
           <NativeSelect.Indicator />
         </NativeSelect.Root>
@@ -100,7 +100,7 @@ export const AdminPageContent = () => {
         {canSeePauseTab && <Tabs.Trigger value="pausing">{"Pausing"}</Tabs.Trigger>}
         {canSeeVeBetterPassportTab && <Tabs.Trigger value="vebetter-passport">{"VeBetter Passport"}</Tabs.Trigger>}
         {canSeeGalaxyMemberTab && <Tabs.Trigger value="galaxy-member">{"Galaxy Member"}</Tabs.Trigger>}
-        {canSeeMigrationTab && <Tabs.Trigger value="migration">{"Migration"}</Tabs.Trigger>}
+        {canSeeMigrationTab && <Tabs.Trigger value="roles-migration">{"Roles Migration"}</Tabs.Trigger>}
       </Tabs.List>
 
       <Tabs.Content value="emissions">
@@ -165,7 +165,7 @@ export const AdminPageContent = () => {
       )}
 
       {canSeeMigrationTab && (
-        <Tabs.Content value="migration">
+        <Tabs.Content value="roles-migration">
           <MigrationTab />
         </Tabs.Content>
       )}

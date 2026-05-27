@@ -29,7 +29,8 @@ export const useDiscoverHeldRoles = (address?: string): DiscoveryResult => {
   )
 
   return useMemo(() => {
-    const isLoading = !address || queries.some(q => q.isLoading || q.isFetching)
+    if (!address) return { isLoading: false, heldRoles: [] }
+    const isLoading = queries.some(q => q.isLoading || q.isFetching)
     const heldRoles: HeldRole[] = []
 
     ACCESS_CONTROLLED_CONTRACTS.forEach((contract, idx) => {
