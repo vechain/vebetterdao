@@ -60,11 +60,11 @@ export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose,
 
   const txUI = {
     waitingConfirmation: {
-      title: t(isEdit ? "Updating implementation details..." : "Registering implementation details..."),
+      title: t(isEdit ? "Updating development details..." : "Registering development details..."),
     },
-    success: { title: t(isEdit ? "Implementation details updated" : "Proposal moved to In Development") },
+    success: { title: t(isEdit ? "Development details updated" : "Proposal moved to In Development") },
     error: {
-      title: t(isEdit ? "Failed to update implementation details" : "Failed to register implementation details"),
+      title: t(isEdit ? "Failed to update development details" : "Failed to register development details"),
     },
   }
   const onTxSuccess = () => {
@@ -141,11 +141,11 @@ export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose,
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      ariaTitle={t(isEdit ? "Edit implementation details" : "Register implementation details")}
+      ariaTitle={t(isEdit ? "Edit development details" : "Register development details")}
       showCloseButton
       isCloseable>
       <VStack w="full" align="stretch" gap={6}>
-        <Heading size="lg">{t(isEdit ? "Edit implementation details" : "Register implementation details")}</Heading>
+        <Heading size="lg">{t(isEdit ? "Edit development details" : "Register development details")}</Heading>
         <Text textStyle="sm" color="gray.500">
           {t(
             "The implementation cost approved by voters will be paid out to a single payout address you choose below. That wallet is responsible for forwarding funds to the actual contributors — developers, project managers, designers, etc. — off chain. You can edit these details up until the payout is claimed.",

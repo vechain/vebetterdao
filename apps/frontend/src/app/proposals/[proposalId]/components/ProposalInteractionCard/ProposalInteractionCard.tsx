@@ -600,7 +600,7 @@ export const ProposalInteractionCard = ({
         onClose={() => setIsMarkInDevModalOpen(false)}
       />
 
-      {/* V11: Edit implementation details modal — same form, but routes through updateCommunityExecution. */}
+      {/* V11: Edit development details modal — same form, but routes through updateCommunityExecution. */}
       <MarkInDevelopmentModal
         proposalId={proposalId}
         maxBudget={proposalMaxBudget ?? 0n}
