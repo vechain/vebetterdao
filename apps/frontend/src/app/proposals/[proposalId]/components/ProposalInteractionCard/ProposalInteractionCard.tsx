@@ -535,7 +535,7 @@ export const ProposalInteractionCard = ({
               )}
               {canEditCommunityExecution && (
                 <Button variant="secondary" w="full" flex={1} onClick={() => setIsEditCommunityExecutionOpen(true)}>
-                  {t("Edit implementation details")}
+                  {t("Edit details")}
                 </Button>
               )}
               {canPayDevs && (
