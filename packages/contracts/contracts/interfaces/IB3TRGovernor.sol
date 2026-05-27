@@ -734,96 +734,86 @@ interface IB3TRGovernor is IERC165, IERC6372 {
 
   // ------------------------------- Version 11 (Community Execution Framework) -------------------------------
 
-  // V11 Community Execution Framework errors (re-declared here so they appear in the
-  // contract ABI and can be matched by chai matchers / decoded by indexers).
+  // V11 errors re-declared on the interface so they appear in the contract ABI and can be
+  // matched by chai matchers / decoded by indexers. The GovernorRestrictedProposal error
+  // declared earlier in this interface (line ~173) is reused for non-Standard proposals.
 
   /// @dev Caller is neither the proposal proposer nor a PROPOSAL_STATE_MANAGER_ROLE holder.
   error UnauthorizedCommunityExecution(address caller, uint256 proposalId);
 
-  // Note: V11 also reuses the existing GovernorRestrictedProposal error declared above
-  // (line ~173) when the proposal is not a Standard proposal.
-
-  /// @dev No max budget was recorded for the proposal.
+  /// @dev No max budget was recorded for the proposal but a non-zero payee was provided.
   error MissingProposalBudget(uint256 proposalId);
 
-  /// @dev Payees array length is outside the allowed bounds.
-  error InvalidPayeeCount(uint256 provided, uint256 max);
+  /// @dev Payee is the zero address while the proposal has a non-zero implementation cost.
+  error InvalidPayeeAddress();
 
-  /// @dev A payee entry has a zero address or zero amount.
-  error InvalidPayee(uint256 payeeIndex);
+  /// @dev Contributors array is larger than maxContributorsPerProposal.
+  error TooManyContributors(uint256 provided, uint256 max);
 
-  /// @dev Sum of payee amounts exceeds the recorded max budget.
-  error BudgetExceeded(uint256 requested, uint256 maxBudget);
-
-  /// @dev markAsInDevelopmentWithPayees was already called for this proposal.
+  /// @dev markAsInDevelopment was already called for this proposal.
   error PayeesAlreadyFinalized(uint256 proposalId);
 
-  /// @dev Cannot update payees because at least one payout has already been claimed.
-  error PayoutAlreadyOccurred(uint256 proposalId, uint256 payeeIndex);
+  /// @dev The payout was already pulled from Treasury.
+  error PayoutAlreadyClaimed(uint256 proposalId);
 
-  /// @dev Payee index out of bounds for the registered list.
-  error PayeeIndexOutOfBounds(uint256 proposalId, uint256 payeeIndex, uint256 length);
+  /// @dev The proposal is not in a state where the budget can be paid out (missing payee or budget).
+  error NotReadyToClaim(uint256 proposalId);
 
-  /// @dev The targeted payee has already been paid.
-  error PayoutAlreadyClaimed(uint256 proposalId, uint256 payeeIndex);
-
-  /// @dev claimAllPayouts found no unclaimed entries.
-  error NothingToClaim(uint256 proposalId);
-
-  /// @notice Emitted when a maximum implementation budget is recorded for a proposal.
+  /// @notice Emitted when an implementation-cost budget is recorded for a proposal.
   event ProposalBudgetSet(uint256 indexed proposalId, uint256 maxBudget);
 
-  /// @notice Off-chain metadata registered alongside payees when entering development.
-  event ProposalInDevelopmentDetails(uint256 indexed proposalId, string devNickname, string discussionLink);
-
-  /// @notice Emitted once per payee at registration or after updatePayees.
-  event ProposalPayeeRegistered(
+  /// @notice Off-chain metadata registered alongside the payee when entering development
+  ///         or replaced via updateCommunityExecution before payout.
+  event ProposalInDevelopmentDetails(
     uint256 indexed proposalId,
-    uint256 indexed payeeIndex,
-    address indexed account,
-    uint256 amount
+    address indexed payee,
+    string description,
+    string implementationDiscussion
   );
 
-  /// @notice Emitted when the registered payee list is replaced via updatePayees.
-  event ProposalPayeesReset(uint256 indexed proposalId);
+  /// @notice Emitted when the contributor handle list is (re)set for a proposal.
+  event ProposalContributorsSet(uint256 indexed proposalId, string[] contributors);
 
-  /// @notice Emitted when a single payee successfully pulls their payout from Treasury.
-  event ProposalPayoutClaimed(
-    uint256 indexed proposalId,
-    uint256 indexed payeeIndex,
-    address indexed account,
-    uint256 amount
-  );
+  /// @notice Emitted when the single registered payee pulls the implementation cost from Treasury.
+  event ProposalPayoutClaimed(uint256 indexed proposalId, address indexed payee, uint256 amount);
 
-  /// @notice Mark a proposal as InDevelopment and optionally register developer payees + metadata.
-  ///         Pass `payees: []` for proposals created with `maxBudget == 0`.
+  /// @notice Mark a proposal as InDevelopment and register the V11 payee + metadata.
   function markAsInDevelopment(
     uint256 proposalId,
-    GovernorTypes.Payee[] calldata payees,
-    string calldata devNickname,
-    string calldata discussionLink
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
   ) external;
 
-  /// @notice Replace the registered developer payees for an InDevelopment proposal.
-  function updatePayees(uint256 proposalId, GovernorTypes.Payee[] calldata payees) external;
+  /// @notice Update the payee / description / implementation-discussion / contributors of a
+  ///         proposal whose payout has not yet been claimed.
+  function updateCommunityExecution(
+    uint256 proposalId,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
+  ) external;
 
-  /// @notice Pull payout for a single registered payee. Permissionless.
-  function claimPayout(uint256 proposalId, uint256 payeeIndex) external;
+  /// @notice Pull the full implementation cost from Treasury to the registered payee. Permissionless.
+  function claimPayout(uint256 proposalId) external;
 
-  /// @notice Pull payouts for every unclaimed registered payee. Permissionless.
-  function claimAllPayouts(uint256 proposalId) external;
-
-  /// @notice The maximum implementation budget (B3TR wei) recorded for a proposal.
+  /// @notice The maximum implementation cost (B3TR wei) recorded for a proposal.
   function getProposalBudget(uint256 proposalId) external view returns (uint256);
 
-  /// @notice The registered payee list for a proposal.
-  function getProposalPayees(uint256 proposalId) external view returns (GovernorTypes.Payee[] memory);
+  /// @notice The single registered payee for a proposal.
+  function getProposalPayee(uint256 proposalId) external view returns (address);
 
-  /// @notice True iff the payout at the given index for the given proposal has been claimed.
-  function isPayoutClaimed(uint256 proposalId, uint256 payeeIndex) external view returns (bool);
+  /// @notice True iff the payout has been pulled from Treasury.
+  function isProposalPaid(uint256 proposalId) external view returns (bool);
 
-  /// @notice The developer nickname and discussion link registered for a proposal.
-  function getProposalDevInfo(
-    uint256 proposalId
-  ) external view returns (string memory devNickname, string memory discussionLink);
+  /// @notice The free-text description registered alongside the V11 payee.
+  function getProposalDescription(uint256 proposalId) external view returns (string memory);
+
+  /// @notice The implementation-discussion link for a proposal.
+  function getProposalImplementationDiscussion(uint256 proposalId) external view returns (string memory);
+
+  /// @notice The contributor handle list (github / twitter URLs etc.) for a proposal.
+  function getProposalContributors(uint256 proposalId) external view returns (string[] memory);
 }

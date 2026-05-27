@@ -168,10 +168,10 @@ export const NewProposalPageDiscussionContent = () => {
           </Field.Root>
 
           <VStack gap={2} align="flex-start" w="full">
-            <Heading size={["sm", "md"]}>{t("How much B3TR is the maximum implementation budget?")}</Heading>
+            <Heading size={["sm", "md"]}>{t("How much B3TR is the implementation cost?")}</Heading>
             <Text textStyle="sm" color="gray.500">
               {t(
-                "Hard cap (in B3TR) that may later be paid out from the Treasury to the developers selected to implement this proposal. Set to 0 if the proposal does not require a payout.",
+                "Hard cap (in B3TR) that may later be paid out from the Treasury to the single payout address you select once the proposal is in development. The payout address is then responsible for distributing funds off chain to all contributors. Set to 0 if the proposal does not require a payout.",
               )}
             </Text>
 

@@ -156,10 +156,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Should NOT be able to mark as IN-DEVELOPMENT from Succeeded state
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await expect(governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")).to.be.revertedWithCustomError(
-        governor,
-        "GovernorRestrictedProposal",
-      )
+      await expect(
+        governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", []),
+      ).to.be.revertedWithCustomError(governor, "GovernorRestrictedProposal")
 
       // State should remain Succeeded
       expect(await governor.state(proposalId)).to.equal(4) // Succeeded
@@ -207,7 +206,8 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       await waitForVotingPeriodToEnd(proposalId)
 
       // Random account should NOT be able to mark as IN-DEVELOPMENT
-      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId, [], "", "")).to.be.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", []))
+        .to.be.reverted
     })
     it("(EXECUTABLE PROPOSAL) Should NOT be able to mark as IN-DEVELOPMENT if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       //Create and execute a proposal doing a tokenDetails call
@@ -239,7 +239,8 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       })?.args[0]
 
       // Random account should NOT be able to mark as IN-DEVELOPMENT
-      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId, [], "", "")).to.be.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", []))
+        .to.be.reverted
     })
     it("(GRANT PROPOSAL) Should NOT be able to mark as IN-DEVELOPMENT if not the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
@@ -265,7 +266,8 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       )
 
       // Random account should NOT be able to mark as IN-DEVELOPMENT
-      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId, [], "", "")).to.be.reverted
+      await expect(governor.connect(otherAccounts[3]).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", []))
+        .to.be.reverted
     })
     it("(TEXT-ONLY PROPOSAL) Should be able to mark as IN-DEVELOPMENT if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
       const targets: string[] = []
@@ -308,7 +310,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Should be able to mark as IN-DEVELOPMENT
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
     })
     it("(EXECUTABLE PROPOSAL) Should be able to mark as IN-DEVELOPMENT if the PROPOSAL_STATE_MANAGER_ROLE", async function () {
@@ -341,7 +343,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       })?.args[0]
       // Should be able to mark as IN-DEVELOPMENT
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
     })
     it("(GRANT PROPOSAL) Should NOT be able to mark as IN-DEVELOPMENT even with the PROPOSAL_STATE_MANAGER_ROLE", async function () {
@@ -370,10 +372,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
       // Should be able to mark as IN-DEVELOPMENT
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
 
-      await expect(governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")).to.be.revertedWithCustomError(
-        governor,
-        "GovernorRestrictedProposal",
-      )
+      await expect(
+        governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", []),
+      ).to.be.revertedWithCustomError(governor, "GovernorRestrictedProposal")
     })
   })
   describe("Permissions - Mark as COMPLETED", function () {
@@ -518,7 +519,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Should be able to mark as IN-DEVELOPMENT
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Should be able to mark as COMPLETED
@@ -556,7 +557,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Should be able to mark as IN-DEVELOPMENT
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Should be able to mark as COMPLETED
@@ -588,10 +589,9 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Should NOT be able to mark as COMPLETED
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await expect(governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")).to.be.revertedWithCustomError(
-        governor,
-        "GovernorRestrictedProposal",
-      )
+      await expect(
+        governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", []),
+      ).to.be.revertedWithCustomError(governor, "GovernorRestrictedProposal")
       await expect(governor.connect(owner).markAsCompleted(proposalId)).to.be.revertedWithCustomError(
         governor,
         "GovernorRestrictedProposal",
@@ -640,7 +640,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Mark as IN-DEVELOPMENT first
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Random account should NOT be able to reset development state
@@ -677,7 +677,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Mark as IN-DEVELOPMENT first
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Random account should NOT be able to reset development state
@@ -750,7 +750,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Should be able to mark as IN-DEVELOPMENT
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Should be able to reset development state
@@ -788,7 +788,7 @@ describe("Governance - Mark in development/completed - @shard4k", function () {
 
       // Should be able to mark as IN-DEVELOPMENT
       await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
-      await governor.connect(owner).markAsInDevelopment(proposalId, [], "", "")
+      await governor.connect(owner).markAsInDevelopment(proposalId, ethers.ZeroAddress, "", "", [])
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
 
       // Should be able to reset development state

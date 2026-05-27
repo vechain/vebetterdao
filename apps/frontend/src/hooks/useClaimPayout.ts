@@ -6,10 +6,9 @@ import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
 
 import {
-  getIsPayoutClaimedQueryKey,
-  getIsPayoutClaimedQueryKeyPrefix,
-} from "../api/contracts/governance/hooks/useIsPayoutClaimed"
-import { getProposalPayeesQueryKey } from "../api/contracts/governance/hooks/useProposalPayees"
+  getIsProposalPaidQueryKey,
+  getIsProposalPaidQueryKeyPrefix,
+} from "../api/contracts/governance/hooks/useIsProposalPaid"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getEventsKey } from "./useEvents"
@@ -22,34 +21,29 @@ type Props = {
   transactionModalCustomUI?: TransactionCustomUI
 }
 
-type SendArgs = { payeeIndex: number }
-
 /**
- * V11: pull a single payee's payout from Treasury. Permissionless at the contract level.
+ * V11: pull the full implementation cost from Treasury to the single registered payee.
+ * Permissionless at the contract level; UI surfaces this to admin, proposer, or the payee.
  */
 export const useClaimPayout = ({ proposalId, onSuccess, transactionModalCustomUI }: Props) => {
-  const clauseBuilder = useCallback(
-    ({ payeeIndex }: SendArgs) => {
-      return [
-        buildClause({
-          to: getConfig().b3trGovernorAddress,
-          contractInterface: GovernorInterface,
-          method: "claimPayout",
-          args: [proposalId, payeeIndex],
-          comment: `pay registered developer payee #${payeeIndex} from Treasury`,
-        }),
-      ]
-    },
-    [proposalId],
-  )
+  const clauseBuilder = useCallback(() => {
+    return [
+      buildClause({
+        to: getConfig().b3trGovernorAddress,
+        contractInterface: GovernorInterface,
+        method: "claimPayout",
+        args: [proposalId],
+        comment: "pull implementation cost from Treasury to the registered payee",
+      }),
+    ]
+  }, [proposalId])
 
   const refetchQueryKeys = useMemo(
     () => [
-      getProposalPayeesQueryKey(proposalId),
-      getIsPayoutClaimedQueryKey(proposalId, 0),
-      // V11: prefix invalidation flips every per-payee Paid/Pending badge in one shot.
-      getIsPayoutClaimedQueryKeyPrefix(),
-      // ProposalPayoutClaimed event stream drives the timeline Paid step.
+      getIsProposalPaidQueryKey(proposalId),
+      // Prefix invalidation in case multiple proposals are cached.
+      getIsProposalPaidQueryKeyPrefix(),
+      // Event stream for the Paid timeline step.
       getEventsKey({ eventName: "ProposalPayoutClaimed" }),
     ],
     [proposalId],

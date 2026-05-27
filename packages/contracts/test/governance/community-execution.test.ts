@@ -26,11 +26,14 @@ import {
 /**
  * V11 Community Execution Framework end-to-end coverage.
  *
- * Validates the new flow on top of the existing markAsInDevelopment /
- * markAsCompleted state machine: max budget at proposal creation,
- * payee registration via markAsInDevelopment (proposer OR admin),
- * admin-only updatePayees, anyone-can-call claimPayout / claimAllPayouts,
- * idempotency, budget cap, legacy backwards compatibility.
+ * Final V11 surface:
+ *   - propose(...args, maxBudget)      — single 7-arg signature
+ *   - markAsInDevelopment(id, payee, description, implementationDiscussion, contributors[])
+ *   - updateCommunityExecution(...)    — proposer or admin can edit until claimPayout()
+ *   - claimPayout(id)                  — anyone; pays full budget to the single registered payee
+ *
+ * One payout address per proposal; that wallet is then responsible for forwarding funds to
+ * any contributors / dev team off-chain. Contributors are stored as a string[] of handles.
  */
 describe("Governance - Community Execution Framework V11 - @shard4z", function () {
   let governor: B3TRGovernor
@@ -39,15 +42,15 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
   let treasury: Treasury
   let owner: SignerWithAddress
   let proposer: SignerWithAddress
-  let voter: SignerWithAddress
   let otherAccounts: SignerWithAddress[]
   let veBetterPassport: VeBetterPassport
   let emissions: Emissions
   let xAllocationVoting: XAllocationVoting
   let minterAccount: SignerWithAddress
-  let b3trContract: ContractFactory
+  // unused but destructured in the fixture
+  let _voter: SignerWithAddress
+  let _b3trContract: ContractFactory
 
-  // shorthands
   const E = (n: string | number) => ethers.parseEther(n.toString())
 
   beforeEach(async function () {
@@ -58,19 +61,18 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
     treasury = fixture.treasury
     owner = fixture.owner
     proposer = fixture.proposer
-    voter = fixture.voter
+    _voter = fixture.voter
     otherAccounts = fixture.otherAccounts
     veBetterPassport = fixture.veBetterPassport
     emissions = fixture.emissions
     xAllocationVoting = fixture.xAllocationVoting
     minterAccount = fixture.minterAccount
-    b3trContract = fixture.b3trContract
+    _b3trContract = fixture.b3trContract
 
     await setupProposer(proposer, b3tr, vot3, minterAccount)
   })
 
-  /// Helper: create a text-only Standard proposal (no on-chain actions), vote it through
-  /// to `Succeeded`. Optionally registers a max B3TR budget via the new propose(7) overload.
+  /// Helper: text-only Standard proposal voted through to `Succeeded`. Optional budget.
   async function createAndPassTextProposal(opts: { budget?: bigint; description?: string } = {}) {
     const targets: string[] = []
     const values: bigint[] = []
@@ -84,14 +86,12 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
 
     const proposalId = await getProposalIdFromTx(tx)
 
-    // Pay deposit so proposal can become active.
     const proposalDepositThreshold = await governor.proposalDepositThreshold(proposalId)
     await setupSupporter(proposer, vot3, proposalDepositThreshold, governor)
     await governor.connect(proposer).deposit(proposalDepositThreshold, proposalId)
 
     await waitForCurrentRoundToEnd()
 
-    // Setup three voters with passport whitelist
     await setupVoter(otherAccounts[0], b3tr, vot3, minterAccount, owner, veBetterPassport)
     await setupVoter(otherAccounts[1], b3tr, vot3, minterAccount, owner, veBetterPassport)
     await setupVoter(otherAccounts[2], b3tr, vot3, minterAccount, owner, veBetterPassport)
@@ -147,225 +147,197 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
   // ------------------- markAsInDevelopment ------------------- //
 
   describe("markAsInDevelopment", () => {
-    it("proposer can register payees and transitions to InDevelopment", async () => {
+    it("proposer can register a single payee and transition to InDevelopment", async () => {
       const budget = E(1000)
       const proposalId = await createAndPassTextProposal({ budget })
 
-      const payees = [
-        { account: otherAccounts[5].address, amount: E(600) },
-        { account: otherAccounts[6].address, amount: E(400) },
-      ]
+      const payee = otherAccounts[5].address
+      const contributors = ["github:alice", "twitter:@bob"]
+
       await expect(
-        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "alice", "https://forum.example/123"),
+        governor
+          .connect(proposer)
+          .markAsInDevelopment(
+            proposalId,
+            payee,
+            "Developed by Alice & Bob",
+            "https://forum.example/123",
+            contributors,
+          ),
       )
         .to.emit(governor, "ProposalInDevelopment")
         .and.to.emit(governor, "ProposalInDevelopmentDetails")
+        .and.to.emit(governor, "ProposalContributorsSet")
 
       expect(await governor.state(proposalId)).to.equal(8) // InDevelopment
-      const stored = await governor.getProposalPayees(proposalId)
-      expect(stored.length).to.equal(2)
-      expect(stored[0].account).to.equal(otherAccounts[5].address)
-      expect(stored[0].amount).to.equal(E(600))
-      expect(stored[1].amount).to.equal(E(400))
-      const [nickname, link] = await governor.getProposalDevInfo(proposalId)
-      expect(nickname).to.equal("alice")
-      expect(link).to.equal("https://forum.example/123")
+      expect(await governor.getProposalPayee(proposalId)).to.equal(payee)
+      expect(await governor.getProposalDescription(proposalId)).to.equal("Developed by Alice & Bob")
+      expect(await governor.getProposalImplementationDiscussion(proposalId)).to.equal("https://forum.example/123")
+      expect(await governor.getProposalContributors(proposalId)).to.deep.equal(contributors)
+      expect(await governor.isProposalPaid(proposalId)).to.equal(false)
     })
 
     it("PROPOSAL_STATE_MANAGER_ROLE admin can register on behalf of the proposer", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(500) })
-      const payees = [{ account: otherAccounts[5].address, amount: E(500) }]
-      await expect(governor.connect(owner).markAsInDevelopment(proposalId, payees, "bob", "https://x.example")).to.not
-        .be.reverted
+      await expect(
+        governor
+          .connect(owner)
+          .markAsInDevelopment(proposalId, otherAccounts[5].address, "desc", "https://x.example", []),
+      ).to.not.be.reverted
       expect(await governor.state(proposalId)).to.equal(8)
     })
 
-    it("an unrelated account cannot register payees", async () => {
+    it("an unrelated account cannot register", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
       await expect(
-        governor
-          .connect(otherAccounts[7])
-          .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l"),
+        governor.connect(otherAccounts[7]).markAsInDevelopment(proposalId, otherAccounts[5].address, "n", "l", []),
       ).to.be.revertedWithCustomError(governor, "UnauthorizedCommunityExecution")
     })
 
-    it("reverts when no budget was registered AND payees were provided", async () => {
-      // budget == 0 + payees.length > 0 → MissingProposalBudget
+    it("reverts when budget > 0 and payee is the zero address", async () => {
+      const proposalId = await createAndPassTextProposal({ budget: E(100) })
+      await expect(
+        governor.connect(proposer).markAsInDevelopment(proposalId, ethers.ZeroAddress, "n", "l", []),
+      ).to.be.revertedWithCustomError(governor, "InvalidPayeeAddress")
+    })
+
+    it("reverts when budget == 0 but a payee is provided", async () => {
       const proposalId = await createAndPassTextProposal({})
       await expect(
-        governor
-          .connect(proposer)
-          .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(1) }], "n", "l"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "n", "l", []),
       ).to.be.revertedWithCustomError(governor, "MissingProposalBudget")
     })
 
-    it("allows budget == 0 with empty payees (pure state transition, no payout flow)", async () => {
+    it("allows budget == 0 with zero payee (pure state transition, no payout flow)", async () => {
       const proposalId = await createAndPassTextProposal({})
       await expect(
-        governor.connect(proposer).markAsInDevelopment(proposalId, [], "alice", "https://x.example"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, ethers.ZeroAddress, "desc", "https://x", []),
       ).to.emit(governor, "ProposalInDevelopment")
       expect(await governor.state(proposalId)).to.equal(8)
-      // Metadata is still stored even when no payees registered.
-      const [nickname, link] = await governor.getProposalDevInfo(proposalId)
-      expect(nickname).to.equal("alice")
-      expect(link).to.equal("https://x.example")
-      // No payees recorded → no payout flow possible.
-      const stored = await governor.getProposalPayees(proposalId)
-      expect(stored.length).to.equal(0)
-    })
-
-    it("reverts when payee sum exceeds the budget", async () => {
-      const proposalId = await createAndPassTextProposal({ budget: E(1000) })
-      const payees = [
-        { account: otherAccounts[5].address, amount: E(600) },
-        { account: otherAccounts[6].address, amount: E(500) },
-      ]
-      await expect(
-        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l"),
-      ).to.be.revertedWithCustomError(governor, "BudgetExceeded")
-    })
-
-    it("reverts on empty payees", async () => {
-      const proposalId = await createAndPassTextProposal({ budget: E(100) })
-      await expect(
-        governor.connect(proposer).markAsInDevelopment(proposalId, [], "n", "l"),
-      ).to.be.revertedWithCustomError(governor, "InvalidPayeeCount")
-    })
-
-    it("reverts on zero-address / zero-amount payee", async () => {
-      const proposalId = await createAndPassTextProposal({ budget: E(100) })
-      await expect(
-        governor
-          .connect(proposer)
-          .markAsInDevelopment(proposalId, [{ account: ethers.ZeroAddress, amount: E(1) }], "n", "l"),
-      ).to.be.revertedWithCustomError(governor, "InvalidPayee")
-      await expect(
-        governor
-          .connect(proposer)
-          .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: 0 }], "n", "l"),
-      ).to.be.revertedWithCustomError(governor, "InvalidPayee")
+      expect(await governor.getProposalPayee(proposalId)).to.equal(ethers.ZeroAddress)
     })
 
     it("calling twice reverts (state already InDevelopment)", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
-      const payees = [{ account: otherAccounts[5].address, amount: E(100) }]
-      await governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l")
-      // After first call the state is InDevelopment which is NOT in {Succeeded, Executed},
-      // so validateStateBitmap reverts before reaching the PayeesAlreadyFinalized guard.
+      await governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "n", "l", [])
       await expect(
-        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l"),
+        governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "n", "l", []),
       ).to.be.revertedWithCustomError(governor, "GovernorUnexpectedProposalState")
     })
-  })
 
-  // ------------------- updatePayees ------------------- //
-
-  describe("updatePayees", () => {
-    it("admin can replace payees when no claim has happened", async () => {
-      const proposalId = await createAndPassTextProposal({ budget: E(1000) })
-      await governor
-        .connect(proposer)
-        .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(500) }], "n", "l")
-
-      const newPayees = [
-        { account: otherAccounts[6].address, amount: E(400) },
-        { account: otherAccounts[7].address, amount: E(300) },
-      ]
-      await expect(governor.connect(owner).updatePayees(proposalId, newPayees)).to.emit(governor, "ProposalPayeesReset")
-      const stored = await governor.getProposalPayees(proposalId)
-      expect(stored.length).to.equal(2)
-      expect(stored[0].account).to.equal(otherAccounts[6].address)
-      expect(stored[1].account).to.equal(otherAccounts[7].address)
-    })
-
-    it("non-admin cannot call updatePayees", async () => {
+    it("reverts when too many contributors are passed", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
-      await governor
-        .connect(proposer)
-        .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l")
+      const contributors = Array.from({ length: 21 }, (_, i) => `gh:user${i}`)
       await expect(
-        governor.connect(proposer).updatePayees(proposalId, [{ account: otherAccounts[6].address, amount: E(100) }]),
-      ).to.be.reverted
+        governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "n", "l", contributors),
+      ).to.be.revertedWithCustomError(governor, "TooManyContributors")
     })
   })
 
-  // ------------------- claim payouts ------------------- //
+  // ------------------- updateCommunityExecution ------------------- //
 
-  describe("claimPayout / claimAllPayouts", () => {
-    it("anyone can claim a single payout; idempotent at the (proposalId, index) granularity", async () => {
+  describe("updateCommunityExecution", () => {
+    it("proposer can update the payee + metadata until the payout is claimed", async () => {
+      const proposalId = await createAndPassTextProposal({ budget: E(500) })
+      await governor
+        .connect(proposer)
+        .markAsInDevelopment(proposalId, otherAccounts[5].address, "v1 desc", "https://v1", ["gh:a"])
+
+      const newPayee = otherAccounts[6].address
+      await expect(
+        governor
+          .connect(proposer)
+          .updateCommunityExecution(proposalId, newPayee, "v2 desc", "https://v2", ["gh:c", "gh:d"]),
+      )
+        .to.emit(governor, "ProposalInDevelopmentDetails")
+        .and.to.emit(governor, "ProposalContributorsSet")
+
+      expect(await governor.getProposalPayee(proposalId)).to.equal(newPayee)
+      expect(await governor.getProposalDescription(proposalId)).to.equal("v2 desc")
+      expect(await governor.getProposalContributors(proposalId)).to.deep.equal(["gh:c", "gh:d"])
+    })
+
+    it("admin can update even when caller is not the proposer", async () => {
+      const proposalId = await createAndPassTextProposal({ budget: E(500) })
+      await governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "v1", "https://v1", [])
+
+      await expect(
+        governor
+          .connect(owner)
+          .updateCommunityExecution(proposalId, otherAccounts[6].address, "admin", "https://admin", []),
+      ).to.not.be.reverted
+      expect(await governor.getProposalPayee(proposalId)).to.equal(otherAccounts[6].address)
+    })
+
+    it("unauthorized caller is rejected", async () => {
+      const proposalId = await createAndPassTextProposal({ budget: E(500) })
+      await governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "v1", "https://v1", [])
+
+      await expect(
+        governor.connect(otherAccounts[7]).updateCommunityExecution(proposalId, otherAccounts[6].address, "n", "l", []),
+      ).to.be.revertedWithCustomError(governor, "UnauthorizedCommunityExecution")
+    })
+
+    it("reverts after the payout has been claimed", async () => {
+      const budget = E(100)
+      const proposalId = await createAndPassTextProposal({ budget })
+      await governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "v1", "https://v1", [])
+      await governor.connect(owner).markAsCompleted(proposalId)
+      await b3tr.connect(minterAccount).mint(await treasury.getAddress(), budget)
+      await governor.connect(otherAccounts[8]).claimPayout(proposalId)
+
+      await expect(
+        governor
+          .connect(proposer)
+          .updateCommunityExecution(proposalId, otherAccounts[6].address, "v2", "https://v2", []),
+      ).to.be.revertedWithCustomError(governor, "PayoutAlreadyClaimed")
+    })
+  })
+
+  // ------------------- claimPayout ------------------- //
+
+  describe("claimPayout", () => {
+    it("anyone can trigger the payout; the full budget goes to the registered payee; idempotent", async () => {
       const budget = E(900)
       const proposalId = await createAndPassTextProposal({ budget })
-      const payees = [
-        { account: otherAccounts[5].address, amount: E(300) },
-        { account: otherAccounts[6].address, amount: E(600) },
-      ]
-      await governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l")
+      const payee = otherAccounts[5].address
+      await governor.connect(proposer).markAsInDevelopment(proposalId, payee, "desc", "https://x", ["gh:a", "gh:b"])
       await governor.connect(owner).markAsCompleted(proposalId)
 
-      // Fund Treasury so transfers can succeed.
       await b3tr.connect(minterAccount).mint(await treasury.getAddress(), budget)
-      const before5 = await b3tr.balanceOf(otherAccounts[5].address)
-      const before6 = await b3tr.balanceOf(otherAccounts[6].address)
+      const before = await b3tr.balanceOf(payee)
 
-      // Call from a random third party.
-      await expect(governor.connect(otherAccounts[8]).claimPayout(proposalId, 0)).to.emit(
+      await expect(governor.connect(otherAccounts[8]).claimPayout(proposalId)).to.emit(
         governor,
         "ProposalPayoutClaimed",
       )
 
-      expect(await b3tr.balanceOf(otherAccounts[5].address)).to.equal(before5 + E(300))
-      expect(await governor.isPayoutClaimed(proposalId, 0)).to.equal(true)
-      expect(await governor.isPayoutClaimed(proposalId, 1)).to.equal(false)
+      expect(await b3tr.balanceOf(payee)).to.equal(before + budget)
+      expect(await governor.isProposalPaid(proposalId)).to.equal(true)
 
-      // Double-claim same index reverts.
-      await expect(governor.connect(otherAccounts[8]).claimPayout(proposalId, 0)).to.be.revertedWithCustomError(
+      await expect(governor.connect(otherAccounts[8]).claimPayout(proposalId)).to.be.revertedWithCustomError(
         governor,
         "PayoutAlreadyClaimed",
       )
-
-      // Other index is still claimable.
-      await governor.connect(otherAccounts[5]).claimPayout(proposalId, 1)
-      expect(await b3tr.balanceOf(otherAccounts[6].address)).to.equal(before6 + E(600))
     })
 
     it("claim reverts before the proposal is Completed", async () => {
       const proposalId = await createAndPassTextProposal({ budget: E(100) })
-      await governor
-        .connect(proposer)
-        .markAsInDevelopment(proposalId, [{ account: otherAccounts[5].address, amount: E(100) }], "n", "l")
-      // not yet marked Completed
+      await governor.connect(proposer).markAsInDevelopment(proposalId, otherAccounts[5].address, "n", "l", [])
       await b3tr.connect(minterAccount).mint(await treasury.getAddress(), E(100))
-      await expect(governor.connect(owner).claimPayout(proposalId, 0)).to.be.revertedWithCustomError(
+      await expect(governor.connect(owner).claimPayout(proposalId)).to.be.revertedWithCustomError(
         governor,
         "GovernorUnexpectedProposalState",
       )
     })
 
-    it("claimAllPayouts pays every payee and skips already-claimed entries", async () => {
-      const budget = E(1000)
-      const proposalId = await createAndPassTextProposal({ budget })
-      const payees = [
-        { account: otherAccounts[5].address, amount: E(400) },
-        { account: otherAccounts[6].address, amount: E(600) },
-      ]
-      await governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l")
+    it("claim reverts when the proposal has no budget / no payee", async () => {
+      const proposalId = await createAndPassTextProposal({})
+      await governor.connect(proposer).markAsInDevelopment(proposalId, ethers.ZeroAddress, "desc", "https://x", [])
       await governor.connect(owner).markAsCompleted(proposalId)
-      await b3tr.connect(minterAccount).mint(await treasury.getAddress(), budget)
-
-      // pre-claim index 0
-      await governor.connect(otherAccounts[8]).claimPayout(proposalId, 0)
-      const balBefore5 = await b3tr.balanceOf(otherAccounts[5].address)
-      const balBefore6 = await b3tr.balanceOf(otherAccounts[6].address)
-
-      // claimAllPayouts pays index 1 only (0 is skipped)
-      await governor.connect(otherAccounts[9]).claimAllPayouts(proposalId)
-      expect(await b3tr.balanceOf(otherAccounts[5].address)).to.equal(balBefore5)
-      expect(await b3tr.balanceOf(otherAccounts[6].address)).to.equal(balBefore6 + E(600))
-
-      // running again reverts (nothing left to claim)
-      await expect(governor.connect(otherAccounts[9]).claimAllPayouts(proposalId)).to.be.revertedWithCustomError(
+      await expect(governor.connect(owner).claimPayout(proposalId)).to.be.revertedWithCustomError(
         governor,
-        "NothingToClaim",
+        "NotReadyToClaim",
       )
     })
   })
@@ -375,20 +347,6 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
   describe("misc", () => {
     it("version() reports 11", async () => {
       expect(await governor.version()).to.equal("11")
-    })
-
-    it("treasury() / maxPayeesPerProposal are accessible via the new initialized storage", async () => {
-      // No public getter for these in V11 to save contract size — verify via behavior:
-      // a claim path requires treasury to be set + budget validations require cap > 0.
-      // markAsInDevelopment with valid sum but oversize array would revert InvalidPayeeCount.
-      const proposalId = await createAndPassTextProposal({ budget: E(21) })
-      const payees = Array.from({ length: 21 }, (_, i) => ({
-        account: otherAccounts[i % otherAccounts.length].address,
-        amount: E(1),
-      }))
-      await expect(
-        governor.connect(proposer).markAsInDevelopment(proposalId, payees, "n", "l"),
-      ).to.be.revertedWithCustomError(governor, "InvalidPayeeCount")
     })
   })
 })

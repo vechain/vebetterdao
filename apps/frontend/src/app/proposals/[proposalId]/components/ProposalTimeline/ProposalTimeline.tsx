@@ -4,7 +4,7 @@ import { t } from "i18next"
 import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
-import { useProposalPayees } from "@/api/contracts/governance/hooks/useProposalPayees"
+import { useProposalPayee } from "@/api/contracts/governance/hooks/useProposalPayee"
 import { useProposalCompletedEvent } from "@/hooks/proposals/common/useProposalCompletedEvent.ts"
 import { useProposalInDevelopmentEvent } from "@/hooks/proposals/common/useProposalInDevelopmentEvent"
 import { useProposalPayoutClaimedEvent } from "@/hooks/proposals/common/useProposalPayoutClaimedEvent"
@@ -32,7 +32,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
   const { data: proposalInDevelopmentEvent } = useProposalInDevelopmentEvent(proposal?.id ?? "")
   const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposal?.id ?? "")
-  const { data: payees } = useProposalPayees(proposal?.id ?? "")
+  const { data: payee } = useProposalPayee(proposal?.id ?? "")
   const { data: payoutClaimedEvents } = useProposalPayoutClaimedEvent(proposal?.id ?? "")
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
   const proposalCreatedAt = proposal?.createdAt ?? 0
@@ -56,16 +56,16 @@ export const ProposalTimeline = ({ proposal }: Props) => {
 
   // V11: "Paid" step is reached when every registered payee has claimed their payout.
   // We use the timestamp of the latest ProposalPayoutClaimed event as the step date.
+  const hasPayee = !!payee && payee.toLowerCase() !== "0x0000000000000000000000000000000000000000"
   const allPayoutsClaimed = useMemo(() => {
-    if (!payees || payees.length === 0) return false
+    if (!hasPayee) return false
     if (!payoutClaimedEvents) return false
-    return payoutClaimedEvents.length >= payees.length
-  }, [payees, payoutClaimedEvents])
+    return payoutClaimedEvents.length >= 1
+  }, [hasPayee, payoutClaimedEvents])
   const paidTimestamp = useMemo(() => {
     if (!allPayoutsClaimed || !payoutClaimedEvents?.length) return undefined
-    return payoutClaimedEvents.reduce((acc, ev) => (ev.timestamp > acc ? ev.timestamp : acc), 0)
+    return payoutClaimedEvents[0]?.timestamp
   }, [allPayoutsClaimed, payoutClaimedEvents])
-  const hasPayees = !!payees && payees.length > 0
 
   const timelineDates = useMemo(() => {
     return {
@@ -230,7 +230,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
           : "",
       },
       // V11: "Paid" appears only for proposals that registered developer payees.
-      ...(hasPayees
+      ...(hasPayee
         ? [
             {
               label: t("Paid"),
@@ -248,7 +248,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     timelineDates.inDevelopmentStartDate,
     timelineDates.completedTimestamp,
     timelineDates.paidTimestamp,
-    hasPayees,
+    hasPayee,
     proposalVotingRoundId,
   ])
 

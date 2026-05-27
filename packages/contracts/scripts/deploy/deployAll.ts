@@ -1025,7 +1025,7 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [], // v9
       [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress(), config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS], // v10
-      [await treasury.getAddress(), 20], // v11: treasury + max payees per proposal
+      [await treasury.getAddress(), 20], // v11: treasury + max contributors per proposal
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],

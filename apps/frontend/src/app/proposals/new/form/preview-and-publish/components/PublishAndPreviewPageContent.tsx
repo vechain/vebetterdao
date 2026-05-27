@@ -149,12 +149,12 @@ export const PublishAndPreviewPageContent = () => {
           )}
 
           <VStack gap={2} align="flex-start" w="full">
-            <Heading size={["sm", "md"]}>{t("Implementation budget")}</Heading>
+            <Heading size={["sm", "md"]}>{t("Implementation cost")}</Heading>
             {maxBudgetNumber > 0 ? (
               <>
                 <Text textStyle="sm" color="gray.500">
                   {t(
-                    "Hard cap that may be paid out from the Treasury to the developers selected to implement this proposal.",
+                    "Hard cap that may be paid out from the Treasury. After the proposal is approved you'll register a single payout address — that wallet receives the full amount in one transfer and is then responsible for distributing funds off chain to all contributors (devs, PMs, designers, etc.).",
                   )}
                 </Text>
                 <HStack gap={3} align="center" mt={2}>
@@ -171,7 +171,7 @@ export const PublishAndPreviewPageContent = () => {
               </>
             ) : (
               <Text textStyle="sm" color="gray.500">
-                {t("This proposal has no implementation budget — no developer payout flow will be available.")}
+                {t("This proposal has no implementation cost — no payout will be made from Treasury.")}
               </Text>
             )}
           </VStack>

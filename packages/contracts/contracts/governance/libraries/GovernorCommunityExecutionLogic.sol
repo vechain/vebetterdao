@@ -30,8 +30,9 @@ import { ITreasury } from "../../interfaces/ITreasury.sol";
 
 /// @title GovernorCommunityExecutionLogic
 /// @notice Library implementing the V11 Community Execution Framework: per-proposal
-///         B3TR budgets, developer-payee registration, and pull-based payouts from
-///         the Treasury after the proposal is marked Completed.
+///         B3TR implementation cost, a single payout address that receives the full
+///         budget after the proposal is marked Completed, free-text description /
+///         implementation-discussion link, and a list of contributor handles.
 /// @dev All state-changing functions are designed to be called via delegatecall from
 ///      {B3TRGovernor}; they read and write the namespaced GovernorStorage slot and
 ///      use `msg.sender` (which resolves to the original caller in delegatecall
@@ -39,78 +40,56 @@ import { ITreasury } from "../../interfaces/ITreasury.sol";
 library GovernorCommunityExecutionLogic {
   // ------------------ EVENTS ------------------ //
 
-  /// @notice Emitted when a maximum implementation budget is recorded for a proposal.
-  /// @dev Emitted from {setProposalBudget}, called during `propose(7)`.
+  /// @notice Emitted when an implementation-cost budget is recorded for a proposal.
   event ProposalBudgetSet(uint256 indexed proposalId, uint256 maxBudget);
 
   /// @notice Re-declared backward-compatible event so the new flow keeps emitting the
-  ///         same signature as the legacy `markAsInDevelopment(uint256)` path.
+  ///         same signature as the legacy `markAsInDevelopment(uint256)` path used to.
   event ProposalInDevelopment(uint256 proposalId);
 
-  /// @notice Off-chain metadata registered alongside payees when entering development.
-  event ProposalInDevelopmentDetails(uint256 indexed proposalId, string devNickname, string discussionLink);
-
-  /// @notice Emitted once per payee at registration or after {updatePayees}.
-  event ProposalPayeeRegistered(
+  /// @notice Off-chain metadata registered alongside the payee when entering development
+  ///         (or replaced via {updateCommunityExecution} before payout).
+  event ProposalInDevelopmentDetails(
     uint256 indexed proposalId,
-    uint256 indexed payeeIndex,
-    address indexed account,
-    uint256 amount
+    address indexed payee,
+    string description,
+    string implementationDiscussion
   );
 
-  /// @notice Emitted when the registered payee list is replaced via {updatePayees}.
-  event ProposalPayeesReset(uint256 indexed proposalId);
+  /// @notice Emitted when the contributor handles are (re)set for a proposal.
+  event ProposalContributorsSet(uint256 indexed proposalId, string[] contributors);
 
-  /// @notice Emitted when a single payee successfully pulls their payout from Treasury.
-  event ProposalPayoutClaimed(
-    uint256 indexed proposalId,
-    uint256 indexed payeeIndex,
-    address indexed account,
-    uint256 amount
-  );
+  /// @notice Emitted when the single payout is pulled from Treasury to the registered payee.
+  event ProposalPayoutClaimed(uint256 indexed proposalId, address indexed payee, uint256 amount);
 
   // ------------------ ERRORS ------------------ //
 
   /// @dev Caller is neither the proposal proposer nor a PROPOSAL_STATE_MANAGER_ROLE holder.
   error UnauthorizedCommunityExecution(address caller, uint256 proposalId);
 
-  /// @dev The targeted proposal is not a Standard proposal (e.g. it is a Grant).
-  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
-
-  /// @dev No max budget was recorded for the proposal; the new flow cannot be used.
+  /// @dev No max budget was recorded for the proposal; the V11 flow cannot be used.
   error MissingProposalBudget(uint256 proposalId);
 
-  /// @dev Payees array length is outside the allowed bounds.
-  error InvalidPayeeCount(uint256 provided, uint256 max);
+  /// @dev The payee address is the zero address.
+  error InvalidPayeeAddress();
 
-  /// @dev A payee entry has a zero address or zero amount.
-  error InvalidPayee(uint256 payeeIndex);
+  /// @dev Contributors array is larger than `maxContributorsPerProposal`.
+  error TooManyContributors(uint256 provided, uint256 max);
 
-  /// @dev Sum of payee amounts exceeds the recorded max budget.
-  error BudgetExceeded(uint256 requested, uint256 maxBudget);
-
-  /// @dev markAsInDevelopmentWithPayees was already called for this proposal.
+  /// @dev markAsInDevelopment was already called for this proposal.
   error PayeesAlreadyFinalized(uint256 proposalId);
 
-  /// @dev Cannot update payees because at least one payout has already been claimed.
-  error PayoutAlreadyOccurred(uint256 proposalId, uint256 payeeIndex);
+  /// @dev The payout was already pulled from Treasury.
+  error PayoutAlreadyClaimed(uint256 proposalId);
 
-  /// @dev Payee index out of bounds for the registered list.
-  error PayeeIndexOutOfBounds(uint256 proposalId, uint256 payeeIndex, uint256 length);
-
-  /// @dev The targeted payee has already been paid.
-  error PayoutAlreadyClaimed(uint256 proposalId, uint256 payeeIndex);
-
-  /// @dev claimAllPayouts found no unclaimed entries.
-  error NothingToClaim(uint256 proposalId);
+  /// @dev The proposal is not in a state where the budget can be paid out.
+  error NotReadyToClaim(uint256 proposalId);
 
   // ------------------ INTERNAL (called from other libraries) ------------------ //
 
-  /// @notice Record the immutable max B3TR budget for a proposal.
-  /// @dev Called from `GovernorProposalLogic._propose` when `maxBudget > 0`.
-  ///      Idempotent for `maxBudget == 0` (early return) so legacy `propose(6)` is a no-op.
-  /// @param proposalId The id of the proposal whose budget is being set.
-  /// @param maxBudget  Maximum amount (B3TR wei) that may be paid out to developers.
+  /// @notice Record the immutable max B3TR implementation cost for a proposal.
+  /// @dev Called from `GovernorProposalLogic._propose` when `maxBudget > 0`. Idempotent
+  ///      for `maxBudget == 0` (early return).
   function setProposalBudget(uint256 proposalId, uint256 maxBudget) internal {
     if (maxBudget == 0) {
       return;
@@ -122,35 +101,45 @@ library GovernorCommunityExecutionLogic {
 
   // ------------------ EXTERNAL: STATE-CHANGING ------------------ //
 
-  /// @notice Mark a proposal as InDevelopment. Optionally register developer payees + metadata.
-  /// @dev Unified V11 entrypoint — replaces the legacy admin-only `markAsInDevelopment(uint256)`.
-  ///      Authorized to the proposer OR a PROPOSAL_STATE_MANAGER_ROLE caller; the role check is
-  ///      performed by the Governor wrapper and forwarded as `callerHasManagerRole`.
+  /// @notice Mark a proposal as InDevelopment and register the V11 payee + metadata.
+  /// @dev Authorized to the proposer OR a PROPOSAL_STATE_MANAGER_ROLE caller; the role
+  ///      check is performed by the Governor wrapper and forwarded as `callerHasManagerRole`.
   ///
-  ///      Validation matrix (budget = proposalMaxBudget[id]):
-  ///      | budget | payees     | result                                                           |
-  ///      |--------|------------|------------------------------------------------------------------|
-  ///      | 0      | []         | OK — pure state transition, no payout flow                       |
-  ///      | 0      | n > 0      | revert MissingProposalBudget (no budget to back the payouts)     |
-  ///      | > 0    | []         | revert InvalidPayeeCount (budget orphaned)                       |
-  ///      | > 0    | n ∈ [1, m] | OK — full validation: sum ≤ budget, no zero amounts/addresses    |
-  ///
-  ///      Other requirements (always):
-  ///      - Proposal must be a Standard proposal (Grants use their own milestone flow)
+  ///      Validation:
+  ///      - Proposal must be a Standard proposal (Grants follow the milestone payout flow)
   ///      - Proposal state must be `Executed`, or `Succeeded` when not executable
-  ///      - Function must not have been called before for this proposal
-  /// @param proposalId       The proposal id.
-  /// @param payees           The payees being registered (may be empty for non-payout proposals).
-  /// @param devNickname      Developer nickname / display identifier (stored on chain).
-  /// @param discussionLink   URL to the Discourse / discussion thread (stored on chain).
-  /// @param callerHasManagerRole True iff `msg.sender` holds PROPOSAL_STATE_MANAGER_ROLE on the Governor.
+  ///      - The function must not have been called before for this proposal
+  ///      - When `maxBudget > 0` (community-execution proposal): `payee` must be != 0
+  ///      - When `maxBudget == 0`: `payee` may be zero (pure state transition, no payout)
+  ///      - Contributors list size must be <= maxContributorsPerProposal
+  ///
+  ///      The single registered payee receives the FULL `maxBudget` when {claimPayout}
+  ///      is later called. It is the payee's responsibility to forward funds to any
+  ///      contributors / dev team / project manager off-chain.
   function markAsInDevelopment(
     uint256 proposalId,
-    GovernorTypes.Payee[] calldata payees,
-    string calldata devNickname,
-    string calldata discussionLink,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors,
     bool callerHasManagerRole
   ) external {
+    _checkMarkAsInDevelopmentGuards(proposalId, callerHasManagerRole);
+    _validateBudgetVsPayee(proposalId, payee);
+    _validateContributorsCount(contributors);
+
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    if ($.proposalPayeesFinalized[proposalId]) {
+      revert PayeesAlreadyFinalized(proposalId);
+    }
+    $.proposalPayeesFinalized[proposalId] = true;
+
+    _writeCommunityExecutionData(proposalId, payee, description, implementationDiscussion, contributors);
+    $.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
+    emit ProposalInDevelopment(proposalId);
+  }
+
+  function _checkMarkAsInDevelopmentGuards(uint256 proposalId, bool callerHasManagerRole) private view {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     GovernorTypes.ProposalCore storage proposal = $.proposals[proposalId];
 
@@ -163,8 +152,6 @@ library GovernorCommunityExecutionLogic {
       revert GovernorRestrictedProposal(proposalId, proposalType);
     }
 
-    // Same state guards as the legacy markAsInDevelopment: allowed states are
-    // Executed (executable, already executed) or Succeeded (non-executable, can't queue/execute).
     GovernorStateLogic.validateStateBitmap(
       proposalId,
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) |
@@ -175,96 +162,82 @@ library GovernorCommunityExecutionLogic {
     ) {
       revert GovernorRestrictedProposal(proposalId, proposalType);
     }
+  }
 
-    if ($.proposalPayeesFinalized[proposalId]) {
-      revert PayeesAlreadyFinalized(proposalId);
+  function _validateBudgetVsPayee(uint256 proposalId, address payee) private view {
+    uint256 budget = GovernorStorageTypes.getGovernorStorage().proposalMaxBudget[proposalId];
+    if (budget > 0 && payee == address(0)) {
+      revert InvalidPayeeAddress();
     }
-
-    uint256 budget = $.proposalMaxBudget[proposalId];
-
-    // Budget / payees consistency invariant (see validation matrix above).
-    if (budget == 0) {
-      if (payees.length > 0) {
-        revert MissingProposalBudget(proposalId);
-      }
-    } else {
-      // budget > 0 — require non-empty payees and run full validation.
-      _validatePayees($, payees, budget);
-      $.proposalPayeesFinalized[proposalId] = true;
-      for (uint256 i; i < payees.length; ++i) {
-        $.proposalPayees[proposalId].push(payees[i]);
-      }
-    }
-
-    // Always persist metadata (nickname + link) for transparency.
-    $.proposalDevNickname[proposalId] = devNickname;
-    $.proposalDiscussionLink[proposalId] = discussionLink;
-
-    // Transition development state.
-    $.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
-
-    // Emit lifecycle events. ProposalInDevelopment keeps its V8 signature so existing indexers work.
-    emit ProposalInDevelopment(proposalId);
-    emit ProposalInDevelopmentDetails(proposalId, devNickname, discussionLink);
-    for (uint256 i; i < payees.length; ++i) {
-      emit ProposalPayeeRegistered(proposalId, i, payees[i].account, payees[i].amount);
+    if (budget == 0 && payee != address(0)) {
+      revert MissingProposalBudget(proposalId);
     }
   }
 
-  /// @notice Replace the registered payee list for an in-development proposal.
-  /// @dev Caller must hold PROPOSAL_STATE_MANAGER_ROLE — that check is enforced by the
-  ///      Governor wrapper. The proposal must still be `InDevelopment` and no payout
-  ///      may have been claimed yet (otherwise per-index claim flags would alias).
-  /// @param proposalId The proposal id.
-  /// @param payees     The new payee list (fully replaces the previous one).
-  function updatePayees(uint256 proposalId, GovernorTypes.Payee[] calldata payees) external {
+  function _validateContributorsCount(string[] calldata contributors) private view {
+    uint256 max = GovernorStorageTypes.getGovernorStorage().maxContributorsPerProposal;
+    if (contributors.length > max) {
+      revert TooManyContributors(contributors.length, max);
+    }
+  }
+
+  function _writeCommunityExecutionData(
+    uint256 proposalId,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
+  ) private {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    $.proposalPayee[proposalId] = payee;
+    $.proposalDescription[proposalId] = description;
+    $.proposalImplementationDiscussion[proposalId] = implementationDiscussion;
+    _setContributors($, proposalId, contributors);
+    emit ProposalInDevelopmentDetails(proposalId, payee, description, implementationDiscussion);
+    emit ProposalContributorsSet(proposalId, contributors);
+  }
+
+  /// @notice Replace the payee / description / discussion / contributors for an
+  ///         in-development proposal whose payout has not yet been claimed.
+  /// @dev Authorized to the proposer OR a PROPOSAL_STATE_MANAGER_ROLE caller (matching
+  ///      markAsInDevelopment access rules). Allowed while the proposal is `InDevelopment`
+  ///      or `Completed` so the proposer can still correct the payout target up until
+  ///      {claimPayout} is called. Once `proposalPaid` is true the data is immutable.
+  function updateCommunityExecution(
+    uint256 proposalId,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors,
+    bool callerHasManagerRole
+  ) external {
+    _checkUpdateCommunityExecutionGuards(proposalId, callerHasManagerRole);
+    _validateBudgetVsPayee(proposalId, payee);
+    _validateContributorsCount(contributors);
+    _writeCommunityExecutionData(proposalId, payee, description, implementationDiscussion, contributors);
+  }
+
+  function _checkUpdateCommunityExecutionGuards(uint256 proposalId, bool callerHasManagerRole) private view {
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    GovernorTypes.ProposalCore storage proposal = $.proposals[proposalId];
+
+    if (msg.sender != proposal.proposer && !callerHasManagerRole) {
+      revert UnauthorizedCommunityExecution(msg.sender, proposalId);
+    }
 
     GovernorStateLogic.validateStateBitmap(
       proposalId,
-      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment)
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment) |
+        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
     );
-
-    uint256 budget = $.proposalMaxBudget[proposalId];
-    if (budget == 0) {
-      revert MissingProposalBudget(proposalId);
-    }
-
-    _validatePayees($, payees, budget);
-
-    // Guard against claim-index aliasing: no existing payee may be claimed.
-    GovernorTypes.Payee[] storage existing = $.proposalPayees[proposalId];
-    for (uint256 i; i < existing.length; ++i) {
-      if ($.proposalPayeeClaimed[proposalId][i]) {
-        revert PayoutAlreadyOccurred(proposalId, i);
-      }
-    }
-
-    // Replace the array atomically.
-    delete $.proposalPayees[proposalId];
-    for (uint256 i; i < payees.length; ++i) {
-      $.proposalPayees[proposalId].push(payees[i]);
-    }
-
-    emit ProposalPayeesReset(proposalId);
-    for (uint256 i; i < payees.length; ++i) {
-      emit ProposalPayeeRegistered(proposalId, i, payees[i].account, payees[i].amount);
+    if ($.proposalPaid[proposalId]) {
+      revert PayoutAlreadyClaimed(proposalId);
     }
   }
 
-  /// @notice Claim a single payout for a registered payee. Callable by anyone.
-  /// @dev Idempotent at the (proposalId, payeeIndex) granularity.
-  /// @param proposalId  The proposal id (must be in `Completed` state).
-  /// @param payeeIndex  The index into the registered payees array.
-  function claimPayout(uint256 proposalId, uint256 payeeIndex) external {
-    _claimPayout(proposalId, payeeIndex, true);
-  }
-
-  /// @notice Claim payouts for every unclaimed payee of a Completed proposal in one tx.
-  /// @dev Iterates the registered payees and silently skips any already-claimed index.
-  ///      Reverts if every payee has already been paid.
-  /// @param proposalId The proposal id (must be in `Completed` state).
-  function claimAllPayouts(uint256 proposalId) external {
+  /// @notice Pull the full implementation cost from Treasury to the registered payee.
+  /// @dev Callable by anyone. Requires the proposal to be `Completed`. Idempotent.
+  function claimPayout(uint256 proposalId) external {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
 
     GovernorStateLogic.validateStateBitmap(
@@ -272,130 +245,71 @@ library GovernorCommunityExecutionLogic {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
     );
 
-    GovernorTypes.Payee[] storage payees = $.proposalPayees[proposalId];
-    uint256 n = payees.length;
-
-    ITreasury treasury = $.treasury;
-    bool anyClaimed = false;
-
-    for (uint256 i; i < n; ++i) {
-      if ($.proposalPayeeClaimed[proposalId][i]) {
-        continue;
-      }
-      $.proposalPayeeClaimed[proposalId][i] = true;
-      address account = payees[i].account;
-      uint256 amount = payees[i].amount;
-      treasury.transferB3TR(account, amount);
-      emit ProposalPayoutClaimed(proposalId, i, account, amount);
-      anyClaimed = true;
+    if ($.proposalPaid[proposalId]) {
+      revert PayoutAlreadyClaimed(proposalId);
     }
 
-    if (!anyClaimed) {
-      revert NothingToClaim(proposalId);
+    address payee = $.proposalPayee[proposalId];
+    uint256 amount = $.proposalMaxBudget[proposalId];
+    if (payee == address(0) || amount == 0) {
+      revert NotReadyToClaim(proposalId);
     }
+
+    $.proposalPaid[proposalId] = true;
+    $.treasury.transferB3TR(payee, amount);
+    emit ProposalPayoutClaimed(proposalId, payee, amount);
   }
 
   // ------------------ EXTERNAL: VIEWS ------------------ //
 
-  /// @notice Maximum implementation budget recorded for the proposal (B3TR wei).
   function getProposalBudget(uint256 proposalId) external view returns (uint256) {
     return GovernorStorageTypes.getGovernorStorage().proposalMaxBudget[proposalId];
   }
 
-  /// @notice Whether {markAsInDevelopmentWithPayees} has been called for the proposal.
-  function isProposalPayeesFinalized(uint256 proposalId) external view returns (bool) {
+  function getProposalPayee(uint256 proposalId) external view returns (address) {
+    return GovernorStorageTypes.getGovernorStorage().proposalPayee[proposalId];
+  }
+
+  function isProposalPaid(uint256 proposalId) external view returns (bool) {
+    return GovernorStorageTypes.getGovernorStorage().proposalPaid[proposalId];
+  }
+
+  function isProposalCommunityExecutionFinalized(uint256 proposalId) external view returns (bool) {
     return GovernorStorageTypes.getGovernorStorage().proposalPayeesFinalized[proposalId];
   }
 
-  /// @notice Registered payee list for the proposal.
-  function getProposalPayees(uint256 proposalId) external view returns (GovernorTypes.Payee[] memory) {
-    return GovernorStorageTypes.getGovernorStorage().proposalPayees[proposalId];
+  function getProposalDescription(uint256 proposalId) external view returns (string memory) {
+    return GovernorStorageTypes.getGovernorStorage().proposalDescription[proposalId];
   }
 
-  /// @notice A specific registered payee by index.
-  function getProposalPayee(
-    uint256 proposalId,
-    uint256 payeeIndex
-  ) external view returns (GovernorTypes.Payee memory) {
-    GovernorTypes.Payee[] storage payees = GovernorStorageTypes.getGovernorStorage().proposalPayees[proposalId];
-    if (payeeIndex >= payees.length) {
-      revert PayeeIndexOutOfBounds(proposalId, payeeIndex, payees.length);
-    }
-    return payees[payeeIndex];
+  function getProposalImplementationDiscussion(uint256 proposalId) external view returns (string memory) {
+    return GovernorStorageTypes.getGovernorStorage().proposalImplementationDiscussion[proposalId];
   }
 
-  /// @notice Whether the payout at `payeeIndex` for `proposalId` has already been claimed.
-  function isPayoutClaimed(uint256 proposalId, uint256 payeeIndex) external view returns (bool) {
-    return GovernorStorageTypes.getGovernorStorage().proposalPayeeClaimed[proposalId][payeeIndex];
+  function getProposalContributors(uint256 proposalId) external view returns (string[] memory) {
+    return GovernorStorageTypes.getGovernorStorage().proposalContributors[proposalId];
   }
 
-  /// @notice The developer nickname + discussion link registered for the proposal.
-  function getProposalDevInfo(
-    uint256 proposalId
-  ) external view returns (string memory devNickname, string memory discussionLink) {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    return ($.proposalDevNickname[proposalId], $.proposalDiscussionLink[proposalId]);
-  }
-
-  /// @notice The current Treasury reference used for payouts.
-  function getTreasury() external view returns (ITreasury) {
-    return GovernorStorageTypes.getGovernorStorage().treasury;
-  }
-
-  /// @notice Current maximum allowed payee count per proposal.
-  function getMaxPayeesPerProposal() external view returns (uint256) {
-    return GovernorStorageTypes.getGovernorStorage().maxPayeesPerProposal;
+  function getMaxContributorsPerProposal() external view returns (uint256) {
+    return GovernorStorageTypes.getGovernorStorage().maxContributorsPerProposal;
   }
 
   // ------------------ INTERNAL HELPERS ------------------ //
 
-  /// @dev Common per-payee-array validation used by both registration paths.
-  function _validatePayees(
+  function _setContributors(
     GovernorStorageTypes.GovernorStorage storage $,
-    GovernorTypes.Payee[] calldata payees,
-    uint256 budget
-  ) private view {
-    uint256 max = $.maxPayeesPerProposal;
-    if (payees.length == 0 || payees.length > max) {
-      revert InvalidPayeeCount(payees.length, max);
-    }
-    uint256 sum;
-    for (uint256 i; i < payees.length; ++i) {
-      if (payees[i].account == address(0) || payees[i].amount == 0) {
-        revert InvalidPayee(i);
-      }
-      sum += payees[i].amount;
-    }
-    if (sum > budget) {
-      revert BudgetExceeded(sum, budget);
+    uint256 proposalId,
+    string[] calldata contributors
+  ) private {
+    delete $.proposalContributors[proposalId];
+    for (uint256 i; i < contributors.length; ++i) {
+      $.proposalContributors[proposalId].push(contributors[i]);
     }
   }
 
-  /// @dev Per-payee claim path with CEI ordering.
-  function _claimPayout(uint256 proposalId, uint256 payeeIndex, bool revertOnAlreadyClaimed) private {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+  // ------------------ ERRORS USED FROM OTHER LIBRARIES ------------------ //
 
-    GovernorStateLogic.validateStateBitmap(
-      proposalId,
-      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
-    );
-
-    GovernorTypes.Payee[] storage payees = $.proposalPayees[proposalId];
-    if (payeeIndex >= payees.length) {
-      revert PayeeIndexOutOfBounds(proposalId, payeeIndex, payees.length);
-    }
-
-    if ($.proposalPayeeClaimed[proposalId][payeeIndex]) {
-      if (revertOnAlreadyClaimed) {
-        revert PayoutAlreadyClaimed(proposalId, payeeIndex);
-      }
-      return;
-    }
-
-    $.proposalPayeeClaimed[proposalId][payeeIndex] = true;
-    address account = payees[payeeIndex].account;
-    uint256 amount = payees[payeeIndex].amount;
-    $.treasury.transferB3TR(account, amount);
-    emit ProposalPayoutClaimed(proposalId, payeeIndex, account, amount);
-  }
+  /// @dev Re-declared here so it can be referenced from this library's revert paths.
+  ///      Matches the existing selector declared in GovernorProposalLogic / IB3TRGovernor.
+  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
 }

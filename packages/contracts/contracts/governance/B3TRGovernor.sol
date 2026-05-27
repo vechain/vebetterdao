@@ -140,19 +140,19 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
   }
 
   /// @notice Initialize V11: Community Execution Framework
-  /// @dev Records the Treasury reference used to pay developer payees and the maximum number
-  ///      of payees allowed per proposal. Run once when upgrading from V10 to V11.
-  /// @param _treasury The Treasury contract from which B3TR developer payouts are pulled.
-  /// @param _maxPayeesPerProposal Hard cap on the size of the payees array per proposal (suggested: 20).
+  /// @dev Records the Treasury reference used to pay the registered payee and the maximum
+  ///      number of contributor handles allowed per proposal.
+  /// @param _treasury The Treasury contract from which B3TR payouts are pulled.
+  /// @param _maxContributorsPerProposal Hard cap on the contributors array per proposal.
   function initializeV11(
     ITreasury _treasury,
-    uint256 _maxPayeesPerProposal
+    uint256 _maxContributorsPerProposal
   ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) reinitializer(9) {
     require(address(_treasury) != address(0), "B3TRGovernor: invalid treasury");
-    require(_maxPayeesPerProposal > 0, "B3TRGovernor: invalid max payees");
+    require(_maxContributorsPerProposal > 0, "B3TRGovernor: invalid max contributors");
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
     $.treasury = _treasury;
-    $.maxPayeesPerProposal = _maxPayeesPerProposal;
+    $.maxContributorsPerProposal = _maxContributorsPerProposal;
   }
 
   /**
@@ -1122,87 +1122,98 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
   // ------------------ V11: Community Execution Framework ------------------ //
 
   /**
-   * @notice V11: Mark a proposal as InDevelopment. Optionally register developer payees + metadata.
-   * @dev Single consolidated entrypoint — replaces the legacy admin-only `markAsInDevelopment(uint256)`.
-   *      Callable by the proposal proposer or by an address holding PROPOSAL_STATE_MANAGER_ROLE.
-   *      - `maxBudget == 0` requires empty `payees` (pure state transition, no payout flow).
-   *      - `maxBudget > 0` requires non-empty `payees` with sum(amounts) ≤ maxBudget.
-   *      Grants reject (Grants follow the milestone-based payout flow, not community execution).
-   * @param proposalId     The proposal id.
-   * @param payees         Array of (account, amount) payee entries (may be empty when budget == 0).
-   * @param devNickname    On-chain developer nickname / identifier.
-   * @param discussionLink Discourse / external discussion link recorded on chain.
+   * @notice V11: Mark a proposal as InDevelopment and register the single payout address,
+   *         free-text description, implementation-discussion link, and contributor handles.
+   * @dev Callable by the proposer or by an address holding PROPOSAL_STATE_MANAGER_ROLE.
+   *      - `maxBudget == 0` requires `payee == address(0)` (pure state transition).
+   *      - `maxBudget > 0`  requires `payee != address(0)` (single recipient of the full budget).
+   *      Grants reject — Grants follow the milestone-based payout flow.
+   *      The registered payee receives the FULL `maxBudget` on {claimPayout}; it is the
+   *      payee's responsibility to forward funds to any contributors / team off-chain.
+   * @param proposalId               The proposal id.
+   * @param payee                    Single payout address; may be address(0) when maxBudget == 0.
+   * @param description              Free-text description (e.g. "Developed by Framer and Rosa").
+   * @param implementationDiscussion URL to the implementation-discussion thread.
+   * @param contributors             Array of contributor handles / URLs (capped at maxContributorsPerProposal).
    */
   function markAsInDevelopment(
     uint256 proposalId,
-    GovernorTypes.Payee[] calldata payees,
-    string calldata devNickname,
-    string calldata discussionLink
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
   ) external whenNotPaused {
     GovernorCommunityExecutionLogic.markAsInDevelopment(
       proposalId,
-      payees,
-      devNickname,
-      discussionLink,
+      payee,
+      description,
+      implementationDiscussion,
+      contributors,
       hasRole(PROPOSAL_STATE_MANAGER_ROLE, _msgSender())
     );
   }
 
   /**
-   * @notice V11: Replace the developer payees of an InDevelopment proposal.
-   * @dev Admin-only; cannot run if any payee has already pulled their payout (would corrupt
-   *      per-index claim state). Sum of new amounts must still respect the proposal budget.
-   * @param proposalId The proposal id.
-   * @param payees     The new payees array.
+   * @notice V11: Update the payee / description / implementation-discussion / contributors of
+   *         a proposal whose payout has not been claimed yet.
+   * @dev Authorized to the proposer OR PROPOSAL_STATE_MANAGER_ROLE. Allowed while the proposal
+   *      is `InDevelopment` or `Completed` and `proposalPaid` is still false.
    */
-  function updatePayees(
+  function updateCommunityExecution(
     uint256 proposalId,
-    GovernorTypes.Payee[] calldata payees
-  ) external whenNotPaused onlyRole(PROPOSAL_STATE_MANAGER_ROLE) {
-    GovernorCommunityExecutionLogic.updatePayees(proposalId, payees);
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
+  ) external whenNotPaused {
+    GovernorCommunityExecutionLogic.updateCommunityExecution(
+      proposalId,
+      payee,
+      description,
+      implementationDiscussion,
+      contributors,
+      hasRole(PROPOSAL_STATE_MANAGER_ROLE, _msgSender())
+    );
   }
 
   /**
-   * @notice V11: Pay one registered developer payee. Callable by anyone.
-   * @dev Idempotent at (proposalId, payeeIndex). Requires the proposal to be Completed.
-   * @param proposalId The proposal id.
-   * @param payeeIndex Index into the registered payees array.
+   * @notice V11: Pay the registered payee the full implementation cost from Treasury.
+   * @dev Callable by anyone. Idempotent — second call reverts with PayoutAlreadyClaimed.
    */
-  function claimPayout(uint256 proposalId, uint256 payeeIndex) external whenNotPaused {
-    GovernorCommunityExecutionLogic.claimPayout(proposalId, payeeIndex);
-  }
-
-  /**
-   * @notice V11: Pay every unclaimed registered payee in one call. Callable by anyone.
-   * @dev Bounded by `maxPayeesPerProposal`. Already-claimed entries are skipped.
-   * @param proposalId The proposal id.
-   */
-  function claimAllPayouts(uint256 proposalId) external whenNotPaused {
-    GovernorCommunityExecutionLogic.claimAllPayouts(proposalId);
+  function claimPayout(uint256 proposalId) external whenNotPaused {
+    GovernorCommunityExecutionLogic.claimPayout(proposalId);
   }
 
   // ------------------ V11: Views ------------------ //
 
-  /// @notice The maximum implementation budget (B3TR wei) recorded for a proposal.
+  /// @notice The maximum implementation cost (B3TR wei) recorded for a proposal.
   function getProposalBudget(uint256 proposalId) external view returns (uint256) {
     return GovernorCommunityExecutionLogic.getProposalBudget(proposalId);
   }
 
-  /// @notice Returns the registered payees for the proposal.
-  function getProposalPayees(uint256 proposalId) external view returns (GovernorTypes.Payee[] memory) {
-    return GovernorCommunityExecutionLogic.getProposalPayees(proposalId);
+  /// @notice The single registered payee for the proposal.
+  function getProposalPayee(uint256 proposalId) external view returns (address) {
+    return GovernorCommunityExecutionLogic.getProposalPayee(proposalId);
   }
 
-  /// @notice True iff the payout at the given index for the given proposal has already been claimed.
-  function isPayoutClaimed(uint256 proposalId, uint256 payeeIndex) external view returns (bool) {
-    return GovernorCommunityExecutionLogic.isPayoutClaimed(proposalId, payeeIndex);
+  /// @notice True iff the payout has already been pulled from Treasury.
+  function isProposalPaid(uint256 proposalId) external view returns (bool) {
+    return GovernorCommunityExecutionLogic.isProposalPaid(proposalId);
   }
 
-  /// @notice Returns the developer nickname and discussion link registered for the proposal.
-  function getProposalDevInfo(
-    uint256 proposalId
-  ) external view returns (string memory devNickname, string memory discussionLink) {
-    return GovernorCommunityExecutionLogic.getProposalDevInfo(proposalId);
+  /// @notice The free-text description registered alongside the V11 payee.
+  function getProposalDescription(uint256 proposalId) external view returns (string memory) {
+    return GovernorCommunityExecutionLogic.getProposalDescription(proposalId);
+  }
+
+  /// @notice The implementation-discussion link for a proposal.
+  function getProposalImplementationDiscussion(uint256 proposalId) external view returns (string memory) {
+    return GovernorCommunityExecutionLogic.getProposalImplementationDiscussion(proposalId);
+  }
+
+  /// @notice The contributor handle list (e.g. github/twitter URLs) for a proposal.
+  function getProposalContributors(uint256 proposalId) external view returns (string[] memory) {
+    return GovernorCommunityExecutionLogic.getProposalContributors(proposalId);
   }
 
   /**

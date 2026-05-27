@@ -5,12 +5,10 @@ import { useCallback, useMemo } from "react"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
 
-import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalContributorsQueryKey } from "../api/contracts/governance/hooks/useProposalContributors"
 import { getProposalDescriptionQueryKey } from "../api/contracts/governance/hooks/useProposalDescription"
 import { getProposalImplementationDiscussionQueryKey } from "../api/contracts/governance/hooks/useProposalImplementationDiscussion"
 import { getProposalPayeeQueryKey } from "../api/contracts/governance/hooks/useProposalPayee"
-import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useProposalState"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 
@@ -30,20 +28,20 @@ type SendArgs = {
 }
 
 /**
- * V11: mark a proposal as InDevelopment and register the single payout address,
- * free-text description, implementation-discussion link, and contributor handles.
- * Callable by the proposer or by an admin holding PROPOSAL_STATE_MANAGER_ROLE.
+ * V11: update payee / description / implementation-discussion / contributors of a proposal
+ * whose payout has not yet been claimed. Callable by the proposer or by an admin holding
+ * PROPOSAL_STATE_MANAGER_ROLE; allowed while the proposal is InDevelopment or Completed.
  */
-export const useMarkProposalInDevelopment = ({ proposalId, onSuccess, transactionModalCustomUI }: Props) => {
+export const useUpdateCommunityExecution = ({ proposalId, onSuccess, transactionModalCustomUI }: Props) => {
   const clauseBuilder = useCallback(
     ({ payee, description, implementationDiscussion, contributors }: SendArgs) => {
       return [
         buildClause({
           to: getConfig().b3trGovernorAddress,
           contractInterface: GovernorInterface,
-          method: "markAsInDevelopment",
+          method: "updateCommunityExecution",
           args: [proposalId, payee, description, implementationDiscussion, contributors],
-          comment: "mark proposal in development and register payee + metadata",
+          comment: "update proposal payee + metadata before payout",
         }),
       ]
     },
@@ -52,8 +50,6 @@ export const useMarkProposalInDevelopment = ({ proposalId, onSuccess, transactio
 
   const refetchQueryKeys = useMemo(
     () => [
-      getProposalStateQueryKey(proposalId),
-      getAllProposalsStateQueryKey(),
       getProposalPayeeQueryKey(proposalId),
       getProposalDescriptionQueryKey(proposalId),
       getProposalImplementationDiscussionQueryKey(proposalId),

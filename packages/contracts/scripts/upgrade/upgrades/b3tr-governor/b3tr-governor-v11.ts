@@ -5,7 +5,7 @@ import { B3TRGovernor } from "../../../../typechain-types"
 import { governanceLibraries } from "../../../libraries"
 import { ethers } from "hardhat"
 
-const MAX_PAYEES_PER_PROPOSAL = 20
+const MAX_CONTRIBUTORS_PER_PROPOSAL = 20
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -55,7 +55,7 @@ async function main() {
     "B3TRGovernorV10",
     "B3TRGovernor",
     config.b3trGovernorAddress,
-    [config.treasuryContractAddress, MAX_PAYEES_PER_PROPOSAL],
+    [config.treasuryContractAddress, MAX_CONTRIBUTORS_PER_PROPOSAL],
     {
       version: 11,
       libraries: libraryAddresses,
