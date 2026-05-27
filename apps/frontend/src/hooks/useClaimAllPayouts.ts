@@ -5,9 +5,11 @@ import { useCallback, useMemo } from "react"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
 
+import { getIsPayoutClaimedQueryKeyPrefix } from "../api/contracts/governance/hooks/useIsPayoutClaimed"
 import { getProposalPayeesQueryKey } from "../api/contracts/governance/hooks/useProposalPayees"
 
 import { useBuildTransaction } from "./useBuildTransaction"
+import { getEventsKey } from "./useEvents"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -35,7 +37,18 @@ export const useClaimAllPayouts = ({ proposalId, onSuccess, transactionModalCust
     ]
   }, [proposalId])
 
-  const refetchQueryKeys = useMemo(() => [getProposalPayeesQueryKey(proposalId)], [proposalId])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getProposalPayeesQueryKey(proposalId),
+      // V11: refresh every per-payee isPayoutClaimed read so the Pay devs button hides
+      // and per-payee badges flip to Paid immediately after the tx confirms.
+      getIsPayoutClaimedQueryKeyPrefix(),
+      // Also refresh the ProposalPayoutClaimed event stream — drives the Paid step on the
+      // timeline once the indexer catches up.
+      getEventsKey({ eventName: "ProposalPayoutClaimed" }),
+    ],
+    [proposalId],
+  )
 
   return useBuildTransaction({
     clauseBuilder,

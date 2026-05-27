@@ -34,6 +34,7 @@ import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { MulticolorBar } from "@/components/MulticolorBar/MulticolorBar"
 import { ResultsDisplay } from "@/components/Proposal/ResultsDisplay"
+import { useProposalPayoutClaimedEvent } from "@/hooks/proposals/common/useProposalPayoutClaimedEvent"
 import {
   ProposalType as GrantsProposalType,
   ProposalEnriched,
@@ -116,11 +117,16 @@ export const ProposalInteractionCard = ({
   const { sendTransaction: queueProposal } = useQueueProposal({ proposalId })
   const { sendTransaction: executeProposal } = useExecuteProposal({ proposalId })
   const { sendTransaction: markProposalCompleted } = useMarkProposalCompleted({ proposalId })
-  const { sendTransaction: claimAllPayouts } = useClaimAllPayouts({ proposalId })
+  const [optimisticAllClaimed, setOptimisticAllClaimed] = useState(false)
+  const { sendTransaction: claimAllPayouts } = useClaimAllPayouts({
+    proposalId,
+    onSuccess: () => setOptimisticAllClaimed(true),
+  })
 
   // V11: per-proposal community-execution data
   const { data: proposalMaxBudget } = useProposalBudget(proposalId)
   const { data: proposalPayees } = useProposalPayees(proposalId)
+  const { data: payoutClaimedEvents } = useProposalPayoutClaimedEvent(proposalId)
   const isPayeeMember = useMemo(
     () =>
       !!account?.address &&
@@ -128,6 +134,12 @@ export const ProposalInteractionCard = ({
       proposalPayees.some(p => compareAddresses(p.account, account.address ?? "")),
     [account?.address, proposalPayees],
   )
+  const allPayoutsClaimed = useMemo(() => {
+    if (optimisticAllClaimed) return true
+    if (!proposalPayees || proposalPayees.length === 0) return false
+    if (!payoutClaimedEvents) return false
+    return payoutClaimedEvents.length >= proposalPayees.length
+  }, [optimisticAllClaimed, proposalPayees, payoutClaimedEvents])
 
   const handleQueueProposal = useCallback(() => queueProposal(), [queueProposal])
 
@@ -204,8 +216,17 @@ export const ProposalInteractionCard = ({
     if (proposal?.type === ProposalType.Grant) return false
     if (proposal?.state !== ProposalState.Completed) return false
     if (!proposalPayees || proposalPayees.length === 0) return false
+    if (allPayoutsClaimed) return false
     return hasProposalStateRole || isProposer || isPayeeMember
-  }, [hasProposalStateRole, isProposer, isPayeeMember, proposalPayees, proposal?.state, proposal?.type])
+  }, [
+    hasProposalStateRole,
+    isProposer,
+    isPayeeMember,
+    proposalPayees,
+    allPayoutsClaimed,
+    proposal?.state,
+    proposal?.type,
+  ])
 
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {

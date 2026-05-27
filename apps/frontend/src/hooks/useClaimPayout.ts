@@ -5,10 +5,14 @@ import { useCallback, useMemo } from "react"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
 
-import { getIsPayoutClaimedQueryKey } from "../api/contracts/governance/hooks/useIsPayoutClaimed"
+import {
+  getIsPayoutClaimedQueryKey,
+  getIsPayoutClaimedQueryKeyPrefix,
+} from "../api/contracts/governance/hooks/useIsPayoutClaimed"
 import { getProposalPayeesQueryKey } from "../api/contracts/governance/hooks/useProposalPayees"
 
 import { useBuildTransaction } from "./useBuildTransaction"
+import { getEventsKey } from "./useEvents"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -40,7 +44,14 @@ export const useClaimPayout = ({ proposalId, onSuccess, transactionModalCustomUI
   )
 
   const refetchQueryKeys = useMemo(
-    () => [getProposalPayeesQueryKey(proposalId), getIsPayoutClaimedQueryKey(proposalId, 0)],
+    () => [
+      getProposalPayeesQueryKey(proposalId),
+      getIsPayoutClaimedQueryKey(proposalId, 0),
+      // V11: prefix invalidation flips every per-payee Paid/Pending badge in one shot.
+      getIsPayoutClaimedQueryKeyPrefix(),
+      // ProposalPayoutClaimed event stream drives the timeline Paid step.
+      getEventsKey({ eventName: "ProposalPayoutClaimed" }),
+    ],
     [proposalId],
   )
 

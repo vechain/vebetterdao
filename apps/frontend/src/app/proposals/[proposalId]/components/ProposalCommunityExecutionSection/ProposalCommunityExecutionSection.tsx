@@ -101,7 +101,12 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
         {/* Payees */}
         {hasPayees && (
           <VStack gap={2} align="flex-start" w="full">
-            <Text fontWeight="semibold">{t("Developer payees")}</Text>
+            <Text fontWeight="semibold">{t("Payees")}</Text>
+            <Text textStyle="sm" color="gray.500">
+              {t(
+                "Wallet(s) that will receive the implementation budget. Each payee may be the proposer (who then forwards funds to the dev team), a project manager, or a developer directly — the DAO doesn't enforce a specific role.",
+              )}
+            </Text>
             <VStack gap={2} align="stretch" w="full">
               {payees?.map((p, idx) => (
                 <PayeeRow

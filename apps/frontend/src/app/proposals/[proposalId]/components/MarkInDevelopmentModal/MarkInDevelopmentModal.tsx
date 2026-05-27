@@ -40,9 +40,9 @@ export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose 
   const mutation = useMarkProposalInDevelopment({
     proposalId,
     transactionModalCustomUI: {
-      waitingConfirmation: { title: t("Registering developers...") },
+      waitingConfirmation: { title: t("Registering payees...") },
       success: { title: t("Proposal moved to In Development") },
-      error: { title: t("Failed to register developers") },
+      error: { title: t("Failed to register payees") },
     },
     onSuccess: () => {
       onClose()
@@ -103,19 +103,19 @@ export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose 
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      ariaTitle={t("Register developers and payouts")}
+      ariaTitle={t("Register payees and metadata")}
       showCloseButton
       isCloseable>
       <VStack w="full" align="stretch" gap={6}>
-        <Heading size="lg">{t("Register developers and payouts")}</Heading>
+        <Heading size="lg">{t("Register payees and metadata")}</Heading>
         <Text textStyle="sm" color="gray.500">
           {t(
-            "Move this proposal to In Development by registering the developer(s) who will implement it. The total payout cannot exceed the budget approved by voters.",
+            "Move this proposal to In Development by registering the payee(s) for the implementation budget. Each payee can be the proposer (who then forwards to the dev team), a project manager, or a developer directly — the DAO doesn't enforce a specific role. The total payout cannot exceed the budget approved by voters.",
           )}
         </Text>
 
         <Field.Root>
-          <Field.Label>{t("Developer nickname")}</Field.Label>
+          <Field.Label>{t("Developer / team nickname")}</Field.Label>
           <Input
             data-testid="dev-nickname-input"
             value={devNickname}
