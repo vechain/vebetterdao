@@ -23,6 +23,7 @@ export const useProposalPayoutClaimedEvent = (proposalId: string) => {
         amount: BigInt(response.decodedData.args.amount),
         blockNumber: response.meta.blockNumber,
         txOrigin: response.meta.txOrigin,
+        txID: response.meta.txID,
         timestamp: response?.meta?.blockTimestamp ? response.meta.blockTimestamp * 1000 : 0,
       })),
   })

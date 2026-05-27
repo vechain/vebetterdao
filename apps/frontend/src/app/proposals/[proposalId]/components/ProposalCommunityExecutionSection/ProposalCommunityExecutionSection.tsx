@@ -1,7 +1,8 @@
-import { Avatar, Badge, Box, Flex, HStack, Heading, Link, Text, Tooltip, VStack } from "@chakra-ui/react"
+import { Avatar, Badge, Box, Flex, HStack, Heading, Icon, Link, Text, Tooltip, VStack } from "@chakra-ui/react"
 import { ethers } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { LuExternalLink } from "react-icons/lu"
 
 import { useIsProposalPaid } from "@/api/contracts/governance/hooks/useIsProposalPaid"
 import { useProposalBudget } from "@/api/contracts/governance/hooks/useProposalBudget"
@@ -12,8 +13,10 @@ import { useProposalPayee } from "@/api/contracts/governance/hooks/useProposalPa
 import { useProposalState } from "@/api/contracts/governance/hooks/useProposalState"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import { useProposalPayoutClaimedEvent } from "@/hooks/proposals/common/useProposalPayoutClaimedEvent"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 type Props = {
   proposalId: string
@@ -103,6 +106,8 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
   const { data: implementationDiscussion } = useProposalImplementationDiscussion(proposalId)
   const { data: contributorsRaw } = useProposalContributors(proposalId)
   const { data: b3trUsdPrice } = useMainnetB3TRPrice()
+  const { data: payoutClaimedEvents } = useProposalPayoutClaimedEvent(proposalId)
+  const payoutTxId = payoutClaimedEvents?.[0]?.txID
 
   const hasBudget = !!maxBudget && maxBudget > 0n
   const hasPayee = !!payee && payee.toLowerCase() !== ZERO
@@ -149,12 +154,25 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
                 </Text>
               )}
               {paid ? (
-                <Badge colorPalette="green" variant="subtle">
-                  {t("Paid")}
-                </Badge>
+                payoutTxId ? (
+                  <Link
+                    href={getExplorerTxLink(payoutTxId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t("View payout transaction on the explorer")}>
+                    <Badge colorPalette="green" variant="subtle" gap={1}>
+                      {t("Paid")}
+                      <Icon as={LuExternalLink} boxSize={3} />
+                    </Badge>
+                  </Link>
+                ) : (
+                  <Badge colorPalette="green" variant="subtle">
+                    {t("Paid")}
+                  </Badge>
+                )
               ) : isCompleted ? (
                 <Badge colorPalette="gray" variant="subtle">
-                  {t("Pending")}
+                  {t("Pending payment")}
                 </Badge>
               ) : null}
             </HStack>
