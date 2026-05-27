@@ -1,8 +1,7 @@
-import { Avatar, Badge, Box, Flex, HStack, Heading, Icon, Link, Text, Tooltip, VStack } from "@chakra-ui/react"
+import { Avatar, Badge, Box, Flex, HStack, Heading, Link, Text, Tooltip, VStack } from "@chakra-ui/react"
 import { ethers } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LuWallet } from "react-icons/lu"
 
 import { useIsProposalPaid } from "@/api/contracts/governance/hooks/useIsProposalPaid"
 import { useProposalBudget } from "@/api/contracts/governance/hooks/useProposalBudget"
@@ -135,12 +134,13 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
         pb={2}
         borderBottom="1px solid"
         borderColor="border.primary">
-        {t("Implementation cost")}
+        {t("Development Details")}
       </Heading>
       <VStack gap={5} align="flex-start" w="full">
         {hasBudget && (
-          <VStack gap={2} align="flex-start" w="full">
-            <HStack gap={3} align="center">
+          <Box>
+            <Text fontWeight="semibold">{t("Cost")}</Text>
+            <HStack gap={3} align="center" mt={1}>
               <B3TRIcon boxSize={6} colorVariant="dark" />
               <Heading size={["md", "md", "lg"]}>{`${formatB3TR(maxBudget)} B3TR`}</Heading>
               {budgetUsd !== undefined && (
@@ -158,51 +158,16 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
                 </Badge>
               ) : null}
             </HStack>
-            <Text textStyle="sm" color="gray.500">
-              {t("Treasury funds used to pay the team working on implementing this proposal.")}
-            </Text>
-          </VStack>
+          </Box>
         )}
 
         {hasPayee && (
-          <VStack
-            align="flex-start"
-            bg="b3tr-balance-bg"
-            p={4}
-            borderRadius="lg"
-            borderWidth="1px"
-            borderColor="border.primary"
-            w="full"
-            gap={3}>
-            <HStack gap={3} align="center" w="full">
-              <Flex
-                boxSize={10}
-                bg="bg.subtle"
-                borderRadius="full"
-                align="center"
-                justify="center"
-                color="gray.500"
-                flexShrink={0}>
-                <Icon as={LuWallet} boxSize={5} />
-              </Flex>
-              <VStack align="flex-start" gap={0.5} flex={1} minW={0}>
-                <Text
-                  textStyle="xs"
-                  textTransform="uppercase"
-                  letterSpacing="wider"
-                  fontWeight="semibold"
-                  color="gray.500">
-                  {t("Payout address")}
-                </Text>
-                <AddressWithProfilePicture address={payee as string} />
-              </VStack>
-            </HStack>
-            <Text textStyle="sm" color="gray.500">
-              {t(
-                "Receives the full implementation cost when the payout is claimed. Responsible for distributing funds to contributors off chain.",
-              )}
-            </Text>
-          </VStack>
+          <Box>
+            <Text fontWeight="semibold">{t("Payout address")}</Text>
+            <Box mt={1}>
+              <AddressWithProfilePicture address={payee as string} />
+            </Box>
+          </Box>
         )}
 
         {hasDescription && (
