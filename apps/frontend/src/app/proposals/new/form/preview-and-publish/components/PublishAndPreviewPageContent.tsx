@@ -1,7 +1,6 @@
 "use client"
 import { Box, Button, Card, HStack, Heading, Separator, Text, VStack } from "@chakra-ui/react"
 import MDEditor from "@uiw/react-md-editor"
-import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import "@uiw/react-md-editor/markdown-editor.css"
 import { ethers } from "ethers"
 import { useRouter } from "next/navigation"
@@ -10,6 +9,7 @@ import { useTranslation } from "react-i18next"
 
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
+import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
 
 import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
 import { useHashProposal } from "../../../../../../api/contracts/governance/hooks/useHashProposal"
@@ -36,7 +36,7 @@ export const PublishAndPreviewPageContent = () => {
   } = useProposalFormStore()
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
   const { data: threshold } = useDepositThreshold()
-  const { data: b3trUsdPrice } = useGetTokenUsdPrice("B3TR")
+  const { data: b3trUsdPrice } = useMainnetB3TRPrice()
   const maxBudgetNumber = useMemo(() => {
     const n = Number(maxBudget)
     return Number.isFinite(n) && n > 0 ? n : 0

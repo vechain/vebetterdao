@@ -1,5 +1,4 @@
 import { Avatar, Badge, Box, Flex, HStack, Heading, Link, Stack, Text, Tooltip, VStack } from "@chakra-ui/react"
-import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -13,6 +12,7 @@ import { useProposalPayee } from "@/api/contracts/governance/hooks/useProposalPa
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
 
 type Props = {
   proposalId: string
@@ -98,7 +98,7 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
   const { data: description } = useProposalDescription(proposalId)
   const { data: implementationDiscussion } = useProposalImplementationDiscussion(proposalId)
   const { data: contributorsRaw } = useProposalContributors(proposalId)
-  const { data: b3trUsdPrice } = useGetTokenUsdPrice("B3TR")
+  const { data: b3trUsdPrice } = useMainnetB3TRPrice()
 
   const hasBudget = !!maxBudget && maxBudget > 0n
   const hasPayee = !!payee && payee.toLowerCase() !== ZERO

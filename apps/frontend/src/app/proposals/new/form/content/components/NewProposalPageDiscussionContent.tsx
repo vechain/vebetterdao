@@ -13,7 +13,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useGetTokenUsdPrice, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -23,6 +23,7 @@ import rehypeSanitize from "rehype-sanitize"
 
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants/AnalyticsEvents"
+import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
 
 import {
   updateMarkdownTemplatePlaceholders,
@@ -45,7 +46,7 @@ export const NewProposalPageDiscussionContent = () => {
   const { title, shortDescription, markdownDescription, actions, setData, metadataUri, maxBudget } =
     useProposalFormStore()
   const { onMetadataUpload, metadataUploading: isMetadataUploading } = useUploadProposalMetadata()
-  const { data: b3trUsdPrice } = useGetTokenUsdPrice("B3TR")
+  const { data: b3trUsdPrice } = useMainnetB3TRPrice()
   const { control, formState, handleSubmit, setValue, watch } = useForm<FormData>({
     defaultValues: {
       markdownDescription,

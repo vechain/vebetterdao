@@ -1,5 +1,4 @@
 import { Alert, Box, Button, Field, HStack, Heading, IconButton, Input, Stack, Text, VStack } from "@chakra-ui/react"
-import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import { ethers, isAddress } from "ethers"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,6 +6,7 @@ import { MdAdd, MdClose } from "react-icons/md"
 
 import { BaseModal } from "@/components/BaseModal"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
 import { useMarkProposalInDevelopment } from "@/hooks/useMarkProposalInDevelopment"
 import { useUpdateCommunityExecution } from "@/hooks/useUpdateCommunityExecution"
 
@@ -31,7 +31,7 @@ const trimAll = (s: string) => s.trim()
 
 export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose, initialValues, isEdit }: Props) => {
   const { t } = useTranslation()
-  const { data: b3trUsdPrice } = useGetTokenUsdPrice("B3TR")
+  const { data: b3trUsdPrice } = useMainnetB3TRPrice()
 
   const [payee, setPayee] = useState(initialValues?.payee ?? "")
   const [description, setDescription] = useState(initialValues?.description ?? "")
