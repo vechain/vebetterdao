@@ -10,7 +10,6 @@ import { useProposalDescription } from "@/api/contracts/governance/hooks/useProp
 import { useProposalImplementationDiscussion } from "@/api/contracts/governance/hooks/useProposalImplementationDiscussion"
 import { useProposalPayee } from "@/api/contracts/governance/hooks/useProposalPayee"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
-import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
 
@@ -118,7 +117,8 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
   }
 
   return (
-    <CollapsibleSection title={t("Implementation cost")} defaultOpen={true}>
+    <VStack align="flex-start" w="full" gap={4}>
+      <Heading size={["xl", "2xl"]}>{t("Implementation cost")}</Heading>
       <VStack gap={5} align="flex-start" w="full">
         {hasBudget && (
           <VStack gap={2} align="flex-start" w="full">
@@ -230,6 +230,6 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
           </VStack>
         )}
       </VStack>
-    </CollapsibleSection>
+    </VStack>
   )
 }
