@@ -118,7 +118,19 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
 
   return (
     <VStack align="flex-start" w="full" gap={4}>
-      <Heading size={["xl", "2xl"]}>{t("Implementation cost")}</Heading>
+      {/* Match the visual style of the markdown "## Proposal Summary" / "## Proposal Type" headings
+          rendered inside the same card. MDEditor.Markdown uses github-style h2: ~1.5em bold with a
+          1px bottom border. */}
+      <Heading
+        as="h2"
+        size="xl"
+        fontWeight="semibold"
+        w="full"
+        pb={2}
+        borderBottom="1px solid"
+        borderColor="border.primary">
+        {t("Implementation cost")}
+      </Heading>
       <VStack gap={5} align="flex-start" w="full">
         {hasBudget && (
           <VStack gap={2} align="flex-start" w="full">
