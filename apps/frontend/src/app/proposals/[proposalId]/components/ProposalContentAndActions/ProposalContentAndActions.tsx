@@ -27,6 +27,7 @@ import { ProposalFormAction } from "../../../../../store/useProposalFormStore"
 import { removeTitleHeading } from "../../../../../utils/MarkdownUtils/MarkdownUtils"
 import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { FileAttachmentPreview } from "../../../../grants/components/FileAttachmentPreview"
+import { ProposalCommunityExecutionSection } from "../ProposalCommunityExecutionSection/ProposalCommunityExecutionSection"
 import { SocialLink } from "../SocialLink/SocialLink"
 
 import "@/app/theme/swiper-custom.css"
@@ -322,6 +323,9 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
 
           {/* Executable actions */}
           {!!actions.length && <ProposalExecutableActions actions={actions} />}
+
+          {/* V11: Community execution budget, payees and dev info */}
+          {proposal?.id && <ProposalCommunityExecutionSection proposalId={proposal.id} />}
         </VStack>
       )}
     </VStack>

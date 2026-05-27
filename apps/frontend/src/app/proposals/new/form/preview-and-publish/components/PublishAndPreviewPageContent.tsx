@@ -149,7 +149,7 @@ export const PublishAndPreviewPageContent = () => {
           )}
 
           <VStack gap={2} align="flex-start" w="full">
-            <Heading size={["sm", "md"]}>{t("Maximum implementation budget")}</Heading>
+            <Heading size={["sm", "md"]}>{t("Implementation budget")}</Heading>
             {maxBudgetNumber > 0 ? (
               <>
                 <Text textStyle="sm" color="gray.500">

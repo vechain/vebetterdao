@@ -4,8 +4,10 @@ import { t } from "i18next"
 import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
+import { useProposalPayees } from "@/api/contracts/governance/hooks/useProposalPayees"
 import { useProposalCompletedEvent } from "@/hooks/proposals/common/useProposalCompletedEvent.ts"
 import { useProposalInDevelopmentEvent } from "@/hooks/proposals/common/useProposalInDevelopmentEvent"
+import { useProposalPayoutClaimedEvent } from "@/hooks/proposals/common/useProposalPayoutClaimedEvent"
 
 import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
 import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
@@ -16,7 +18,7 @@ import {
   ProposalType,
 } from "../../../../../hooks/proposals/grants/types"
 
-type CustomState = ProposalState | "Created"
+type CustomState = ProposalState | "Created" | "Paid"
 type TimelineStep = {
   label: string
   state: CustomState[]
@@ -30,6 +32,8 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
   const { data: proposalInDevelopmentEvent } = useProposalInDevelopmentEvent(proposal?.id ?? "")
   const { data: proposalCompletedEvent } = useProposalCompletedEvent(proposal?.id ?? "")
+  const { data: payees } = useProposalPayees(proposal?.id ?? "")
+  const { data: payoutClaimedEvents } = useProposalPayoutClaimedEvent(proposal?.id ?? "")
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
@@ -50,6 +54,19 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   // Scenario 6: Grant rejected
   // support -> approval -> in development -> cancelled
 
+  // V11: "Paid" step is reached when every registered payee has claimed their payout.
+  // We use the timestamp of the latest ProposalPayoutClaimed event as the step date.
+  const allPayoutsClaimed = useMemo(() => {
+    if (!payees || payees.length === 0) return false
+    if (!payoutClaimedEvents) return false
+    return payoutClaimedEvents.length >= payees.length
+  }, [payees, payoutClaimedEvents])
+  const paidTimestamp = useMemo(() => {
+    if (!allPayoutsClaimed || !payoutClaimedEvents?.length) return undefined
+    return payoutClaimedEvents.reduce((acc, ev) => (ev.timestamp > acc ? ev.timestamp : acc), 0)
+  }, [allPayoutsClaimed, payoutClaimedEvents])
+  const hasPayees = !!payees && payees.length > 0
+
   const timelineDates = useMemo(() => {
     return {
       supportStartDate: proposalCreatedAt * 1000,
@@ -58,6 +75,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
       // Standard proposal only
       inDevelopmentStartDate: standardProposalInDevelopmentStartDate,
       completedTimestamp: standardProposalCompletedTimestamp,
+      paidTimestamp,
       hasValidDates: hasValidDates,
       isLoading: isLoading,
     }
@@ -67,6 +85,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     votingEndDate,
     standardProposalInDevelopmentStartDate,
     standardProposalCompletedTimestamp,
+    paidTimestamp,
     hasValidDates,
     isLoading,
   ])
@@ -210,6 +229,16 @@ export const ProposalTimeline = ({ proposal }: Props) => {
           ? dayjs(timelineDates.completedTimestamp).format("MMM D, YYYY")
           : "",
       },
+      // V11: "Paid" appears only for proposals that registered developer payees.
+      ...(hasPayees
+        ? [
+            {
+              label: t("Paid"),
+              state: ["Paid" as CustomState],
+              description: timelineDates.paidTimestamp ? dayjs(timelineDates.paidTimestamp).format("MMM D, YYYY") : "",
+            },
+          ]
+        : []),
     ]
   }, [
     proposal?.state,
@@ -218,6 +247,8 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     timelineDates.votingEndDate,
     timelineDates.inDevelopmentStartDate,
     timelineDates.completedTimestamp,
+    timelineDates.paidTimestamp,
+    hasPayees,
     proposalVotingRoundId,
   ])
 
@@ -256,9 +287,15 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   const currentStep = useMemo(() => {
     if (!proposal) return 0
 
+    // V11: when all registered payees have claimed, advance the cursor to the "Paid" step.
+    if (allPayoutsClaimed && proposal.state === ProposalState.Completed) {
+      const paidIndex = timelineSteps.findIndex(step => step.state.includes("Paid"))
+      if (paidIndex >= 0) return paidIndex
+    }
+
     const stepIndex = timelineSteps.findIndex(step => step.state.includes(proposal.state as ProposalState | "Created"))
     return stepIndex >= 0 ? stepIndex : 0
-  }, [proposal, timelineSteps])
+  }, [proposal, timelineSteps, allPayoutsClaimed])
 
   return (
     <Card.Root variant="primary" w="full" p="6" gap={0}>
