@@ -52,6 +52,12 @@ export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose,
     setContributors(initialValues.contributors ? [...initialValues.contributors] : [])
   }, [initialValues])
 
+  // Defensive: re-opening the modal must always start with submitting=false, even if a previous
+  // attempt was rejected in the wallet and somehow didn't fire onFailure.
+  useEffect(() => {
+    if (isOpen) setSubmitting(false)
+  }, [isOpen])
+
   const txUI = {
     waitingConfirmation: {
       title: t(isEdit ? "Updating implementation details..." : "Registering implementation details..."),
@@ -65,15 +71,20 @@ export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose,
     onClose()
     setSubmitting(false)
   }
+  // The wallet can reject / time out / error the tx, in which case the kit doesn't fire onSuccess
+  // — we must release the submitting flag so the user can retry without re-opening the modal.
+  const onTxFailure = () => setSubmitting(false)
   const markMutation = useMarkProposalInDevelopment({
     proposalId,
     transactionModalCustomUI: txUI,
     onSuccess: onTxSuccess,
+    onFailure: onTxFailure,
   })
   const updateMutation = useUpdateCommunityExecution({
     proposalId,
     transactionModalCustomUI: txUI,
     onSuccess: onTxSuccess,
+    onFailure: onTxFailure,
   })
 
   const hasBudget = maxBudget > 0n

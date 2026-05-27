@@ -19,6 +19,7 @@ const GovernorInterface = B3TRGovernor__factory.createInterface()
 type Props = {
   proposalId: string
   onSuccess?: () => void
+  onFailure?: () => void
   transactionModalCustomUI?: TransactionCustomUI
 }
 
@@ -34,7 +35,7 @@ type SendArgs = {
  * free-text description, implementation-discussion link, and contributor handles.
  * Callable by the proposer or by an admin holding PROPOSAL_STATE_MANAGER_ROLE.
  */
-export const useMarkProposalInDevelopment = ({ proposalId, onSuccess, transactionModalCustomUI }: Props) => {
+export const useMarkProposalInDevelopment = ({ proposalId, onSuccess, onFailure, transactionModalCustomUI }: Props) => {
   const clauseBuilder = useCallback(
     ({ payee, description, implementationDiscussion, contributors }: SendArgs) => {
       return [
@@ -66,6 +67,7 @@ export const useMarkProposalInDevelopment = ({ proposalId, onSuccess, transactio
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
+    onFailure,
     transactionModalCustomUI,
   })
 }

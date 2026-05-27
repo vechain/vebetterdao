@@ -17,6 +17,7 @@ const GovernorInterface = B3TRGovernor__factory.createInterface()
 type Props = {
   proposalId: string
   onSuccess?: () => void
+  onFailure?: () => void
   transactionModalCustomUI?: TransactionCustomUI
 }
 
@@ -32,7 +33,7 @@ type SendArgs = {
  * whose payout has not yet been claimed. Callable by the proposer or by an admin holding
  * PROPOSAL_STATE_MANAGER_ROLE; allowed while the proposal is InDevelopment or Completed.
  */
-export const useUpdateCommunityExecution = ({ proposalId, onSuccess, transactionModalCustomUI }: Props) => {
+export const useUpdateCommunityExecution = ({ proposalId, onSuccess, onFailure, transactionModalCustomUI }: Props) => {
   const clauseBuilder = useCallback(
     ({ payee, description, implementationDiscussion, contributors }: SendArgs) => {
       return [
@@ -62,6 +63,7 @@ export const useUpdateCommunityExecution = ({ proposalId, onSuccess, transaction
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
+    onFailure,
     transactionModalCustomUI,
   })
 }
