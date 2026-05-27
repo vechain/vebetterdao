@@ -207,7 +207,8 @@ describe("Governor and TimeLock - @shard4a1", function () {
       const funcSig = V1Contract.interface.getFunction("upgradeToAndCall")?.selector
 
       // Check that the new implementation works
-      const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
+      // Contract was created from B3TRGovernorV1 factory — cast accordingly so the 6-arg propose typechecks.
+      const newGovernor = Contract.attach(await governor.getAddress()) as unknown as B3TRGovernorV1
 
       const tx1 = await newGovernor.connect(owner).setWhitelistFunction(b3tr, funcSig, true) // whitelist the function for b3tr contract
       const receipt = await tx1.wait()
@@ -334,7 +335,8 @@ describe("Governor and TimeLock - @shard4a1", function () {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
 
       // Check that the new implementation works
-      const newGovernor = Contract.attach(await governor.getAddress()) as B3TRGovernor
+      // Contract was created from B3TRGovernorV1 factory — cast accordingly so the 6-arg propose typechecks.
+      const newGovernor = Contract.attach(await governor.getAddress()) as unknown as B3TRGovernorV1
 
       expect(await newGovernor.quorumDenominator()).to.equal(100)
     })
