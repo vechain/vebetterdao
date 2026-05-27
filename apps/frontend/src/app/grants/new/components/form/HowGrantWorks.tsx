@@ -40,7 +40,7 @@ export const HowGrantWorks = () => {
     {
       heading: t("Report on spending"),
       description: t(
-        "For each milestone, submit a standardized expenditure report so reviewers can verify how funds were used before approving the next tranche.",
+        "For each milestone, submit a standardized milestone report so reviewers can verify how funds were used before approving the next tranche.",
       ),
     },
   ]

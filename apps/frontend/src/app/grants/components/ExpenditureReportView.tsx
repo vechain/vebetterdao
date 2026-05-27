@@ -40,7 +40,7 @@ export const ExpenditureReportView = ({ report, headerAction }: ExpenditureRepor
           <Icon as={Reports} boxSize={4} color="icon.subtle" />
           <VStack w="full" align="flex-start" gap={0}>
             <Text textStyle="sm" fontWeight="semibold">
-              {t("Expenditure Report")}
+              {t("Milestone Report")}
             </Text>
             <Text textStyle="sm" color="text.subtle">
               {dayjs(report.dateSubmitted * 1000).format("MMM D, YYYY")}

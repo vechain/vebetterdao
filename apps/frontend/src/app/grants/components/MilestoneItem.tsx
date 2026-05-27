@@ -294,9 +294,9 @@ export const MilestoneItem = ({
           <GenericAlert
             type="warning"
             isLoading={false}
-            title={t("Expenditure report missing for the previous milestone")}
+            title={t("Milestone report missing for the previous milestone")}
             message={t(
-              "No expenditure report for Milestone {{previous}} is recorded on chain. Confirm before funding Milestone {{current}}.",
+              "No milestone report for Milestone {{previous}} is recorded on chain. Confirm before funding Milestone {{current}}.",
               { previous: milestoneIndex, current: milestoneIndex + 1 },
             )}
           />
@@ -349,7 +349,7 @@ export const MilestoneItem = ({
         if (canManageReport) {
           return (
             <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
-              {t("Submit expenditure report")}
+              {t("Submit milestone report")}
             </Button>
           )
         }

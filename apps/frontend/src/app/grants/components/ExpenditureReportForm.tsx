@@ -186,7 +186,7 @@ export const ExpenditureReportForm = ({
     try {
       await onSubmit(report)
     } catch (err) {
-      setErrors({ submit: err instanceof Error ? err.message : t("Failed to submit expenditure report") })
+      setErrors({ submit: err instanceof Error ? err.message : t("Failed to submit milestone report") })
     }
   }, [
     milestoneGoal,
@@ -209,7 +209,7 @@ export const ExpenditureReportForm = ({
     <VStack align="stretch" gap={6} w="full">
       <VStack align="flex-start" gap={1}>
         <Text textStyle="lg" fontWeight="semibold">
-          {t("Expenditure Report for Milestone {{milestone}}", { milestone: currentMilestoneIndex + 1 })}
+          {t("Milestone {{milestone}} Report", { milestone: currentMilestoneIndex + 1 })}
         </Text>
         <Text textStyle="sm" color="text.subtle">
           {proposal.projectName}

@@ -79,7 +79,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     async (report: ExpenditureReport) => {
       // Errors propagate to the form so it can show an inline message — no toasts on this flow.
       if (!proposal?.id || !proposal.milestones?.length) {
-        throw new Error(t("Failed to submit expenditure report"))
+        throw new Error(t("Failed to submit milestone report"))
       }
       setIsPublishingReport(true)
       try {
