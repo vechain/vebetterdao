@@ -141,9 +141,7 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
               )}
             </HStack>
             <Text textStyle="sm" color="gray.500">
-              {t(
-                "Hard cap that may be paid out from the Treasury. The full amount goes to a single payout address chosen by the proposer; that wallet then forwards funds to the rest of the team off chain.",
-              )}
+              {t("Treasury funds used to pay the team working on implementing this proposal.")}
             </Text>
           </VStack>
         )}
