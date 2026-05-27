@@ -131,7 +131,7 @@
     "@vechain/sdk-core": "1.2.0-rc.2",
     "@vechain/sdk-hardhat-plugin": "1.2.0-rc.2",
     "@vechain/sdk-network": "1.2.0-rc.2",
-    "archiver": "^7.0.1",
+    "archiver": "^8.0.0",
     "axios": "^1.15.2",
     "chai": "^4.2.0",
     "dotenv": "^16.3.1",
