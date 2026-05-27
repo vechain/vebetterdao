@@ -230,9 +230,13 @@ export const ProposalInteractionCard = ({
 
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
-    if (proposal?.state === undefined || !CANCELLABLE_STATES.includes(proposal.state)) return false
+    if (proposal?.state === undefined) return false
     const isAdmin = permissions?.isAdminOfB3TRGovernor
-    return isProposer || isAdmin
+    // Match the on-chain rule: the proposer can only cancel while still Pending (support phase).
+    // Admins can additionally cancel Succeeded or Queued proposals before execution.
+    if (isProposer && proposal.state === ProposalState.Pending) return true
+    if (isAdmin && CANCELLABLE_STATES.includes(proposal.state)) return true
+    return false
   }, [isProposer, permissions?.isAdminOfB3TRGovernor, proposal?.state])
 
   const shouldShowActionButton = useMemo(() => {
