@@ -9,8 +9,10 @@ import { useProposalContributors } from "@/api/contracts/governance/hooks/usePro
 import { useProposalDescription } from "@/api/contracts/governance/hooks/useProposalDescription"
 import { useProposalImplementationDiscussion } from "@/api/contracts/governance/hooks/useProposalImplementationDiscussion"
 import { useProposalPayee } from "@/api/contracts/governance/hooks/useProposalPayee"
+import { useProposalState } from "@/api/contracts/governance/hooks/useProposalState"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture/AddressWithProfilePicture"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
 
 type Props = {
@@ -94,6 +96,9 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
   const { data: maxBudget } = useProposalBudget(proposalId)
   const { data: payee } = useProposalPayee(proposalId)
   const { data: paid } = useIsProposalPaid(proposalId)
+  const { data: stateRaw } = useProposalState(proposalId)
+  const state = Number(stateRaw ?? -1) as ProposalState
+  const isCompleted = state === ProposalState.Completed
   const { data: description } = useProposalDescription(proposalId)
   const { data: implementationDiscussion } = useProposalImplementationDiscussion(proposalId)
   const { data: contributorsRaw } = useProposalContributors(proposalId)
@@ -146,11 +151,11 @@ export const ProposalCommunityExecutionSection = ({ proposalId }: Props) => {
                 <Badge colorPalette="green" variant="subtle">
                   {t("Paid")}
                 </Badge>
-              ) : (
+              ) : isCompleted ? (
                 <Badge colorPalette="gray" variant="subtle">
                   {t("Pending")}
                 </Badge>
-              )}
+              ) : null}
             </HStack>
             <Text textStyle="sm" color="gray.500">
               {t("Treasury funds used to pay the team working on implementing this proposal.")}
