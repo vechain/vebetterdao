@@ -1299,6 +1299,7 @@
   "Max points reached for this app": "Max points reached for this app",
   "Max: {{max}} VOT3": "Max: {{max}} VOT3",
   "Maximum actions is {{max}}": "Maximum actions is {{max}}",
+  "Maximum amount that may be paid from the Treasury for implementing this proposal. After approval, you’ll register a single payout address that will receive the full amount in one transfer and will be responsible for distributing funds off-chain to all contributors (developers, PMs, designers, etc.).": "Maximum amount that may be paid from the Treasury for implementing this proposal. After approval, you’ll register a single payout address that will receive the full amount in one transfer and will be responsible for distributing funds off-chain to all contributors (developers, PMs, designers, etc.).",
   "Maximum implementation budget": "Maximum implementation budget",
   "Maximum implementation budget (B3TR)": "Maximum implementation budget (B3TR)",
   "Maximum limit reached": "Maximum limit reached",

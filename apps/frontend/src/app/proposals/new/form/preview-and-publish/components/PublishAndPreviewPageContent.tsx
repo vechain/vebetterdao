@@ -154,7 +154,7 @@ export const PublishAndPreviewPageContent = () => {
               <>
                 <Text textStyle="sm" color="gray.500">
                   {t(
-                    "Hard cap that may be paid out from the Treasury. After the proposal is approved you'll register a single payout address — that wallet receives the full amount in one transfer and is then responsible for distributing funds off chain to all contributors (devs, PMs, designers, etc.).",
+                    "Maximum amount that may be paid from the Treasury for implementing this proposal. After approval, you’ll register a single payout address that will receive the full amount in one transfer and will be responsible for distributing funds off-chain to all contributors (developers, PMs, designers, etc.).",
                   )}
                 </Text>
                 <HStack gap={3} align="center" mt={2}>
