@@ -8,6 +8,7 @@ import { FiInfo } from "react-icons/fi"
 
 import { type ChallengeDetail } from "@/api/challenges/types"
 import { useChallengeUserActions } from "@/api/challenges/useChallengeUserActions"
+import { useAccountLinking } from "@/api/contracts/vePassport/hooks/useAccountLinking"
 import { AddressIcon } from "@/components/AddressIcon"
 import { BaseModal } from "@/components/BaseModal"
 import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard/BetterActionCard"
@@ -43,6 +44,8 @@ export const ChallengeUserActionsModal = ({ onClose, challenge, participant }: C
   const { data: vnsData } = useVechainDomain(display.address)
   const domain = vnsData?.domain
 
+  const { isLinked: participantHasLinkedAccounts } = useAccountLinking(isOpen ? display.address : undefined)
+
   const { actions, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useChallengeUserActions(
     challenge,
     isOpen ? display.address : undefined,
@@ -72,30 +75,32 @@ export const ChallengeUserActionsModal = ({ onClose, challenge, participant }: C
               <Text textStyle="sm" color="text.subtle">
                 <Trans i18nKey="{{value}} actions" values={{ value: display.score }} />
               </Text>
-              <Tooltip
-                content={t(
-                  "Each wallet's quest score reflects only the actions performed by that wallet. Actions from other wallets linked to the same VeBetter Passport are not pooled into a single score.",
-                )}
-                contentProps={{ maxW: "xs" }}
-                positioning={{ placement: "top" }}>
-                <chakra.button
-                  type="button"
-                  aria-label={t(
+              {participantHasLinkedAccounts && (
+                <Tooltip
+                  content={t(
                     "Each wallet's quest score reflects only the actions performed by that wallet. Actions from other wallets linked to the same VeBetter Passport are not pooled into a single score.",
                   )}
-                  display="inline-flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  cursor="pointer"
-                  color="text.subtle"
-                  flexShrink={0}
-                  bg="transparent"
-                  borderWidth="0"
-                  p="0"
-                  lineHeight="0">
-                  <Icon as={FiInfo} boxSize={3} />
-                </chakra.button>
-              </Tooltip>
+                  contentProps={{ maxW: "xs" }}
+                  positioning={{ placement: "top" }}>
+                  <chakra.button
+                    type="button"
+                    aria-label={t(
+                      "Each wallet's quest score reflects only the actions performed by that wallet. Actions from other wallets linked to the same VeBetter Passport are not pooled into a single score.",
+                    )}
+                    display="inline-flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    cursor="pointer"
+                    color="text.subtle"
+                    flexShrink={0}
+                    bg="transparent"
+                    borderWidth="0"
+                    p="0"
+                    lineHeight="0">
+                    <Icon as={FiInfo} boxSize={3} />
+                  </chakra.button>
+                </Tooltip>
+              )}
             </HStack>
           </VStack>
           <Button asChild variant="outline" size="xs" rounded="full">
