@@ -1,0 +1,136 @@
+import fs from "fs"
+import path from "path"
+import { pathToFileURL } from "url"
+import { getConfig } from "@repo/config"
+import { AppConfig } from "@repo/config"
+import { AppEnv } from "@repo/config/contracts"
+import { deployAll } from "../deploy/deployAll"
+
+// ts-node compiles this file as CommonJS (per packages/contracts/tsconfig.json's
+// `module: "commonjs"`), which rewrites `await import(...)` to `require(...)`
+// — incompatible with the ESM `@vechain/dev-stack` package. The Function
+// constructor escapes the compiler so the import runs natively at runtime.
+const dynamicImport: (specifier: string) => Promise<any> = new Function("s", "return import(s)") as (
+  specifier: string,
+) => Promise<any>
+
+export async function registerWithDevStack(cfg: AppConfig): Promise<void> {
+  const { registerAddresses } = await dynamicImport("@vechain/dev-stack")
+  const devConfigPath = path.resolve("../../vechain-dev.config.mjs")
+  const devConfig = (await dynamicImport(pathToFileURL(devConfigPath).href)).default
+  const registered = await registerAddresses({
+    project: devConfig.project,
+    profiles: devConfig.profiles,
+    addresses: {
+      B3TR_CONTRACT: cfg.b3trContractAddress,
+      VOT3_CONTRACT: cfg.vot3ContractAddress,
+      EMISSIONS_CONTRACT: cfg.emissionsContractAddress,
+      B3TR_GOVERNOR_CONTRACT: cfg.b3trGovernorAddress,
+      B3TR_DBA_POOL_CONTRACT: cfg.dbaPoolContractAddress,
+      GM_NFT_CONTRACT: cfg.galaxyMemberContractAddress,
+      X_ALLOC_VOTING_CONTRACT: cfg.xAllocationVotingContractAddress,
+      CHALLENGES_CONTRACT: cfg.challengesContractAddress,
+      X_ALLOC_POOL_CONTRACT: cfg.xAllocationPoolContractAddress,
+      X2EARN_REWARDS_POOL_CONTRACT: cfg.x2EarnRewardsPoolContractAddress,
+      VOTER_REWARDS_CONTRACT: cfg.voterRewardsContractAddress,
+      TREASURY_CONTRACT: cfg.treasuryContractAddress,
+      STARGATE_NFT_CONTRACT: cfg.stargateNFTContractAddress,
+      STARGATE_DELEGATION_CONTRACT: cfg.stargateContractAddress,
+      NAVIGATOR_REGISTRY_CONTRACT: cfg.navigatorRegistryContractAddress,
+      // Block-explorer aliases for the same addresses.
+      SOLO_B3TR_ADDRESS: cfg.b3trContractAddress,
+      SOLO_VOT3_ADDRESS: cfg.vot3ContractAddress,
+      SOLO_STARGATE_NFT_ADDRESS: cfg.stargateNFTContractAddress,
+      SOLO_STARGATE_DELEGATION_ADDRESS: cfg.stargateContractAddress,
+    },
+  })
+  console.log(`Registered with dev-stack: ${registered}`)
+}
+
+export async function overrideLocalConfigWithNewContracts(
+  contracts: Awaited<ReturnType<typeof deployAll>>,
+): Promise<AppConfig> {
+  const config = getConfig()
+  const env = config.environment
+  if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
+
+  const newConfig: AppConfig = {
+    ...config,
+    b3trContractAddress: await contracts.b3tr.getAddress(),
+    vot3ContractAddress: await contracts.vot3.getAddress(),
+    b3trGovernorAddress: await contracts.governor.getAddress(),
+    timelockContractAddress: await contracts.timelock.getAddress(),
+    xAllocationPoolContractAddress: await contracts.xAllocationPool.getAddress(),
+    xAllocationVotingContractAddress: await contracts.xAllocationVoting.getAddress(),
+    emissionsContractAddress: await contracts.emissions.getAddress(),
+    voterRewardsContractAddress: await contracts.voterRewards.getAddress(),
+    galaxyMemberContractAddress: await contracts.galaxyMember.getAddress(),
+    treasuryContractAddress: await contracts.treasury.getAddress(),
+    x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
+    x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
+    x2EarnCreatorContractAddress: await contracts.x2EarnCreator.getAddress(),
+    nodeManagementContractAddress: await contracts.vechainNodeManagement.getAddress(),
+    veBetterPassportContractAddress: await contracts.veBetterPassport.getAddress(),
+    challengesContractAddress: await contracts.b3trChallenges.getAddress(),
+    grantsManagerContractAddress: await contracts.grantsManager.getAddress(),
+    dbaPoolContractAddress: await contracts.dynamicBaseAllocationPool.getAddress(),
+    stargateContractAddress: await contracts.stargate.getAddress(),
+    stargateNFTContractAddress: await contracts.stargateNFT.getAddress(),
+    tokenAuctionContractAddress: await contracts.vechainNodesMock.getAddress(),
+    relayerRewardsPoolContractAddress: await contracts.relayerRewardsPool.getAddress(),
+    navigatorRegistryContractAddress: await contracts.navigatorRegistry.getAddress(),
+    b3trGovernorLibraries: {
+      governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
+      governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),
+      governorDepositLogicAddress: await contracts.libraries.governorDepositLogic.getAddress(),
+      governorFunctionRestrictionsLogicAddress:
+        await contracts.libraries.governorFunctionRestrictionsLogic.getAddress(),
+      governorProposalLogicAddressAddress: await contracts.libraries.governorProposalLogic.getAddress(),
+      governorQuorumLogicAddress: await contracts.libraries.governorQuorumLogic.getAddress(),
+      governorStateLogicAddress: await contracts.libraries.governorStateLogic.getAddress(),
+      governorVotesLogicAddress: await contracts.libraries.governorVotesLogic.getAddress(),
+    },
+    passportLibraries: {
+      passportChecksLogicAddress: await contracts.libraries.passportChecksLogic.getAddress(),
+      passportConfiguratorAddress: await contracts.libraries.passportConfigurator.getAddress(),
+      passportEntityLogicAddress: await contracts.libraries.passportEntityLogic.getAddress(),
+      passportDelegationLogicAddress: await contracts.libraries.passportDelegationLogic.getAddress(),
+      passportPersonhoodLogicAddress: await contracts.libraries.passportPersonhoodLogic.getAddress(),
+      passportPoPScoreLogicAddress: await contracts.libraries.passportPoPScoreLogic.getAddress(),
+      passportSignalingLogicAddress: await contracts.libraries.passportSignalingLogic.getAddress(),
+      passportWhitelistAndBlacklistLogicAddress:
+        await contracts.libraries.passportWhitelistAndBlacklistLogic.getAddress(),
+    },
+  }
+
+  // eslint-disable-next-line
+  const toWrite = `import { AppConfig } from \".\" \n const config: AppConfig = ${JSON.stringify(newConfig, null, 2)};
+  export default config;`
+
+  let fileToWrite: string
+  switch (env) {
+    case AppEnv.LOCAL:
+      fileToWrite = "local.ts"
+      break
+    case AppEnv.E2E:
+      fileToWrite = "e2e.ts"
+      break
+    case AppEnv.TESTNET_STAGING:
+      fileToWrite = "testnet-staging.ts"
+      break
+    case AppEnv.TESTNET:
+      fileToWrite = "testnet.ts"
+      break
+    case AppEnv.MAINNET:
+      fileToWrite = "mainnet.ts"
+      break
+    default:
+      throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${env}`)
+  }
+
+  const localConfigPath = path.resolve(`../config/${fileToWrite}`)
+  console.log(`Writing new config file to ${localConfigPath}`)
+  fs.writeFileSync(localConfigPath, toWrite)
+
+  return newConfig
+}

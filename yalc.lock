@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "@vechain/dev-stack": {
+      "signature": "dac694b3bef6862177488dfd4dd2f5c8",
+      "file": true
+    }
+  }
+}
