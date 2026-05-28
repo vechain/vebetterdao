@@ -184,4 +184,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
         "Add VOT3 unlocked-balance check on delegate/increaseDelegation; reinitializer caps over-delegated citizens at their balance",
     },
   },
+  "B3TR Challenges": {
+    name: "b3tr-challenges",
+    configAddressField: "challengesContractAddress",
+    versions: ["v2"] as const,
+    descriptions: {
+      v2: "Gate join/claim on VeBetterPassport.isPerson(); skip non-persons in completeChallenge bestScore selection",
+    },
+  },
 } as const

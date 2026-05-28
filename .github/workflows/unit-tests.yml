@@ -181,6 +181,12 @@ jobs:
             label: VOT3
           - shard: shard9a
             label: B3TRChallenges
+          - shard: shard9b
+            label: B3TRChallenges - Passport gating
+          - shard: shard9c
+            label: B3TRChallenges - V2 Upgrade
+          - shard: shard9d
+            label: B3TRChallenges - V2 Compatibility
           - shard: shard10-core
             label: VoterRewards
           - shard: shard10a
