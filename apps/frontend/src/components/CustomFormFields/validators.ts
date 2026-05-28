@@ -1,3 +1,4 @@
+import { getConfig } from "@repo/config"
 import * as AddressUtils from "@repo/utils/AddressUtils"
 import dayjs from "dayjs"
 import { t } from "i18next"
@@ -6,6 +7,19 @@ import { GrantFormData } from "@/hooks/proposals/grants/types"
 import * as AppUtils from "@/utils/AppUtils/AppUtils"
 
 import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "../../constants/proposals"
+
+/**
+ * On non-mainnet envs we relax the "must be at least the next day" checks on milestone dates so
+ * testers can spin up a grant whose milestones are minutes apart (or same-day) and exercise the
+ * full approve / claim / report flow without waiting.
+ */
+const isMilestoneDateConstraintRelaxed = (): boolean => {
+  try {
+    return getConfig().environment !== "mainnet"
+  } catch {
+    return false
+  }
+}
 
 export const patternUrlCheck = {
   value: /^https?:\/\/.+/,
@@ -107,13 +121,20 @@ export const validateMilestoneStartDate = (
   if (previousMilestone && previousMilestone.durationTo) {
     const previousEndDate = previousMilestone.durationTo
 
-    // Compare dates at start of day to avoid time-of-day issues
-    const currentStartOfDay = dayjs.unix(value).startOf("day").unix()
-    const previousEndStartOfDay = dayjs.unix(previousEndDate).startOf("day").unix()
+    if (isMilestoneDateConstraintRelaxed()) {
+      // Non-mainnet: allow same-day continuation so testers don't have to space milestones out.
+      if (value < previousEndDate) {
+        return `Milestone must start on or after the previous milestone ends (${formatDuration(previousEndDate)})`
+      }
+    } else {
+      // Compare dates at start of day to avoid time-of-day issues
+      const currentStartOfDay = dayjs.unix(value).startOf("day").unix()
+      const previousEndStartOfDay = dayjs.unix(previousEndDate).startOf("day").unix()
 
-    // Milestone can start on the day after the previous milestone ends
-    if (currentStartOfDay <= previousEndStartOfDay) {
-      return `Milestone must start after the previous milestone ends (${formatDuration(previousEndDate)})`
+      // Milestone can start on the day after the previous milestone ends
+      if (currentStartOfDay <= previousEndStartOfDay) {
+        return `Milestone must start after the previous milestone ends (${formatDuration(previousEndDate)})`
+      }
     }
   }
 
@@ -140,12 +161,19 @@ export const validateMilestoneEndDate = (
 
   // Only validate against start date if start date is set and valid
   if (startDate && startDate > 0) {
-    // Compare dates at start of day to avoid time-of-day issues
-    const endStartOfDay = dayjs.unix(value).startOf("day").unix()
-    const startStartOfDay = dayjs.unix(startDate).startOf("day").unix()
+    if (isMilestoneDateConstraintRelaxed()) {
+      // Non-mainnet: allow end == start (zero-duration milestones for fast e2e testing).
+      if (value < startDate) {
+        return "End date must be on or after start date"
+      }
+    } else {
+      // Compare dates at start of day to avoid time-of-day issues
+      const endStartOfDay = dayjs.unix(value).startOf("day").unix()
+      const startStartOfDay = dayjs.unix(startDate).startOf("day").unix()
 
-    if (endStartOfDay <= startStartOfDay) {
-      return "End date must be after start date"
+      if (endStartOfDay <= startStartOfDay) {
+        return "End date must be after start date"
+      }
     }
   }
 

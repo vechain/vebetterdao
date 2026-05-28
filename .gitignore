@@ -182,3 +182,5 @@ tasks/
 
 # Temporary e2e test cases
 packages/e2e/src/temporary_test_cases
+
+.yalc/

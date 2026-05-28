@@ -14,6 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
+import { getConfig } from "@repo/config"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useEffect, useMemo, useState } from "react"
@@ -165,15 +166,18 @@ const MilestoneHeader = ({
   hasDurationInfo,
   formattedDurationFrom,
   formattedDurationTo,
+  fundingAmountUsd,
   isMobile,
 }: {
   milestoneNumber: number
   hasDurationInfo: boolean
   formattedDurationFrom: string
   formattedDurationTo: string
+  fundingAmountUsd: number
   isMobile: boolean
 }) => {
   const { t } = useTranslation()
+  const hasAmountInfo = fundingAmountUsd > 0
 
   return (
     <HStack w="full" gap={4}>
@@ -183,6 +187,12 @@ const MilestoneHeader = ({
           <Text>{formattedDurationFrom}</Text>
           <LuArrowRight color="subtle.active" size={16} />
           <Text>{formattedDurationTo}</Text>
+        </Badge>
+      )}
+      {hasAmountInfo && !isMobile && (
+        <Badge variant="outline" textStyle="sm" fontWeight="regular">
+          {"$"}
+          {fundingAmountUsd.toLocaleString()} {"USD"}
         </Badge>
       )}
     </HStack>
@@ -262,7 +272,15 @@ export const MilestoneSection = ({
     // Calculate 12-month limit from first milestone start
     const twelveMonthLimit = firstMilestoneStart ? dayjs.unix(firstMilestoneStart).add(12, "months").unix() : null
     const startMinDate = isFirst ? now : previousMilestoneEnd || now
-    const startMinPickableDate = dayjs.unix(startMinDate).add(1, "day").unix()
+    // Mainnet: enforce at least one day gap. Non-mainnet: allow same-day so testers can chain milestones immediately.
+    const isMainnet = (() => {
+      try {
+        return getConfig().environment === "mainnet"
+      } catch {
+        return false
+      }
+    })()
+    const startMinPickableDate = isMainnet ? dayjs.unix(startMinDate).add(1, "day").unix() : startMinDate
 
     return {
       startMinDate: startMinPickableDate,
@@ -331,6 +349,7 @@ export const MilestoneSection = ({
           hasDurationInfo={hasDurationInfo}
           formattedDurationFrom={formattedDurationFrom}
           formattedDurationTo={formattedDurationTo}
+          fundingAmountUsd={Number(currentMilestone.fundingAmountUsd) || 0}
           isMobile={Boolean(isMobile)}
         />
         <Accordion.ItemIndicator />
@@ -460,23 +479,49 @@ export const Milestones = ({
   // Computed values
   const milestones = watch("milestones")
   const grantType = watch("grantType")
+  const costBreakdown = watch("costBreakdown")
   const B3TRPerUSD = 1 / (Number(conversionRate) ?? 1)
+
+  /**
+   * Suggest a sensible starting amount for the next milestone:
+   * the leftover between the user's cost-breakdown total and the milestone amounts already assigned.
+   * Bounded by 0 (never negative) and by the per-grant-type cap.
+   */
+  const computeRemainingBudget = (currentMilestones: GrantFormData["milestones"]): number => {
+    const breakdownTotal = (costBreakdown ?? []).reduce((acc, item) => acc + (Number(item?.amount) || 0), 0)
+    const assigned = currentMilestones.reduce((acc, m) => acc + (Number(m?.fundingAmountUsd) || 0), 0)
+    const remaining = breakdownTotal - assigned
+    if (remaining <= 0) return 0
+    return Math.min(remaining, getMaxGrantAmount(grantType))
+  }
 
   const computedValues = useMemo(() => {
     const canRemoveAnyMilestone = milestones.length > Number(milestoneMinimumAmount ?? 3)
     const totalRequestedAmount = calculateTotalAmount(milestones)
     const isTotalRequestedAmountValid = totalRequestedAmount <= getMaxGrantAmount(grantType)
+    const breakdownTotal = (costBreakdown ?? []).reduce((acc, item) => acc + (Number(item?.amount) || 0), 0)
+    // Non-blocking nudge: milestones should sum to the user's declared cost-breakdown total.
+    // Only nudge once both sides are populated, otherwise we'd alert the user before they've even typed.
+    const mismatchesBreakdown =
+      breakdownTotal > 0 && totalRequestedAmount > 0 && totalRequestedAmount !== breakdownTotal
 
     return {
       canRemoveAnyMilestone,
       totalRequestedAmount,
       isTotalRequestedAmountValid,
+      breakdownTotal,
+      mismatchesBreakdown,
     }
-  }, [milestones, milestoneMinimumAmount, grantType])
+  }, [milestones, milestoneMinimumAmount, grantType, costBreakdown])
 
   // Event handlers
   const handleAddMilestone = () => {
-    const newMilestone = defaultMilestoneValues
+    const remainingUsd = computeRemainingBudget(milestones)
+    const newMilestone = {
+      ...defaultMilestoneValues,
+      fundingAmountUsd: remainingUsd,
+      fundingAmount: remainingUsd > 0 ? Math.round(remainingUsd * B3TRPerUSD) : 0,
+    }
     const newMilestones = [...milestones, newMilestone]
 
     setValue("milestones", newMilestones)
@@ -555,6 +600,22 @@ export const Milestones = ({
               message={t("The maximum amount for this grant type is {{value}} USD", {
                 value: getMaxGrantAmount(grantType),
               })}
+            />
+          </GridItem>
+        )}
+
+        {computedValues.mismatchesBreakdown && computedValues.isTotalRequestedAmountValid && (
+          <GridItem colSpan={2}>
+            <GenericAlert
+              isLoading={false}
+              type="warning"
+              message={t(
+                "The milestone total (${{milestonesTotal}} USD) does not match the budget total (${{breakdownTotal}} USD).",
+                {
+                  milestonesTotal: computedValues.totalRequestedAmount.toLocaleString(),
+                  breakdownTotal: computedValues.breakdownTotal.toLocaleString(),
+                },
+              )}
             />
           </GridItem>
         )}

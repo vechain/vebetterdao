@@ -37,6 +37,12 @@ export const HowGrantWorks = () => {
       heading: t("Receive funds"),
       description: t("If approved, your grant is funded from the DAO Treasury."),
     },
+    {
+      heading: t("Report on spending"),
+      description: t(
+        "For each milestone, submit a standardized milestone report so reviewers can verify how funds were used before approving the next tranche.",
+      ),
+    },
   ]
   return (
     <Card.Root variant="primary">

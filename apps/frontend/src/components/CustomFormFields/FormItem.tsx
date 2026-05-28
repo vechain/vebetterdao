@@ -70,12 +70,20 @@ export const FormItem = ({
         <InputComponent
           placeholder={placeholder}
           {...register}
+          {...(type !== "textarea" && { type })}
+          {...(type === "number" && { inputMode: "numeric", min: 0, step: 1 })}
           {...(type === "textarea" && {
             h: "full",
             minH: "120px",
             resize: "vertical",
           })}
           onChange={e => {
+            // For numeric fields, strip anything that's not a digit — blocks "e", "+", "-",
+            // ".", and pasted letters/symbols that HTMLInputElement otherwise tolerates.
+            if (type === "number") {
+              const cleaned = e.target.value.replace(/\D/g, "")
+              if (cleaned !== e.target.value) e.target.value = cleaned
+            }
             register.onChange(e) // Call the original register onChange
             setCharCount(e.target.value.length) // Update local character count
           }}

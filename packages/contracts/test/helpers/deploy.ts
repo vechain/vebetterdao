@@ -923,14 +923,20 @@ export const getOrDeployContractInstances = async ({
   // Grant UPGRADER_ROLE to deployer
   await grantsManagerV1.connect(owner).grantRole(await grantsManagerV1.UPGRADER_ROLE(), owner.address)
 
-  // Then upgrade from V1 to V2
+  // Upgrade V1 → V2
+  await upgradeProxy("GrantsManagerV1", "GrantsManagerV2", await grantsManagerV1.getAddress(), [], {
+    version: 2,
+    libraries: {},
+  })
+
+  // Upgrade V2 → V3 (widens updateMilestoneMetadataURI access to grants receiver + approver role)
   const grantsManager = (await upgradeProxy(
-    "GrantsManagerV1",
+    "GrantsManagerV2",
     "GrantsManager",
     await grantsManagerV1.getAddress(),
     [],
     {
-      version: 2,
+      version: 3,
       libraries: {},
     },
   )) as GrantsManager

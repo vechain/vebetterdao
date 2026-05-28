@@ -649,13 +649,22 @@ contract GrantsManager is
    * @param proposalId The ID of the proposal
    * @param newMilestoneMetadataURI The new IPFS hash containing the updated milestone descriptions
    * @notice The JSON is {milestone1: {details: ..., duration: timestamp}, milestone2: {details: ..., duration: timestamp}}
+   * @dev In production the grants approver wallet acts as the proposer for nearly every grant, so
+   *      the receiving app cannot persist expenditure reports unless the receiver and the approver
+   *      role are also allow-listed. Governance retains override capability.
    */
   function updateMilestoneMetadataURI(uint256 proposalId, string memory newMilestoneMetadataURI) external {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    if (msg.sender != $.grant[proposalId].proposer) {
+    GrantProposal storage grant = $.grant[proposalId];
+    if (
+      msg.sender != grant.proposer &&
+      msg.sender != grant.grantsReceiver &&
+      !hasRole(GRANTS_APPROVER_ROLE, msg.sender) &&
+      !hasRole(GOVERNANCE_ROLE, msg.sender)
+    ) {
       revert NotAuthorized();
     }
-    $.grant[proposalId].metadataURI = newMilestoneMetadataURI;
+    grant.metadataURI = newMilestoneMetadataURI;
 
     emit MilestoneMetadataURIUpdated(proposalId, newMilestoneMetadataURI);
   }
@@ -760,7 +769,7 @@ contract GrantsManager is
    * @return The version of the contract
    */
   function version() external pure returns (uint256) {
-    return 2;
+    return 3;
   }
 
   // ------------------ Overrides ------------------ //

@@ -21,6 +21,7 @@ import { GrantTypeSelection } from "../GrantTypeSelection"
 
 import { GrantsNewFormStepIndicator } from "./GrantsNewFormStepIndicator"
 import { AboutGrant } from "./steps/AboutGrant"
+import { CostBreakdown } from "./steps/CostBreakdown"
 import { Milestones } from "./steps/Milestones"
 import { Schedule } from "./steps/Schedule"
 
@@ -30,6 +31,7 @@ import { Schedule } from "./steps/Schedule"
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
   ABOUT_GRANT = "ABOUT_GRANT",
+  BUDGET = "BUDGET",
   MILESTONES = "MILESTONES",
   SCHEDULE = "SCHEDULE",
 }
@@ -41,12 +43,13 @@ export type GrantStep = {
 const STEP_INDICES = {
   GRANT_TYPE: 0,
   ABOUT_GRANT: 1,
-  MILESTONES: 2,
-  SCHEDULE: 3,
+  BUDGET: 2,
+  MILESTONES: 3,
+  SCHEDULE: 4,
 } as const
 
 const FIRST_STEP = 0
-const LAST_STEP = 3 // SCHEDULE index
+const LAST_STEP = 4 // SCHEDULE index
 
 const treasuryInterface = Treasury__factory.createInterface()
 
@@ -115,6 +118,20 @@ export const GrantsNewFormStepCard = () => {
         />
       ),
       title: t("About grant"),
+    },
+    {
+      key: GrantFormStep.BUDGET,
+      content: (
+        <CostBreakdown
+          register={register}
+          setValue={setValue}
+          getValues={getValues}
+          setData={setData}
+          errors={errors}
+          control={control}
+        />
+      ),
+      title: t("Budget"),
     },
     {
       key: GrantFormStep.MILESTONES,
