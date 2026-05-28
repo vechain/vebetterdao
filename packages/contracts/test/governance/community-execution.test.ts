@@ -342,6 +342,61 @@ describe("Governance - Community Execution Framework V11 - @shard4z", function (
     })
   })
 
+  // ------------------- resetDevelopmentState (regression) ------------------- //
+
+  describe("resetDevelopmentState", () => {
+    it("wipes V11 community-execution metadata so markAsInDevelopment can re-run with a fresh payee", async () => {
+      const budget = E(500)
+      const proposalId = await createAndPassTextProposal({ budget })
+      const payeeA = otherAccounts[5].address
+      const payeeB = otherAccounts[6].address
+
+      await governor
+        .connect(proposer)
+        .markAsInDevelopment(proposalId, payeeA, "first desc", "https://first", ["gh:alice"])
+
+      // sanity: first registration is observable
+      expect(await governor.getProposalPayee(proposalId)).to.equal(payeeA)
+      expect(await governor.getProposalDescription(proposalId)).to.equal("first desc")
+      expect(await governor.getProposalContributors(proposalId)).to.deep.equal(["gh:alice"])
+
+      // Admin resets — V11 metadata must be wiped
+      await expect(governor.connect(owner).resetDevelopmentState(proposalId)).to.emit(
+        governor,
+        "ProposalDevelopmentStateReset",
+      )
+
+      expect(await governor.getProposalPayee(proposalId)).to.equal(ethers.ZeroAddress)
+      expect(await governor.getProposalDescription(proposalId)).to.equal("")
+      expect(await governor.getProposalImplementationDiscussion(proposalId)).to.equal("")
+      expect(await governor.getProposalContributors(proposalId)).to.deep.equal([])
+
+      // markAsInDevelopment can now be called again with a different payee
+      await expect(
+        governor.connect(proposer).markAsInDevelopment(proposalId, payeeB, "second desc", "https://second", ["gh:bob"]),
+      ).to.emit(governor, "ProposalInDevelopment")
+
+      expect(await governor.getProposalPayee(proposalId)).to.equal(payeeB)
+      expect(await governor.getProposalDescription(proposalId)).to.equal("second desc")
+      expect(await governor.getProposalContributors(proposalId)).to.deep.equal(["gh:bob"])
+    })
+
+    it("reverts with PayoutAlreadyClaimed after claimPayout has been called", async () => {
+      const budget = E(700)
+      const proposalId = await createAndPassTextProposal({ budget })
+      const payee = otherAccounts[5].address
+
+      await governor.connect(proposer).markAsInDevelopment(proposalId, payee, "desc", "https://x", [])
+      await governor.connect(owner).markAsCompleted(proposalId)
+      await b3tr.connect(minterAccount).mint(await treasury.getAddress(), budget)
+      await governor.connect(otherAccounts[8]).claimPayout(proposalId)
+
+      await expect(governor.connect(owner).resetDevelopmentState(proposalId))
+        .to.be.revertedWithCustomError(governor, "PayoutAlreadyClaimed")
+        .withArgs(proposalId)
+    })
+  })
+
   // ------------------- misc ------------------- //
 
   describe("misc", () => {

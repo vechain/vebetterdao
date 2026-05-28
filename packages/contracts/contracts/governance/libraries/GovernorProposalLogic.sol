@@ -148,6 +148,13 @@ library GovernorProposalLogic {
    */
   error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
 
+  /**
+   * @dev Thrown when an attempt is made to reset the development state of a proposal whose
+   * V11 community-execution payout has already been claimed. Mirrors the selector declared in
+   * {GovernorCommunityExecutionLogic} and {IB3TRGovernor} so callers see a single error type.
+   */
+  error PayoutAlreadyClaimed(uint256 proposalId);
+
   /** ------------------ GETTERS ------------------ **/
 
   /**
@@ -625,7 +632,15 @@ library GovernorProposalLogic {
    * @notice Reset the development state of a proposal back to pending development
    * @param proposalId The id of the proposal
    * @dev This should reset the enum state back to the original one,
-   * since pending development is not tracked in {GovernorStateLogic._state} condition
+   * since pending development is not tracked in {GovernorStateLogic._state} condition.
+   *
+   * V11: also wipes the community-execution metadata (single payee, description,
+   * implementation-discussion link, contributors, finalized flag) so that a follow-up
+   * {markAsInDevelopment} call can register a fresh payee. The immutable `proposalMaxBudget`
+   * set at proposal-creation time is intentionally preserved.
+   *
+   * Reverts with {PayoutAlreadyClaimed} if the Treasury transfer has already executed —
+   * a paid proposal must never be silently un-marked.
    */
   function resetDevelopmentState(uint256 proposalId) external {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
@@ -634,7 +649,16 @@ library GovernorProposalLogic {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment) |
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
     );
+    if ($.proposalPaid[proposalId]) {
+      revert PayoutAlreadyClaimed(proposalId);
+    }
     $.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.PendingDevelopment;
+    // V11: wipe community-execution metadata so markAsInDevelopment can re-run with a fresh payee.
+    delete $.proposalPayeesFinalized[proposalId];
+    delete $.proposalPayee[proposalId];
+    delete $.proposalDescription[proposalId];
+    delete $.proposalImplementationDiscussion[proposalId];
+    delete $.proposalContributors[proposalId];
     //Emit event
     emit ProposalDevelopmentStateReset(proposalId);
   }
