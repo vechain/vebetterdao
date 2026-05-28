@@ -131,7 +131,9 @@ library ChallengeCoreLogic {
     if (!$.b3tr.transferFrom(msg.sender, address(this), params.stakeAmount)) revert IChallenges.TransferFailed();
 
     // In stake challenges the creator escrows the first stake and counts as the first participant.
+    // The creator effectively joins the quest, so they must satisfy the same passport check applied in joinChallenge.
     if (params.kind == ChallengeTypes.ChallengeKind.Stake) {
+      _requirePerson($, msg.sender);
       _addParticipant(challengeId, msg.sender);
     }
 
@@ -174,6 +176,9 @@ library ChallengeCoreLogic {
     if ($.participantStatus[challengeId][msg.sender] == ChallengeTypes.ParticipantStatus.Joined) {
       revert IChallenges.AlreadyParticipating(challengeId, msg.sender);
     }
+
+    // Block sybils and blacklisted accounts from earning quest rewards. Refund paths intentionally remain open.
+    _requirePerson($, msg.sender);
 
     // Split Win has no participant cap by design — the cap only applies to Max Actions challenges.
     if (
@@ -550,6 +555,13 @@ library ChallengeCoreLogic {
 
     challenge.declined.pop();
     delete $.declinedIndexPlusOne[challengeId][invitee];
+  }
+
+  /// @dev Reverts with `NotVerifiedPerson` if `account` does not pass VeBetterPassport's `isPerson` check.
+  /// Used to gate participation actions (joining or auto-joining via stake challenge creation).
+  function _requirePerson(ChallengeStorageTypes.ChallengesStorage storage $, address account) private view {
+    (bool isPerson, string memory reason) = $.veBetterPassport.isPerson(account);
+    if (!isPerson) revert IChallenges.NotVerifiedPerson(account, reason);
   }
 
   function _isChallengeValid(ChallengeTypes.Challenge storage challenge) private view returns (bool) {

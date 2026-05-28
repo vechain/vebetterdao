@@ -50,6 +50,10 @@ interface IChallenges {
   error SplitWinSlotsExhausted(uint256 challengeId);
   error NotEligibleForSplitWin(uint256 challengeId, address account, uint256 actions, uint256 threshold);
   error NotASplitWinChallenge(uint256 challengeId);
+  /// @notice Thrown when an account fails the VeBetterPassport personhood check on a participation or claim path.
+  /// @param account Address that failed the personhood check.
+  /// @param reason Reason returned by VeBetterPassport (e.g. "User is blacklisted").
+  error NotVerifiedPerson(address account, string reason);
 
   // ---------- Events ---------- //
 

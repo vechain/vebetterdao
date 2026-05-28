@@ -87,7 +87,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
 
   /// @inheritdoc IChallenges
   function version() external pure returns (string memory) {
-    return "1";
+    return "2";
   }
 
   /// @inheritdoc IChallenges

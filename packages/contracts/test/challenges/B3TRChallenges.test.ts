@@ -994,7 +994,7 @@ describe("B3TRChallenges - @shard9a", function () {
 
   it("returns version, challengeCount, and config getters", async function () {
     const { challenges, roundGovernor } = await deployFixture()
-    expect(await challenges.version()).to.equal("1")
+    expect(await challenges.version()).to.equal("2")
     expect(await challenges.challengeCount()).to.equal(0n)
     expect(await challenges.maxChallengeDuration()).to.equal(4n)
     expect(await challenges.maxSelectedApps()).to.equal(5n)

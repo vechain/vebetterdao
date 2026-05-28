@@ -67,7 +67,13 @@ library ChallengeSettlementLogic {
     }
 
     for (uint256 i; i < challenge.participants.length; i++) {
-      uint256 actions = _getParticipantActions(challenge, challenge.participants[i]);
+      address participant = challenge.participants[i];
+      // Skip non-persons so that the prize is not awarded to (or stranded on) a sybil/blacklisted account.
+      // Their stake remains in the totalPrize pool, redistributed to the verified top scorers.
+      (bool isPerson, ) = $.veBetterPassport.isPerson(participant);
+      if (!isPerson) continue;
+
+      uint256 actions = _getParticipantActions(challenge, participant);
       _updateBestScore(challenge, actions);
     }
 
@@ -103,6 +109,13 @@ library ChallengeSettlementLogic {
 
     if (!_isEligibleForPayout(challengeId, challenge, msg.sender)) {
       revert IChallenges.NothingToClaim(challengeId, msg.sender);
+    }
+
+    // Block sybils/blacklisted accounts from collecting earned quest rewards.
+    // The `CreatorRefund` branch is a no-winner refund of the creator's own stake, so it stays open even if the
+    // creator is no longer a verified person — same policy as `claimChallengeRefund` and `claimCreatorSplitWinRefund`.
+    if (challenge.settlementMode != ChallengeTypes.SettlementMode.CreatorRefund) {
+      _requirePerson($, msg.sender);
     }
 
     uint256 recipientCount = _payoutRecipientCount(challenge);
@@ -155,6 +168,9 @@ library ChallengeSettlementLogic {
     if (challenge.winners.length >= challenge.numWinners) {
       revert IChallenges.SplitWinSlotsExhausted(challengeId);
     }
+
+    // Block sybils/blacklisted accounts from grabbing Split Win slots.
+    _requirePerson($, msg.sender);
 
     uint256 actions = _getParticipantActionsUpTo(challenge, msg.sender, currentRound);
     if (actions < challenge.threshold) {
@@ -263,6 +279,13 @@ library ChallengeSettlementLogic {
   function getParticipantActions(uint256 challengeId, address participant) public view returns (uint256) {
     ChallengeTypes.Challenge storage challenge = _getChallenge(challengeId);
     return _getParticipantActions(challenge, participant);
+  }
+
+  /// @dev Reverts with `NotVerifiedPerson` if `account` does not pass VeBetterPassport's `isPerson` check.
+  /// Used to gate quest-reward claims (Max Actions top-winner payout and Split Win slot claim).
+  function _requirePerson(ChallengeStorageTypes.ChallengesStorage storage $, address account) private view {
+    (bool isPerson, string memory reason) = $.veBetterPassport.isPerson(account);
+    if (!isPerson) revert IChallenges.NotVerifiedPerson(account, reason);
   }
 
   function _updateBestScore(ChallengeTypes.Challenge storage challenge, uint256 actions) private {
