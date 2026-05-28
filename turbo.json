@@ -161,22 +161,28 @@
       "outputs": ["dist/**", "artifacts/**", "typechain-types/**", "cache/**"]
     },
     "deploy": {
+      "cache": false,
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
     },
     "deploy:local": {
-      "dependsOn": ["^deploy:local"]
+      "cache": false,
+      "dependsOn": ["^deploy:local", "@repo/config#check-or-generate-local-config"]
     },
     "deploy:testnet-staging": {
-      "dependsOn": ["^deploy:testnet-staging"]
+      "cache": false,
+      "dependsOn": ["^deploy:testnet-staging", "@repo/config#check-or-generate-local-config"]
     },
     "deploy:testnet": {
-      "dependsOn": ["^deploy:testnet"]
+      "cache": false,
+      "dependsOn": ["^deploy:testnet", "@repo/config#check-or-generate-local-config"]
     },
     "deploy:mainnet": {
-      "dependsOn": ["^deploy:mainnet"]
+      "cache": false,
+      "dependsOn": ["^deploy:mainnet", "@repo/config#check-or-generate-local-config"]
     },
     "deploy:hardhat": {
-      "dependsOn": ["^deploy:hardhat"]
+      "cache": false,
+      "dependsOn": ["^deploy:hardhat", "@repo/config#check-or-generate-local-config"]
     },
     "upgrade:contract": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
