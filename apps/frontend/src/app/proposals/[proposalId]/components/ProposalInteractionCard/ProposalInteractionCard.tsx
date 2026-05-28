@@ -142,6 +142,19 @@ export const ProposalInteractionCard = ({
   )
   const isProposalPaid = optimisticPaid || !!isPaidOnChain
 
+  // Stable reference for the edit modal's initial values. Without useMemo, the literal object
+  // would get a new identity on every render — including every React Query refetch — and the
+  // modal's seeding effect would wipe whatever the user has typed.
+  const editInitialValues = useMemo(
+    () => ({
+      payee: proposalPayee ?? "",
+      description: proposalDescription ?? "",
+      implementationDiscussion: proposalDiscussion ?? "",
+      contributors: proposalContributors ?? [],
+    }),
+    [proposalPayee, proposalDescription, proposalDiscussion, proposalContributors],
+  )
+
   const handleQueueProposal = useCallback(() => queueProposal(), [queueProposal])
 
   const handleExecuteProposal = useCallback(() => executeProposal(), [executeProposal])
@@ -689,12 +702,7 @@ export const ProposalInteractionCard = ({
         isOpen={isEditCommunityExecutionOpen}
         onClose={() => setIsEditCommunityExecutionOpen(false)}
         isEdit
-        initialValues={{
-          payee: proposalPayee ?? "",
-          description: proposalDescription ?? "",
-          implementationDiscussion: proposalDiscussion ?? "",
-          contributors: proposalContributors ?? [],
-        }}
+        initialValues={editInitialValues}
       />
     </>
   )

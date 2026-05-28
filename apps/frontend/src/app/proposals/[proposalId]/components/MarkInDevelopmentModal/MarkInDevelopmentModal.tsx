@@ -43,14 +43,18 @@ export const MarkInDevelopmentModal = ({ proposalId, maxBudget, isOpen, onClose,
   )
   const [submitting, setSubmitting] = useState(false)
 
-  // When initialValues change (loading from chain), seed the form once.
+  // Seed the form from initialValues only at the moment the modal opens. We intentionally do
+  // NOT depend on `initialValues` itself: the parent re-fetches the underlying chain reads on
+  // every React Query refetch, and if those updates re-ran this effect they would wipe whatever
+  // the user has typed into the form mid-edit.
   useEffect(() => {
-    if (!initialValues) return
-    setPayee(initialValues.payee ?? "")
-    setDescription(initialValues.description ?? "")
-    setImplementationDiscussion(initialValues.implementationDiscussion ?? "")
-    setContributors(initialValues.contributors ? [...initialValues.contributors] : [])
-  }, [initialValues])
+    if (!isOpen) return
+    setPayee(initialValues?.payee ?? "")
+    setDescription(initialValues?.description ?? "")
+    setImplementationDiscussion(initialValues?.implementationDiscussion ?? "")
+    setContributors(initialValues?.contributors ? [...initialValues.contributors] : [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   // Defensive: re-opening the modal must always start with submitting=false, even if a previous
   // attempt was rejected in the wallet and somehow didn't fire onFailure.
