@@ -1,5 +1,18 @@
-import { Button, Field, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Checkbox,
+  CloseButton,
+  Dialog,
+  Field,
+  HStack,
+  Icon,
+  Portal,
+  SimpleGrid,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { getConfig } from "@repo/config"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -9,13 +22,17 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
+import { ExpenditureReport, GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimMilestone } from "@/hooks/useClaimMilestone"
 import { useRejectGrant } from "@/hooks/useRejectGrant"
 
 import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
 import { DatePicker } from "../../../components/DatePicker/DatePicker"
+import { GenericAlert } from "../../components/Alert/GenericAlert"
+
+import { ExpenditureReportForm } from "./ExpenditureReportForm"
+import { ExpenditureReportView } from "./ExpenditureReportView"
 
 type MilestoneWithState = {
   milestone?: {
@@ -33,8 +50,19 @@ type MilestoneItemProps = {
   proposal: GrantProposalEnriched
   isCurrentStep: boolean
   milestoneIndex: number
+  totalMilestones: number
   mode?: "read" | "edit"
   onDateChange: (durationFrom: string, durationTo: string) => void
+  /** Tranche-keyed expenditure report for this milestone, if one has been submitted. */
+  expenditureReport?: ExpenditureReport
+  /** Whether the connected wallet is allowed to submit/update reports (proposer / receiver / approver). */
+  canSubmitExpenditureReport: boolean
+  /** True when this milestone's inline ExpenditureReportForm is the one currently open. */
+  isReportFormOpen: boolean
+  isPublishingReport: boolean
+  onOpenReportForm: () => void
+  onCancelReportForm: () => void
+  onSubmitReport: (report: ExpenditureReport) => Promise<void>
 }
 const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType; title: string; value?: string }) => (
   <HStack w="full" align="flex">
@@ -66,21 +94,37 @@ export const MilestoneItem = ({
   proposal,
   isCurrentStep,
   milestoneIndex,
+  totalMilestones,
   mode = "read",
   onDateChange,
+  expenditureReport,
+  canSubmitExpenditureReport,
+  isReportFormOpen,
+  isPublishingReport,
+  onOpenReportForm,
+  onCancelReportForm,
+  onSubmitReport,
 }: MilestoneItemProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address)
 
+  /** Non-mainnet envs may emit timestamped strings (YYYY-MM-DDTHH:mm) for milestone date editing. */
+  const milestoneDateTimeEnabled = useMemo(() => {
+    try {
+      return getConfig().environment !== "mainnet"
+    } catch {
+      return false
+    }
+  }, [])
+  const dateFormat = milestoneDateTimeEnabled ? "YYYY-MM-DDTHH:mm" : "YYYY-MM-DD"
   const [duration, setDuration] = useState<{ from: string; to: string }>({
     from: milestoneData.milestone?.durationFrom
-      ? dayjs(milestoneData.milestone?.durationFrom * 1000).format("YYYY-MM-DD")
+      ? dayjs(milestoneData.milestone?.durationFrom * 1000).format(dateFormat)
       : "",
-    to: milestoneData.milestone?.durationTo
-      ? dayjs(milestoneData.milestone?.durationTo * 1000).format("YYYY-MM-DD")
-      : "",
+    to: milestoneData.milestone?.durationTo ? dayjs(milestoneData.milestone?.durationTo * 1000).format(dateFormat) : "",
   })
+  const [overrideMissingReport, setOverrideMissingReport] = useState(false)
 
   // Hooks with proper milestone context
   const { sendTransaction: approveMilestone, resetStatus: resetApproveMilestone } = useApproveMilestone({
@@ -146,6 +190,28 @@ export const MilestoneItem = ({
     )
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
+  /**
+   * The expenditure report attached to *this* milestone documents how the funds for it were spent.
+   * Reports are produced after each milestone is claimed and become the proof needed to unlock
+   * the next milestone — i.e. funding Milestone N+1 requires the report for Milestone N.
+   * Milestone 1 (index 0) has no predecessor, so its approval is never gated on a report.
+   */
+  const previousMilestoneReport = useMemo(
+    () => (milestoneIndex > 0 ? proposal.expenditureReports?.find(r => r.trancheNumber === milestoneIndex) : undefined),
+    [proposal.expenditureReports, milestoneIndex],
+  )
+  const requiresPreviousReport = milestoneIndex > 0
+  const isPreviousReportMissing = requiresPreviousReport && !previousMilestoneReport
+
+  const shouldWarnMissingPreviousReport =
+    isCurrentStep &&
+    isPreviousReportMissing &&
+    proposal.state === ProposalState.InDevelopment &&
+    (milestoneData.state === MilestoneState.Pending || milestoneData.state === MilestoneState.Approved)
+
+  /** Approver's Approve & Fund button is gated by an override only when the previous report is missing. */
+  const shouldGateReviewerApproval = shouldShowReviewerActions && isPreviousReportMissing
+
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
     return account?.address && isGrantReceiver && milestoneData.state === MilestoneState.Approved
@@ -177,6 +243,7 @@ export const MilestoneItem = ({
               <Field.Label>{t("From")}</Field.Label>
               <DatePicker
                 variant="single"
+                enableTimeSelection={milestoneDateTimeEnabled}
                 startDate={duration.from}
                 placeholder={
                   milestoneData.milestone?.durationFrom
@@ -194,6 +261,7 @@ export const MilestoneItem = ({
               <Field.Label>{t("To")}</Field.Label>
               <DatePicker
                 variant="single"
+                enableTimeSelection={milestoneDateTimeEnabled}
                 startDate={duration.to}
                 placeholder={
                   milestoneData.milestone?.durationTo
@@ -216,13 +284,87 @@ export const MilestoneItem = ({
         value={milestoneData.milestone?.description ?? ""}
       />
 
-      {/* Reviewer actions (approve/reject) - only on current pending milestone */}
+      {/*
+        Missing-previous-report warning — visible to anyone on the current milestone. The report
+        for the previous milestone (whose funds were already claimed) is what reviewers use to
+        decide whether to fund the next one, so the warning lives next to the Approve & Fund action.
+      */}
+      {shouldWarnMissingPreviousReport && (
+        <VStack align="flex-start" w="full" gap={3}>
+          <GenericAlert
+            type="warning"
+            isLoading={false}
+            title={t("Milestone report missing for the previous milestone")}
+            message={t(
+              "No milestone report for Milestone {{previous}} is recorded on chain. Confirm before funding Milestone {{current}}.",
+              { previous: milestoneIndex, current: milestoneIndex + 1 },
+            )}
+          />
+          {/* Approver-only override — required to enable Approve & Fund when the previous report is missing. */}
+          {shouldGateReviewerApproval && (
+            <Checkbox.Root
+              size="md"
+              checked={overrideMissingReport}
+              onCheckedChange={({ checked }) => setOverrideMissingReport(Boolean(checked))}>
+              <Checkbox.HiddenInput />
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+              <Checkbox.Label>
+                <Text textStyle="sm">{t("Ignore missing report warning and send anyway")}</Text>
+              </Checkbox.Label>
+            </Checkbox.Root>
+          )}
+        </VStack>
+      )}
+      {/*
+        Per-milestone expenditure report. The report documents how *this* milestone's funds were
+        spent — which only makes sense after the receiver has actually claimed them. So:
+          - Submit CTA shows only on Claimed milestones (and only to authorized wallets).
+          - Update CTA in the existing report header follows the same rule.
+        Other milestones still render the read-only report card if one exists (historical view).
+      */}
+      {(() => {
+        const canManageReport =
+          canSubmitExpenditureReport &&
+          proposal.state === ProposalState.InDevelopment &&
+          milestoneData.state === MilestoneState.Claimed
+
+        if (expenditureReport) {
+          return (
+            <VStack w="full" p={4} borderWidth="1px" borderRadius="xl" borderColor="border.primary" align="stretch">
+              <ExpenditureReportView
+                report={expenditureReport}
+                headerAction={
+                  canManageReport ? (
+                    <Button variant="secondary" size="xs" onClick={onOpenReportForm}>
+                      {t("Update")}
+                    </Button>
+                  ) : undefined
+                }
+              />
+            </VStack>
+          )
+        }
+        if (canManageReport) {
+          return (
+            <Button variant="secondary" size="sm" onClick={onOpenReportForm}>
+              {t("Submit milestone report")}
+            </Button>
+          )
+        }
+        return null
+      })()}
+
       {shouldShowReviewerActions && (
         <HStack w="full">
-          <Button variant="secondary" onClick={handleReject}>
+          <Button variant="secondary" colorPalette="red" onClick={handleReject}>
             {t("Reject")}
           </Button>
-          <Button variant="primary" onClick={handleApprove}>
+          <Button
+            variant="primary"
+            onClick={handleApprove}
+            disabled={Boolean(shouldGateReviewerApproval) && !overrideMissingReport}>
             {t("Approve & Fund")}
           </Button>
         </HStack>
@@ -236,6 +378,37 @@ export const MilestoneItem = ({
           </Button>
         </HStack>
       )}
+
+      <Dialog.Root
+        open={isReportFormOpen}
+        onOpenChange={e => {
+          if (!e.open) onCancelReportForm()
+        }}
+        size={{ base: "full", md: "lg" }}
+        scrollBehavior="inside"
+        closeOnInteractOutside={false}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Body p={{ base: 4, md: 6 }}>
+                <ExpenditureReportForm
+                  proposal={proposal}
+                  currentMilestoneIndex={milestoneIndex}
+                  totalMilestones={totalMilestones}
+                  onSubmit={onSubmitReport}
+                  onCancel={onCancelReportForm}
+                  isSubmitting={isPublishingReport}
+                  existingReport={expenditureReport}
+                />
+              </Dialog.Body>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="sm" />
+              </Dialog.CloseTrigger>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </VStack>
   )
 }

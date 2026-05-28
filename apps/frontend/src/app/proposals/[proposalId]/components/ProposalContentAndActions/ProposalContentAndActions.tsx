@@ -26,6 +26,7 @@ import {
 import { ProposalFormAction } from "../../../../../store/useProposalFormStore"
 import { removeTitleHeading } from "../../../../../utils/MarkdownUtils/MarkdownUtils"
 import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
+import { CostBreakdownView } from "../../../../grants/components/CostBreakdownView"
 import { FileAttachmentPreview } from "../../../../grants/components/FileAttachmentPreview"
 import { SocialLink } from "../SocialLink/SocialLink"
 
@@ -156,6 +157,11 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 value={proposal?.competitiveEdge}
               />
             </VStack>
+          </CollapsibleSection>
+
+          {/* Budget section — merged from the former Budget tab so all grant details live on Overview. */}
+          <CollapsibleSection title={t("Budget")}>
+            <CostBreakdownView proposal={proposal} />
           </CollapsibleSection>
 
           {/* Outcomes section */}

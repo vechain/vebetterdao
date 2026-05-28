@@ -16,6 +16,7 @@ import {
   InputProps,
   Icon,
 } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -23,6 +24,18 @@ import { UseFormRegisterReturn, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { LuCalendar } from "react-icons/lu"
+
+/**
+ * On non-mainnet envs we let testers pick a precise hour/minute (and "today") so a milestone can
+ * start 5 minutes from now. Mainnet keeps date-only behaviour to avoid weird timezone surprises.
+ */
+const isTimeSelectionEnabled = (): boolean => {
+  try {
+    return getConfig().environment !== "mainnet"
+  } catch {
+    return false
+  }
+}
 //TODO: This input needs a optimization, it's not efficient with those lots of calculations and state updates
 // Starting the week on Monday
 dayjs.extend(updateLocale)
@@ -197,18 +210,24 @@ export const FormDateInput = ({
   const today = useMemo(() => dayjs(), [])
   const [currentDate, setCurrentDate] = useState(today)
   const [selectedDate, setSelectedDate] = useState<string>("")
+  const allowTime = useMemo(() => isTimeSelectionEnabled(), [])
+  const [selectedHour, setSelectedHour] = useState(0)
+  const [selectedMinute, setSelectedMinute] = useState(0)
 
   // Update selected date when form value changes
   // Convert from Unix timestamp (form value) back to display format
   useEffect(() => {
     if (formValue) {
-      // formValue is a Unix timestamp in seconds, convert to YYYY-MM-DD for internal state
-      const formatted = dayjs.unix(formValue).format("YYYY-MM-DD")
-      setSelectedDate(formatted)
+      const d = dayjs.unix(formValue)
+      setSelectedDate(d.format("YYYY-MM-DD"))
+      if (allowTime) {
+        setSelectedHour(d.hour())
+        setSelectedMinute(d.minute())
+      }
     } else {
       setSelectedDate("")
     }
-  }, [formValue])
+  }, [formValue, allowTime])
 
   // Calendar calculations
   const daysInMonth = currentDate.daysInMonth()
@@ -232,8 +251,8 @@ export const FormDateInput = ({
         return false
       }
 
-      // Block today
-      if (date.isSame(today, "day")) {
+      // Block today (mainnet only — with time selection, "today + a few minutes" is the whole point)
+      if (!allowTime && date.isSame(today, "day")) {
         return false
       }
 
@@ -249,33 +268,41 @@ export const FormDateInput = ({
 
       return true
     },
-    [currentDate, maxDate, minDate, today],
+    [currentDate, maxDate, minDate, today, allowTime],
+  )
+
+  const commitTimestamp = useCallback(
+    (dateStr: string, hour: number, minute: number) => {
+      const unixSeconds = dayjs(dateStr).hour(hour).minute(minute).second(0).millisecond(0).unix()
+      register.onChange({ target: { name: register.name, value: unixSeconds } })
+    },
+    [register],
   )
 
   const handleDaySelect = useCallback(
     (day: number) => {
       const selected = currentDate.date(day).format("YYYY-MM-DD")
-      setSelectedDate(selected) // Local state for display purposes only
+      setSelectedDate(selected)
+      commitTimestamp(selected, allowTime ? selectedHour : 0, allowTime ? selectedMinute : 0)
 
-      // Convert to Unix timestamp (seconds) for form storage
-      const unixSeconds = dayjs(selected).unix()
-
-      // Store Unix timestamp as the actual form value (not the formatted display)
-      const syntheticEvent = {
-        target: {
-          name: register.name,
-          value: unixSeconds, // This is the Unix timestamp stored in the form
-        },
-      }
-
-      register.onChange(syntheticEvent)
-      setIsOpen(false)
-
-      if (onBlur) {
-        onBlur()
+      // Keep the popover open when time selection is on so the tester can dial in hours/minutes.
+      if (!allowTime) {
+        setIsOpen(false)
+        onBlur?.()
       }
     },
-    [currentDate, register, onBlur],
+    [currentDate, commitTimestamp, allowTime, selectedHour, selectedMinute, onBlur],
+  )
+
+  const handleTimeChange = useCallback(
+    (hour: number, minute: number) => {
+      const safeHour = Math.max(0, Math.min(23, hour))
+      const safeMinute = Math.max(0, Math.min(59, minute))
+      setSelectedHour(safeHour)
+      setSelectedMinute(safeMinute)
+      if (selectedDate) commitTimestamp(selectedDate, safeHour, safeMinute)
+    },
+    [commitTimestamp, selectedDate],
   )
 
   const resetSelection = useCallback(() => {
@@ -294,8 +321,9 @@ export const FormDateInput = ({
   // Note: This is only for visual display - the actual form value remains as Unix timestamp
   const displayValue = useMemo(() => {
     if (!selectedDate) return ""
-    return dayjs(selectedDate).format("MM/DD/YYYY") // e.g., "12/29/2025"
-  }, [selectedDate])
+    const d = dayjs(selectedDate).hour(selectedHour).minute(selectedMinute)
+    return allowTime ? d.format("MM/DD/YYYY HH:mm") : d.format("MM/DD/YYYY")
+  }, [selectedDate, selectedHour, selectedMinute, allowTime])
 
   const isDaySelected = useCallback(
     (day: number) => {
@@ -393,6 +421,51 @@ export const FormDateInput = ({
                   today={today}
                   minDate={minDate}
                 />
+
+                {allowTime && (
+                  <HStack gap={2} align="center">
+                    <Text textStyle="sm" color="text.subtle">
+                      {"Time"}
+                    </Text>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={23}
+                      step={1}
+                      inputMode="numeric"
+                      value={selectedHour.toString().padStart(2, "0")}
+                      onChange={e => handleTimeChange(Number(e.target.value), selectedMinute)}
+                      w="14"
+                      size="sm"
+                      rounded="md"
+                      textAlign="center"
+                    />
+                    <Text>{":"}</Text>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={59}
+                      step={1}
+                      inputMode="numeric"
+                      value={selectedMinute.toString().padStart(2, "0")}
+                      onChange={e => handleTimeChange(selectedHour, Number(e.target.value))}
+                      w="14"
+                      size="sm"
+                      rounded="md"
+                      textAlign="center"
+                    />
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      ml="auto"
+                      onClick={() => {
+                        setIsOpen(false)
+                        onBlur?.()
+                      }}>
+                      {"Done"}
+                    </Button>
+                  </HStack>
+                )}
 
                 <CalendarFooter resetSelection={resetSelection} />
               </VStack>

@@ -4,7 +4,7 @@ import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { Clock, InfoCircle, Reports } from "iconoir-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
@@ -14,11 +14,13 @@ import { useHasVotedInProposals } from "@/api/contracts/governance/hooks/useHasV
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useProposalDepositThreshold } from "@/api/contracts/governance/hooks/useProposalDepositThreshold"
+import { useProposalEta } from "@/api/contracts/governance/hooks/useProposalEta"
 import { useProposalQuorumByType } from "@/api/contracts/governance/hooks/useProposalQuorumByType"
 import { useProposalQuorumNumeratorByType } from "@/api/contracts/governance/hooks/useProposalQuorumNumeratorByType"
 import { useProposalSnapshot } from "@/api/contracts/governance/hooks/useProposalSnapshot"
 import { useProposalTotalVotes } from "@/api/contracts/governance/hooks/useProposalTotalVotes"
 import { useProposalUserDeposit } from "@/api/contracts/governance/hooks/useProposalUserDeposit"
+import { useSimulateExecuteProposal } from "@/api/contracts/governance/hooks/useSimulateExecuteProposal"
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
@@ -124,6 +126,9 @@ export const ProposalInteractionCard = ({
 
   // ===== COMPUTED VALUES =====
   const isProposer = compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
+  // Grant proposers cannot support their own grant — only applies to grant-type proposals in support phase.
+  const isGrantProposerInSupportPhase =
+    isProposer && proposal?.type !== GrantsProposalType.Standard && proposal?.state === ProposalState.Pending
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? "0")
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
   const proposalQuorumBigInt = BigInt(proposalQuorum ?? "0")
@@ -145,6 +150,39 @@ export const ProposalInteractionCard = ({
   const isExecutable = useMemo(() => {
     return proposal?.state === ProposalState.Queued && proposalHasTargets
   }, [proposal?.state, proposalHasTargets])
+
+  // ===== TIMELOCK COUNTDOWN =====
+  const { data: proposalEta } = useProposalEta(proposalId, proposal?.state === ProposalState.Queued)
+  const [nowSeconds, setNowSeconds] = useState(() => Math.floor(Date.now() / 1000))
+  useEffect(() => {
+    if (proposal?.state !== ProposalState.Queued) return
+    const id = setInterval(() => setNowSeconds(Math.floor(Date.now() / 1000)), 1000)
+    return () => clearInterval(id)
+  }, [proposal?.state])
+  const secondsUntilExecutable = proposalEta ? Math.max(0, proposalEta - nowSeconds) : 0
+  const isAwaitingTimelock = isExecutable && !!proposalEta && secondsUntilExecutable > 0
+
+  // Dry-run the execute() once the timelock is clear — surfaces underlying reverts (e.g. Treasury
+  // transfer-limit, missing role on a sub-call) so the user doesn't pay gas just to see a revert.
+  const { data: simulatedExecution } = useSimulateExecuteProposal({
+    proposal,
+    caller: account?.address,
+    enabled: isExecutable && !isAwaitingTimelock,
+  })
+  const executeWouldRevert = Boolean(simulatedExecution?.wouldRevert)
+  const executeRevertReason = simulatedExecution?.revertReason
+
+  const formattedTimeUntilExecutable = useMemo(() => {
+    if (!isAwaitingTimelock) return ""
+    const days = Math.floor(secondsUntilExecutable / 86_400)
+    const hours = Math.floor((secondsUntilExecutable % 86_400) / 3_600)
+    const minutes = Math.floor((secondsUntilExecutable % 3_600) / 60)
+    const seconds = secondsUntilExecutable % 60
+    if (days > 0) return `${days}d ${hours}h ${minutes}m`
+    if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`
+    if (minutes > 0) return `${minutes}m ${seconds}s`
+    return `${seconds}s`
+  }, [isAwaitingTimelock, secondsUntilExecutable])
 
   const percentageSupported = useMemo(() => {
     if (currentDepositAmount === 0n) return "0"
@@ -232,14 +270,16 @@ export const ProposalInteractionCard = ({
       return hasUserAlreadyVoted || userVotingPower === 0
     }
 
-    // If it's support phase AND: User has no balance OR Maximum support reached
+    // If it's support phase AND: User has no balance OR Maximum support reached OR user is the grant proposer
     if (proposal?.state === ProposalState.Pending) {
-      return userVot3Balance < 1 || proposalDepositReached
+      return userVot3Balance < 1 || proposalDepositReached || isGrantProposerInSupportPhase
     }
 
     //User has permissions to execute or queue
     if (isExecutable) {
-      return !currentUserCanExecute
+      // Gate the Execute button while the timelock delay hasn't elapsed, or when the simulation
+      // tells us the underlying call would revert anyway.
+      return !currentUserCanExecute || isAwaitingTimelock || executeWouldRevert
     }
 
     return false
@@ -251,6 +291,9 @@ export const ProposalInteractionCard = ({
     userVot3Balance,
     proposalDepositReached,
     currentUserCanExecute,
+    isGrantProposerInSupportPhase,
+    isAwaitingTimelock,
+    executeWouldRevert,
   ])
 
   // ===== VOTING DATA PROCESSING =====
@@ -389,9 +432,7 @@ export const ProposalInteractionCard = ({
               <>
                 <HStack>
                   <Icon as={Clock} boxSize={5} />
-                  <Card.Title p={0} gap={0}>
-                    <Heading>{t("Ends in")}</Heading>
-                  </Card.Title>
+                  <Heading>{t("Ends in")}</Heading>
                 </HStack>
                 {/* Countdown Display */}
                 <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
@@ -446,6 +487,47 @@ export const ProposalInteractionCard = ({
                       "You have 0 voting power. Your {{amount}} VOT3 tokens were used to support a proposal and count as voting power only for allocation rounds, not for proposals.",
                       { amount: humanNumber(userDepositedAmount) },
                     )}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
+
+            {isGrantProposerInSupportPhase && (
+              <Alert.Root status="info" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
+                    {t("You can't support your own grant proposal.")}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
+
+            {isAwaitingTimelock && (
+              <Alert.Root status="info" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.info.strong">
+                    {t("Available to execute in {{time}}", { time: formattedTimeUntilExecutable })}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
+
+            {isExecutable && !isAwaitingTimelock && executeWouldRevert && (
+              <Alert.Root status="error" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.negative.strong">
+                    {t("Execution would revert: {{reason}}", {
+                      reason: executeRevertReason ?? t("unknown error"),
+                    })}
                   </Text>
                 </HStack>
               </Alert.Root>

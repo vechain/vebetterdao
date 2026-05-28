@@ -40,6 +40,9 @@ const initialState: GrantFormData = {
   x2EModel: "",
   revenueModel: "",
   highLevelRoadmap: "",
+  // Budget & spending plan
+  costBreakdown: [{ category: "", description: "", amount: 0 }],
+  spendingPlan: "",
   // Milestones
   milestones: [
     {
