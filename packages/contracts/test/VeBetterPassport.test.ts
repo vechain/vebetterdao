@@ -143,7 +143,7 @@ describe("VeBetterPassport Upgrades - @shard8d", function () {
         forceDeploy: true,
       })
 
-      expect(await veBetterPassport.version()).to.equal("5")
+      expect(await veBetterPassport.version()).to.equal("6")
     })
     it("Should not be able to initialize twice", async function () {
       const config = createTestConfig()
