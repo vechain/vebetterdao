@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next"
 
 import { type ChallengeDetail, ChallengeKind, ChallengeStatus, ChallengeType } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
+import { useChallengePersonhoodBatch } from "@/api/challenges/useChallengePersonhood"
 
 import { AddChallengeInvitesModal } from "../../shared/AddChallengeInvitesModal"
 
@@ -116,6 +117,14 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
 
   const isViewerInTop = rankings.some(r => AddressUtils.compareAddresses(r.address, account?.address ?? ""))
 
+  // Batched personhood lookup for the visible top-N + pending invitees so non-persons get a "Not verified" badge.
+  const visibleAddresses = useMemo(() => {
+    const set = new Set<string>(rankings.map(r => r.address.toLowerCase()))
+    if (viewerRanking?.address) set.add(viewerRanking.address.toLowerCase())
+    return [...set]
+  }, [rankings, viewerRanking?.address])
+  const { data: personhoodMap } = useChallengePersonhoodBatch(visibleAddresses)
+
   const inviteButton = challenge.canAddInvites ? (
     <AddChallengeInvitesModal
       challengeId={challenge.challengeId}
@@ -196,18 +205,23 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
 
     return (
       <>
-        {rankings.map(ranking => (
-          <ChallengeActionsRow
-            key={ranking.address}
-            {...ranking}
-            position={isPending || isSplitWin ? 0 : ranking.position}
-            tag={isPending ? t("Joined") : undefined}
-            isWinner={isWinnerAddress(ranking.address, ranking.position)}
-            hideScore={isPending}
-            isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
-            onClick={() => setSelectedParticipant(ranking)}
-          />
-        ))}
+        {rankings.map(ranking => {
+          const personhood = personhoodMap?.[ranking.address.toLowerCase()]
+          return (
+            <ChallengeActionsRow
+              key={ranking.address}
+              {...ranking}
+              position={isPending || isSplitWin ? 0 : ranking.position}
+              tag={isPending ? t("Joined") : undefined}
+              isWinner={isWinnerAddress(ranking.address, ranking.position)}
+              hideScore={isPending}
+              isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
+              isPerson={personhood?.isPerson ?? true}
+              personhoodReason={personhood?.reason}
+              onClick={() => setSelectedParticipant(ranking)}
+            />
+          )
+        })}
         {pendingInviteeRows.length > 0 && (
           <>
             <Separator w="full" h={1} color="border.secondary" />
@@ -279,6 +293,8 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
                   isYou
                   isWinner={isWinnerAddress(viewerRanking.address, viewerRanking.position)}
                   hideScore={isPending}
+                  isPerson={personhoodMap?.[viewerRanking.address.toLowerCase()]?.isPerson ?? true}
+                  personhoodReason={personhoodMap?.[viewerRanking.address.toLowerCase()]?.reason}
                   onClick={() => setSelectedParticipant(viewerRanking)}
                 />
               </>

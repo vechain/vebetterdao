@@ -1,13 +1,14 @@
-import { Button, Heading, Icon, Separator, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
+import { Button, Collapsible, HStack, Heading, Icon, Separator, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { Group, SendDiagonal } from "iconoir-react"
+import { Group, NavArrowDown, SendDiagonal } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type ChallengeDetail, ChallengeStatus, ChallengeType } from "@/api/challenges/types"
 import type { ChallengeParticipantActionsEntry } from "@/api/challenges/useChallengeParticipantActions"
+import { useChallengePersonhoodBatch } from "@/api/challenges/useChallengePersonhood"
 import { BaseModal } from "@/components/BaseModal"
 
 import { ChallengeActionsRow } from "./ChallengeActionsRow"
@@ -64,27 +65,51 @@ export const ChallengeLeaderboardModal = ({
     [leaderboard],
   )
 
+  // Batch-fetch VeBetterPassport.isPerson for every ranking row + pending invitees so we can
+  // mark unverified accounts and group them in a collapsible section.
+  const addressesToCheck = useMemo(
+    () => [...rankings.map(r => r.address), ...pendingInvitees],
+    [rankings, pendingInvitees],
+  )
+  const { data: personhoodMap } = useChallengePersonhoodBatch(addressesToCheck)
+
+  const verifiedRankings = useMemo(
+    () => rankings.filter(r => personhoodMap?.[r.address.toLowerCase()]?.isPerson !== false),
+    [rankings, personhoodMap],
+  )
+  const unverifiedRankings = useMemo(
+    () => rankings.filter(r => personhoodMap?.[r.address.toLowerCase()]?.isPerson === false),
+    [rankings, personhoodMap],
+  )
+
   const viewerIndex = useMemo(() => {
     if (!account?.address) return -1
     return rankings.findIndex(r => AddressUtils.compareAddresses(r.address, account.address ?? ""))
   }, [rankings, account?.address])
 
+  const renderRow = (ranking: { position: number; address: string; score: number }) => {
+    const personhood = personhoodMap?.[ranking.address.toLowerCase()]
+    return (
+      <ChallengeActionsRow
+        key={ranking.address}
+        {...ranking}
+        position={isPending || isSplitWin ? 0 : ranking.position}
+        tag={isPending ? t("Joined") : undefined}
+        isWinner={isWinnerAddress(ranking.address, ranking.position)}
+        hideScore={isPending}
+        isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
+        isPerson={personhood?.isPerson ?? true}
+        personhoodReason={personhood?.reason}
+        onClick={() => setSelectedParticipant(ranking)}
+      />
+    )
+  }
+
   const participantsContent = (
     <>
       {isLoading
         ? Array.from({ length: SKELETON_COUNT }, (_, i) => <Skeleton key={i} borderRadius="lg" h="72px" />)
-        : rankings.map(ranking => (
-            <ChallengeActionsRow
-              key={ranking.address}
-              {...ranking}
-              position={isPending || isSplitWin ? 0 : ranking.position}
-              tag={isPending ? t("Joined") : undefined}
-              isWinner={isWinnerAddress(ranking.address, ranking.position)}
-              hideScore={isPending}
-              isYou={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
-              onClick={() => setSelectedParticipant(ranking)}
-            />
-          ))}
+        : verifiedRankings.map(renderRow)}
 
       {isFetchingNextPage &&
         Array.from({ length: SKELETON_COUNT }, (_, i) => <Skeleton key={`next-${i}`} borderRadius="lg" h="72px" />)}
@@ -99,6 +124,8 @@ export const ChallengeLeaderboardModal = ({
             isYou
             isWinner={isWinnerAddress(account.address, 0)}
             hideScore={isPending}
+            isPerson={personhoodMap?.[account.address.toLowerCase()]?.isPerson ?? true}
+            personhoodReason={personhoodMap?.[account.address.toLowerCase()]?.reason}
             onClick={() =>
               setSelectedParticipant({
                 address: account.address!,
@@ -108,6 +135,26 @@ export const ChallengeLeaderboardModal = ({
             }
           />
         </>
+      )}
+
+      {!isLoading && unverifiedRankings.length > 0 && (
+        <Collapsible.Root>
+          <Collapsible.Trigger asChild>
+            <Button variant="ghost" size="sm" w="full" justifyContent="space-between" mt={2}>
+              <HStack>
+                <Text textStyle="sm" color="text.subtle">
+                  {`${t("Unverified participants")} (${unverifiedRankings.length})`}
+                </Text>
+              </HStack>
+              <Icon as={NavArrowDown} boxSize={4} />
+            </Button>
+          </Collapsible.Trigger>
+          <Collapsible.Content>
+            <VStack gap={4} align="stretch" pt={2}>
+              {unverifiedRankings.map(renderRow)}
+            </VStack>
+          </Collapsible.Content>
+        </Collapsible.Root>
       )}
 
       {!isLoading && rankings.length === 0 && !isFetchingNextPage && (
@@ -137,16 +184,21 @@ export const ChallengeLeaderboardModal = ({
   const pendingContent = (
     <>
       {pendingInvitees.length > 0 ? (
-        pendingInvitees.map(address => (
-          <ChallengeActionsRow
-            key={`pending-${address}`}
-            position={0}
-            address={address}
-            score={0}
-            tag={t("Invite pending")}
-            hideScore
-          />
-        ))
+        pendingInvitees.map(address => {
+          const personhood = personhoodMap?.[address.toLowerCase()]
+          return (
+            <ChallengeActionsRow
+              key={`pending-${address}`}
+              position={0}
+              address={address}
+              score={0}
+              tag={t("Invite pending")}
+              hideScore
+              isPerson={personhood?.isPerson ?? true}
+              personhoodReason={personhood?.reason}
+            />
+          )
+        })
       ) : (
         <Text textStyle="sm" color="text.subtle" textAlign="center" py={4}>
           {t("No pending invites")}

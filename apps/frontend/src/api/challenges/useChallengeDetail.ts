@@ -7,9 +7,10 @@ import { useChallengesDeployBlock } from "@/hooks/useChallengesDeployBlock"
 
 import { buildChallengeDetail } from "./buildChallengeDetail"
 import { fetchMaxParticipants } from "./fetchMaxParticipants"
+import { useViewerPersonhood } from "./useChallengePersonhood"
 
-export const getChallengeDetailQueryKey = (challengeId: string, viewerAddress?: string) =>
-  ["challenges", "detail", challengeId, viewerAddress ?? "guest"] as const
+export const getChallengeDetailQueryKey = (challengeId: string, viewerAddress?: string, viewerIsPerson?: boolean) =>
+  ["challenges", "detail", challengeId, viewerAddress ?? "guest", viewerIsPerson ?? "unknown"] as const
 
 interface UseChallengeDetailOptions {
   pollWhileMissing?: boolean
@@ -36,10 +37,15 @@ export const useChallengeDetail = (
   const contractAddress = getConfig().challengesContractAddress
   const currentRound = currentRoundRaw !== undefined ? Number(currentRoundRaw) : undefined
 
+  // Live VeBetterPassport personhood for the viewer. While loading or for guests this returns
+  // `{ isPerson: true }` so we don't show false-negative gating before the passport query resolves.
+  const viewerPersonhood = useViewerPersonhood(viewerAddress)
+  const viewerIsPerson = viewerPersonhood?.isPerson ?? true
+
   const enabled = !!thor && currentRound !== undefined && isValidChallengeId
 
   const query = useQuery({
-    queryKey: getChallengeDetailQueryKey(challengeId, viewerAddress),
+    queryKey: getChallengeDetailQueryKey(challengeId, viewerAddress, viewerIsPerson),
     queryFn: async () => {
       const maxParticipants = await fetchMaxParticipants(thor!, contractAddress, queryClient)
       return buildChallengeDetail({
@@ -51,6 +57,7 @@ export const useChallengeDetail = (
         viewer: viewerAddress,
         currentRound: currentRound!,
         maxParticipants,
+        viewerIsPerson,
       })
     },
     enabled,
@@ -64,5 +71,6 @@ export const useChallengeDetail = (
     isLoading: !isChallengeMissing && (query.isLoading || !enabled || (pollWhileMissing && query.data === null)),
     isError: query.isError,
     error: query.error,
+    viewerPersonhood,
   }
 }

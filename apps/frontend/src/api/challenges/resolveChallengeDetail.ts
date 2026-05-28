@@ -56,6 +56,9 @@ type ResolveChallengeDetailParams = {
   viewerAddress?: string
   currentRound: number
   participantActions?: bigint
+  // Live VeBetterPassport personhood verdict for the viewer. Defaults to `true` so guests / unloaded
+  // checks don't show spurious "not verified" gating before the passport query resolves.
+  viewerIsPerson?: boolean
 }
 
 const compareAddresses = (left?: string, right?: string) =>
@@ -113,6 +116,7 @@ export const resolveChallengeDetail = ({
   viewerAddress,
   currentRound,
   participantActions = 0n,
+  viewerIsPerson = true,
 }: ResolveChallengeDetailParams): ChallengeDetail => {
   const isCreator = compareAddresses(challenge.creator, viewerAddress)
   const viewerStatus = resolveViewerStatus(challenge, viewerAddress)
@@ -128,13 +132,16 @@ export const resolveChallengeDetail = ({
   const isSplitWinWinner = isSplitWin && includesAddress(challenge.winners, viewerAddress)
   // Split Win challenges have no participant cap by design.
   const hasReachedParticipantLimit = !isSplitWin && challenge.participantCount >= challenge.maxParticipants
+  // Personhood is required by the contract to join (public or private) and to accept an invite.
+  // Mirror that gate so the UI doesn't surface CTAs that would revert on-chain.
   const canJoin =
     challenge.status === ChallengeStatus.Pending &&
     challenge.visibility === ChallengeVisibility.Public &&
     !isJoined &&
     !isCreator &&
-    !hasReachedParticipantLimit
-  const canAccept = isInvitationPending && !hasReachedParticipantLimit
+    !hasReachedParticipantLimit &&
+    viewerIsPerson
+  const canAccept = isInvitationPending && !hasReachedParticipantLimit && viewerIsPerson
   const canDecline = isInvitationPending && viewerStatus !== ParticipantStatus.Declined
   const canLeave = challenge.status === ChallengeStatus.Pending && isJoined && !isCreator
   const canCancel = challenge.status === ChallengeStatus.Pending && isCreator
@@ -150,13 +157,16 @@ export const resolveChallengeDetail = ({
   const inSplitWinWindow = currentRound >= challenge.startRound && currentRound <= challenge.endRound
 
   // Max Actions: claim after Completed against bestScore. Split Win: claim during Active window.
+  // Personhood gates apply only to earned-reward branches. The `CreatorRefund` branch is conceptually a
+  // refund of the creator's own stake (no winners met threshold) and stays open even if the creator is non-person —
+  // matching the contract policy in ChallengeSettlementLogic.claimChallengePayout.
   const canClaim =
     !isSplitWin &&
     !hasClaimed &&
     challenge.status === ChallengeStatus.Completed &&
     (challenge.settlementMode === SettlementMode.CreatorRefund
       ? isCreator
-      : isJoined && participantActions === bestScore)
+      : isJoined && participantActions === bestScore && viewerIsPerson)
 
   const canClaimSplitWin =
     isSplitWin &&
@@ -165,7 +175,8 @@ export const resolveChallengeDetail = ({
     isJoined &&
     inSplitWinWindow &&
     slotsLeft > 0 &&
-    participantActions >= threshold
+    participantActions >= threshold &&
+    viewerIsPerson
 
   const canClaimCreatorSplitWinRefund =
     isSplitWin &&
