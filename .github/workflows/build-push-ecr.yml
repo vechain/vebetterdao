@@ -82,15 +82,14 @@ jobs:
           DOCKERFILE_PATH: ${{ inputs.dockerfile_path }}
           CONTRACTS_CHANGED: ${{ steps.check-contracts.outputs.contracts }}
         run: |
-          # Use explicit path if provided, otherwise auto-detect
+          # Use explicit path if provided, otherwise force monorepo Dockerfile.
+          # npm-contracts path is temporarily disabled while @vechain/vebetterdao-contracts
+          # is blocked by the internal registry's <7-day quarantine policy.
           if [ -n "$DOCKERFILE_PATH" ]; then
             echo "path=${DOCKERFILE_PATH}" >> $GITHUB_OUTPUT
-          elif [ "$CONTRACTS_CHANGED" == "true" ]; then
-            echo "Using standard Dockerfile (contracts changed)"
-            echo "path=./Dockerfile" >> $GITHUB_OUTPUT
           else
-            echo "Using npm-contracts Dockerfile (no contracts changes)"
-            echo "path=./Dockerfile.npm-contracts" >> $GITHUB_OUTPUT
+            echo "Using standard Dockerfile (npm-contracts disabled, contracts_changed=${CONTRACTS_CHANGED})"
+            echo "path=./Dockerfile" >> $GITHUB_OUTPUT
           fi
 
       - name: Configure AWS credentials
