@@ -159,7 +159,7 @@ export const ChallengeLeaderboardModal = ({
             <Button variant="ghost" size="sm" w="full" justifyContent="space-between" mt={2}>
               <HStack>
                 <Text textStyle="sm" color="text.subtle">
-                  {`${t("Unverified participants")} (${unverifiedRankings.length})`}
+                  {`${t("Ineligible participants")} (${unverifiedRankings.length})`}
                 </Text>
               </HStack>
               <Icon as={NavArrowDown} boxSize={4} />
