@@ -320,6 +320,11 @@ interface IVeBetterPassport {
   /// @return The signaling threshold
   function signalingThreshold() external view returns (uint256);
 
+  /// @notice Returns the number of times a user has been signaled
+  /// @param user The address of the user to check
+  /// @return The signaled counter for the user
+  function signaledCounter(address user) external view returns (uint256);
+
   /// @notice Gets the total number of signals for an app
   /// @param app The app ID
   /// @return The total number of signals for the app
