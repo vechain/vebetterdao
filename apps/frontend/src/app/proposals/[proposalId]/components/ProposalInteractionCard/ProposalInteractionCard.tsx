@@ -30,6 +30,7 @@ import { useSimulateExecuteProposal } from "@/api/contracts/governance/hooks/use
 import { useTotalVotesOnBlock } from "@/api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useUserSingleProposalVoteEvent } from "@/api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useIsDelegatedAtSnapshot } from "@/api/contracts/navigatorRegistry/hooks/useIsDelegatedAtSnapshot"
+import { useTreasuryB3trTransferLimit } from "@/api/contracts/treasury/useTreasuryTransferLimit"
 import { useVot3PastSupply } from "@/api/contracts/vot3/hooks/useVot3PastTotalSupply"
 import { useProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
 import { CountdownBoxes } from "@/components/CountdownBoxes/CountdownBoxes"
@@ -133,6 +134,9 @@ export const ProposalInteractionCard = ({
   const { data: proposalMaxBudget } = useProposalBudget(proposalId)
   const { data: proposalPayee } = useProposalPayee(proposalId)
   const { data: isPaidOnChain } = useIsProposalPaid(proposalId)
+  // Treasury per-call B3TR cap: if maxBudget exceeds it, claimPayout would revert.
+  // Used below to disable Pay devs so the user doesn't burn gas on a guaranteed revert.
+  const { data: treasuryB3trLimit } = useTreasuryB3trTransferLimit()
   const { data: proposalDescription } = useProposalDescription(proposalId)
   const { data: proposalDiscussion } = useProposalImplementationDiscussion(proposalId)
   const { data: proposalContributors } = useProposalContributors(proposalId)
@@ -278,6 +282,19 @@ export const ProposalInteractionCard = ({
     if (isProposalPaid) return false
     return hasProposalStateRole || isProposer || isPayeeMember
   }, [hasProposalStateRole, isProposer, isPayeeMember, proposalPayee, isProposalPaid, proposal?.state, proposal?.type])
+
+  // maxBudget is set at proposal creation and cannot be lowered; if it exceeds Treasury's
+  // per-call B3TR limit, claimPayout will revert. Disable Pay devs and wait for admins to
+  // raise the global limit.
+  const payoutExceedsTreasuryLimit = useMemo(() => {
+    if (treasuryB3trLimit === undefined || proposalMaxBudget === undefined) return false
+    return (proposalMaxBudget as unknown as bigint) > (treasuryB3trLimit as unknown as bigint)
+  }, [treasuryB3trLimit, proposalMaxBudget])
+  const treasuryB3trLimitFormatted = useMemo(
+    () =>
+      treasuryB3trLimit !== undefined ? humanNumber(ethers.formatEther(treasuryB3trLimit as unknown as bigint)) : "",
+    [treasuryB3trLimit],
+  )
 
   // ===== BUSINESS LOGIC =====
   const canCancelProposal = useMemo(() => {
@@ -599,6 +616,22 @@ export const ProposalInteractionCard = ({
               </Alert.Root>
             )}
 
+            {canPayDevs && payoutExceedsTreasuryLimit && (
+              <Alert.Root status="error" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.negative.strong">
+                    {t(
+                      "Payout exceeds Treasury's per-transfer B3TR limit ({{limit}} B3TR). An admin must raise the Treasury limit before Pay devs can succeed.",
+                      { limit: treasuryB3trLimitFormatted },
+                    )}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
+
             <HStack w="full" gap={4}>
               {/* Action Button */}
               {shouldShowActionButton && (
@@ -634,7 +667,12 @@ export const ProposalInteractionCard = ({
                 </Button>
               )}
               {canPayDevs && (
-                <Button variant="primary" w="full" flex={1} onClick={handlePayDevs}>
+                <Button
+                  variant="primary"
+                  w="full"
+                  flex={1}
+                  onClick={handlePayDevs}
+                  disabled={payoutExceedsTreasuryLimit}>
                   {t("Pay devs")}
                 </Button>
               )}

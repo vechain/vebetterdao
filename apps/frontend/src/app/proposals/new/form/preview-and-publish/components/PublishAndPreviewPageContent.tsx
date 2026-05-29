@@ -1,12 +1,15 @@
 "use client"
-import { Box, Button, Card, HStack, Heading, Separator, Text, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, Card, HStack, Heading, Separator, Text, VStack } from "@chakra-ui/react"
+import { humanNumber } from "@repo/utils/FormattingUtils"
 import MDEditor from "@uiw/react-md-editor"
 import "@uiw/react-md-editor/markdown-editor.css"
 import { ethers } from "ethers"
+import { InfoCircle } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useTreasuryB3trTransferLimit } from "@/api/contracts/treasury/useTreasuryTransferLimit"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
@@ -37,10 +40,25 @@ export const PublishAndPreviewPageContent = () => {
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
   const { data: threshold } = useDepositThreshold()
   const { data: b3trUsdPrice } = useMainnetB3TRPrice()
+  const { data: treasuryB3trLimit } = useTreasuryB3trTransferLimit()
   const maxBudgetNumber = useMemo(() => {
     const n = Number(maxBudget)
     return Number.isFinite(n) && n > 0 ? n : 0
   }, [maxBudget])
+  // Block publish if maxBudget exceeds Treasury's per-call B3TR limit — claimPayout would revert forever.
+  const budgetExceedsTreasuryLimit = useMemo(() => {
+    if (treasuryB3trLimit === undefined || !maxBudget) return false
+    try {
+      return ethers.parseEther(maxBudget) > (treasuryB3trLimit as unknown as bigint)
+    } catch {
+      return false
+    }
+  }, [treasuryB3trLimit, maxBudget])
+  const treasuryB3trLimitFormatted = useMemo(
+    () =>
+      treasuryB3trLimit !== undefined ? humanNumber(ethers.formatEther(treasuryB3trLimit as unknown as bigint)) : "",
+    [treasuryB3trLimit],
+  )
   const maxBudgetUsd = useMemo(() => {
     if (maxBudgetNumber <= 0) return undefined
     const price = Number(b3trUsdPrice)
@@ -205,11 +223,27 @@ export const PublishAndPreviewPageContent = () => {
             )}
           </VStack>
 
+          {budgetExceedsTreasuryLimit && (
+            <Alert.Root status="error" py="2" px="3">
+              <HStack alignItems="flex-start" gap="2" w="full">
+                <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                  <InfoCircle />
+                </Alert.Indicator>
+                <Text textStyle="sm" fontWeight="medium" color="status.negative.strong">
+                  {t(
+                    "Budget exceeds Treasury's per-transfer B3TR limit ({{limit}} B3TR). Go back and lower the Implementation Cost — otherwise the payout will be permanently unclaimable.",
+                    { limit: treasuryB3trLimitFormatted },
+                  )}
+                </Text>
+              </HStack>
+            </Alert.Root>
+          )}
+
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
             <Button data-testid="go-back" variant="link" onClick={router.back}>
               {t("Go back")}
             </Button>
-            <Button data-testid="publish" variant="primary" onClick={onSubmit}>
+            <Button data-testid="publish" variant="primary" onClick={onSubmit} disabled={budgetExceedsTreasuryLimit}>
               {t("Publish")}
             </Button>
           </HStack>

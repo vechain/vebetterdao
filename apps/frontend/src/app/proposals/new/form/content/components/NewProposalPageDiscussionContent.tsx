@@ -13,7 +13,9 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -21,6 +23,7 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import rehypeSanitize from "rehype-sanitize"
 
+import { useTreasuryB3trTransferLimit } from "@/api/contracts/treasury/useTreasuryTransferLimit"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants/AnalyticsEvents"
 import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
@@ -47,6 +50,13 @@ export const NewProposalPageDiscussionContent = () => {
     useProposalFormStore()
   const { onMetadataUpload, metadataUploading: isMetadataUploading } = useUploadProposalMetadata()
   const { data: b3trUsdPrice } = useMainnetB3TRPrice()
+  // Treasury enforces a per-call B3TR cap on transferB3TR; claimPayout() would revert forever
+  // if maxBudget exceeds it, so the budget input is hard-capped here at creation time.
+  const { data: treasuryB3trLimit } = useTreasuryB3trTransferLimit()
+  const treasuryB3trLimitEther = useMemo(
+    () => (treasuryB3trLimit !== undefined ? ethers.formatEther(treasuryB3trLimit as unknown as bigint) : undefined),
+    [treasuryB3trLimit],
+  )
   const { control, formState, handleSubmit, setValue, watch } = useForm<FormData>({
     defaultValues: {
       markdownDescription,
@@ -193,6 +203,20 @@ export const NewProposalPageDiscussionContent = () => {
                     if (!value || value.trim() === "") return true
                     const n = Number(value)
                     if (!Number.isFinite(n) || n < 0) return t("Budget must be a non-negative number")
+                    if (treasuryB3trLimit !== undefined && treasuryB3trLimitEther !== undefined) {
+                      let parsed: bigint
+                      try {
+                        parsed = ethers.parseEther(value.trim())
+                      } catch {
+                        return t("Budget must be a non-negative number")
+                      }
+                      if (parsed > (treasuryB3trLimit as unknown as bigint)) {
+                        return t(
+                          "Budget exceeds Treasury's per-transfer B3TR limit ({{limit}} B3TR). The payout would be unclaimable.",
+                          { limit: humanNumber(treasuryB3trLimitEther) },
+                        )
+                      }
+                    }
                     return true
                   },
                 }}
