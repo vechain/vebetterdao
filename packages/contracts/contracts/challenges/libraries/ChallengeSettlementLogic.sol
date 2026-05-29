@@ -66,17 +66,17 @@ library ChallengeSettlementLogic {
       revert IChallenges.ChallengeAlreadyCompleted(challengeId);
     }
 
-    // Pass 1: compute bestScore/bestCount only over participants NOT flagged as sybils. We use the soft
-    // VeBetterPassport check (blacklist + signaling threshold) instead of `isPerson` so honest veDelegate
-    // delegators are not excluded from competing for the prize. Cache per-participant results so the second
-    // pass does not re-run the (potentially expensive) action sum.
+    // Pass 1: compute bestScore/bestCount over person-participants only. Sybils/blacklisted accounts are
+    // skipped so their actions never set the bar. Cache per-participant results so the second pass does
+    // not re-run the (potentially expensive) action sum.
     uint256 participantsLen = challenge.participants.length;
     uint256[] memory cachedActions = new uint256[](participantsLen);
-    bool[] memory eligibleCache = new bool[](participantsLen);
+    bool[] memory isPersonCache = new bool[](participantsLen);
     for (uint256 i; i < participantsLen; i++) {
       address participant = challenge.participants[i];
-      if (_isFlaggedSybil($, participant)) continue;
-      eligibleCache[i] = true;
+      (bool isPerson, ) = $.veBetterPassport.isPerson(participant);
+      if (!isPerson) continue;
+      isPersonCache[i] = true;
       uint256 actions = _getParticipantActions(challenge, participant);
       cachedActions[i] = actions;
       _updateBestScore(challenge, actions);
@@ -91,7 +91,7 @@ library ChallengeSettlementLogic {
       uint256 bestScore = challenge.bestScore;
       uint256 eligibleCount;
       for (uint256 i; i < participantsLen; i++) {
-        if (eligibleCache[i] && cachedActions[i] == bestScore) {
+        if (isPersonCache[i] && cachedActions[i] == bestScore) {
           $.isEligibleWinner[challengeId][challenge.participants[i]] = true;
           eligibleCount++;
         }
@@ -300,26 +300,11 @@ library ChallengeSettlementLogic {
     return _getParticipantActions(challenge, participant);
   }
 
-  /// @dev Rejects only sybils explicitly flagged in VeBetterPassport (blacklist or over the signaling threshold).
-  /// `isPerson` is intentionally NOT used: it returns false for users that delegated their passport via
-  /// veDelegate, which would lock honest delegators out of joining/claiming.
+  /// @dev Reverts with `NotVerifiedPerson` if `account` does not pass VeBetterPassport's `isPerson` check.
+  /// Used to gate quest-reward claims (Max Actions top-winner payout and Split Win slot claim).
   function _requirePerson(ChallengeStorageTypes.ChallengesStorage storage $, address account) private view {
-    if (_isFlaggedSybil($, account)) {
-      revert IChallenges.NotVerifiedPerson(account, _flagReason($, account));
-    }
-  }
-
-  /// @dev Returns true when an account is flagged as a sybil by VeBetterPassport.
-  /// Single source of truth so the completeChallenge skip predicate stays in lockstep with `_requirePerson`.
-  function _isFlaggedSybil(ChallengeStorageTypes.ChallengesStorage storage $, address account) private view returns (bool) {
-    if ($.veBetterPassport.isBlacklisted(account)) return true;
-    uint256 threshold = $.veBetterPassport.signalingThreshold();
-    return threshold != 0 && $.veBetterPassport.signaledCounter(account) >= threshold;
-  }
-
-  function _flagReason(ChallengeStorageTypes.ChallengesStorage storage $, address account) private view returns (string memory) {
-    if ($.veBetterPassport.isBlacklisted(account)) return "User is blacklisted";
-    return "User has been signaled too many times";
+    (bool isPerson, string memory reason) = $.veBetterPassport.isPerson(account);
+    if (!isPerson) revert IChallenges.NotVerifiedPerson(account, reason);
   }
 
   function _updateBestScore(ChallengeTypes.Challenge storage challenge, uint256 actions) private {

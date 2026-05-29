@@ -557,18 +557,11 @@ library ChallengeCoreLogic {
     delete $.declinedIndexPlusOne[challengeId][invitee];
   }
 
-  /// @dev Rejects only sybils explicitly flagged in VeBetterPassport (blacklist or over the signaling threshold).
-  /// `isPerson` is intentionally NOT used: it returns false for users that delegated their passport via
-  /// veDelegate, which would lock honest delegators out of joining/claiming. The soft check below preserves
-  /// the sybil-resistance goal without punishing legitimate delegators.
+  /// @dev Reverts with `NotVerifiedPerson` if `account` does not pass VeBetterPassport's `isPerson` check.
+  /// Used to gate participation actions (joining or auto-joining via stake challenge creation).
   function _requirePerson(ChallengeStorageTypes.ChallengesStorage storage $, address account) private view {
-    if ($.veBetterPassport.isBlacklisted(account)) {
-      revert IChallenges.NotVerifiedPerson(account, "User is blacklisted");
-    }
-    uint256 threshold = $.veBetterPassport.signalingThreshold();
-    if (threshold != 0 && $.veBetterPassport.signaledCounter(account) >= threshold) {
-      revert IChallenges.NotVerifiedPerson(account, "User has been signaled too many times");
-    }
+    (bool isPerson, string memory reason) = $.veBetterPassport.isPerson(account);
+    if (!isPerson) revert IChallenges.NotVerifiedPerson(account, reason);
   }
 
   function _isChallengeValid(ChallengeTypes.Challenge storage challenge) private view returns (bool) {

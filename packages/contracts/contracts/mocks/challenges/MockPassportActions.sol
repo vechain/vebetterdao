@@ -5,15 +5,11 @@ contract MockPassportActions {
   mapping(address account => mapping(uint256 roundId => uint256 count)) private _userRoundActionCount;
   mapping(address account => mapping(uint256 roundId => mapping(bytes32 appId => uint256 count))) private _userRoundActionCountApp;
 
-  // Personhood mock (legacy — kept so tests written against the previous `isPerson`-based gating still build).
+  // Personhood state. Tracked as (initialized, value) so tests can opt accounts in/out individually.
+  // The default for unset accounts is `true` so existing tests that predate the personhood gate keep passing.
   mapping(address account => bool initialized) private _isPersonInitialized;
   mapping(address account => bool isPerson) private _isPerson;
   mapping(address account => string reason) private _isPersonReason;
-
-  // Sybil-flag state used by the soft V2 gate (blacklist + signaling threshold). Defaults: not flagged.
-  mapping(address account => bool isBlacklisted) private _isBlacklisted;
-  mapping(address account => uint256 count) private _signaledCounter;
-  uint256 private _signalingThreshold;
 
   function setUserRoundActionCount(address account, uint256 roundId, uint256 count) external {
     _userRoundActionCount[account][roundId] = count;
@@ -23,28 +19,14 @@ contract MockPassportActions {
     _userRoundActionCountApp[account][roundId][appId] = count;
   }
 
-  /// @notice Legacy personhood setter. Retained so older tests keep compiling; the V2 gate no longer reads
-  /// `isPerson` — it reads `isBlacklisted` + `signaledCounter` / `signalingThreshold`. Tests that need to
-  /// fail the new gate should use `setIsBlacklisted` or `setSignaledCounter` + `setSignalingThreshold`.
+  /// @notice Configures the personhood verdict for a given account in the mock.
+  /// @param account Address to override.
+  /// @param isPerson_ Whether the account should be considered a person.
+  /// @param reason Reason string returned alongside the verdict (e.g. "User is blacklisted").
   function setIsPerson(address account, bool isPerson_, string calldata reason) external {
     _isPersonInitialized[account] = true;
     _isPerson[account] = isPerson_;
     _isPersonReason[account] = reason;
-  }
-
-  /// @notice Configures the blacklist verdict for a given account.
-  function setIsBlacklisted(address account, bool value) external {
-    _isBlacklisted[account] = value;
-  }
-
-  /// @notice Configures the signaled counter for a given account.
-  function setSignaledCounter(address account, uint256 count) external {
-    _signaledCounter[account] = count;
-  }
-
-  /// @notice Configures the global signaling threshold. Default is 0 → signaling check is disabled.
-  function setSignalingThreshold(uint256 threshold) external {
-    _signalingThreshold = threshold;
   }
 
   function userRoundActionCount(address account, uint256 roundId) external view returns (uint256) {
@@ -61,17 +43,5 @@ contract MockPassportActions {
       return (true, "");
     }
     return (_isPerson[account], _isPersonReason[account]);
-  }
-
-  function isBlacklisted(address account) external view returns (bool) {
-    return _isBlacklisted[account];
-  }
-
-  function signaledCounter(address account) external view returns (uint256) {
-    return _signaledCounter[account];
-  }
-
-  function signalingThreshold() external view returns (uint256) {
-    return _signalingThreshold;
   }
 }

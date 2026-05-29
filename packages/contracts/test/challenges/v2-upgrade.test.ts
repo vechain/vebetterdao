@@ -155,7 +155,7 @@ describe("B3TRChallenges - V2 Upgrade - @shard9c", function () {
     expect(await challengesV2.getParticipantStatus(1, carol.address)).to.equal(ParticipantStatus.Invited)
 
     // V2 passport gate is active for new joins. Carol still invited but non-person → cannot join post-upgrade.
-    await passport.setIsBlacklisted(carol.address, true)
+    await passport.setIsPerson(carol.address, false, "User is blacklisted")
     await expect(challengesV2.connect(carol).joinChallenge(1))
       .to.be.revertedWithCustomError(challengesV2, "NotVerifiedPerson")
       .withArgs(carol.address, "User is blacklisted")

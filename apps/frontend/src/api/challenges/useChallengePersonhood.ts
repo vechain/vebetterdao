@@ -15,20 +15,12 @@ const normalize = (addr: string) => addr.toLowerCase()
 export const getChallengePersonhoodBatchQueryKey = (addresses: string[]) =>
   ["challenges", "personhood", "batch", ...addresses.map(normalize).sort()] as const
 
-const toBigInt = (value: unknown): bigint => {
-  if (typeof value === "bigint") return value
-  if (typeof value === "number" || typeof value === "string") return BigInt(value)
-  return 0n
-}
-
 /**
- * Batch sybil check mirroring the V2 B3TRChallenges contract gate. We deliberately do NOT call
- * `isPerson` — it returns false for veDelegate delegators, locking honest users out. Instead we read
- * the two flags the contract actually checks: `isBlacklisted` per account and the global
- * `signalingThreshold` against per-account `signaledCounter`.
+ * Batch personhood check for a list of addresses against VeBetterPassport.isPerson(addr).
+ * Mirrors the live `isPerson` check the B3TRChallenges contract performs on join/claim,
+ * so the UI's verified/unverified verdict matches what the contract will allow.
  *
- * Returns a map keyed by lowercased address; `isPerson: false` means "the on-chain gate would reject
- * this account" with `reason` matching the contract's revert string.
+ * Returns a map keyed by lowercased address.
  */
 export const useChallengePersonhoodBatch = (addresses: string[] | undefined) => {
   const thor = useThor()
@@ -44,36 +36,26 @@ export const useChallengePersonhoodBatch = (addresses: string[] | undefined) => 
     queryFn: async () => {
       if (unique.length === 0) return {} as Record<string, ChallengePersonhood>
 
-      // One signalingThreshold call (global) + isBlacklisted + signaledCounter per account.
-      const calls = [
-        { abi, address, functionName: "signalingThreshold" as const, args: [] as const },
-        ...unique.flatMap(
-          addr =>
-            [
-              { abi, address, functionName: "isBlacklisted" as const, args: [addr] as const },
-              { abi, address, functionName: "signaledCounter" as const, args: [addr] as const },
-            ] as const,
-        ),
-      ]
-
-      const results = (await executeMultipleClausesCall({ thor, calls })) as unknown[]
-      const threshold = toBigInt(results[0])
+      const results = await executeMultipleClausesCall({
+        thor,
+        calls: unique.map(addr => ({
+          abi,
+          address,
+          functionName: "isPerson",
+          args: [addr],
+        })),
+      })
 
       return Object.fromEntries(
         unique.map((addr, index) => {
-          const blacklisted = !!results[1 + index * 2]
-          const signaled = toBigInt(results[2 + index * 2])
-          const overSignaled = threshold !== 0n && signaled >= threshold
-          if (blacklisted) {
-            return [addr, { isPerson: false, reason: "User is blacklisted" } satisfies ChallengePersonhood]
-          }
-          if (overSignaled) {
-            return [
-              addr,
-              { isPerson: false, reason: "User has been signaled too many times" } satisfies ChallengePersonhood,
-            ]
-          }
-          return [addr, { isPerson: true, reason: "" } satisfies ChallengePersonhood]
+          const tuple = results[index] as unknown as [boolean, string] | undefined
+          return [
+            addr,
+            {
+              isPerson: !!tuple?.[0],
+              reason: tuple?.[1] ?? "",
+            } satisfies ChallengePersonhood,
+          ]
         }),
       )
     },
@@ -89,9 +71,9 @@ export const useChallengePersonhoodBatch = (addresses: string[] | undefined) => 
 }
 
 /**
- * Convenience hook for the viewer's sybil verdict. Returns `undefined` while loading and
- * `{ isPerson, reason }` once the call resolves. Falls back to `{ isPerson: true }` when no address
- * is provided so guests don't see false "not verified" badges.
+ * Convenience hook for the viewer's personhood. Returns `undefined` while loading and
+ * a `{ isPerson, reason }` object once the call resolves. Falls back to `{ isPerson: true }`
+ * when no address is provided so guests don't see false "not verified" badges.
  */
 export const useViewerPersonhood = (viewerAddress: string | undefined): ChallengePersonhood | undefined => {
   const addresses = useMemo(() => (viewerAddress ? [viewerAddress] : []), [viewerAddress])
