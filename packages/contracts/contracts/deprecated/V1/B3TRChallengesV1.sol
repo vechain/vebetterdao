@@ -4,21 +4,21 @@ pragma solidity 0.8.20;
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IChallenges } from "./interfaces/IChallenges.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { ChallengeCoreLogic } from "./challenges/libraries/ChallengeCoreLogic.sol";
-import { ChallengeSettlementLogic } from "./challenges/libraries/ChallengeSettlementLogic.sol";
-import { ChallengeStorageTypes } from "./challenges/libraries/ChallengeStorageTypes.sol";
-import { ChallengeTypes } from "./challenges/libraries/ChallengeTypes.sol";
+import { IChallengesV1 as IChallenges } from "./challenges/interfaces/IChallengesV1.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { ChallengeCoreLogicV1 as ChallengeCoreLogic } from "./challenges/libraries/ChallengeCoreLogicV1.sol";
+import { ChallengeSettlementLogicV1 as ChallengeSettlementLogic } from "./challenges/libraries/ChallengeSettlementLogicV1.sol";
+import { ChallengeStorageTypesV1 as ChallengeStorageTypes } from "./challenges/libraries/ChallengeStorageTypesV1.sol";
+import { ChallengeTypesV1 as ChallengeTypes } from "./challenges/libraries/ChallengeTypesV1.sol";
 
 /// @title B3TRChallenges
 /// @notice Upgradeable entrypoint for creating, joining, settling, and administering B3TR challenges.
 /// @dev This contract owns storage, roles, and external access control while delegating challenge lifecycle and
 /// settlement logic to dedicated libraries. NatSpec for the external API is inherited from `IChallenges`.
-contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract B3TRChallengesV1 is IChallenges, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant SETTINGS_MANAGER_ROLE = keccak256("SETTINGS_MANAGER_ROLE");
@@ -87,7 +87,7 @@ contract B3TRChallenges is IChallenges, AccessControlUpgradeable, ReentrancyGuar
 
   /// @inheritdoc IChallenges
   function version() external pure returns (string memory) {
-    return "2";
+    return "1";
   }
 
   /// @inheritdoc IChallenges

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import { ChallengeTypes } from "../challenges/libraries/ChallengeTypes.sol";
+import { ChallengeTypesV1 as ChallengeTypes } from "../libraries/ChallengeTypesV1.sol";
 
 /// @title B3TRChallenges Interface
 /// @notice External interface for creating, joining, settling, and administering B3TR challenges.
 /// @dev Lifecycle and settlement events emitted from the challenge libraries are declared here as well so the main
 /// contract ABI remains complete for docs, tests, and indexers.
-interface IChallenges {
+interface IChallengesV1 {
   // ---------- Errors ---------- //
   error ZeroAddress();
   error InvalidAmount();
@@ -50,10 +50,6 @@ interface IChallenges {
   error SplitWinSlotsExhausted(uint256 challengeId);
   error NotEligibleForSplitWin(uint256 challengeId, address account, uint256 actions, uint256 threshold);
   error NotASplitWinChallenge(uint256 challengeId);
-  /// @notice Thrown when an account fails the VeBetterPassport personhood check on a participation or claim path.
-  /// @param account Address that failed the personhood check.
-  /// @param reason Reason returned by VeBetterPassport (e.g. "User is blacklisted").
-  error NotVerifiedPerson(address account, string reason);
 
   // ---------- Events ---------- //
 

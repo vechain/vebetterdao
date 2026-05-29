@@ -17,6 +17,10 @@ interface ChallengeActionsRowProps {
   tag?: string
   hideScore?: boolean
   onClick?: () => void
+  // When false, render a "Not verified" badge so other users can see this account will not
+  // be able to claim rewards because VeBetterPassport's isPerson check is failing for them.
+  isPerson?: boolean
+  personhoodReason?: string
 }
 
 export const ChallengeActionsRow = ({
@@ -28,6 +32,8 @@ export const ChallengeActionsRow = ({
   tag,
   hideScore,
   onClick,
+  isPerson = true,
+  personhoodReason,
 }: ChallengeActionsRowProps) => {
   const { data: vnsData } = useVechainDomain(address)
   const domain = vnsData?.domain
@@ -63,6 +69,20 @@ export const ChallengeActionsRow = ({
         </Box>
       </HStack>
       <HStack gap={2} zIndex={1}>
+        {!isPerson && (
+          <Badge
+            variant="outline"
+            size="sm"
+            rounded="full"
+            fontWeight="semibold"
+            colorPalette="red"
+            color={isYou ? "white" : undefined}
+            borderColor={isYou ? "transparency.700" : undefined}
+            bg={isYou ? "transparency.200" : undefined}
+            title={personhoodReason || undefined}>
+            {t("Not verified")}
+          </Badge>
+        )}
         {tag && (
           <Badge
             variant="outline"

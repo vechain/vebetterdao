@@ -59,6 +59,9 @@ interface BuildChallengeDetailParams {
   viewer?: string
   currentRound: number
   maxParticipants: number
+  // Live VeBetterPassport.isPerson verdict for the viewer. Optional so callers without
+  // an authenticated viewer (or before the passport query resolves) leave gating untouched.
+  viewerIsPerson?: boolean
 }
 
 /**
@@ -75,6 +78,7 @@ export const buildChallengeDetail = async ({
   viewer,
   currentRound,
   maxParticipants,
+  viewerIsPerson,
 }: BuildChallengeDetailParams): Promise<ChallengeDetail | null> => {
   const address = contractAddress as `0x${string}`
   const idBig = BigInt(challengeId)
@@ -212,5 +216,6 @@ export const buildChallengeDetail = async ({
     viewerAddress: viewer,
     currentRound,
     participantActions,
+    viewerIsPerson,
   })
 }

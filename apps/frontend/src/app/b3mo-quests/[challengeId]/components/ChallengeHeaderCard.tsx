@@ -25,6 +25,7 @@ import {
   SettlementMode,
 } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
+import { useViewerPersonhood } from "@/api/challenges/useChallengePersonhood"
 import { useChallengeStatusTime } from "@/api/challenges/useChallengeStatusTime"
 
 import { ChallengeActions, hasChallengeActions } from "../../shared/ChallengeActions"
@@ -108,6 +109,18 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
 
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
 
+  // Surface a banner explaining why the viewer cannot act on this quest. We render it only when the viewer
+  // would otherwise be eligible (creator / participant / invitee) so guests don't see noise.
+  const viewerPersonhood = useViewerPersonhood(account?.address)
+  const wouldOtherwiseAct =
+    !isGuest &&
+    (challenge.isCreator ||
+      challenge.isJoined ||
+      challenge.isInvitationPending ||
+      challenge.status === ChallengeStatus.Pending ||
+      challenge.status === ChallengeStatus.Active)
+  const showPersonhoodBanner = !!viewerPersonhood && viewerPersonhood.isPerson === false && wouldOtherwiseAct
+
   return (
     <>
       <Card.Root variant="primary" p="4" w="full">
@@ -178,6 +191,25 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
             textAlign="left">
             {statusTimeLabel ?? getChallengeInvalidReason(challenge, t) ?? t(challengeStatusLabel(challenge.status))}
           </Badge>
+
+          {showPersonhoodBanner && (
+            <Box
+              role="alert"
+              bg="status.negative.subtle"
+              borderColor="status.negative.primary"
+              borderWidth={1}
+              borderRadius="lg"
+              p={3}>
+              <Text textStyle="sm" color="status.negative.strong" fontWeight="semibold">
+                {t("Your VeBetterPassport check failed — you can't join or claim this B3MO quest")}
+              </Text>
+              {viewerPersonhood?.reason && (
+                <Text textStyle="xs" color="text.subtle" mt={1}>
+                  {viewerPersonhood.reason}
+                </Text>
+              )}
+            </Box>
+          )}
 
           {hasChallengeActions(challenge) && (
             <Box display={{ base: "block", md: "none" }}>
