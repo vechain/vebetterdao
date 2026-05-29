@@ -587,6 +587,7 @@ export const getOrDeployContractInstances = async ({
       "X2EarnRewardsPoolV5",
       "X2EarnRewardsPoolV6",
       "X2EarnRewardsPoolV7",
+      "X2EarnRewardsPoolV8",
       "X2EarnRewardsPool",
     ],
     [
@@ -598,9 +599,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9],
     },
   )) as X2EarnRewardsPool
 

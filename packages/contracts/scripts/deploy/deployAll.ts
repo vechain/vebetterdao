@@ -554,6 +554,7 @@ export async function deployAll(config: ContractsConfig) {
       "X2EarnRewardsPoolV4",
       "X2EarnRewardsPoolV5",
       "X2EarnRewardsPoolV7",
+      "X2EarnRewardsPoolV8",
       "X2EarnRewardsPool",
     ],
     [
@@ -573,9 +574,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
       logOutput: true,
     },
   )) as X2EarnRewardsPool

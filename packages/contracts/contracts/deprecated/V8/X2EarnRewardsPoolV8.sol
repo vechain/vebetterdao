@@ -26,17 +26,17 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPoolV8 } from "./interfaces/IX2EarnRewardsPoolV8.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
- * @title X2EarnRewardsPool
+ * @title X2EarnRewardsPoolV8
  * @dev This contract is used by x2Earn apps to reward users that performed sustainable actions.
  * The XAllocationPool contract or other contracts/users can deposit funds into this contract by specifying the app
  * that can access the funds.
@@ -64,19 +64,9 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * - Added distributeRewardForRound / distributeRewardWithProofForRound / distributeRewardWithProofAndMetadataForRound
  *   that accept an actionRound parameter so apps can attribute actions to the round they actually occurred in,
  *   calling veBetterPassport.registerActionForRound instead of registerAction.
- * ----- Version 9 -----
- * - Separated sustainable rewards from bonus/secondary rewards so non-sustainable payouts no longer
- *   keep passports active.
- * - Added distributeNonProofReward(appId, amount, receiver, category, description) that transfers B3TR
- *   without calling veBetterPassport.registerAction, emitting NonProofRewardDistributed with a typed
- *   NonProofRewardCategory so indexers can exclude it from personhood signals.
- * - Made proofTypes/proofValues mandatory on distributeRewardWithProof, distributeRewardWithProofAndMetadata
- *   and their *ForRound counterparts.
- * - Marked distributeReward as deprecated (kept for backward compatibility).
- * - Added distributeRewardDeprecatedForRound to mirror distributeRewardDeprecated under the round-attribution flow.
  */
-contract X2EarnRewardsPool is
-  IX2EarnRewardsPool,
+contract X2EarnRewardsPoolV8 is
+  IX2EarnRewardsPoolV8,
   UUPSUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable
@@ -282,27 +272,7 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-distributeRewardDeprecatedForRound}
-   */
-  function distributeRewardDeprecatedForRound(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    string memory proof,
-    uint256 actionRound
-  ) external {
-    // emit event with provided json proof
-    emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
-
-    _distributeRewardForRound(appId, amount, receiver, actionRound);
-  }
-
-  /**
    * @dev {IX2EarnRewardsPool-distributeReward}
-   * @notice DEPRECATED (V9). Registers a passport action without a proof, which allowed apps to keep
-   * passports active via non-sustainable rewards. Kept for backward compatibility. New integrations
-   * MUST use `distributeRewardWithProof` (sustainable, proof required) or `distributeNonProofReward`
-   * (bonus rewards, does not register a passport action).
    * @notice the proof argument is unused but kept for backwards compatibility
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory /*proof*/) external {
@@ -314,7 +284,6 @@ contract X2EarnRewardsPool is
 
   /**
    * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
-   * @notice Since V9 a non-empty proof is mandatory. Use {distributeNonProofReward} for bonus rewards.
    */
   function distributeRewardWithProof(
     bytes32 appId,
@@ -326,14 +295,12 @@ contract X2EarnRewardsPool is
     uint256[] memory impactValues,
     string memory description
   ) external {
-    _requireProof(proofTypes, proofValues);
     _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
     _distributeReward(appId, amount, receiver);
   }
 
   /**
    * @dev See {IX2EarnRewardsPool-distributeRewardWithProofAndMetadata}
-   * @notice Since V9 a non-empty proof is mandatory. Use {distributeNonProofReward} for bonus rewards.
    */
   function distributeRewardWithProofAndMetadata(
     bytes32 appId,
@@ -346,7 +313,6 @@ contract X2EarnRewardsPool is
     string memory description,
     string memory metadata
   ) external {
-    _requireProof(proofTypes, proofValues);
     _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
     _emitMetadata(appId, amount, receiver, metadata);
     _distributeReward(appId, amount, receiver);
@@ -369,7 +335,6 @@ contract X2EarnRewardsPool is
 
   /**
    * @dev See {IX2EarnRewardsPool-distributeRewardWithProofForRound}
-   * @notice Since V9 a non-empty proof is mandatory. Use {distributeNonProofReward} for bonus rewards.
    */
   function distributeRewardWithProofForRound(
     bytes32 appId,
@@ -382,14 +347,12 @@ contract X2EarnRewardsPool is
     string memory description,
     uint256 actionRound
   ) external {
-    _requireProof(proofTypes, proofValues);
     _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
     _distributeRewardForRound(appId, amount, receiver, actionRound);
   }
 
   /**
    * @dev See {IX2EarnRewardsPool-distributeRewardWithProofAndMetadataForRound}
-   * @notice Since V9 a non-empty proof is mandatory. Use {distributeNonProofReward} for bonus rewards.
    */
   function distributeRewardWithProofAndMetadataForRound(
     bytes32 appId,
@@ -403,28 +366,9 @@ contract X2EarnRewardsPool is
     string memory metadata,
     uint256 actionRound
   ) external {
-    _requireProof(proofTypes, proofValues);
     _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
     _emitMetadata(appId, amount, receiver, metadata);
     _distributeRewardForRound(appId, amount, receiver, actionRound);
-  }
-
-  /**
-   * @dev See {IX2EarnRewardsPool-distributeNonProofReward}
-   * @notice This entrypoint does NOT register a passport action. Indexers MUST treat
-   * NonProofRewardDistributed events as bonus/secondary rewards and exclude them from
-   * passport personhood signals.
-   */
-  function distributeNonProofReward(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    NonProofRewardCategory category,
-    string memory description
-  ) external {
-    emit NonProofRewardDistributed(amount, appId, receiver, category, description, msg.sender);
-
-    _distributeNonProofReward(appId, amount, receiver);
   }
 
   /**
@@ -435,10 +379,31 @@ contract X2EarnRewardsPool is
    * Example: ["carbon", "water", "energy"], [100, 200, 300]
    */
   function _distributeReward(bytes32 appId, uint256 amount, address receiver) internal nonReentrant {
-    _validateAndTransferReward(appId, amount, receiver);
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    
+    // Check if the distribution is paused
+    require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
+
+    // check authorization
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+    require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
+
+    // check if the contract has enough funds
+    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
+
+    // check to distribute from the correct pool if the feature is enabled
+    if ($.isRewardsPoolEnabled[appId]) {
+      require($.rewardsPoolBalance[appId] >= amount, "X2EarnRewardsPool: not enough funds in the rewards pool");
+      $.rewardsPoolBalance[appId] -= amount;
+    } else {
+      require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient available funds");
+      $.availableFunds[appId] -= amount;
+    }
+
+    // Transfer the rewards to the receiver
+    require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     // Try to register the action in the veBetterPassport contract
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     try $.veBetterPassport.registerAction(receiver, appId) {
       // If the call succeeds, you can optionally handle success here.
     } catch Error(string memory reason) {
@@ -461,45 +426,11 @@ contract X2EarnRewardsPool is
     require(actionRound > 0, "X2EarnRewardsPool: actionRound is zero");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+
     require(
       address($.xAllocationVoting) != address(0) && actionRound <= $.xAllocationVoting.currentRoundId(),
       "X2EarnRewardsPool: actionRound exceeds current round"
     );
-
-    _validateAndTransferReward(appId, amount, receiver);
-
-    try $.veBetterPassport.registerActionForRound(receiver, appId, actionRound) {
-    } catch Error(string memory reason) {
-      emit RegisterActionFailed(reason, "");
-    } catch (bytes memory lowLevelData) {
-      emit RegisterActionFailed("Low-level error", lowLevelData);
-    }
-  }
-
-  /**
-   * @dev Transfers a non-sustainable / bonus reward without registering a passport action.
-   * By design it does NOT call veBetterPassport so the receiver's passport is not kept active
-   * by this payout. Runs the same authorization, pause and pool-balance checks as the sustainable
-   * distribution paths via {_validateAndTransferReward}.
-   *
-   * @param appId the app id that is emitting the bonus reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that receives the bonus reward
-   */
-  function _distributeNonProofReward(bytes32 appId, uint256 amount, address receiver) internal nonReentrant {
-    _validateAndTransferReward(appId, amount, receiver);
-  }
-
-  /**
-   * @dev Shared validation, balance accounting and B3TR transfer used by every distribute path.
-   * Caller MUST hold a nonReentrant lock since this function performs an external ERC20 transfer.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token to transfer
-   * @param receiver the address that receives the B3TR
-   */
-  function _validateAndTransferReward(bytes32 appId, uint256 amount, address receiver) private {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
@@ -515,19 +446,13 @@ contract X2EarnRewardsPool is
     }
 
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
-  }
 
-  /**
-   * @dev Reverts if the provided proof arrays are empty.
-   * Used by distributeRewardWithProof / distributeRewardWithProofAndMetadata and their *ForRound
-   * counterparts since V9 to enforce that every passport-registering reward carries an on-chain proof.
-   * The length-match check is performed by _buildProofJson when the JSON is built.
-   */
-  function _requireProof(string[] memory proofTypes, string[] memory proofValues) internal pure {
-    require(
-      proofTypes.length > 0 && proofValues.length > 0,
-      "X2EarnRewardsPool: proof is mandatory"
-    );
+    try $.veBetterPassport.registerActionForRound(receiver, appId, actionRound) {
+    } catch Error(string memory reason) {
+      emit RegisterActionFailed(reason, "");
+    } catch (bytes memory lowLevelData) {
+      emit RegisterActionFailed("Low-level error", lowLevelData);
+    }
   }
 
   /**
@@ -893,7 +818,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "9";
+    return "8";
   }
 
   /**

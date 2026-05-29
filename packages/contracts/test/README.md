@@ -42,6 +42,7 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard10b**: VoterRewards - Relayer Claim Rewards
 - **shard11**: X2EarnCreator
 - **shard12**: X2EarnRewardsPool
+- **shard12b**: X2EarnRewardsPool - V9 (distributeNonProofReward, distributeRewardDeprecatedForRound, mandatory proof, distributeReward deprecation)
 - **shard13**: X-Allocation Pool
 - **shard14-core**: X-Allocation Voting
 - **shard14a**: X-Allocation Voting - Upgrade

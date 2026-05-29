@@ -19,6 +19,7 @@ import {
   X2EarnRewardsPoolV5,
   X2EarnRewardsPoolV6,
   X2EarnRewardsPoolV7,
+  X2EarnRewardsPoolV8,
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
@@ -77,7 +78,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       const { x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
-      expect(await x2EarnRewardsPool.version()).to.equal("8")
+      expect(await x2EarnRewardsPool.version()).to.equal("9")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -156,7 +157,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnRewardsPool.version()).to.equal("8")
+      expect(await x2EarnRewardsPool.version()).to.equal("9")
     })
 
     it("Storage should be preserved after upgrade", async () => {
@@ -285,17 +286,32 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPoolV7.version()).to.equal("7")
 
       // upgrade to V8
-      const x2EarnRewardsPool = (await upgradeProxy(
+      const x2EarnRewardsPoolV8 = (await upgradeProxy(
         "X2EarnRewardsPoolV7",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV8",
         await x2EarnRewardsPoolV1.getAddress(),
         [],
         {
           version: 8,
         },
+      )) as X2EarnRewardsPoolV8
+
+      expect(await x2EarnRewardsPoolV8.version()).to.equal("8")
+      expect(await x2EarnRewardsPoolV8.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV8.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+
+      // upgrade to V9
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV8",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 9,
+        },
       )) as X2EarnRewardsPool
 
-      expect(await x2EarnRewardsPool.version()).to.equal("8")
+      expect(await x2EarnRewardsPool.version()).to.equal("9")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
     })
@@ -427,17 +443,30 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPoolV7.version()).to.equal("7")
 
       // upgrade to V8
-      const x2EarnRewardsPool = (await upgradeProxy(
+      const x2EarnRewardsPoolV8 = (await upgradeProxy(
         "X2EarnRewardsPoolV7",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV8",
         await x2EarnRewardsPoolV1.getAddress(),
         [],
         {
           version: 8,
         },
+      )) as X2EarnRewardsPoolV8
+
+      expect(await x2EarnRewardsPoolV8.version()).to.equal("8")
+
+      // upgrade to V9
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV8",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 9,
+        },
       )) as X2EarnRewardsPool
 
-      expect(await x2EarnRewardsPool.version()).to.equal("8")
+      expect(await x2EarnRewardsPool.version()).to.equal("9")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
@@ -619,17 +648,30 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPoolV7.version()).to.equal("7")
 
       // upgrade to V8
-      const x2EarnRewardsPool = (await upgradeProxy(
+      const x2EarnRewardsPoolV8 = (await upgradeProxy(
         "X2EarnRewardsPoolV7",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV8",
         await x2EarnRewardsPoolV1.getAddress(),
         [],
         {
           version: 8,
         },
+      )) as X2EarnRewardsPoolV8
+
+      expect(await x2EarnRewardsPoolV8.version()).to.equal("8")
+
+      // upgrade to V9
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV8",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 9,
+        },
       )) as X2EarnRewardsPool
 
-      expect(await x2EarnRewardsPool.version()).to.equal("8")
+      expect(await x2EarnRewardsPool.version()).to.equal("9")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
@@ -1814,7 +1856,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(emittedProof).to.not.have.property("impact")
     })
 
-    it("App can provide only impact without proofs", async function () {
+    it("V9: distributeRewardWithProof reverts when proof is omitted even if impact is provided", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -1831,52 +1873,26 @@ describe("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
-      // By default, the rewards pool is enabled for new apps
       await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
-      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
-      // fill the pool
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
-      const tx = await x2EarnRewardsPool
-        .connect(owner)
-        .distributeRewardWithProof(
-          appId,
-          ethers.parseEther("1"),
-          user.address,
-          [],
-          [],
-          ["carbon", "water"],
-          [100, 200],
-          "The description of the action",
-        )
-
-      const receipt = await tx.wait()
-
-      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
-      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
-
-      // event emitted
-      if (!receipt) throw new Error("No receipt")
-
-      let event = filterEventsByName(receipt.logs, "RewardDistributed")
-
-      expect(event).not.to.eql([])
-      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
-      expect(event[0].args[1]).to.equal(appId)
-      expect(event[0].args[2]).to.equal(user.address)
-
-      const emittedProof = JSON.parse(event[0].args[3])
-
-      expect(emittedProof).to.have.property("version")
-      expect(emittedProof.version).to.equal(2)
-      expect(emittedProof).to.have.property("description")
-      expect(emittedProof.description).to.equal("The description of the action")
-      expect(emittedProof).to.have.deep.property("impact", { carbon: 100, water: 200 })
-
-      expect(emittedProof).to.not.have.property("proof")
+      await expect(
+        x2EarnRewardsPool
+          .connect(owner)
+          .distributeRewardWithProof(
+            appId,
+            ethers.parseEther("1"),
+            user.address,
+            [],
+            [],
+            ["carbon", "water"],
+            [100, 200],
+            "The description of the action",
+          ),
+      ).to.be.revertedWith("X2EarnRewardsPool: proof is mandatory")
     })
 
     it("App can provide multiple proofs with metadata", async function () {
@@ -2117,7 +2133,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(emittedMetadata).to.have.deep.property("city", "Brasília")
     })
 
-    it("If only description is passed, without proofs and impact, nothing is emitted", async function () {
+    it("V9: distributeRewardWithProof reverts when only description is provided (proof is mandatory)", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -2134,43 +2150,26 @@ describe("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
-      // By default, the rewards pool is enabled for new apps
       await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
-      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
-      // fill the pool
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
-      const tx = await x2EarnRewardsPool
-        .connect(owner)
-        .distributeRewardWithProof(
-          appId,
-          ethers.parseEther("1"),
-          user.address,
-          [],
-          [],
-          [],
-          [],
-          "The description of the action",
-        )
-
-      const receipt = await tx.wait()
-
-      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
-      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
-
-      // event emitted
-      if (!receipt) throw new Error("No receipt")
-
-      let event = filterEventsByName(receipt.logs, "RewardDistributed")
-
-      expect(event).not.to.eql([])
-      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
-      expect(event[0].args[1]).to.equal(appId)
-      expect(event[0].args[2]).to.equal(user.address)
-      expect(event[0].args[3]).to.equal("")
+      await expect(
+        x2EarnRewardsPool
+          .connect(owner)
+          .distributeRewardWithProof(
+            appId,
+            ethers.parseEther("1"),
+            user.address,
+            [],
+            [],
+            [],
+            [],
+            "The description of the action",
+          ),
+      ).to.be.revertedWith("X2EarnRewardsPool: proof is mandatory")
     })
 
     it("Description is not mandatory if proof or impact is passed", async function () {
@@ -2238,7 +2237,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(emittedProof).to.have.deep.property("impact", { carbon: 100, water: 200 })
     })
 
-    it("If no proof, nor impact, nor description is passed, nothing is emitted", async function () {
+    it("V9: distributeRewardWithProof reverts when proof arrays are empty (proof is mandatory)", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -2265,25 +2264,15 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
-      const tx = await x2EarnRewardsPool
-        .connect(owner)
-        .distributeRewardWithProof(appId, ethers.parseEther("1"), user.address, [], [], [], [], "")
+      await expect(
+        x2EarnRewardsPool
+          .connect(owner)
+          .distributeRewardWithProof(appId, ethers.parseEther("1"), user.address, [], [], [], [], ""),
+      ).to.be.revertedWith("X2EarnRewardsPool: proof is mandatory")
 
-      const receipt = await tx.wait()
-
-      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
-      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
-
-      // event emitted
-      if (!receipt) throw new Error("No receipt")
-
-      let event = filterEventsByName(receipt.logs, "RewardDistributed")
-
-      expect(event).not.to.eql([])
-      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
-      expect(event[0].args[1]).to.equal(appId)
-      expect(event[0].args[2]).to.equal(user.address)
-      expect(event[0].args[3]).to.equal("")
+      // funds untouched and no reward distributed
+      expect(await b3tr.balanceOf(user.address)).to.equal(0)
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(amount)
     })
 
     it("If no metadata is passed, metadata event is not emitted", async function () {
