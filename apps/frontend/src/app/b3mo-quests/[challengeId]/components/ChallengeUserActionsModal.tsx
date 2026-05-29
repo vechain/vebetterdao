@@ -1,12 +1,14 @@
-import { Badge, Button, chakra, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Alert, Badge, Button, chakra, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { InfoCircle } from "iconoir-react"
 import NextLink from "next/link"
 import { useRef } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FiInfo } from "react-icons/fi"
 
 import { type ChallengeDetail } from "@/api/challenges/types"
+import { useViewerPersonhood } from "@/api/challenges/useChallengePersonhood"
 import { useChallengeUserActions } from "@/api/challenges/useChallengeUserActions"
 import { useAccountLinking } from "@/api/contracts/vePassport/hooks/useAccountLinking"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -45,6 +47,11 @@ export const ChallengeUserActionsModal = ({ onClose, challenge, participant }: C
   const domain = vnsData?.domain
 
   const { isLinked: participantHasLinkedAccounts } = useAccountLinking(isOpen ? display.address : undefined)
+
+  // Mirror the contract's claim-time isPerson check so other users can see why this account
+  // won't be able to claim the quest payout.
+  const participantPersonhood = useViewerPersonhood(isOpen ? display.address : undefined)
+  const isNotEligible = participantPersonhood?.isPerson === false
 
   const { actions, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useChallengeUserActions(
     challenge,
@@ -107,6 +114,21 @@ export const ChallengeUserActionsModal = ({ onClose, challenge, participant }: C
             <NextLink href={`/profile/${display.address}`}>{t("View full profile")}</NextLink>
           </Button>
         </VStack>
+
+        {isNotEligible && (
+          <Alert.Root status="error" py="2" px="3">
+            <HStack alignItems="flex-start" gap="2" w="full">
+              <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                <InfoCircle />
+              </Alert.Indicator>
+              <Text textStyle="sm" fontWeight="medium" color="status.negative.strong">
+                {t("Passport not valid, {{reason}}. Quest cannot be claimed.", {
+                  reason: participantPersonhood?.reason || t("not a person"),
+                })}
+              </Text>
+            </HStack>
+          </Alert.Root>
+        )}
 
         <Heading size="sm" fontWeight="semibold">
           {t("Actions in this B3MO quest")}

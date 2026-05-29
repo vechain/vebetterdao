@@ -17,7 +17,7 @@ interface ChallengeActionsRowProps {
   tag?: string
   hideScore?: boolean
   onClick?: () => void
-  // When false, render a "Not verified" badge so other users can see this account will not
+  // When false, render a "Not eligible" badge so other users can see this account will not
   // be able to claim rewards because VeBetterPassport's isPerson check is failing for them.
   isPerson?: boolean
   personhoodReason?: string
@@ -80,7 +80,7 @@ export const ChallengeActionsRow = ({
             borderColor={isYou ? "transparency.700" : undefined}
             bg={isYou ? "transparency.200" : undefined}
             title={personhoodReason || undefined}>
-            {t("Not verified")}
+            {t("Not eligible")}
           </Badge>
         )}
         {tag && (

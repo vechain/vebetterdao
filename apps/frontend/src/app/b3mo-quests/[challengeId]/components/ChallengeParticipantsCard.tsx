@@ -91,14 +91,32 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
       isSplitWin ? challenge.winners : undefined,
     )
 
+  // Personhood lookup for the entire loaded leaderboard + viewer so we can hide ineligible
+  // accounts from the main card (they still surface inside the leaderboard modal's collapsible).
+  const leaderboardAddresses = useMemo(
+    () => [
+      ...leaderboard.map(e => e.participant.toLowerCase()),
+      ...(account?.address ? [account.address.toLowerCase()] : []),
+    ],
+    [leaderboard, account?.address],
+  )
+  const { data: personhoodMap } = useChallengePersonhoodBatch(leaderboardAddresses)
+
+  // Drop non-persons before slicing to the top-N display. While personhood is still loading we
+  // treat everyone as eligible to avoid a blank card flash.
+  const eligibleLeaderboard = useMemo(
+    () => leaderboard.filter(e => personhoodMap?.[e.participant.toLowerCase()]?.isPerson !== false),
+    [leaderboard, personhoodMap],
+  )
+
   const rankings = useMemo(
     () =>
-      leaderboard.slice(0, LEADERBOARD_SIZE).map(entry => ({
+      eligibleLeaderboard.slice(0, LEADERBOARD_SIZE).map(entry => ({
         position: entry.position,
         address: entry.participant,
         score: entry.actions,
       })),
-    [leaderboard],
+    [eligibleLeaderboard],
   )
 
   const viewerRanking = useMemo(() => {
@@ -116,14 +134,6 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   }, [leaderboard, account?.address, challenge.isJoined, challenge.viewerActions])
 
   const isViewerInTop = rankings.some(r => AddressUtils.compareAddresses(r.address, account?.address ?? ""))
-
-  // Batched personhood lookup for the visible top-N + pending invitees so non-persons get a "Not verified" badge.
-  const visibleAddresses = useMemo(() => {
-    const set = new Set<string>(rankings.map(r => r.address.toLowerCase()))
-    if (viewerRanking?.address) set.add(viewerRanking.address.toLowerCase())
-    return [...set]
-  }, [rankings, viewerRanking?.address])
-  const { data: personhoodMap } = useChallengePersonhoodBatch(visibleAddresses)
 
   const inviteButton = challenge.canAddInvites ? (
     <AddChallengeInvitesModal

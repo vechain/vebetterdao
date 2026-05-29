@@ -1,5 +1,6 @@
-import { Heading, VStack, Card, HStack, Button, Text, useDisclosure } from "@chakra-ui/react"
+import { Alert, Heading, VStack, Card, HStack, Button, Text, useDisclosure } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { InfoCircle } from "iconoir-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -23,7 +24,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
     useGetPendingDelegationsDelegateePOV(address)
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
-  const { isPerson } = useCanUserVote(address, delegateeAddress)
+  const { isPerson, personReason } = useCanUserVote(address, delegateeAddress)
   const descriptionLabel = useMemo(() => {
     return isConnectedUser
       ? t("Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens")
@@ -55,6 +56,28 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                   "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",
                 )}
             </Text>
+
+            {!isPerson && (
+              <Alert.Root status="error" py="2" px="3">
+                <HStack alignItems="flex-start" gap="2" w="full">
+                  <Alert.Indicator boxSize="4" flexShrink={0} mt="0.5">
+                    <InfoCircle />
+                  </Alert.Indicator>
+                  <Text textStyle="sm" fontWeight="medium" color="status.negative.strong">
+                    {isConnectedUser
+                      ? t("Your VeBetterPassport is not valid: {{reason}}. You cannot vote until this is resolved.", {
+                          reason: personReason || t("not a person"),
+                        })
+                      : t(
+                          "This user's VeBetterPassport is not valid: {{reason}}. They cannot vote until this is resolved.",
+                          {
+                            reason: personReason || t("not a person"),
+                          },
+                        )}
+                  </Text>
+                </HStack>
+              </Alert.Root>
+            )}
 
             {isPerson ? descriptionLabel : <VotingRequirementsList />}
           </VStack>
