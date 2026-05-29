@@ -40,6 +40,21 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
  *
  * @dev This library manages complex contract state by grouping mappings and settings into
  * distinct storage types. It leverages the ERC-7201 standard for organizing these namespaces.
+ *
+ * KEY CONVENTION (since V6, see VeBetterPassport version history):
+ * - **Score** fields (`userTotalScore`, `userAppTotalScore`, `userRoundScore`, `userAppRoundScore`) are
+ *   keyed by the resolved **passport** address. They aggregate actions from every entity linked to a
+ *   passport so that `isPerson` / `_cumulativeScoreWithDecay` treats the passport as a single identity.
+ * - **Count** fields (`userRoundActionCount`, `userAppRoundActionCount`, `userRoundAppCount`,
+ *   `userRoundUniqueAppInteraction`) are keyed by the **actor** wallet (the address that performed the
+ *   action). These drive `B3TRChallenges.getParticipantActions` and per-wallet analytics; per-actor
+ *   keying prevents quest sybil via entity linkage and avoids the entity-as-participant zero-case.
+ * - `userUniqueAppInteraction` / `userInteractedApps` are written for both the passport and the actor
+ *   (when distinct) to keep signaling logic working — signal attach/detach iterates the entity's own list.
+ * - `appRoundActionCount` is global per (app, round) and has no user/passport key.
+ *
+ * When adding new fields, decide deliberately whether they should aggregate across entities (key by
+ * passport) or attribute to a single wallet (key by actor), and document it in the field comment below.
  */
 library PassportStorageTypes {
   struct PassportStorage {
@@ -73,13 +88,13 @@ library PassportStorageTypes {
     mapping(PassportTypes.APP_SECURITY security => uint256 multiplier) securityMultiplier;
     // Security level of an app -> will be UNDEFINED and set to LOW by default
     mapping(bytes32 appId => PassportTypes.APP_SECURITY security) appSecurity;
-    // All-time total score of a user
+    // All-time total score of a passport (keyed by passport; aggregates linked entities)
     mapping(address user => uint256 totalScore) userTotalScore;
-    // All-time total score of a user for a specific app
+    // All-time total score of a passport for a specific app (keyed by passport)
     mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore;
-    // Score of a user in a specific round
+    // Score of a passport in a specific round (keyed by passport; load-bearing for isPerson / cumulative score)
     mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore;
-    // Score of a user for a specific app in a specific round
+    // Score of a passport for a specific app in a specific round (keyed by passport)
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore;
     // Checkpointed threshold for a user to be considered a person in a round
     Checkpoints.Trace208 popScoreThreshold;
@@ -131,15 +146,18 @@ library PassportStorageTypes {
     // Mapping of apps to total signals
     mapping(bytes32 app => uint256) appTotalSignalsCounter;
     // ---------- Version 5 - Participation Tracking ---------- //
-    // Track which apps a user has interacted with in a specific round
+    // Whether a wallet has interacted with this app in this round (gate for userRoundAppCount).
+    // Actor-keyed since V6 (previously passport-keyed) — see key convention note at the top of this library.
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => bool))) userRoundUniqueAppInteraction;
-    // Number of distinct apps a user has interacted with in a specific round
+    // Number of distinct apps a wallet has interacted with in a round. Actor-keyed since V6.
     mapping(address user => mapping(uint256 round => uint256 count)) userRoundAppCount;
-    // Number of actions distributed by an app in a specific round
+    // Number of actions distributed by an app in a specific round (global per (app, round); no user key).
     mapping(bytes32 appId => mapping(uint256 round => uint256 count)) appRoundActionCount;
-    // Number of actions registered per user (passport) per app per round
+    // Number of actions registered per wallet per app per round. Actor-keyed since V6 (was passport-keyed).
+    // This is the read source for B3TRChallenges.getParticipantActions — per-actor keying is what prevents
+    // quest sybil via entity linkage.
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 count))) userAppRoundActionCount;
-    // Total number of actions registered per user (passport) per round
+    // Total number of actions registered per wallet per round (across all apps). Actor-keyed since V6.
     mapping(address user => mapping(uint256 round => uint256 count)) userRoundActionCount;
   }
 

@@ -76,6 +76,15 @@ export const proposeUpgradeGovernance = async (
   const GovernorStateLogicLib = await GovernorStateLogic.deploy()
   await GovernorStateLogicLib.waitForDeployment()
 
+  // V11: deploy GovernorCommunityExecutionLogic so the latest B3TRGovernor links cleanly
+  const GovernorCommunityExecutionLogic = await ethers.getContractFactory("GovernorCommunityExecutionLogic", {
+    libraries: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+    },
+  })
+  const GovernorCommunityExecutionLogicLib = await GovernorCommunityExecutionLogic.deploy()
+  await GovernorCommunityExecutionLogicLib.waitForDeployment()
+
   const B3TRGovernorV2 = await ethers.getContractFactory("B3TRGovernor", {
     libraries: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -86,6 +95,7 @@ export const proposeUpgradeGovernance = async (
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      GovernorCommunityExecutionLogic: await GovernorCommunityExecutionLogicLib.getAddress(),
     },
   })
 
@@ -126,6 +136,7 @@ export const proposeUpgradeGovernance = async (
     metadataUri,
     currentRoundId + 1n,
     0,
+    0, // V11: maxBudget (0 = no Community-Execution payout flow)
     {
       gasLimit: 10_000_000,
     },

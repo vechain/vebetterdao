@@ -7,12 +7,13 @@ import {
   VeBetterPassportV2,
   VeBetterPassportV3,
   VeBetterPassportV4,
+  VeBetterPassportV5,
   VeBetterPassport,
 } from "../../typechain-types"
 import { createTestConfig } from "../helpers/config"
 
 describe("VeBetterPassport Upgrade - @shard8a", function () {
-  it("Should upgrade from V1 -> V2 -> V3 -> V4 -> V5 (latest) and preserve storage", async function () {
+  it("Should upgrade from V1 -> V2 -> V3 -> V4 -> V5 -> V6 (latest) and preserve storage", async function () {
     const config = createTestConfig()
     const {
       owner,
@@ -50,6 +51,14 @@ describe("VeBetterPassport Upgrade - @shard8a", function () {
       passportSignalingLogicV4,
       passportWhitelistAndBlacklistLogicV4,
       passportEntityLogicV4,
+      passportChecksLogicV5,
+      passportConfiguratorV5,
+      passportDelegationLogicV5,
+      passportPersonhoodLogicV5,
+      passportPoPScoreLogicV5,
+      passportSignalingLogicV5,
+      passportWhitelistAndBlacklistLogicV5,
+      passportEntityLogicV5,
       passportChecksLogic,
       passportConfigurator,
       passportDelegationLogic,
@@ -191,14 +200,37 @@ describe("VeBetterPassport Upgrade - @shard8a", function () {
 
     expect(await veBetterPassportV4.version()).to.equal("4")
 
-    // Upgrade V4 -> V5 (latest)
+    // Upgrade V4 -> V5
     const veBetterPassportV5 = (await upgradeProxy(
       "VeBetterPassportV4",
-      "VeBetterPassport",
+      "VeBetterPassportV5",
       await veBetterPassportV4.getAddress(),
       [],
       {
         version: 5,
+        libraries: {
+          PassportChecksLogicV5: await passportChecksLogicV5.getAddress(),
+          PassportConfiguratorV5: await passportConfiguratorV5.getAddress(),
+          PassportEntityLogicV5: await passportEntityLogicV5.getAddress(),
+          PassportDelegationLogicV5: await passportDelegationLogicV5.getAddress(),
+          PassportPersonhoodLogicV5: await passportPersonhoodLogicV5.getAddress(),
+          PassportPoPScoreLogicV5: await passportPoPScoreLogicV5.getAddress(),
+          PassportSignalingLogicV5: await passportSignalingLogicV5.getAddress(),
+          PassportWhitelistAndBlacklistLogicV5: await passportWhitelistAndBlacklistLogicV5.getAddress(),
+        },
+      },
+    )) as VeBetterPassportV5
+
+    expect(await veBetterPassportV5.version()).to.equal("5")
+
+    // Upgrade V5 -> V6 (latest)
+    const veBetterPassportV6 = (await upgradeProxy(
+      "VeBetterPassportV5",
+      "VeBetterPassport",
+      await veBetterPassportV5.getAddress(),
+      [],
+      {
+        version: 6,
         libraries: {
           PassportChecksLogic: await passportChecksLogic.getAddress(),
           PassportConfigurator: await passportConfigurator.getAddress(),
@@ -212,7 +244,7 @@ describe("VeBetterPassport Upgrade - @shard8a", function () {
       },
     )) as VeBetterPassport
 
-    expect(await veBetterPassportV5.version()).to.equal("5")
+    expect(await veBetterPassportV6.version()).to.equal("6")
 
     const adminRoleV1 = await veBetterPassportV1.DEFAULT_ADMIN_ROLE()
     const ownerHasAdminV1 = await veBetterPassportV1.hasRole(adminRoleV1, owner.address)
@@ -234,6 +266,10 @@ describe("VeBetterPassport Upgrade - @shard8a", function () {
     const ownerHasAdminV5 = await veBetterPassportV5.hasRole(adminRoleV5, owner.address)
     const thresholdV5 = await veBetterPassportV5.thresholdPoPScore()
 
+    const adminRoleV6 = await veBetterPassportV6.DEFAULT_ADMIN_ROLE()
+    const ownerHasAdminV6 = await veBetterPassportV6.hasRole(adminRoleV6, owner.address)
+    const thresholdV6 = await veBetterPassportV6.thresholdPoPScore()
+
     expect(ownerHasAdminV1).to.be.true
     expect(ownerHasAdminV2).to.equal(ownerHasAdminV1) // Check admin role persisted
     expect(thresholdV2).to.equal(thresholdV1)
@@ -247,15 +283,18 @@ describe("VeBetterPassport Upgrade - @shard8a", function () {
     expect(ownerHasAdminV5).to.equal(ownerHasAdminV4) // Check admin role persisted
     expect(thresholdV5).to.equal(thresholdV4)
 
+    expect(ownerHasAdminV6).to.equal(ownerHasAdminV5) // Check admin role persisted across V5 -> V6
+    expect(thresholdV6).to.equal(thresholdV5)
+
     // Check if the RESET_SIGNALER_ROLE was assigned during V4 initialization
-    const RESET_SIGNALER_ROLE = await veBetterPassportV5.RESET_SIGNALER_ROLE()
-    expect(await veBetterPassportV5.hasRole(RESET_SIGNALER_ROLE, config.CONTRACTS_ADMIN_ADDRESS)).to.be.true
+    const RESET_SIGNALER_ROLE = await veBetterPassportV6.RESET_SIGNALER_ROLE()
+    expect(await veBetterPassportV6.hasRole(RESET_SIGNALER_ROLE, config.CONTRACTS_ADMIN_ADDRESS)).to.be.true
 
-    // Verify a role granted in V1 still exists in V5
-    const SETTINGS_MANAGER_ROLE = await veBetterPassportV5.SETTINGS_MANAGER_ROLE()
-    expect(await veBetterPassportV5.hasRole(SETTINGS_MANAGER_ROLE, owner.address)).to.be.true
+    // Verify a role granted in V1 still exists at latest
+    const SETTINGS_MANAGER_ROLE = await veBetterPassportV6.SETTINGS_MANAGER_ROLE()
+    expect(await veBetterPassportV6.hasRole(SETTINGS_MANAGER_ROLE, owner.address)).to.be.true
 
-    // Verify the new userRoundAppCount function exists in V5
-    expect(veBetterPassportV5.userRoundAppCount).to.be.a("function")
+    // Verify the new userRoundAppCount function exists at latest
+    expect(veBetterPassportV6.userRoundAppCount).to.be.a("function")
   })
 })

@@ -12,12 +12,12 @@ export function VoteTabSkeleton() {
       <Skeleton height="2xl" w="full" hideFrom="md" rounded="lg" />
 
       {/* Desktop */}
-      <HStack hideBelow="md" gap="20" alignItems="stretch">
-        <VStack flex={1} minWidth="4xl" align="stretch" gap="4">
+      <HStack hideBelow="md" gap="6" alignItems="stretch" w="full">
+        <VStack flex={1} align="stretch" gap="4">
           <Heading size="lg">{t("Active apps in current round")}</Heading>
           <Skeleton flex={1} rounded="xl" />
         </VStack>
-        <VStack align="stretch">
+        <VStack width="1/3" align="stretch">
           <Heading size="lg">{t("Your top 5 Apps")}</Heading>
           <Card.Root variant="primary" p="8">
             <Card.Body gap="8">

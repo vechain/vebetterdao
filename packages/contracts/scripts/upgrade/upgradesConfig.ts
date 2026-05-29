@@ -21,7 +21,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Give ability to contract admins to call governance only functions",
@@ -33,6 +33,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v8: "Give ability to mark proposals as in development/completed",
       v9: "Give ability to provide a reason for proposal cancellation",
       v10: "Refactor to library architecture + governance intent multiplier + NavigatorRegistry + RelayerRewardsPool (initializeV10) + castNavigatorVote",
+      v11: "Community Execution Framework: per-proposal B3TR budget (proposeWithBudget), markAsInDevelopmentWithPayees (proposer or admin), updatePayees (admin), claimPayout/claimAllPayouts pulled from Treasury",
     },
   },
   XAllocationVoting: {
@@ -104,12 +105,13 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "VeBetter Passport": {
     name: "vebetter-passport",
     configAddressField: "veBetterPassportContractAddress",
-    versions: ["v2", "v3", "v4", "v5"],
+    versions: ["v2", "v3", "v4", "v5", "v6"],
     descriptions: {
       v2: "Prevent delegation of passports to entities",
       v3: "Add GM level to personhood check",
       v4: "Add RESET_SIGNALER_ROLE, improve signaling management, and remove redundant app signal counters",
       v5: "Add per-round distinct app count tracking (userRoundAppCount)",
+      v6: "Key per-round action counts by actor wallet (fixes B3MO Quests sybil via entity linkage)",
     },
   },
   "Galaxy Member": {

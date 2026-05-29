@@ -36,6 +36,7 @@ import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { INavigatorRegistry } from "../../interfaces/INavigatorRegistry.sol";
 import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
+import { ITreasury } from "../../interfaces/ITreasury.sol";
 
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
@@ -146,5 +147,24 @@ library GovernorStorageTypes {
     mapping(uint256 => uint256[]) proposalsForRound;
     // V10: configurable skip window for navigator governance vote skipping (blocks before proposal deadline)
     uint256 governanceSkipWindowBlocks;
+    // ------------------------------- Version 11 (Community Execution Framework) -------------------------------
+    // Treasury used to pay the registered payee after proposal completion.
+    ITreasury treasury;
+    // Safety cap on the number of contributor handles that can be registered per proposal.
+    uint256 maxContributorsPerProposal;
+    // Per-proposal max B3TR implementation cost (wei). Set immutably at proposal creation.
+    mapping(uint256 proposalId => uint256) proposalMaxBudget;
+    // Per-proposal single payout address (set at markAsInDevelopment).
+    mapping(uint256 proposalId => address) proposalPayee;
+    // True once markAsInDevelopment has registered the V11 community-execution data.
+    mapping(uint256 proposalId => bool) proposalPayeesFinalized;
+    // True once claimPayout has transferred the full budget to the registered payee.
+    mapping(uint256 proposalId => bool) proposalPaid;
+    // On-chain free-text description (e.g. "Developed by Framer and Rosa").
+    mapping(uint256 proposalId => string) proposalDescription;
+    // On-chain Discourse / external implementation-discussion link.
+    mapping(uint256 proposalId => string) proposalImplementationDiscussion;
+    // On-chain contributor handles (e.g. "github:alice", "twitter:@bob", or any URL).
+    mapping(uint256 proposalId => string[]) proposalContributors;
   }
 }

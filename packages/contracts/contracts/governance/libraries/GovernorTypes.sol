@@ -144,4 +144,14 @@ library GovernorTypes {
     InDevelopment,
     Completed
   }
+
+  // ------------------------------- Version 11 (Community Execution Framework) -------------------------------
+
+  /// @notice One developer payout entry registered for a proposal.
+  /// @param account The wallet that will receive the B3TR payout.
+  /// @param amount  The B3TR amount (wei) reserved for this payee.
+  struct Payee {
+    address account;
+    uint256 amount;
+  }
 }

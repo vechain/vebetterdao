@@ -30,6 +30,7 @@ import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
 import { GovernorGovernanceLogic } from "./GovernorGovernanceLogic.sol";
 import { GovernorFunctionRestrictionsLogic } from "./GovernorFunctionRestrictionsLogic.sol";
+import { GovernorCommunityExecutionLogic } from "./GovernorCommunityExecutionLogic.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
@@ -146,6 +147,13 @@ library GovernorProposalLogic {
    * eg. Executable proposals cannot be marked as in development if not executed yet but Succeeded.
    */
   error GovernorRestrictedProposal(uint256 proposalId, GovernorTypes.ProposalType proposalType);
+
+  /**
+   * @dev Thrown when an attempt is made to reset the development state of a proposal whose
+   * V11 community-execution payout has already been claimed. Mirrors the selector declared in
+   * {GovernorCommunityExecutionLogic} and {IB3TRGovernor} so callers see a single error type.
+   */
+  error PayoutAlreadyClaimed(uint256 proposalId);
 
   /** ------------------ GETTERS ------------------ **/
 
@@ -303,14 +311,16 @@ library GovernorProposalLogic {
   /** ------------------ SETTERS ------------------ **/
 
   /**
-   * @notice Proposes a new governance action.
-   * @dev Creates a new proposal and validates the proposal parameters.
+   * @notice Proposes a new Standard governance action with an optional Community-Execution max budget.
+   * @dev V11 unified entrypoint. `maxBudget == 0` means "no payout flow"; `maxBudget > 0` is the hard cap
+   *      that will later be paid out to registered developer payees via {markAsInDevelopment}.
    * @param targets The addresses of the contracts to call.
    * @param values The values to send to the contracts.
    * @param calldatas The function signatures and arguments.
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
    * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param maxBudget Maximum implementation budget in B3TR wei. Set to 0 for proposals without a payout flow.
    * @return The proposal id.
    */
   function propose(
@@ -319,7 +329,8 @@ library GovernorProposalLogic {
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
-    uint256 depositAmount
+    uint256 depositAmount,
+    uint256 maxBudget
   ) external returns (uint256) {
     address proposer = msg.sender;
 
@@ -336,18 +347,22 @@ library GovernorProposalLogic {
       GovernorTypes.ProposalType.Standard
     );
 
-    return
-      _propose(
-        proposer,
-        proposalId,
-        targets,
-        values,
-        calldatas,
-        description,
-        startRoundId,
-        depositAmount,
-        GovernorTypes.ProposalType.Standard
-      );
+    uint256 createdId = _propose(
+      proposer,
+      proposalId,
+      targets,
+      values,
+      calldatas,
+      description,
+      startRoundId,
+      depositAmount,
+      GovernorTypes.ProposalType.Standard
+    );
+
+    // V11: record the immutable community-execution budget. No-op when maxBudget == 0.
+    GovernorCommunityExecutionLogic.setProposalBudget(createdId, maxBudget);
+
+    return createdId;
   }
 
   /**
@@ -585,43 +600,6 @@ library GovernorProposalLogic {
   }
 
   /**
-   * @notice Mark a proposal as in development
-   * @param proposalId The id of the proposal.
-   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
-   * - Only Standard proposals are allowed here.
-   * - Can only mark as in development if proposal is executed or succeeded
-   * - If the proposal is executable and the state is succeeded, it cannot be marked as in development
-   * - Otherwise could skip the queue + execution steps
-   * - The proposal development state is set to InDevelopment
-   * - The event ProposalInDevelopment is emitted
-   */
-  function markAsInDevelopment(uint256 proposalId) external {
-    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
-    GovernorTypes.ProposalType proposalType = $.proposalType[proposalId];
-    GovernorTypes.ProposalCore storage proposal = $.proposals[proposalId];
-
-    // Only Standard proposals are allowed here.
-    // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
-    if (proposalType != GovernorTypes.ProposalType.Standard) {
-      revert GovernorRestrictedProposal(proposalId, proposalType);
-    }
-
-    // Can only mark as in development if proposal is executed or succeeded
-    GovernorStateLogic.validateStateBitmap(
-      proposalId,
-      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Executed) |
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Succeeded)
-    );
-    if (proposal.isExecutable && GovernorStateLogic._state(proposalId) == GovernorTypes.ProposalState.Succeeded) {
-      revert GovernorRestrictedProposal(proposalId, proposalType);
-    }
-
-    $.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.InDevelopment;
-    //Emit event
-    emit ProposalInDevelopment(proposalId);
-  }
-
-  /**
    * @notice Mark a proposal as completed
    * @param proposalId The id of the proposal.
    * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
@@ -654,7 +632,15 @@ library GovernorProposalLogic {
    * @notice Reset the development state of a proposal back to pending development
    * @param proposalId The id of the proposal
    * @dev This should reset the enum state back to the original one,
-   * since pending development is not tracked in {GovernorStateLogic._state} condition
+   * since pending development is not tracked in {GovernorStateLogic._state} condition.
+   *
+   * V11: also wipes the community-execution metadata (single payee, description,
+   * implementation-discussion link, contributors, finalized flag) so that a follow-up
+   * {markAsInDevelopment} call can register a fresh payee. The immutable `proposalMaxBudget`
+   * set at proposal-creation time is intentionally preserved.
+   *
+   * Reverts with {PayoutAlreadyClaimed} if the Treasury transfer has already executed —
+   * a paid proposal must never be silently un-marked.
    */
   function resetDevelopmentState(uint256 proposalId) external {
     GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
@@ -663,7 +649,16 @@ library GovernorProposalLogic {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.InDevelopment) |
         GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Completed)
     );
+    if ($.proposalPaid[proposalId]) {
+      revert PayoutAlreadyClaimed(proposalId);
+    }
     $.proposalDevelopmentState[proposalId] = GovernorTypes.ProposalDevelopmentState.PendingDevelopment;
+    // V11: wipe community-execution metadata so markAsInDevelopment can re-run with a fresh payee.
+    delete $.proposalPayeesFinalized[proposalId];
+    delete $.proposalPayee[proposalId];
+    delete $.proposalDescription[proposalId];
+    delete $.proposalImplementationDiscussion[proposalId];
+    delete $.proposalContributors[proposalId];
     //Emit event
     emit ProposalDevelopmentStateReset(proposalId);
   }

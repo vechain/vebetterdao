@@ -157,6 +157,8 @@ jobs:
             label: Governance - Grants Manager V2 Compatibility
           - shard: shard4k
             label: Governance - Grants Manager V3 Metadata URI Access
+          - shard: shard4z
+            label: Governance - Community Execution Framework V11
           - shard: shard6
             label: TimeLock
           - shard: shard7
@@ -177,6 +179,8 @@ jobs:
             label: VeBetterPassport - Entities
           - shard: shard8f
             label: VeBetterPassport - Delegation
+          - shard: shard8g
+            label: VeBetterPassport - V6 Actor-Keyed Counts
           - shard: shard9
             label: VOT3
           - shard: shard9a

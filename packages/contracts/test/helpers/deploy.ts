@@ -239,6 +239,7 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLib,
     GovernorVotesLogicLib,
     GovernorStateLogicLib,
+    GovernorCommunityExecutionLogicLib,
   } = await governanceLibraries({ logOutput: false, latestVersionOnly: false })
 
   // Deploy Passport Libraries
@@ -279,7 +280,16 @@ export const getOrDeployContractInstances = async ({
     PassportPoPScoreLogicV4,
     PassportSignalingLogicV4,
     PassportWhitelistAndBlacklistLogicV4,
-    // V5 (latest)
+    // V5
+    PassportChecksLogicV5,
+    PassportConfiguratorV5,
+    PassportEntityLogicV5,
+    PassportDelegationLogicV5,
+    PassportPersonhoodLogicV5,
+    PassportPoPScoreLogicV5,
+    PassportSignalingLogicV5,
+    PassportWhitelistAndBlacklistLogicV5,
+    // V6 (latest)
     PassportChecksLogic,
     PassportConfigurator,
     PassportEntityLogic,
@@ -970,6 +980,7 @@ export const getOrDeployContractInstances = async ({
       "B3TRGovernorV7",
       "B3TRGovernorV8",
       "B3TRGovernorV9",
+      "B3TRGovernorV10",
       "B3TRGovernor",
     ],
     [
@@ -1015,9 +1026,10 @@ export const getOrDeployContractInstances = async ({
       [], // Reserved for future configuration parameters; currently no values required
       [], // v9
       [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress(), config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS], // v10
+      [await treasury.getAddress(), 20], // v11: treasury + max contributors per proposal
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -1110,6 +1122,19 @@ export const getOrDeployContractInstances = async ({
           GovernorVotesLogicV9: await GovernorVotesLogicLib.getAddress(),
         },
         {
+          // V10 deprecated link slots: reuse latest library instances (compatible at the
+          // public-API level since V11 left every existing lib function shape intact).
+          GovernorClockLogicV10: await GovernorClockLogicLib.getAddress(),
+          GovernorConfiguratorV10: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV10: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV10: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV10: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV10: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV10: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV10: await GovernorVotesLogicLib.getAddress(),
+        },
+        {
+          // V11 (latest) link slots
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
           GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
           GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
@@ -1118,6 +1143,7 @@ export const getOrDeployContractInstances = async ({
           GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
           GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+          GovernorCommunityExecutionLogic: await GovernorCommunityExecutionLogicLib.getAddress(),
         },
       ],
     },
@@ -1293,6 +1319,7 @@ export const getOrDeployContractInstances = async ({
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      GovernorCommunityExecutionLogic: await GovernorCommunityExecutionLogicLib.getAddress(),
     },
     X2EarnApps: {
       EndorsementUtils: await EndorsementUtils.getAddress(),
@@ -1423,6 +1450,10 @@ export const getOrDeployContractInstances = async ({
   // Grant PROPOSAL_STATE_MANAGER_ROLE to owner in B3TRGovernor contract
   await governor.connect(owner).grantRole(await governor.PROPOSAL_STATE_MANAGER_ROLE(), owner.address)
 
+  // V11: Grant Treasury.GOVERNANCE_ROLE to the B3TRGovernor so claimPayout / claimAllPayouts
+  // can pull B3TR directly from Treasury.
+  await treasury.connect(owner).grantRole(await treasury.GOVERNANCE_ROLE(), await governor.getAddress())
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions({ b3tr, emissions, minterAccount, owner })
@@ -1468,6 +1499,7 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLib: GovernorQuorumLogicLib,
     governorStateLogicLib: GovernorStateLogicLib,
     governorVotesLogicLib: GovernorVotesLogicLib,
+    governorCommunityExecutionLogicLib: GovernorCommunityExecutionLogicLib,
     governorClockLogicLibV1: GovernorClockLogicLibV1,
     governorConfiguratorLibV1: GovernorConfiguratorLibV1,
     governorDepositLogicLibV1: GovernorDepositLogicLibV1,
@@ -1571,6 +1603,14 @@ export const getOrDeployContractInstances = async ({
     passportPoPScoreLogicV4: PassportPoPScoreLogicV4,
     passportSignalingLogicV4: PassportSignalingLogicV4,
     passportWhitelistAndBlacklistLogicV4: PassportWhitelistAndBlacklistLogicV4,
+    passportChecksLogicV5: PassportChecksLogicV5,
+    passportConfiguratorV5: PassportConfiguratorV5,
+    passportEntityLogicV5: PassportEntityLogicV5,
+    passportDelegationLogicV5: PassportDelegationLogicV5,
+    passportPersonhoodLogicV5: PassportPersonhoodLogicV5,
+    passportPoPScoreLogicV5: PassportPoPScoreLogicV5,
+    passportSignalingLogicV5: PassportSignalingLogicV5,
+    passportWhitelistAndBlacklistLogicV5: PassportWhitelistAndBlacklistLogicV5,
     administrationUtils: AdministrationUtils,
     endorsementUtils: EndorsementUtils,
     voteEligibilityUtils: VoteEligibilityUtils,

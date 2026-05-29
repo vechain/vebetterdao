@@ -51,7 +51,6 @@ export const AdminPageContent = () => {
     permissions?.isAdminOfX2EarnCreator || permissions?.isMinterOfX2EarnCreator || permissions?.isBurnerOfX2EarnCreator
 
   const canSeeGalaxyMemberTab = permissions?.isAdminOfGalaxyMember
-  const canSeeMigrationTab = permissions?.isAdminOfB3tr
   const hasAllocationRewards = Number(currentRoundId) > 0
 
   return (
@@ -74,7 +73,7 @@ export const AdminPageContent = () => {
             {canSeePauseTab && <option value="pausing">{"Pausing"}</option>}
             {canSeeVeBetterPassportTab && <option value="vebetter-passport">{"VeBetter Passport"}</option>}
             {canSeeGalaxyMemberTab && <option value="galaxy-member">{"Galaxy Member"}</option>}
-            {canSeeMigrationTab && <option value="roles-migration">{"Roles Migration"}</option>}
+            <option value="roles-migration">{"Roles Migration"}</option>
           </NativeSelect.Field>
           <NativeSelect.Indicator />
         </NativeSelect.Root>
@@ -100,7 +99,7 @@ export const AdminPageContent = () => {
         {canSeePauseTab && <Tabs.Trigger value="pausing">{"Pausing"}</Tabs.Trigger>}
         {canSeeVeBetterPassportTab && <Tabs.Trigger value="vebetter-passport">{"VeBetter Passport"}</Tabs.Trigger>}
         {canSeeGalaxyMemberTab && <Tabs.Trigger value="galaxy-member">{"Galaxy Member"}</Tabs.Trigger>}
-        {canSeeMigrationTab && <Tabs.Trigger value="roles-migration">{"Roles Migration"}</Tabs.Trigger>}
+        <Tabs.Trigger value="roles-migration">{"Roles Migration"}</Tabs.Trigger>
       </Tabs.List>
 
       <Tabs.Content value="emissions">
@@ -164,11 +163,9 @@ export const AdminPageContent = () => {
         </Tabs.Content>
       )}
 
-      {canSeeMigrationTab && (
-        <Tabs.Content value="roles-migration">
-          <MigrationTab />
-        </Tabs.Content>
-      )}
+      <Tabs.Content value="roles-migration">
+        <MigrationTab />
+      </Tabs.Content>
     </Tabs.Root>
   )
 }

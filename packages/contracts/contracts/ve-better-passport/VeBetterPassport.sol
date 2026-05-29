@@ -35,6 +35,18 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
  * - Added per-round distinct app count tracking (userRoundAppCount)
  * - Added per-app per-round action count tracking (appRoundActionCount)
  * - Refactored libraries to access storage directly via PassportStorageTypes.getPassportStorage()
+ *
+ * -------------------- Version 6 --------------------
+ * - Fix B3MO Quests sybil-via-entity-linkage: register per-round action **counts** under the actor
+ *   wallet instead of the resolved passport. Score fields keep aggregating at the passport so PoP
+ *   (`isPerson` / cumulative score / personhood threshold) is unchanged.
+ * - Affected mappings (now actor-keyed): `userRoundActionCount`, `userAppRoundActionCount`,
+ *   `userRoundAppCount`, `userRoundUniqueAppInteraction`.
+ * - Affected getters' semantics: `userRoundActionCount(user)`, `userRoundActionCountApp(user, ..)`,
+ *   `userRoundAppCount(user, ..)` now return the wallet's own counts, not the passport-aggregated
+ *   total. Read by `B3TRChallenges.getParticipantActions` so quest scores match per-wallet proofs.
+ * - Storage layout is unchanged — only the key passed in writes changes. Pre-upgrade counters stay
+ *   in passport slots; from the upgrade onward, new actions write to the actor slot.
  */
 contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -200,15 +212,17 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPoPScoreLogic.appRoundActionCount(appId, round);
   }
 
-  /// @notice Gets the number of distinct apps a user has interacted with in a round
-  /// @param user - the user address
+  /// @notice Gets the number of distinct apps a wallet has interacted with in a round
+  /// @dev Actor-keyed since V6 — returns the wallet's own count, not the passport-aggregated total.
+  /// @param user - the wallet address
   /// @param round - the round
   function userRoundAppCount(address user, uint256 round) external view returns (uint256) {
     return PassportPoPScoreLogic.userRoundAppCount(user, round);
   }
 
-  /// @notice Gets how many actions a user registered in a round
-  /// @param user - the user address
+  /// @notice Gets how many actions a wallet registered in a round
+  /// @dev Actor-keyed since V6 — returns the wallet's own actions, not the passport-aggregated total.
+  /// @param user - the wallet address
   /// @param round - the round
   function userRoundActionCount(address user, uint256 round) external view returns (uint256) {
     return PassportPoPScoreLogic.userRoundActionCount(user, round);
@@ -222,8 +236,9 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPoPScoreLogic.userRoundScoreApp(user, round, appId);
   }
 
-  /// @notice Gets how many actions a user registered for an app in a round
-  /// @param user - the user address
+  /// @notice Gets how many actions a wallet registered for an app in a round
+  /// @dev Actor-keyed since V6 — drives `B3TRChallenges.getParticipantActions`.
+  /// @param user - the wallet address
   /// @param round - the round
   /// @param appId - the app id
   function userRoundActionCountApp(address user, uint256 round, bytes32 appId) external view returns (uint256) {
@@ -475,7 +490,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Returns the version of the contract
   function version() external pure returns (string memory) {
-    return "5";
+    return "6";
   }
 
   // ---------- Setters ---------- //

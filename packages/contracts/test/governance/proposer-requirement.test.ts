@@ -63,7 +63,7 @@ describe("Governance - Proposer requirement - @shard4d", function () {
       const gmLevel = await galaxyMember.levelOf(tokenId)
       expect(gmLevel).to.equal(1)
 
-      await expect(governor.connect(proposer).propose([], [], [], "", roundId, 0)).to.be.revertedWithCustomError(
+      await expect(governor.connect(proposer).propose([], [], [], "", roundId, 0, 0)).to.be.revertedWithCustomError(
         governor,
         "GovernorInvalidProposer",
       )

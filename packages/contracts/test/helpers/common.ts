@@ -117,7 +117,8 @@ export const createProposal = async (
 
   const tx = await governor
     .connect(proposer)
-    .propose([address], [0], [encodedFunctionCall], description, roundId.toString(), 0, {
+    // V11: 7th arg is the Community-Execution maxBudget — 0 disables the payout flow.
+    .propose([address], [0], [encodedFunctionCall], description, roundId.toString(), 0, 0, {
       gasLimit: 10_000_000,
     })
 
@@ -335,6 +336,7 @@ export const createProposalWithMultipleFunctions = async (
     description,
     roundId,
     0, //No deposit amount
+    0, // V11: maxBudget — 0 disables Community-Execution payout flow
   )
 
   return tx

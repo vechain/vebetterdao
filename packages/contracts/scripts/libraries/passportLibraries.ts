@@ -45,6 +45,15 @@ import {
   PassportPoPScoreLogicV4,
   PassportSignalingLogicV4,
   PassportWhitelistAndBlacklistLogicV4,
+  // ------------------- V5 ------------------- //
+  PassportChecksLogicV5,
+  PassportConfiguratorV5,
+  PassportDelegationLogicV5,
+  PassportEntityLogicV5,
+  PassportPersonhoodLogicV5,
+  PassportPoPScoreLogicV5,
+  PassportSignalingLogicV5,
+  PassportWhitelistAndBlacklistLogicV5,
 } from "../../typechain-types"
 
 interface DeployPassportLibrariesArgs {
@@ -96,6 +105,14 @@ export type PassportLibraries = PassportLatestLibraries & {
   PassportPoPScoreLogicV4: PassportPoPScoreLogicV4
   PassportSignalingLogicV4: PassportSignalingLogicV4
   PassportWhitelistAndBlacklistLogicV4: PassportWhitelistAndBlacklistLogicV4
+  PassportChecksLogicV5: PassportChecksLogicV5
+  PassportConfiguratorV5: PassportConfiguratorV5
+  PassportEntityLogicV5: PassportEntityLogicV5
+  PassportDelegationLogicV5: PassportDelegationLogicV5
+  PassportPersonhoodLogicV5: PassportPersonhoodLogicV5
+  PassportPoPScoreLogicV5: PassportPoPScoreLogicV5
+  PassportSignalingLogicV5: PassportSignalingLogicV5
+  PassportWhitelistAndBlacklistLogicV5: PassportWhitelistAndBlacklistLogicV5
 }
 
 export async function passportLibraries<T extends DeployPassportLibrariesArgs>({
@@ -366,6 +383,48 @@ export async function passportLibraries<T extends DeployPassportLibrariesArgs>({
   await PassportWhitelistAndBlacklistLogicV4Lib.waitForDeployment()
   logOutput && console.log("PassportWhitelistAndBlacklistLogicV4 Library deployed")
 
+  // ------------------- V5 ------------------- //
+  const PassportChecksLogicV5 = await ethers.getContractFactory("PassportChecksLogicV5")
+  const PassportChecksLogicV5Lib = (await PassportChecksLogicV5.deploy()) as PassportChecksLogicV5
+  await PassportChecksLogicV5Lib.waitForDeployment()
+  logOutput && console.log("PassportChecksLogicV5 Library deployed")
+
+  const PassportConfiguratorV5 = await ethers.getContractFactory("PassportConfiguratorV5")
+  const PassportConfiguratorV5Lib = (await PassportConfiguratorV5.deploy()) as PassportConfiguratorV5
+  await PassportConfiguratorV5Lib.waitForDeployment()
+  logOutput && console.log("PassportConfiguratorV5 Library deployed")
+
+  const PassportEntityLogicV5 = await ethers.getContractFactory("PassportEntityLogicV5")
+  const PassportEntityLogicV5Lib = (await PassportEntityLogicV5.deploy()) as PassportEntityLogicV5
+  await PassportEntityLogicV5Lib.waitForDeployment()
+  logOutput && console.log("PassportEntityLogicV5 Library deployed")
+
+  const PassportDelegationLogicV5 = await ethers.getContractFactory("PassportDelegationLogicV5")
+  const PassportDelegationLogicV5Lib = (await PassportDelegationLogicV5.deploy()) as PassportDelegationLogicV5
+  await PassportDelegationLogicV5Lib.waitForDeployment()
+  logOutput && console.log("PassportDelegationLogicV5 Library deployed")
+
+  const PassportPoPScoreLogicV5 = await ethers.getContractFactory("PassportPoPScoreLogicV5")
+  const PassportPoPScoreLogicV5Lib = (await PassportPoPScoreLogicV5.deploy()) as PassportPoPScoreLogicV5
+  await PassportPoPScoreLogicV5Lib.waitForDeployment()
+  logOutput && console.log("PassportPoPScoreLogicV5 Library deployed")
+
+  const PassportSignalingLogicV5 = await ethers.getContractFactory("PassportSignalingLogicV5")
+  const PassportSignalingLogicV5Lib = (await PassportSignalingLogicV5.deploy()) as PassportSignalingLogicV5
+  await PassportSignalingLogicV5Lib.waitForDeployment()
+  logOutput && console.log("PassportSignalingLogicV5 Library deployed")
+
+  const PassportPersonhoodLogicV5 = await ethers.getContractFactory("PassportPersonhoodLogicV5")
+  const PassportPersonhoodLogicV5Lib = (await PassportPersonhoodLogicV5.deploy()) as PassportPersonhoodLogicV5
+  await PassportPersonhoodLogicV5Lib.waitForDeployment()
+  logOutput && console.log("PassportPersonhoodLogicV5 Library deployed")
+
+  const PassportWhitelistAndBlacklistLogicV5 = await ethers.getContractFactory("PassportWhitelistAndBlacklistLogicV5")
+  const PassportWhitelistAndBlacklistLogicV5Lib =
+    (await PassportWhitelistAndBlacklistLogicV5.deploy()) as PassportWhitelistAndBlacklistLogicV5
+  await PassportWhitelistAndBlacklistLogicV5Lib.waitForDeployment()
+  logOutput && console.log("PassportWhitelistAndBlacklistLogicV5 Library deployed")
+
   // Deploy Clock Logic V3 (note: no typechain export for this library)
   const PassportClockLogicV3 = await ethers.getContractFactory("PassportClockLogicV3")
   const PassportClockLogicV3Lib = await PassportClockLogicV3.deploy()
@@ -414,6 +473,15 @@ export async function passportLibraries<T extends DeployPassportLibrariesArgs>({
     PassportPoPScoreLogicV4: PassportPoPScoreLogicV4Lib,
     PassportSignalingLogicV4: PassportSignalingLogicV4Lib,
     PassportWhitelistAndBlacklistLogicV4: PassportWhitelistAndBlacklistLogicV4Lib,
+
+    PassportChecksLogicV5: PassportChecksLogicV5Lib,
+    PassportConfiguratorV5: PassportConfiguratorV5Lib,
+    PassportEntityLogicV5: PassportEntityLogicV5Lib,
+    PassportDelegationLogicV5: PassportDelegationLogicV5Lib,
+    PassportPersonhoodLogicV5: PassportPersonhoodLogicV5Lib,
+    PassportPoPScoreLogicV5: PassportPoPScoreLogicV5Lib,
+    PassportSignalingLogicV5: PassportSignalingLogicV5Lib,
+    PassportWhitelistAndBlacklistLogicV5: PassportWhitelistAndBlacklistLogicV5Lib,
 
     // ------------------- LATEST VERSION ------------------- //
     PassportChecksLogic: PassportChecksLogicLib,
