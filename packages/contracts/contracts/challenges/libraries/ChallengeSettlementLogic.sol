@@ -66,15 +66,33 @@ library ChallengeSettlementLogic {
       revert IChallenges.ChallengeAlreadyCompleted(challengeId);
     }
 
-    for (uint256 i; i < challenge.participants.length; i++) {
+    // Pass 1: compute bestScore/bestCount over person-participants only. Sybils/blacklisted accounts are
+    // skipped so their actions never set the bar. Cache per-participant results so the second pass does
+    // not re-run the (potentially expensive) action sum.
+    uint256 participantsLen = challenge.participants.length;
+    uint256[] memory cachedActions = new uint256[](participantsLen);
+    bool[] memory isPersonCache = new bool[](participantsLen);
+    for (uint256 i; i < participantsLen; i++) {
       address participant = challenge.participants[i];
-      // Skip non-persons so that the prize is not awarded to (or stranded on) a sybil/blacklisted account.
-      // Their stake remains in the totalPrize pool, redistributed to the verified top scorers.
       (bool isPerson, ) = $.veBetterPassport.isPerson(participant);
       if (!isPerson) continue;
-
+      isPersonCache[i] = true;
       uint256 actions = _getParticipantActions(challenge, participant);
+      cachedActions[i] = actions;
       _updateBestScore(challenge, actions);
+    }
+
+    // Pass 2: snapshot the eligible-winner set so the claimable list size stays equal to `bestCount`
+    // regardless of any later personhood drift. Anyone NOT marked here at completion can never claim,
+    // even if they regain personhood afterwards — otherwise an account with raw actions == bestScore
+    // that was filtered out of bestCount could pop back in and double-pay the pot.
+    if (challenge.bestCount > 0) {
+      uint256 bestScore = challenge.bestScore;
+      for (uint256 i; i < participantsLen; i++) {
+        if (isPersonCache[i] && cachedActions[i] == bestScore) {
+          $.isEligibleWinner[challengeId][challenge.participants[i]] = true;
+        }
+      }
     }
 
     challenge.settlementMode = challenge.bestCount == 0
@@ -107,15 +125,12 @@ library ChallengeSettlementLogic {
 
     if ($.hasClaimed[challengeId][msg.sender]) revert IChallenges.AlreadyClaimed(challengeId, msg.sender);
 
+    // The TopWinners branch reads `isEligibleWinner`, a snapshot frozen at completeChallenge time.
+    // It already encodes the personhood filter — no additional live `isPerson` check is needed (and adding
+    // one would re-open the bug where a snapshot-excluded account could later regain personhood and steal a
+    // slot that `bestCount` never accounted for).
     if (!_isEligibleForPayout(challengeId, challenge, msg.sender)) {
       revert IChallenges.NothingToClaim(challengeId, msg.sender);
-    }
-
-    // Block sybils/blacklisted accounts from collecting earned quest rewards.
-    // The `CreatorRefund` branch is a no-winner refund of the creator's own stake, so it stays open even if the
-    // creator is no longer a verified person — same policy as `claimChallengeRefund` and `claimCreatorSplitWinRefund`.
-    if (challenge.settlementMode != ChallengeTypes.SettlementMode.CreatorRefund) {
-      _requirePerson($, msg.sender);
     }
 
     uint256 recipientCount = _payoutRecipientCount(challenge);
@@ -311,12 +326,10 @@ library ChallengeSettlementLogic {
       return account == challenge.creator;
     }
 
-    if ($.participantStatus[challengeId][account] != ChallengeTypes.ParticipantStatus.Joined) {
-      return false;
-    }
-
-    uint256 actions = _getParticipantActions(challenge, account);
-    return actions == challenge.bestScore;
+    // Read the snapshot taken at completeChallenge time. The actions == bestScore comparison and the
+    // personhood filter were both applied then; re-evaluating either one live would let the claimable
+    // set drift away from `bestCount` (see `completeChallenge` for the rationale).
+    return $.isEligibleWinner[challengeId][account];
   }
 
   function _refundAmount(

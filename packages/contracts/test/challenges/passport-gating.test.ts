@@ -189,8 +189,8 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
 
   // ──── claimChallengePayout: block non-person winners; refund branch stays open ────
 
-  it("rejects claimChallengePayout when a winner lost personhood after the challenge ended", async function () {
-    const { admin, alice, bob, roundGovernor, passport, challenges } = await deployFixture()
+  it("honours the frozen winner snapshot: a winner who later loses personhood can still claim", async function () {
+    const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
 
     await challenges.createChallenge({
@@ -212,7 +212,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     await challenges.connect(alice).joinChallenge(1)
     await challenges.connect(bob).joinChallenge(1)
 
-    // alice wins outright.
+    // alice wins outright at completion.
     await passport.setUserRoundActionCountApp(admin.address, 2, APP_1, 1)
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 10)
     await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 5)
@@ -223,12 +223,73 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     const challenge = await challenges.getChallenge(1)
     expect(challenge.settlementMode).to.equal(SettlementMode.TopWinners)
     expect(challenge.bestScore).to.equal(10n)
+    expect(challenge.bestCount).to.equal(1n)
 
-    // After settlement alice is blacklisted: she cannot collect the reward.
+    // alice is blacklisted AFTER the challenge ended. The winner set was frozen at completion,
+    // so the verdict cannot retroactively revoke her slot — otherwise the pot would be stranded.
     await passport.setIsPerson(alice.address, false, "User is blacklisted")
-    await expect(challenges.connect(alice).claimChallengePayout(1))
-      .to.be.revertedWithCustomError(challenges, "NotVerifiedPerson")
-      .withArgs(alice.address, "User is blacklisted")
+
+    const balanceBefore = await b3tr.balanceOf(alice.address)
+    await challenges.connect(alice).claimChallengePayout(1)
+    expect(await b3tr.balanceOf(alice.address)).to.equal(balanceBefore + ethers.parseEther("300"))
+  })
+
+  it("regression: a tied non-person at completion cannot steal the prize after regaining personhood", async function () {
+    // The bug: completeChallenge filtered non-persons out of bestScore/bestCount, but the original
+    // claimChallengePayout re-derived eligibility live from `actions == bestScore` + a live isPerson check.
+    // A non-person tied with the verified winner at completion could become a person again afterwards and
+    // claim a slot that bestCount never accounted for, taking the full pot and leaving the real winner
+    // to revert with TransferFailed on an empty contract.
+    const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    await challenges.createChallenge({
+      kind: ChallengeKind.Stake,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      stakeAmount: STAKE_AMOUNT,
+      startRound: 2,
+      endRound: 3,
+      threshold: 0,
+      numWinners: 0,
+      appIds: [APP_1],
+      invitees: [alice.address, bob.address],
+      title: "",
+      description: "",
+      imageURI: "",
+      metadataURI: "",
+    })
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+
+    // A (alice) and B (bob) both have 10 actions — tied top score. B is a non-person at completion.
+    await passport.setUserRoundActionCountApp(admin.address, 2, APP_1, 0)
+    await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 10)
+    await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 10)
+    await passport.setIsPerson(bob.address, false, "User is blacklisted")
+
+    await roundGovernor.setCurrentRoundId(4)
+    await challenges.completeChallenge(1)
+
+    // B is skipped at completion → bestCount == 1, snapshot only contains A.
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.bestScore).to.equal(10n)
+    expect(challenge.bestCount).to.equal(1n)
+    expect(challenge.settlementMode).to.equal(SettlementMode.TopWinners)
+
+    // B regains personhood after the snapshot.
+    await passport.setIsPerson(bob.address, true, "")
+
+    // B is NOT in the eligible-winner snapshot, so the live attempt reverts.
+    // Without the fix, B would pass _isEligibleForPayout (actions == bestScore) and take the entire pot.
+    await expect(challenges.connect(bob).claimChallengePayout(1))
+      .to.be.revertedWithCustomError(challenges, "NothingToClaim")
+      .withArgs(1, bob.address)
+
+    // A claims the full pot exactly once. With the bug present, this would revert with TransferFailed.
+    const balanceBefore = await b3tr.balanceOf(alice.address)
+    await challenges.connect(alice).claimChallengePayout(1)
+    expect(await b3tr.balanceOf(alice.address)).to.equal(balanceBefore + ethers.parseEther("300"))
   })
 
   it("allows the creator to collect the CreatorRefund branch even if they are no longer a person", async function () {
