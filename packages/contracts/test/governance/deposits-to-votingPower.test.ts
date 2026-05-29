@@ -129,6 +129,7 @@ describe("Voting power with proposal deposit - @shard4b", function () {
           `${this?.test?.title}`,
           (Number(roundIdBeforeVotesDeposit) + 2).toString(),
           0,
+          0,
           {
             gasLimit: 10_000_000,
           },
@@ -246,6 +247,7 @@ describe("Voting power with proposal deposit - @shard4b", function () {
           `${this?.test?.title}`,
           (Number(roundIdBeforeVotesDeposit) + 2).toString(),
           0,
+          0,
           {
             gasLimit: 10_000_000,
           },
@@ -360,19 +362,18 @@ describe("Voting power with proposal deposit - @shard4b", function () {
       await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
 
       // Create the proposal already supporting the deposit threshold
-      const tx = await governor
-        .connect(voter)
-        .propose(
-          [await b3tr.getAddress()],
-          [0],
-          [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
-          `${this?.test?.title}`,
-          (Number(roundIdBeforeVotesDeposit) + 2).toString(),
-          depositThreshold,
-          {
-            gasLimit: 10_000_000,
-          },
-        )
+      const tx = await governor.connect(voter).propose(
+        [await b3tr.getAddress()],
+        [0],
+        [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+        `${this?.test?.title}`,
+        (Number(roundIdBeforeVotesDeposit) + 2).toString(),
+        depositThreshold,
+        0, // V11: maxBudget
+        {
+          gasLimit: 10_000_000,
+        },
+      )
 
       await tx.wait()
 
@@ -473,19 +474,18 @@ describe("Voting power with proposal deposit - @shard4b", function () {
       await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
 
       // Create the proposal already supporting the deposit threshold
-      const tx = await governor
-        .connect(voter)
-        .propose(
-          [await b3tr.getAddress()],
-          [0],
-          [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
-          `${this?.test?.title}`,
-          (Number(roundIdBeforeVotesDeposit) + 2).toString(),
-          depositThreshold,
-          {
-            gasLimit: 10_000_000,
-          },
-        )
+      const tx = await governor.connect(voter).propose(
+        [await b3tr.getAddress()],
+        [0],
+        [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+        `${this?.test?.title}`,
+        (Number(roundIdBeforeVotesDeposit) + 2).toString(),
+        depositThreshold,
+        0, // V11: maxBudget
+        {
+          gasLimit: 10_000_000,
+        },
+      )
 
       await tx.wait()
 
@@ -648,6 +648,7 @@ describe("Voting power with proposal deposit - @shard4b", function () {
         `${this?.test?.title}`,
         (Number(roundIdBeforeVotesDeposit) + 2).toString(), // In 2 round possible to withdraw, meanwhile VP is either consumed by castVote, or stored
         depositThreshold,
+        0, // V11: maxBudget
         {
           gasLimit: 10_000_000,
         },
@@ -722,6 +723,7 @@ describe("Voting power with proposal deposit - @shard4b", function () {
         `${this?.test?.title}`,
         (Number(roundIdBeforeVotesDeposit) + 2).toString(), // In 2 round possible to withdraw, meanwhile VP is either consumed by castVote, or stored
         depositThreshold,
+        0, // V11: maxBudget
         {
           gasLimit: 10_000_000,
         },
@@ -847,6 +849,7 @@ describe("Voting power with proposal deposit - @shard4b", function () {
         `${this?.test?.title}`,
         (Number(roundIdBeforeVotesDeposit) + 2).toString(), // In 2 round possible to withdraw, meanwhile VP is either consumed by castVote, or stored
         depositThresholdReduced,
+        0, // V11: maxBudget
         {
           gasLimit: 10_000_000,
         },

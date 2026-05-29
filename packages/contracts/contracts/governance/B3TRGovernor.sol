@@ -33,7 +33,9 @@ import { GovernorClockLogic } from "./libraries/GovernorClockLogic.sol";
 import { GovernorFunctionRestrictionsLogic } from "./libraries/GovernorFunctionRestrictionsLogic.sol";
 import { GovernorGovernanceLogic } from "./libraries/GovernorGovernanceLogic.sol";
 import { GovernorConfigurator } from "./libraries/GovernorConfigurator.sol";
+import { GovernorCommunityExecutionLogic } from "./libraries/GovernorCommunityExecutionLogic.sol";
 import { GovernorTypes } from "./libraries/GovernorTypes.sol";
+import { ITreasury } from "../interfaces/ITreasury.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IVOT3 } from "../interfaces/IVOT3.sol";
 import { IB3TR } from "../interfaces/IB3TR.sol";
@@ -135,6 +137,22 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
     GovernorConfigurator.setNavigatorRegistry(_navigatorRegistry);
     GovernorConfigurator.setRelayerRewardsPool(_relayerRewardsPool);
     GovernorConfigurator.setGovernanceSkipWindowBlocks(_governanceSkipWindowBlocks);
+  }
+
+  /// @notice Initialize V11: Community Execution Framework
+  /// @dev Records the Treasury reference used to pay the registered payee and the maximum
+  ///      number of contributor handles allowed per proposal.
+  /// @param _treasury The Treasury contract from which B3TR payouts are pulled.
+  /// @param _maxContributorsPerProposal Hard cap on the contributors array per proposal.
+  function initializeV11(
+    ITreasury _treasury,
+    uint256 _maxContributorsPerProposal
+  ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) reinitializer(9) {
+    require(address(_treasury) != address(0), "B3TRGovernor: invalid treasury");
+    require(_maxContributorsPerProposal > 0, "B3TRGovernor: invalid max contributors");
+    GovernorStorageTypes.GovernorStorage storage $ = GovernorStorageTypes.getGovernorStorage();
+    $.treasury = _treasury;
+    $.maxContributorsPerProposal = _maxContributorsPerProposal;
   }
 
   /**
@@ -535,7 +553,7 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "10";
+    return "11";
   }
 
   /**
@@ -766,13 +784,15 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
 
   /**
    * @notice See {IB3TRGovernor-propose}.
-   * Callable only when contract is not paused.
+   * @dev V11 consolidated entrypoint. Single `propose` function with mandatory `maxBudget`
+   *      parameter — pass `0` for proposals without a community-execution payout flow.
    * @param targets The list of target addresses
    * @param values The list of values to send
    * @param calldatas The list of call data
    * @param description The proposal description
    * @param startRoundId The round in which the proposal should start
    * @param depositAmount The amount of deposit for the proposal
+   * @param maxBudget Maximum implementation budget in B3TR wei (0 = no payout flow)
    * @return uint256 The proposal id
    */
   function propose(
@@ -781,9 +801,19 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
-    uint256 depositAmount
+    uint256 depositAmount,
+    uint256 maxBudget
   ) external whenNotPaused returns (uint256) {
-    return GovernorProposalLogic.propose(targets, values, calldatas, description, startRoundId, depositAmount);
+    return
+      GovernorProposalLogic.propose(
+        targets,
+        values,
+        calldatas,
+        description,
+        startRoundId,
+        depositAmount,
+        maxBudget
+      );
   }
 
   /**
@@ -1082,19 +1112,108 @@ contract B3TRGovernor is IB3TRGovernor, AccessControlUpgradeable, UUPSUpgradeabl
   }
 
   /**
-   * @notice Mark a proposal as in development
-   * @param proposalId The id of the proposal
-   */
-  function markAsInDevelopment(uint256 proposalId) public onlyRole(PROPOSAL_STATE_MANAGER_ROLE) {
-    GovernorProposalLogic.markAsInDevelopment(proposalId);
-  }
-
-  /**
    * @notice Mark a proposal as completed
    * @param proposalId The id of the proposal
    */
   function markAsCompleted(uint256 proposalId) public onlyRole(PROPOSAL_STATE_MANAGER_ROLE) {
     GovernorProposalLogic.markAsCompleted(proposalId);
+  }
+
+  // ------------------ V11: Community Execution Framework ------------------ //
+
+  /**
+   * @notice V11: Mark a proposal as InDevelopment and register the single payout address,
+   *         free-text description, implementation-discussion link, and contributor handles.
+   * @dev Callable by the proposer or by an address holding PROPOSAL_STATE_MANAGER_ROLE.
+   *      - `maxBudget == 0` requires `payee == address(0)` (pure state transition).
+   *      - `maxBudget > 0`  requires `payee != address(0)` (single recipient of the full budget).
+   *      Grants reject — Grants follow the milestone-based payout flow.
+   *      The registered payee receives the FULL `maxBudget` on {claimPayout}; it is the
+   *      payee's responsibility to forward funds to any contributors / team off-chain.
+   * @param proposalId               The proposal id.
+   * @param payee                    Single payout address; may be address(0) when maxBudget == 0.
+   * @param description              Free-text description (e.g. "Developed by Framer and Rosa").
+   * @param implementationDiscussion URL to the implementation-discussion thread.
+   * @param contributors             Array of contributor handles / URLs (capped at maxContributorsPerProposal).
+   */
+  function markAsInDevelopment(
+    uint256 proposalId,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
+  ) external whenNotPaused {
+    GovernorCommunityExecutionLogic.markAsInDevelopment(
+      proposalId,
+      payee,
+      description,
+      implementationDiscussion,
+      contributors,
+      hasRole(PROPOSAL_STATE_MANAGER_ROLE, _msgSender())
+    );
+  }
+
+  /**
+   * @notice V11: Update the payee / description / implementation-discussion / contributors of
+   *         a proposal whose payout has not been claimed yet.
+   * @dev Authorized to the proposer OR PROPOSAL_STATE_MANAGER_ROLE. Allowed while the proposal
+   *      is `InDevelopment` or `Completed` and `proposalPaid` is still false.
+   */
+  function updateCommunityExecution(
+    uint256 proposalId,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
+  ) external whenNotPaused {
+    GovernorCommunityExecutionLogic.updateCommunityExecution(
+      proposalId,
+      payee,
+      description,
+      implementationDiscussion,
+      contributors,
+      hasRole(PROPOSAL_STATE_MANAGER_ROLE, _msgSender())
+    );
+  }
+
+  /**
+   * @notice V11: Pay the registered payee the full implementation cost from Treasury.
+   * @dev Callable by anyone. Idempotent — second call reverts with PayoutAlreadyClaimed.
+   */
+  function claimPayout(uint256 proposalId) external whenNotPaused {
+    GovernorCommunityExecutionLogic.claimPayout(proposalId);
+  }
+
+  // ------------------ V11: Views ------------------ //
+
+  /// @notice The maximum implementation cost (B3TR wei) recorded for a proposal.
+  function getProposalBudget(uint256 proposalId) external view returns (uint256) {
+    return GovernorCommunityExecutionLogic.getProposalBudget(proposalId);
+  }
+
+  /// @notice The single registered payee for the proposal.
+  function getProposalPayee(uint256 proposalId) external view returns (address) {
+    return GovernorCommunityExecutionLogic.getProposalPayee(proposalId);
+  }
+
+  /// @notice True iff the payout has already been pulled from Treasury.
+  function isProposalPaid(uint256 proposalId) external view returns (bool) {
+    return GovernorCommunityExecutionLogic.isProposalPaid(proposalId);
+  }
+
+  /// @notice The free-text description registered alongside the V11 payee.
+  function getProposalDescription(uint256 proposalId) external view returns (string memory) {
+    return GovernorCommunityExecutionLogic.getProposalDescription(proposalId);
+  }
+
+  /// @notice The implementation-discussion link for a proposal.
+  function getProposalImplementationDiscussion(uint256 proposalId) external view returns (string memory) {
+    return GovernorCommunityExecutionLogic.getProposalImplementationDiscussion(proposalId);
+  }
+
+  /// @notice The contributor handle list (e.g. github/twitter URLs) for a proposal.
+  function getProposalContributors(uint256 proposalId) external view returns (string[] memory) {
+    return GovernorCommunityExecutionLogic.getProposalContributors(proposalId);
   }
 
   /**

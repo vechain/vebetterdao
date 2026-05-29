@@ -255,7 +255,6 @@ export const ProposalTimeline = ({ proposal }: Props) => {
 
   const currentStep = useMemo(() => {
     if (!proposal) return 0
-
     const stepIndex = timelineSteps.findIndex(step => step.state.includes(proposal.state as ProposalState | "Created"))
     return stepIndex >= 0 ? stepIndex : 0
   }, [proposal, timelineSteps])

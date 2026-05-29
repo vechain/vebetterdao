@@ -41,6 +41,8 @@ type BuildClausesProps = {
   actions: ProposalAction[]
   startRoundId: number | string
   depositAmount: string
+  /** V11: Maximum implementation budget (B3TR, ether units). Optional — leave empty for legacy propose(6). */
+  maxBudget?: string
 }
 /**
  * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
@@ -53,7 +55,7 @@ export const useCreateStandardProposal = ({ onSuccess, transactionModalCustomUI 
   const { account } = useWallet()
 
   const buildClauses = useCallback(
-    ({ description, actions, startRoundId, depositAmount }: BuildClausesProps) => {
+    ({ description, actions, startRoundId, depositAmount, maxBudget }: BuildClausesProps) => {
       if (!description) throw new Error("description is required")
       if (!actions) throw new Error("actions is required")
       if (!startRoundId) throw new Error("startRoundId is required")
@@ -62,6 +64,7 @@ export const useCreateStandardProposal = ({ onSuccess, transactionModalCustomUI 
 
       const clauses: EnhancedClause[] = []
       const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
+      const parsedMaxBudget = maxBudget && !isZero(maxBudget) ? ethers.parseEther(maxBudget).toString() : "0"
 
       if (!isZero(depositAmount)) {
         const approveClause: EnhancedClause = {
@@ -83,6 +86,7 @@ export const useCreateStandardProposal = ({ onSuccess, transactionModalCustomUI 
         { contractsAddress: [], calldatas: [] },
       )
 
+      // V11: consolidated propose(7 args). Pass `maxBudget = 0` for proposals without a payout flow.
       const createProposalClause: EnhancedClause = {
         to: GOVERNANCE_CONTRACT,
         value: 0,
@@ -93,8 +97,12 @@ export const useCreateStandardProposal = ({ onSuccess, transactionModalCustomUI 
           description,
           startRoundId,
           parsedDepositAmount,
+          parsedMaxBudget,
         ]),
-        comment: `Create new proposal for round ${startRoundId} with description: ${description}`,
+        comment:
+          parsedMaxBudget === "0"
+            ? `Create new proposal for round ${startRoundId} with description: ${description}`
+            : `Create proposal for round ${startRoundId} with max budget ${maxBudget} B3TR — ${description}`,
         abi: JSON.parse(JSON.stringify(b3trGovernorInterface.getFunction("propose"))),
       }
       clauses.push(createProposalClause)

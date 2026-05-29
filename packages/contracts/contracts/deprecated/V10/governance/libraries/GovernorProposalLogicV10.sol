@@ -1,0 +1,1108 @@
+// SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
+pragma solidity 0.8.20;
+
+import { GovernorStorageTypesV10 } from "./GovernorStorageTypesV10.sol";
+import { GovernorTypesV10 } from "./GovernorTypesV10.sol";
+import { GovernorStateLogicV10 } from "./GovernorStateLogicV10.sol";
+import { GovernorClockLogicV10 } from "./GovernorClockLogicV10.sol";
+import { GovernorDepositLogicV10 } from "./GovernorDepositLogicV10.sol";
+import { GovernorGovernanceLogicV10 } from "./GovernorGovernanceLogicV10.sol";
+import { GovernorFunctionRestrictionsLogicV10 } from "./GovernorFunctionRestrictionsLogicV10.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
+import { IGrantsManager } from "../../../../interfaces/IGrantsManager.sol";
+
+/// @title GovernorProposalLogicV10
+/// @notice Library for managing proposals in the Governor contract.
+/// @dev This library provides functions to create, cancel, execute, and validate proposals.
+library GovernorProposalLogicV10 {
+  using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
+
+  /**
+   * @dev Emitted when a proposal is canceled.
+   */
+  event ProposalCanceled(uint256 proposalId);
+
+  /**
+   * @dev Emitted when a proposal is canceled with a reason.
+   */
+  event ProposalCanceledWithReason(uint256 indexed proposalId, address indexed canceler, string reason);
+
+  /**
+   * @dev Emitted when a proposal is created.
+   */
+  event ProposalCreated(
+    uint256 indexed proposalId,
+    address indexed proposer,
+    address[] targets,
+    uint256[] values,
+    string[] signatures,
+    bytes[] calldatas,
+    string description,
+    uint256 indexed roundIdVoteStart,
+    uint256 depositThreshold
+  );
+
+  /**
+   * @dev Emitted when a proposal is created with type information.
+   */
+  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypesV10.ProposalType proposalType);
+
+  /**
+   * @dev Emitted when a proposal is executed.
+   */
+  event ProposalExecuted(uint256 proposalId);
+
+  /**
+   * @dev Emitted when a proposal is queued.
+   */
+  event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
+
+  /**
+   * @dev Emitted when a proposal is marked as in development.
+   */
+  event ProposalInDevelopment(uint256 proposalId);
+
+  /**
+   * @dev Emitted when a proposal is marked as completed.
+   */
+  event ProposalCompleted(uint256 proposalId);
+
+  /**
+   * @dev Emitted when the development state of a proposal is reset back to pending development.
+   */
+  event ProposalDevelopmentStateReset(uint256 proposalId);
+
+  /**
+   * @dev Thrown when the current state of a proposal is not the expected state for an operation.
+   */
+  error GovernorUnexpectedProposalState(
+    uint256 proposalId,
+    GovernorTypesV10.ProposalState current,
+    bytes32 expectedStates
+  );
+
+  /**
+   * @dev Thrown when a user is not authorized to perform an action.
+   */
+  error UnauthorizedAccess(address user);
+
+  /**
+   * @dev Thrown when the round for proposal start is invalid.
+   */
+  error GovernorInvalidStartRound(uint256 roundId);
+
+  /**
+   * @dev Thrown when a queue operation is not implemented.
+   */
+  error GovernorQueueNotImplemented();
+
+  /**
+   * @dev Thrown when there is an empty proposal or a mismatch between parameters length for a proposal call.
+   */
+  error GovernorInvalidProposalLength(uint256 targets, uint256 calldatas, uint256 values);
+
+  /**
+   * @dev Thrown when the proposer is not allowed to create a proposal.
+   */
+  error GovernorRestrictedProposer(address proposer);
+
+  /**
+   * @dev Thrown when the proposal type is invalid.
+   */
+  error GovernorInvalidProposalType(GovernorTypesV10.ProposalType proposalType);
+
+  /**
+   * @dev Thrown when the proposer does not fit the requirement (GM weight ATM)
+   */
+  error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
+
+  /**
+   * @dev Thrown when a proposal is not allowed to perform a specific action.
+   * Some actions are restricted to Standard proposals only, others to Grant proposals only.
+   * eg. Executable proposals cannot be marked as in development if not executed yet but Succeeded.
+   */
+  error GovernorRestrictedProposal(uint256 proposalId, GovernorTypesV10.ProposalType proposalType);
+
+  /** ------------------ GETTERS ------------------ **/
+
+  /**
+   * @notice Returns the hash of a proposal.
+   * @dev Hashes the proposal parameters to produce a unique proposal id.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param descriptionHash The hash of the proposal description.
+   * @return The proposal id.
+   */
+  function hashProposal(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) internal pure returns (uint256) {
+    return uint256(keccak256(abi.encode(targets, values, calldatas, descriptionHash)));
+  }
+
+  /**
+   * @notice Returns the proposer of a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The address of the proposer.
+   */
+  function proposalProposer(
+    uint256 proposalId
+  ) internal view returns (address) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return $.proposals[proposalId].proposer;
+  }
+
+  /**
+   * @notice Returns the eta (estimated time of arrival) of a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The eta in seconds.
+   */
+  function proposalEta(
+    uint256 proposalId
+  ) internal view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return $.proposals[proposalId].etaSeconds;
+  }
+
+  /**
+   * @notice Returns the start round of a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The start round id.
+   */
+  function proposalStartRound(
+    uint256 proposalId
+  ) internal view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return $.proposals[proposalId].roundIdVoteStart;
+  }
+
+  /**
+   * @notice Returns the snapshot block of a proposal.
+   * @dev Determines the block number at which the proposal was snapshot.
+   * @param proposalId The id of the proposal.
+   * @return The snapshot block number.
+   */
+  function proposalSnapshot(
+    uint256 proposalId
+  ) external view returns (uint256) {
+    return _proposalSnapshot(proposalId);
+  }
+
+  /**
+   * @notice Returns the deadline block of a proposal.
+   * @dev Determines the block number at which the proposal will be considered expired.
+   * @param proposalId The id of the proposal.
+   * @return The deadline block number.
+   */
+  function proposalDeadline(
+    uint256 proposalId
+  ) external view returns (uint256) {
+    return _proposalDeadline(proposalId);
+  }
+
+  /**
+   * @notice Returns whether a proposal can start in the next round.
+   * @return True if the proposal can start in the next round, false otherwise.
+   */
+  function canProposalStartInNextRound() external view returns (bool) {
+    return _canProposalStartInNextRound();
+  }
+
+  /**
+   * @notice Returns the total votes for a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The total votes for the proposal.
+   */
+  function getProposalTotalVotes(
+    uint256 proposalId
+  ) internal view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return $.proposalTotalVotes[proposalId];
+  }
+
+  /**
+   * @notice Returns the timelock id of a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The timelock id of the proposal.
+   */
+  function getTimelockId(
+    uint256 proposalId
+  ) internal view returns (bytes32) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return $.timelockIds[proposalId];
+  }
+
+  /**
+   * @notice Returns the proposal type of a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The proposal type.
+   */
+  function proposalType(
+    uint256 proposalId
+  ) external view returns (uint8) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return uint8($.proposalType[proposalId]);
+  }
+
+  /**
+   * @notice Returns proposal IDs that are currently active.
+   * @dev Iterates proposals registered for the current round and filters by Active state.
+   *      Bounded by proposals-per-round (0-3 in practice).
+   */
+  function getActiveProposals() external view returns (uint256[] memory) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
+    uint256[] storage roundProposals = $.proposalsForRound[currentRoundId];
+    uint256 len = roundProposals.length;
+    uint256[] memory activeProposalIds = new uint256[](len);
+    uint256 activeCount;
+
+    for (uint256 i; i < len; i++) {
+      uint256 proposalId = roundProposals[i];
+      if (GovernorStateLogicV10._state(proposalId) == GovernorTypesV10.ProposalState.Active) {
+        activeProposalIds[activeCount] = proposalId;
+        activeCount++;
+      }
+    }
+
+    uint256[] memory trimmed = new uint256[](activeCount);
+    for (uint256 i; i < activeCount; i++) {
+      trimmed[i] = activeProposalIds[i];
+    }
+
+    return trimmed;
+  }
+
+  /** ------------------ SETTERS ------------------ **/
+
+  /**
+   * @notice Proposes a new governance action.
+   * @dev Creates a new proposal and validates the proposal parameters.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param description The description of the proposal.
+   * @param startRoundId The round in which the proposal should be active.
+   * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @return The proposal id.
+   */
+  function propose(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount
+  ) external returns (uint256) {
+    address proposer = msg.sender;
+
+    uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+
+    validateProposeParams(
+      proposer,
+      startRoundId,
+      description,
+      targets,
+      values,
+      calldatas,
+      proposalId,
+      GovernorTypesV10.ProposalType.Standard
+    );
+
+    return
+      _propose(
+        proposer,
+        proposalId,
+        targets,
+        values,
+        calldatas,
+        description,
+        startRoundId,
+        depositAmount,
+        GovernorTypesV10.ProposalType.Standard
+      );
+  }
+
+  /**
+   * @notice Proposes a new grant proposal.
+   * @dev Creates a new proposal and validates the proposal parameters.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param description The description of the proposal.
+   * @param startRoundId The round in which the proposal should be active.
+   * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param grantsReceiver The address of the grants receiver
+   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones ipfs hash
+   * @return The proposal id.
+   */
+  function proposeGrant(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    address grantsReceiver,
+    string memory milestonesDetailsMetadataURI
+  ) external returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+
+    validateProposeParams(
+      msg.sender, //Proposer
+      startRoundId,
+      description,
+      targets,
+      values,
+      calldatas,
+      proposalId,
+      GovernorTypesV10.ProposalType.Grant
+    );
+
+    //Instantiate the grants manager contract inline to avoid stack too deep errors
+    IGrantsManager($.grantsManager).createMilestones(
+      milestonesDetailsMetadataURI,
+      proposalId,
+      msg.sender, //Proposer
+      grantsReceiver,
+      calldatas
+    );
+
+    return
+      _propose(
+        msg.sender, //Proposer
+        proposalId,
+        targets,
+        values,
+        calldatas,
+        description,
+        startRoundId,
+        depositAmount,
+        GovernorTypesV10.ProposalType.Grant
+      );
+  }
+
+  /**
+   * @dev Function to know if a proposal is executable or not.
+   * If the proposal was creted without any targets, values, or calldatas, it is not executable.
+   * to check if the proposal is executable.
+   *
+   * @param proposalId The id of the proposal
+   */
+  function proposalNeedsQueuing(
+    uint256 proposalId
+  ) external view returns (bool) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorTypesV10.ProposalCore storage proposal = $.proposals[proposalId];
+    if (proposal.roundIdVoteStart == 0) {
+      return false;
+    }
+
+    if (proposal.isExecutable) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * @notice Queues a proposal for execution.
+   * @dev Queues the proposal in the timelock.
+   * @param contractAddress The address of the calling contract.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param descriptionHash The hash of the proposal description.
+   * @return The proposal id.
+   */
+  function queue(
+    address contractAddress, // Address of the calling contract
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) external returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
+
+    GovernorStateLogicV10.validateStateBitmap(
+      proposalId,
+      GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Succeeded)
+    );
+
+    uint48 etaSeconds = _queueOperations(
+      contractAddress,
+      proposalId,
+      targets,
+      values,
+      calldatas,
+      descriptionHash
+    );
+
+    if (etaSeconds != 0) {
+      $.proposals[proposalId].etaSeconds = etaSeconds;
+      emit ProposalQueued(proposalId, etaSeconds);
+    } else {
+      revert GovernorQueueNotImplemented();
+    }
+
+    return proposalId;
+  }
+
+  /**
+   * @notice Executes a queued proposal.
+   * @dev Executes the proposal in the timelock.
+   * @param contractAddress The address of the calling contract.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param descriptionHash The hash of the proposal description.
+   * @return The proposal id.
+   */
+  function execute(
+    address contractAddress, // Address of the calling contract
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) external returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
+
+    GovernorStateLogicV10.validateStateBitmap(
+      proposalId,
+      GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Succeeded) |
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Queued)
+    );
+
+    // mark as executed before calls to avoid reentrancy
+    $.proposals[proposalId].executed = true;
+
+    // before execute: register governance call in queue.
+    if (GovernorGovernanceLogicV10.executor() != contractAddress) {
+      for (uint256 i; i < targets.length; ++i) {
+        if (targets[i] == address(this)) {
+          $.governanceCall.pushBack(keccak256(calldatas[i]));
+        }
+      }
+    }
+
+    _executeOperations(contractAddress, proposalId, targets, values, calldatas, descriptionHash);
+
+    // after execute: cleanup governance call queue.
+    if (GovernorGovernanceLogicV10.executor() != contractAddress && !$.governanceCall.empty()) {
+      $.governanceCall.clear();
+    }
+
+    emit ProposalExecuted(proposalId);
+
+    return proposalId;
+  }
+
+  /**
+   * @notice Cancels a proposal.
+   * @dev Cancels a proposal in any state other than Canceled or Executed.
+   * @param account The account canceling the proposal.
+   * @param admin Whether the account has admin role.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param descriptionHash The hash of the proposal description.
+   * @param reason The reason for canceling the proposal.
+   * @return The proposal id.
+   */
+  function cancel(
+    address account,
+    bool admin,
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash,
+    string memory reason
+  ) external returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
+
+    if (account != proposalProposer(proposalId) && !admin) {
+      revert UnauthorizedAccess(account);
+    }
+
+    GovernorStateLogicV10.validateStateBitmap(
+      proposalId,
+      GovernorStateLogicV10.ALL_PROPOSAL_STATES_BITMAP ^
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Canceled) ^
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Executed) ^
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.InDevelopment) ^
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Completed) ^
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.DepositNotMet) ^
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Defeated)
+    );
+
+    if (account == proposalProposer(proposalId)) {
+      require(
+        GovernorStateLogicV10._state(proposalId) == GovernorTypesV10.ProposalState.Pending,
+        "Governor: proposal not pending"
+      );
+    }
+
+    bytes32 timelockId = $.timelockIds[proposalId];
+    if (timelockId != 0) {
+      // cancel
+      $.timelock.cancel(timelockId);
+      // cleanup
+      delete $.timelockIds[proposalId];
+    }
+
+    return _cancel(proposalId, account, reason);
+  }
+
+  /**
+   * @notice Mark a proposal as in development
+   * @param proposalId The id of the proposal.
+   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
+   * - Only Standard proposals are allowed here.
+   * - Can only mark as in development if proposal is executed or succeeded
+   * - If the proposal is executable and the state is succeeded, it cannot be marked as in development
+   * - Otherwise could skip the queue + execution steps
+   * - The proposal development state is set to InDevelopment
+   * - The event ProposalInDevelopment is emitted
+   */
+  function markAsInDevelopment(uint256 proposalId) external {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorTypesV10.ProposalType proposalType = $.proposalType[proposalId];
+    GovernorTypesV10.ProposalCore storage proposal = $.proposals[proposalId];
+
+    // Only Standard proposals are allowed here.
+    // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
+    if (proposalType != GovernorTypesV10.ProposalType.Standard) {
+      revert GovernorRestrictedProposal(proposalId, proposalType);
+    }
+
+    // Can only mark as in development if proposal is executed or succeeded
+    GovernorStateLogicV10.validateStateBitmap(
+      proposalId,
+      GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Executed) |
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Succeeded)
+    );
+    if (proposal.isExecutable && GovernorStateLogicV10._state(proposalId) == GovernorTypesV10.ProposalState.Succeeded) {
+      revert GovernorRestrictedProposal(proposalId, proposalType);
+    }
+
+    $.proposalDevelopmentState[proposalId] = GovernorTypesV10.ProposalDevelopmentState.InDevelopment;
+    //Emit event
+    emit ProposalInDevelopment(proposalId);
+  }
+
+  /**
+   * @notice Mark a proposal as completed
+   * @param proposalId The id of the proposal.
+   * @dev This should be only callable by authorized wallet that has the PROPOSAL_STATE_MANAGER_ROLE role
+   * - Only Standard proposals are allowed here.
+   * - Can only mark as completed if proposal is in development
+   * - The proposal development state is set to Completed
+   * - The event ProposalCompleted is emitted
+   */
+  function markAsCompleted(uint256 proposalId) external {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorTypesV10.ProposalType proposalType = $.proposalType[proposalId];
+
+    // Only Standard proposals are allowed here.
+    // Proposals created before v7 (when proposalType mapping was introduced) will default to Standard.
+    if (proposalType != GovernorTypesV10.ProposalType.Standard) {
+      revert GovernorRestrictedProposal(proposalId, proposalType);
+    }
+
+    // Can only mark as completed if proposal is in development
+    GovernorStateLogicV10.validateStateBitmap(
+      proposalId,
+      GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.InDevelopment)
+    );
+    $.proposalDevelopmentState[proposalId] = GovernorTypesV10.ProposalDevelopmentState.Completed;
+    //Emit event
+    emit ProposalCompleted(proposalId);
+  }
+
+  /**
+   * @notice Reset the development state of a proposal back to pending development
+   * @param proposalId The id of the proposal
+   * @dev This should reset the enum state back to the original one,
+   * since pending development is not tracked in {GovernorStateLogicV10._state} condition
+   */
+  function resetDevelopmentState(uint256 proposalId) external {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorStateLogicV10.validateStateBitmap(
+      proposalId,
+      GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.InDevelopment) |
+        GovernorStateLogicV10.encodeStateBitmap(GovernorTypesV10.ProposalState.Completed)
+    );
+    $.proposalDevelopmentState[proposalId] = GovernorTypesV10.ProposalDevelopmentState.PendingDevelopment;
+    //Emit event
+    emit ProposalDevelopmentStateReset(proposalId);
+  }
+
+  /** ------------------ INTERNAL FUNCTIONS ------------------ **/
+
+  /**
+   * @dev Internal function to propose a new governance action.
+   * @param proposer The address of the proposer.
+   * @param proposalId The id of the proposal.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param description The description of the proposal.
+   * @param startRoundId The round in which the proposal should be active.
+   * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param proposalTypeValue The type of the proposal.
+   * @return The proposal id.
+   */
+  function _propose(
+    address proposer,
+    uint256 proposalId,
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) private returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 depositThresholdAmount = GovernorDepositLogicV10._depositThresholdByProposalType(proposalTypeValue);
+    uint32 votingPeriod = SafeCast.toUint32($.xAllocationVoting.votingPeriod());
+    bool isExecutable = targets.length > 0;
+
+    _validateProposer(proposer, proposalTypeValue);
+
+    _setProposal(
+      proposalId,
+      proposer,
+      votingPeriod,
+      startRoundId,
+      isExecutable,
+      depositAmount,
+      depositThresholdAmount,
+      proposalTypeValue
+    );
+
+    if (depositAmount > 0) {
+      GovernorDepositLogicV10.depositFunds(depositAmount, proposer, proposalId);
+    }
+
+    _emitProposalCreatedEvents(
+      proposer,
+      proposalId,
+      targets,
+      values,
+      calldatas,
+      description,
+      startRoundId,
+      depositThresholdAmount,
+      proposalTypeValue
+    );
+
+    return proposalId;
+  }
+
+  /**
+   * @dev Internal function to emit the proposal created events.
+   * @param proposer The address of the proposer.
+   * @param proposalId The id of the proposal.
+   * @param targets The addresses of the contracts to call.
+   */
+  function _emitProposalCreatedEvents(
+    address proposer,
+    uint256 proposalId,
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositThresholdAmount,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) private {
+    // Emit original event for backward compatibility
+    emit ProposalCreated(
+      proposalId,
+      proposer,
+      targets,
+      values,
+      new string[](targets.length),
+      calldatas,
+      description,
+      startRoundId,
+      depositThresholdAmount
+    );
+
+    // Emit event just for the proposal type
+    emit ProposalCreatedWithType(proposalId, proposalTypeValue);
+  }
+
+  /**
+   * @dev Internal function to validate the parameters of a proposal.
+   * @param proposer The address of the proposer.
+   * @param startRoundId The round in which the proposal should be active.
+   * @param description The description of the proposal.si
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param proposalId The id of the proposal.
+   */
+  function validateProposeParams(
+    address proposer,
+    uint256 startRoundId,
+    string memory description,
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    uint256 proposalId,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) private view {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    //proposal type must be valid
+    if (!isValidProposalType(proposalTypeValue)) {
+      revert GovernorInvalidProposalType(proposalTypeValue);
+    }
+
+    // round must be in the future
+    if (startRoundId <= $.xAllocationVoting.currentRoundId()) {
+      revert GovernorInvalidStartRound(startRoundId);
+    }
+
+    // only do this check if user wants to start proposal in the next round
+    if (startRoundId == $.xAllocationVoting.currentRoundId() + 1) {
+      if (!_canProposalStartInNextRound()) {
+        revert GovernorInvalidStartRound(startRoundId);
+      }
+    }
+    // check description restriction
+    if (proposalTypeValue == GovernorTypesV10.ProposalType.Standard) {
+      if (!isValidDescriptionForProposer(proposer, description)) {
+        revert GovernorRestrictedProposer(proposer);
+      }
+    }
+
+    if (targets.length != values.length || targets.length != calldatas.length) {
+      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+    }
+
+    if ($.proposals[proposalId].roundIdVoteStart != 0) {
+      // Proposal already exists
+      revert GovernorUnexpectedProposalState(proposalId, GovernorStateLogicV10._state(proposalId), bytes32(0));
+    }
+
+    GovernorFunctionRestrictionsLogicV10.checkFunctionsRestriction(targets, calldatas);
+  }
+
+  /**
+   * @dev Internal function to set the data of a proposal in storage.
+   * @param proposalId The id of the proposal.
+   * @param proposer The address of the proposer.
+   * @param voteDuration The duration of the vote.
+   * @param roundIdVoteStart The round in which the proposal should be active.
+   * @param isExecutable Whether the proposal is executable.
+   * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param proposalDepositThreshold The deposit threshold for the proposal.
+   * @param proposalTypeValue The type of the proposal.
+   */
+  function _setProposal(
+    uint256 proposalId,
+    address proposer,
+    uint32 voteDuration,
+    uint256 roundIdVoteStart,
+    bool isExecutable,
+    uint256 depositAmount,
+    uint256 proposalDepositThreshold,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) private {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorTypesV10.ProposalCore storage proposal = $.proposals[proposalId];
+
+    proposal.proposer = proposer;
+    proposal.roundIdVoteStart = roundIdVoteStart;
+    proposal.voteDuration = voteDuration;
+    proposal.isExecutable = isExecutable;
+    proposal.depositAmount = depositAmount;
+    proposal.depositThreshold = proposalDepositThreshold;
+    // set the proposal type
+    $.proposalType[proposalId] = proposalTypeValue;
+    $.proposalsForRound[roundIdVoteStart].push(proposalId);
+  }
+
+  /**
+   * @dev Internal function to validate the proposer.
+   * @param proposer The address of the proposer.
+   * @param proposalTypeValue The type of the proposal.
+   */
+  function _validateProposer(
+    address proposer,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) private view {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 requiredWeight = $.requiredGMLevelByProposalType[proposalTypeValue];
+    uint256 level = $.galaxyMember.levelOf($.galaxyMember.getSelectedTokenId(proposer)); // 1 for earth
+    if (level < requiredWeight) {
+      revert GovernorInvalidProposer(proposer, requiredWeight);
+    }
+  }
+
+  /**
+   * @dev Internal function to execute operations of a proposal.
+   * @param contractAddress The address of the calling contract.
+   * @param proposalId The id of the proposal.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param descriptionHash The hash of the proposal description.
+   */
+  function _executeOperations(
+    address contractAddress, // Address of the calling contract
+    uint256 proposalId,
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) private {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    // execute transfer first
+    $.timelock.executeBatch{ value: msg.value }(
+      targets,
+      values,
+      calldatas,
+      0,
+      GovernorGovernanceLogicV10.timelockSalt(descriptionHash, contractAddress)
+    );
+
+    // cleanup for refund
+    delete $.timelockIds[proposalId];
+  }
+
+  /**
+   * @dev Internal function to queue operations of a proposal in the timelock.
+   * @param contractAddress The address of the calling contract.
+   * @param proposalId The id of the proposal.
+   * @param targets The addresses of the contracts to call.
+   * @param values The values to send to the contracts.
+   * @param calldatas The function signatures and arguments.
+   * @param descriptionHash The hash of the proposal description.
+   * @return The eta (estimated time of arrival) in seconds.
+   */
+  function _queueOperations(
+    address contractAddress, // Address of the calling contract
+    uint256 proposalId,
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    bytes32 descriptionHash
+  ) private returns (uint48) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 delay = $.timelock.getMinDelay();
+
+    bytes32 salt = GovernorGovernanceLogicV10.timelockSalt(descriptionHash, contractAddress);
+    $.timelockIds[proposalId] = $.timelock.hashOperationBatch(targets, values, calldatas, 0, salt);
+    $.timelock.scheduleBatch(targets, values, calldatas, 0, salt, delay);
+
+    return SafeCast.toUint48(block.timestamp + delay);
+  }
+
+  /**
+   * @dev Internal function to cancel a proposal.
+   * @param proposalId The id of the proposal.
+   * @param canceler The address of the account canceling the proposal.
+   * @param reason The reason for canceling the proposal.
+   * @return The proposal id.
+   */
+  function _cancel(
+    uint256 proposalId,
+    address canceler,
+    string memory reason
+  ) private returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    $.proposals[proposalId].canceled = true;
+    emit ProposalCanceled(proposalId);
+    emit ProposalCanceledWithReason(proposalId, canceler, reason);
+
+    return proposalId;
+  }
+
+  /**
+   * @dev Internal function to validate if a proposal can start in the next round.
+   * @return True if the proposal can start in the next round, false otherwise.
+   */
+  function _canProposalStartInNextRound(
+  ) internal view returns (bool) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 currentRoundId = $.xAllocationVoting.currentRoundId();
+    uint256 currentRoundDeadline = $.xAllocationVoting.roundDeadline(currentRoundId);
+    uint48 currentBlock = GovernorClockLogicV10.clock();
+
+    // this could happen if the round ended and the next one not started yet
+    if (currentRoundDeadline <= currentBlock) {
+      return false;
+    }
+
+    // if between now and the start of the new round is less then the min delay, revert
+    if ($.minVotingDelay > currentRoundDeadline - currentBlock) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * @dev Internal function to get the snapshot block of a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The snapshot block number.
+   */
+  function _proposalSnapshot(
+    uint256 proposalId
+  ) internal view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    // round when proposal should be active is already started
+    if ($.xAllocationVoting.currentRoundId() >= $.proposals[proposalId].roundIdVoteStart) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+      return $.xAllocationVoting.roundSnapshot($.proposals[proposalId].roundIdVoteStart);
+    }
+
+    uint256 amountOfRoundsLeft = $.proposals[proposalId].roundIdVoteStart - $.xAllocationVoting.currentRoundId();
+    uint256 roundsDurationLeft = $.xAllocationVoting.votingPeriod() * (amountOfRoundsLeft - 1); // -1 because if only 1 round left we want this to be 0
+    uint256 currentRoundDeadline = $.xAllocationVoting.currentRoundDeadline();
+
+    // if current round ended and a new one did not start yet
+    if (currentRoundDeadline <= GovernorClockLogicV10.clock()) {
+      currentRoundDeadline = GovernorClockLogicV10.clock();
+    }
+
+    return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
+  }
+
+  /**
+   * @dev Internal function to get the deadline block of a proposal.
+   * @param proposalId The id of the proposal.
+   * @return The deadline block number.
+   */
+  function _proposalDeadline(
+    uint256 proposalId
+  ) internal view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    // if round is active or already occured proposal end block is the block when round ends
+    if ($.xAllocationVoting.currentRoundId() >= $.proposals[proposalId].roundIdVoteStart) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+      return $.xAllocationVoting.roundDeadline($.proposals[proposalId].roundIdVoteStart);
+    }
+
+    // if we call this function before the round starts, it will return 0, so we need to estimate the end block
+    return _proposalSnapshot(proposalId) + $.xAllocationVoting.votingPeriod();
+  }
+
+  /** ------------------ PRIVATE FUNCTIONS ------------------ **/
+
+  /**
+   * @dev Checks if the description string ends with a proposer's address suffix.
+   * @param proposer The address of the proposer.
+   * @param description The description of the proposal.
+   * @return True if the suffix matches the proposer's address or if there is no suffix, false otherwise.
+   */
+  function isValidDescriptionForProposer(address proposer, string memory description) private pure returns (bool) {
+    uint256 len = bytes(description).length;
+
+    // Length is too short to contain a valid proposer suffix
+    if (len < 52) {
+      return true;
+    }
+
+    // Extract what would be the `#proposer=0x` marker beginning the suffix
+    bytes12 marker;
+    assembly {
+      // Start of the string contents in memory = description + 32
+      // First character of the marker = len - 52
+      // We read the memory word starting at the first character of the marker:
+      // (description + 32) + (len - 52) = description + (len - 20)
+      marker := mload(add(description, sub(len, 20)))
+    }
+
+    // If the marker is not found, there is no proposer suffix to check
+    if (marker != bytes12("#proposer=0x")) {
+      return true;
+    }
+
+    // Parse the 40 characters following the marker as uint160
+    uint160 recovered;
+    for (uint256 i = len - 40; i < len; ++i) {
+      (bool isHex, uint8 value) = tryHexToUint(bytes(description)[i]);
+      // If any of the characters is not a hex digit, ignore the suffix entirely
+      if (!isHex) {
+        return true;
+      }
+      recovered = (recovered << 4) | value;
+    }
+
+    return recovered == uint160(proposer);
+  }
+
+  /**
+   * @dev Checks if the proposal type is valid.
+   * @param proposalTypeValue The type of the proposal.
+   * @return True if the proposal type is valid, false otherwise.
+   */
+  function isValidProposalType(GovernorTypesV10.ProposalType proposalTypeValue) internal pure returns (bool) {
+    return
+      proposalTypeValue == GovernorTypesV10.ProposalType.Standard || proposalTypeValue == GovernorTypesV10.ProposalType.Grant;
+  }
+
+  /**
+   * @dev Tries to parse a character from a string as a hex value.
+   * @param char The character to parse.
+   * @return isHex True if the character is a valid hex digit, false otherwise.
+   * @return value The parsed hex value.
+   */
+  function tryHexToUint(bytes1 char) private pure returns (bool, uint8) {
+    uint8 c = uint8(char);
+    unchecked {
+      // Case 0-9
+      if (47 < c && c < 58) {
+        return (true, c - 48);
+      }
+      // Case A-F
+      else if (64 < c && c < 71) {
+        return (true, c - 55);
+      }
+      // Case a-f
+      else if (96 < c && c < 103) {
+        return (true, c - 87);
+      }
+      // Else: not a hex char
+      else {
+        return (false, 0);
+      }
+    }
+  }
+
+}

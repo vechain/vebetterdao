@@ -25,6 +25,7 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard4i**: Governance - Grants Manager V2 Upgrade
 - **shard4j**: Governance - Grants Manager V2 Compatibility
 - **shard4k**: Governance - Grants Manager V3 Metadata URI Access
+- **shard4z**: Governance - Community Execution Framework V11
 - **shard6**: TimeLock
 - **shard7**: Treasury
 - **shard7b**: Dynamic Base Allocation Pool

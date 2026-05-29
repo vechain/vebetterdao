@@ -442,6 +442,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
           description,
           currentRoundId + 1n,
           0,
+          0,
         )
 
       const proposalId = await getProposalIdFromTx(tx)
@@ -1322,6 +1323,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
             description,
             currentRoundId + 1n,
             0,
+            0,
           )
 
         const proposalId = await getProposalIdFromTx(tx)
@@ -1410,6 +1412,7 @@ describe("X-Allocation Voting - @shard14-core", function () {
             [encodedFunctionCall],
             description,
             currentRoundId + 1n,
+            0,
             0,
           )
 

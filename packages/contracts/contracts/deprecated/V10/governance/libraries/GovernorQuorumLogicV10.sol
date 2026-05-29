@@ -1,0 +1,247 @@
+// SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
+pragma solidity 0.8.20;
+
+import { GovernorStorageTypesV10 } from "./GovernorStorageTypesV10.sol";
+import { GovernorClockLogicV10 } from "./GovernorClockLogicV10.sol";
+import { GovernorVotesLogicV10 } from "./GovernorVotesLogicV10.sol";
+import { GovernorProposalLogicV10 } from "./GovernorProposalLogicV10.sol";
+import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { GovernorTypesV10 } from "./GovernorTypesV10.sol";
+
+/// @title GovernorQuorumLogicV10
+/// @notice Library for managing quorum numerators using checkpointed data structures.
+library GovernorQuorumLogicV10 {
+  using Checkpoints for Checkpoints.Trace208;
+
+  /// @notice Error that is thrown when the new quorum numerator exceeds the denominator.
+  /// @param quorumNumerator The attempted new numerator that failed the update.
+  /// @param quorumDenominator The denominator against which the numerator was compared.
+  error GovernorInvalidQuorumFraction(uint256 quorumNumerator, uint256 quorumDenominator);
+
+  /// @notice Emitted when the quorum numerator is updated.
+  /// @param oldNumerator The numerator before the update.
+  /// @param newNumerator The numerator after the update.
+  event QuorumNumeratorUpdated(uint256 oldNumerator, uint256 newNumerator);
+
+  /// @notice Emitted when the quorum numerator for a specific proposal type is updated.
+  /// @param oldNumerator The numerator before the update.
+  /// @param newNumerator The numerator after the update.
+  /// @param proposalType The type of proposal.
+  event QuorumNumeratorUpdatedByType(
+    uint256 oldNumerator,
+    uint256 newNumerator,
+    GovernorTypesV10.ProposalType proposalType
+  );
+  /** ------------------ GETTERS ------------------ **/
+
+  /// @notice Retrieves the quorum denominator, which is a constant in this implementation.
+  /// @return The quorum denominator (constant value of 100).
+  function quorumDenominator() internal pure returns (uint256) {
+    return 100;
+  }
+
+  /// @notice Retrieves the quorum numerator at a specific timepoint using checkpoint data.
+  /// @param timepoint The specific timepoint for which to fetch the numerator.
+  /// @return The quorum numerator at the given timepoint.
+  function quorumNumerator(
+    uint256 timepoint
+  ) public view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorTypesV10.ProposalType proposalType = GovernorTypesV10.ProposalType.Standard;
+    uint256 length = $.proposalTypeQuorum[proposalType]._checkpoints.length;
+
+    // Optimistic search, check the latest checkpoint
+    Checkpoints.Checkpoint208 storage latest = $.proposalTypeQuorum[proposalType]._checkpoints[length - 1];
+    uint48 latestKey = latest._key;
+    uint208 latestValue = latest._value;
+    if (latestKey <= timepoint) {
+      return latestValue;
+    }
+
+    // Otherwise, do the binary search
+    return $.proposalTypeQuorum[proposalType].upperLookupRecent(SafeCast.toUint48(timepoint));
+  }
+  /// @notice Retrieves the quorum numerator at a specific timepoint using checkpoint data.
+  /// @param timepoint The specific timepoint for which to fetch the numerator.
+  /// @return The quorum numerator at the given timepoint.
+  function quorumNumeratorByProposalType(
+    uint256 timepoint,
+    uint8 proposalTypeValue
+  ) public view returns (uint256) {
+    return _quorumNumeratorByProposalType(timepoint, GovernorTypesV10.ProposalType(proposalTypeValue));
+  }
+
+  /// @notice Retrieves the latest quorum numerator using the GovernorClockLogicV10 library.
+  /// @return The latest quorum numerator.
+  function quorumNumerator() public view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorTypesV10.ProposalType proposalType = GovernorTypesV10.ProposalType.Standard;
+    return $.proposalTypeQuorum[proposalType].latest();
+  }
+
+  /**
+   * @notice Retrieves the latest quorum numerator for a specific proposal type.
+   * @param proposalTypeValue The type of proposal.
+   * @return The latest quorum numerator for the proposal type.
+   */
+  function quorumNumeratorByProposalType(
+    uint8 proposalTypeValue
+  ) public view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return $.proposalTypeQuorum[GovernorTypesV10.ProposalType(proposalTypeValue)].latest();
+  }
+
+  /**
+   * @notice Checks if the quorum has been reached for a proposal.
+   * @param proposalId The ID of the proposal.
+   * @return True if the quorum has been reached, false otherwise.
+   */
+  function isQuorumReached(
+    uint256 proposalId
+  ) external view returns (bool) {
+    return quorumReached(proposalId);
+  }
+
+  /**
+   * @notice Returns the quorum for a specific timepoint.
+   * @param timepoint The specific timepoint.
+   * @return The quorum at the given timepoint.
+   */
+  function quorum(uint256 timepoint) public view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return ($.vot3.getPastTotalSupply(timepoint) * quorumNumerator(timepoint)) / quorumDenominator();
+  }
+  /**
+   * @notice Returns the quorum for a specific timepoint and proposal type.
+   * @param timepoint The specific timepoint.
+   * @param proposalTypeValue The type of proposal.
+   * @return The quorum at the given timepoint and proposal type.
+   */
+  function quorumByProposalType(
+    uint256 timepoint,
+    uint8 proposalTypeValue
+  ) public view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    return
+      ($.vot3.getPastTotalSupply(timepoint) * quorumNumeratorByProposalType(timepoint, proposalTypeValue)) /
+      quorumDenominator();
+  }
+
+  /** ------------------ SETTERS ------------------ **/
+
+  /**
+   * @notice Updates the quorum numerator to a new value at a specified time, emitting an event upon success.
+   * @dev This function should only be called from governance actions where numerators need updating.
+   * @dev New numerator must be smaller or equal to the denominator.
+   * @param newQuorumNumerator The new value for the quorum numerator.
+   */
+  function updateQuorumNumerator(
+    uint256 newQuorumNumerator
+  ) external {
+    _updateQuorumNumeratorByType(newQuorumNumerator, GovernorTypesV10.ProposalType.Standard);
+  }
+  /**
+   * @notice Updates the quorum numerator for a specific proposal type to a new value at a specified time, emitting an event upon success.
+   * @dev This function should only be called from governance actions where numerators need updating.
+   * @dev New numerator must be smaller or equal to the denominator.
+   * @param newQuorumNumerator The new value for the quorum numerator.
+   * @param proposalTypeValue The type of proposal.
+   */
+  function updateQuorumNumeratorByType(
+    uint256 newQuorumNumerator,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) external {
+    _updateQuorumNumeratorByType(newQuorumNumerator, proposalTypeValue);
+  }
+
+  /** ------------------ INTERNAL FUNCTIONS ------------------ **/
+
+  /**
+   * @dev Internal function to check if the quorum has been reached for a proposal.
+   * @param proposalId The ID of the proposal.
+   * @return True if the quorum has been reached, false otherwise.
+   */
+  function quorumReached(
+    uint256 proposalId
+  ) internal view returns (bool) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    GovernorTypesV10.ProposalType proposalType = $.proposalType[proposalId];
+
+    return
+      quorumByProposalType(GovernorProposalLogicV10._proposalSnapshot(proposalId), uint8(proposalType)) <=
+      $.proposalTotalVotes[proposalId];
+  }
+  /**
+   * @notice Internal function to retrieve the quorum numerator for a specific proposal type at a given timepoint.
+   * @param timepoint The specific timepoint for which to fetch the numerator.
+   * @param proposalTypeValue The type of proposal.
+   * @return The quorum numerator at the given timepoint for the specified proposal type.
+   */
+  function _quorumNumeratorByProposalType(
+    uint256 timepoint,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) internal view returns (uint256) {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 length = $.proposalTypeQuorum[proposalTypeValue]._checkpoints.length;
+
+    // Optimistic search, check the latest checkpoint
+    Checkpoints.Checkpoint208 storage latest = $.proposalTypeQuorum[proposalTypeValue]._checkpoints[length - 1];
+    uint48 latestKey = latest._key;
+    uint208 latestValue = latest._value;
+    if (latestKey <= timepoint) {
+      return latestValue;
+    }
+
+    // Otherwise, do the binary search
+    return $.proposalTypeQuorum[proposalTypeValue].upperLookupRecent(SafeCast.toUint48(timepoint));
+  }
+  /**
+   * @notice Internal function to update the quorum numerator for a specific proposal type.
+   * @dev This function should only be called from governance actions where numerators need updating.
+   * @dev New numerator must be smaller or equal to the denominator.
+   * @param newQuorumNumerator The new value for the quorum numerator.
+   * @param proposalTypeValue The type of proposal.
+   */
+  function _updateQuorumNumeratorByType(
+    uint256 newQuorumNumerator,
+    GovernorTypesV10.ProposalType proposalTypeValue
+  ) internal {
+    GovernorStorageTypesV10.GovernorStorage storage $ = GovernorStorageTypesV10.getGovernorStorage();
+    uint256 denominator = quorumDenominator();
+    uint256 oldQuorumNumerator = quorumNumeratorByProposalType(uint8(proposalTypeValue));
+
+    if (newQuorumNumerator > denominator) {
+      revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);
+    }
+
+    $.proposalTypeQuorum[proposalTypeValue].push(
+      GovernorClockLogicV10.clock(),
+      SafeCast.toUint208(newQuorumNumerator)
+    );
+    emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
+    emit QuorumNumeratorUpdatedByType(oldQuorumNumerator, newQuorumNumerator, proposalTypeValue);
+  }
+}

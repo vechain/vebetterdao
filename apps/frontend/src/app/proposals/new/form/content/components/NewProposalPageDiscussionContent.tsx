@@ -1,14 +1,32 @@
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Box, Button, Card, Field, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  Field,
+  HStack,
+  Heading,
+  Input,
+  InputGroup,
+  Link,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import rehypeSanitize from "rehype-sanitize"
 
+import { useTreasuryB3trTransferLimit } from "@/api/contracts/treasury/useTreasuryTransferLimit"
+import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants/AnalyticsEvents"
+import { useMainnetB3TRPrice } from "@/hooks/useMainnetB3TRPrice"
 
 import {
   updateMarkdownTemplatePlaceholders,
@@ -22,25 +40,47 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 type FormData = {
   markdownDescription: string
   metadataUri: string
+  maxBudget: string
 }
 export const NewProposalPageDiscussionContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
-  const { title, shortDescription, markdownDescription, actions, setData, metadataUri } = useProposalFormStore()
+  const { title, shortDescription, markdownDescription, actions, setData, metadataUri, maxBudget } =
+    useProposalFormStore()
   const { onMetadataUpload, metadataUploading: isMetadataUploading } = useUploadProposalMetadata()
-  const { control, formState, handleSubmit, setValue } = useForm<FormData>({
+  const { data: b3trUsdPrice } = useMainnetB3TRPrice()
+  // Treasury enforces a per-call B3TR cap on transferB3TR; claimPayout() would revert forever
+  // if maxBudget exceeds it, so the budget input is hard-capped here at creation time.
+  const { data: treasuryB3trLimit } = useTreasuryB3trTransferLimit()
+  const treasuryB3trLimitEther = useMemo(
+    () => (treasuryB3trLimit !== undefined ? ethers.formatEther(treasuryB3trLimit as unknown as bigint) : undefined),
+    [treasuryB3trLimit],
+  )
+  const { control, formState, handleSubmit, setValue, watch } = useForm<FormData>({
     defaultValues: {
       markdownDescription,
       metadataUri,
+      maxBudget: maxBudget ?? "",
     },
   })
   const { errors } = formState
+  const maxBudgetValue = watch("maxBudget")
+  const maxBudgetUsd = useMemo(() => {
+    const n = Number(maxBudgetValue)
+    if (!Number.isFinite(n) || n <= 0) return undefined
+    const price = Number(b3trUsdPrice)
+    if (!Number.isFinite(price) || price <= 0) return undefined
+    return n * price
+  }, [maxBudgetValue, b3trUsdPrice])
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (!title || !shortDescription || !data.markdownDescription)
         return control.setError("markdownDescription", { message: "Missing data" })
-      setData({ markdownDescription: data.markdownDescription })
+      setData({
+        markdownDescription: data.markdownDescription,
+        maxBudget: data.maxBudget?.trim() || undefined,
+      })
       const metadataUri = await onMetadataUpload({
         title,
         shortDescription,
@@ -137,6 +177,98 @@ export const NewProposalPageDiscussionContent = () => {
               </Button>
             </Stack>
           </Field.Root>
+
+          <VStack gap={2} align="flex-start" w="full">
+            <Heading size={["sm", "md"]}>{t("Implementation Cost (B3TR)")}</Heading>
+            <Text textStyle="sm" color="gray.500">
+              {t(
+                "Specify the maximum amount of B3TR that can be paid from the Treasury for implementing this proposal.",
+              )}
+            </Text>
+            <Text textStyle="sm" color="gray.500">
+              {t(
+                "Once development begins, you will select a single payout address. Treasury funds, if approved, will be sent to that address, and the recipient will be responsible for distributing payments to contributors off-chain.",
+              )}
+            </Text>
+            <Text textStyle="sm" color="gray.500">
+              {t("Enter 0 if this proposal does not require funding.")}
+            </Text>
+
+            <Field.Root invalid={!!errors.maxBudget}>
+              <Controller
+                name="maxBudget"
+                control={control}
+                rules={{
+                  validate: value => {
+                    if (!value || value.trim() === "") return true
+                    const n = Number(value)
+                    if (!Number.isFinite(n) || n < 0) return t("Budget must be a non-negative number")
+                    if (treasuryB3trLimit !== undefined && treasuryB3trLimitEther !== undefined) {
+                      let parsed: bigint
+                      try {
+                        parsed = ethers.parseEther(value.trim())
+                      } catch {
+                        return t("Budget must be a non-negative number")
+                      }
+                      if (parsed > (treasuryB3trLimit as unknown as bigint)) {
+                        return t(
+                          "Budget exceeds Treasury's per-transfer B3TR limit ({{limit}} B3TR). The payout would be unclaimable.",
+                          { limit: humanNumber(treasuryB3trLimitEther) },
+                        )
+                      }
+                    }
+                    return true
+                  },
+                }}
+                render={({ field }) => (
+                  <InputGroup
+                    w="full"
+                    mt={4}
+                    startElement={<B3TRIcon boxSize={8} colorVariant="dark" />}
+                    startElementProps={{
+                      p: 1,
+                      pointerEvents: "none",
+                    }}
+                    endElement={
+                      maxBudgetUsd !== undefined ? (
+                        <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500">
+                          {`≈ $${maxBudgetUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                        </Heading>
+                      ) : undefined
+                    }>
+                    <Input
+                      data-testid="proposal-max-budget-input"
+                      type="number"
+                      min={0}
+                      step={1}
+                      placeholder="0"
+                      value={field.value}
+                      onChange={field.onChange}
+                      w="full"
+                      textStyle={["xl", "xl", "3xl"]}
+                    />
+                  </InputGroup>
+                )}
+              />
+              {errors.maxBudget ? (
+                <Field.ErrorText fontStyle="sm" color="red.500">
+                  {errors.maxBudget.message}
+                </Field.ErrorText>
+              ) : (
+                <Field.HelperText fontStyle="sm" color="gray.500">
+                  {t("Do not know how much this could cost? Head over to the")}{" "}
+                  <Link
+                    href="https://vechain.discourse.group/c/vebetterdao/47"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="underline">
+                    {t("Discourse forum")}
+                  </Link>{" "}
+                  {t("and chat with other community builders.")}
+                </Field.HelperText>
+              )}
+            </Field.Root>
+          </VStack>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
             <Button data-testid="go-back" variant="link" onClick={router.back} disabled={isMetadataUploading}>

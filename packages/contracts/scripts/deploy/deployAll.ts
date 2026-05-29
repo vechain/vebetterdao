@@ -107,6 +107,7 @@ export async function deployAll(config: ContractsConfig) {
     GovernorQuorumLogicLib,
     GovernorVotesLogicLib,
     GovernorStateLogicLib,
+    GovernorCommunityExecutionLogicLib,
     GovernorClockLogicLibV3,
     GovernorConfiguratorLibV3,
     GovernorFunctionRestrictionsLogicLibV3,
@@ -978,6 +979,7 @@ export async function deployAll(config: ContractsConfig) {
       "B3TRGovernorV7",
       "B3TRGovernorV8",
       "B3TRGovernorV9",
+      "B3TRGovernorV10",
       "B3TRGovernor",
     ],
     [
@@ -1023,9 +1025,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [], // v9
       [navigatorRegistryProxyAddress, await relayerRewardsPool.getAddress(), config.B3TR_GOVERNOR_SKIP_WINDOW_BLOCKS], // v10
+      [await treasury.getAddress(), 20], // v11: treasury + max contributors per proposal
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -1118,6 +1121,19 @@ export async function deployAll(config: ContractsConfig) {
           GovernorVotesLogicV9: await GovernorVotesLogicLib.getAddress(),
         },
         {
+          // V10 deprecated link slots: reuse latest library instances (compatible at the
+          // public-API level since V11 left every existing lib function shape intact).
+          GovernorClockLogicV10: await GovernorClockLogicLib.getAddress(),
+          GovernorConfiguratorV10: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV10: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV10: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV10: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV10: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV10: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV10: await GovernorVotesLogicLib.getAddress(),
+        },
+        {
+          // V11 (latest) link slots
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
           GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
           GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
@@ -1126,6 +1142,7 @@ export async function deployAll(config: ContractsConfig) {
           GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
           GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+          GovernorCommunityExecutionLogic: await GovernorCommunityExecutionLogicLib.getAddress(),
         },
       ],
       logOutput: true,
@@ -1333,6 +1350,7 @@ export async function deployAll(config: ContractsConfig) {
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      GovernorCommunityExecutionLogic: await GovernorCommunityExecutionLogicLib.getAddress(),
     },
     VeBetterPassport: {
       PassportChecksLogic: await PassportChecksLogic.getAddress(),
@@ -1416,6 +1434,11 @@ export async function deployAll(config: ContractsConfig) {
   const GOVERNANCE_ROLE = await treasury.GOVERNANCE_ROLE()
   await treasury.connect(deployer).grantRole(GOVERNANCE_ROLE, TEMP_ADMIN)
   console.log("Governance role granted to treasury contract admin")
+
+  // V11: grant Treasury.GOVERNANCE_ROLE to B3TRGovernor so claimPayout / claimAllPayouts
+  // can pull B3TR directly from Treasury after a proposal is marked Completed.
+  await treasury.connect(deployer).grantRole(GOVERNANCE_ROLE, await governor.getAddress())
+  console.log("Treasury GOVERNANCE_ROLE granted to B3TRGovernor (V11 Community Execution)")
 
   // Grant GrantsManager admin role to GrantsManager contract
   await governor.connect(deployer).grantRole(await governor.CONTRACTS_ADDRESS_MANAGER_ROLE(), deployer.address)

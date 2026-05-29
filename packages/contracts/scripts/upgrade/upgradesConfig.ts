@@ -21,7 +21,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Give ability to contract admins to call governance only functions",
@@ -33,6 +33,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v8: "Give ability to mark proposals as in development/completed",
       v9: "Give ability to provide a reason for proposal cancellation",
       v10: "Refactor to library architecture + governance intent multiplier + NavigatorRegistry + RelayerRewardsPool (initializeV10) + castNavigatorVote",
+      v11: "Community Execution Framework: per-proposal B3TR budget (proposeWithBudget), markAsInDevelopmentWithPayees (proposer or admin), updatePayees (admin), claimPayout/claimAllPayouts pulled from Treasury",
     },
   },
   XAllocationVoting: {

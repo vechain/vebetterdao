@@ -512,10 +512,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function hasVoted(uint256 proposalId, address account) external view returns (bool);
 
   /**
-   * @dev Create a new proposal. Specify the allocation round when vote should become active.
+   * @dev Create a new Standard proposal. Specify the allocation round when vote should become active.
    * The duration is specified by {IGovernor-votingPeriod}.
+   * `maxBudget` (V11) is the optional Community-Execution budget cap in B3TR wei — set to 0 for
+   * proposals without a developer payout flow.
    *
-   * Emits a {ProposalCreated} and {ProposalCreatedWithType} event.
+   * Emits a {ProposalCreated}, {ProposalCreatedWithType}, and (when maxBudget > 0) {ProposalBudgetSet} event.
    */
   function propose(
     address[] memory targets,
@@ -523,7 +525,8 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
-    uint256 depositAmount
+    uint256 depositAmount,
+    uint256 maxBudget
   ) external returns (uint256 proposalId);
 
   /**
@@ -728,4 +731,89 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice Returns currently active proposal IDs.
    */
   function getActiveProposals() external view returns (uint256[] memory);
+
+  // ------------------------------- Version 11 (Community Execution Framework) -------------------------------
+
+  // V11 errors re-declared on the interface so they appear in the contract ABI and can be
+  // matched by chai matchers / decoded by indexers. The GovernorRestrictedProposal error
+  // declared earlier in this interface (line ~173) is reused for non-Standard proposals.
+
+  /// @dev Caller is neither the proposal proposer nor a PROPOSAL_STATE_MANAGER_ROLE holder.
+  error UnauthorizedCommunityExecution(address caller, uint256 proposalId);
+
+  /// @dev No max budget was recorded for the proposal but a non-zero payee was provided.
+  error MissingProposalBudget(uint256 proposalId);
+
+  /// @dev Payee is the zero address while the proposal has a non-zero implementation cost.
+  error InvalidPayeeAddress();
+
+  /// @dev Contributors array is larger than maxContributorsPerProposal.
+  error TooManyContributors(uint256 provided, uint256 max);
+
+  /// @dev markAsInDevelopment was already called for this proposal.
+  error PayeesAlreadyFinalized(uint256 proposalId);
+
+  /// @dev The payout was already pulled from Treasury.
+  error PayoutAlreadyClaimed(uint256 proposalId);
+
+  /// @dev The proposal is not in a state where the budget can be paid out (missing payee or budget).
+  error NotReadyToClaim(uint256 proposalId);
+
+  /// @notice Emitted when an implementation-cost budget is recorded for a proposal.
+  event ProposalBudgetSet(uint256 indexed proposalId, uint256 maxBudget);
+
+  /// @notice Off-chain metadata registered alongside the payee when entering development
+  ///         or replaced via updateCommunityExecution before payout.
+  event ProposalInDevelopmentDetails(
+    uint256 indexed proposalId,
+    address indexed payee,
+    string description,
+    string implementationDiscussion
+  );
+
+  /// @notice Emitted when the contributor handle list is (re)set for a proposal.
+  event ProposalContributorsSet(uint256 indexed proposalId, string[] contributors);
+
+  /// @notice Emitted when the single registered payee pulls the implementation cost from Treasury.
+  event ProposalPayoutClaimed(uint256 indexed proposalId, address indexed payee, uint256 amount);
+
+  /// @notice Mark a proposal as InDevelopment and register the V11 payee + metadata.
+  function markAsInDevelopment(
+    uint256 proposalId,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
+  ) external;
+
+  /// @notice Update the payee / description / implementation-discussion / contributors of a
+  ///         proposal whose payout has not yet been claimed.
+  function updateCommunityExecution(
+    uint256 proposalId,
+    address payee,
+    string calldata description,
+    string calldata implementationDiscussion,
+    string[] calldata contributors
+  ) external;
+
+  /// @notice Pull the full implementation cost from Treasury to the registered payee. Permissionless.
+  function claimPayout(uint256 proposalId) external;
+
+  /// @notice The maximum implementation cost (B3TR wei) recorded for a proposal.
+  function getProposalBudget(uint256 proposalId) external view returns (uint256);
+
+  /// @notice The single registered payee for a proposal.
+  function getProposalPayee(uint256 proposalId) external view returns (address);
+
+  /// @notice True iff the payout has been pulled from Treasury.
+  function isProposalPaid(uint256 proposalId) external view returns (bool);
+
+  /// @notice The free-text description registered alongside the V11 payee.
+  function getProposalDescription(uint256 proposalId) external view returns (string memory);
+
+  /// @notice The implementation-discussion link for a proposal.
+  function getProposalImplementationDiscussion(uint256 proposalId) external view returns (string memory);
+
+  /// @notice The contributor handle list (github / twitter URLs etc.) for a proposal.
+  function getProposalContributors(uint256 proposalId) external view returns (string[] memory);
 }

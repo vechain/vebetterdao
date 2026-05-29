@@ -10,6 +10,7 @@ import {
   GovernorQuorumLogic,
   GovernorStateLogic,
   GovernorVotesLogic,
+  GovernorCommunityExecutionLogic,
   // ------------------- V1 ------------------- //
   GovernorClockLogicV1,
   GovernorConfiguratorV1,
@@ -97,6 +98,7 @@ export type GovernanceLatestLibraries = {
   GovernorVotesLogicLib: GovernorVotesLogic
   GovernorDepositLogicLib: GovernorDepositLogic
   GovernorStateLogicLib: GovernorStateLogic
+  GovernorCommunityExecutionLogicLib: GovernorCommunityExecutionLogic
 }
 
 export type GovernanceLibraries = GovernanceLatestLibraries & {
@@ -246,6 +248,17 @@ export async function governanceLibraries<T extends DeployGovernanceLibrariesArg
   await GovernorStateLogicLib.waitForDeployment()
   logOutput && console.log("GovernorStateLogic Library deployed")
 
+  // V11: Community Execution Framework library (per-proposal budget, payee registry, payout claims)
+  const GovernorCommunityExecutionLogic = await ethers.getContractFactory("GovernorCommunityExecutionLogic", {
+    libraries: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+    },
+  })
+  const GovernorCommunityExecutionLogicLib =
+    (await GovernorCommunityExecutionLogic.deploy()) as GovernorCommunityExecutionLogic
+  await GovernorCommunityExecutionLogicLib.waitForDeployment()
+  logOutput && console.log("GovernorCommunityExecutionLogic Library deployed")
+
   if (latestVersionOnly) {
     return {
       GovernorClockLogicLib,
@@ -257,6 +270,7 @@ export async function governanceLibraries<T extends DeployGovernanceLibrariesArg
       GovernorVotesLogicLib,
       GovernorDepositLogicLib,
       GovernorStateLogicLib,
+      GovernorCommunityExecutionLogicLib,
     } as T["latestVersionOnly"] extends true ? GovernanceLatestLibraries : GovernanceLibraries
   }
 
@@ -823,6 +837,7 @@ export async function governanceLibraries<T extends DeployGovernanceLibrariesArg
     GovernorVotesLogicLib,
     GovernorDepositLogicLib,
     GovernorStateLogicLib,
+    GovernorCommunityExecutionLogicLib,
     GovernorClockLogicLibV6,
     GovernorConfiguratorLibV6,
     GovernorFunctionRestrictionsLogicLibV6,

@@ -365,18 +365,19 @@ describe("GrantsManager - V2 Upgrade - @shard4i", function () {
 
     expect(await grantsManagerV2.version()).to.equal("2")
 
-    // Upgrade Governor V7 -> V8
-    const governorV8 = (await upgradeProxy("B3TRGovernorV7", "B3TRGovernor", await governorV7.getAddress(), [], {
+    // Upgrade Governor V7 -> V8. Target V8 explicitly — "B3TRGovernor" now resolves to V11.
+    // V8 link slots are API-compatible with the latest lib instances (no signature changes).
+    const governorV8 = (await upgradeProxy("B3TRGovernorV7", "B3TRGovernorV8", await governorV7.getAddress(), [], {
       version: 8,
       libraries: {
-        GovernorClockLogic: await governorClockLogicLib.getAddress(),
-        GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-        GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-        GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-        GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-        GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-        GovernorStateLogic: await governorStateLogicLib.getAddress(),
-        GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        GovernorClockLogicV8: await governorClockLogicLib.getAddress(),
+        GovernorConfiguratorV8: await governorConfiguratorLib.getAddress(),
+        GovernorDepositLogicV8: await governorDepositLogicLib.getAddress(),
+        GovernorFunctionRestrictionsLogicV8: await governorFunctionRestrictionsLogicLib.getAddress(),
+        GovernorProposalLogicV8: await governorProposalLogicLib.getAddress(),
+        GovernorQuorumLogicV8: await governorQuorumLogicLib.getAddress(),
+        GovernorStateLogicV8: await governorStateLogicLib.getAddress(),
+        GovernorVotesLogicV8: await governorVotesLogicLib.getAddress(),
       },
     })) as B3TRGovernor
 

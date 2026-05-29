@@ -80,6 +80,15 @@ export const upgradeGovernanceToV2 = async (): Promise<B3TRGovernor> => {
   const GovernorStateLogicLib = await GovernorStateLogic.deploy()
   await GovernorStateLogicLib.waitForDeployment()
 
+  // V11: deploy GovernorCommunityExecutionLogic so the latest B3TRGovernor links cleanly
+  const GovernorCommunityExecutionLogic = await ethers.getContractFactory("GovernorCommunityExecutionLogic", {
+    libraries: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+    },
+  })
+  const GovernorCommunityExecutionLogicLib = await GovernorCommunityExecutionLogic.deploy()
+  await GovernorCommunityExecutionLogicLib.waitForDeployment()
+
   // Start emissions
   await bootstrapAndStartEmissions()
 
@@ -93,6 +102,7 @@ export const upgradeGovernanceToV2 = async (): Promise<B3TRGovernor> => {
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      GovernorCommunityExecutionLogic: await GovernorCommunityExecutionLogicLib.getAddress(),
     },
   })
 
@@ -113,7 +123,8 @@ export const upgradeGovernanceToV2 = async (): Promise<B3TRGovernor> => {
 
   const txGovernorUpgrade = await governor
     .connect(owner)
-    .propose([await governor.getAddress()], [0], [encodedFunctionCall], descriptionUpgrade, currentRoundId + 1n, 0, {
+    // V11: 7th arg is maxBudget (0 = no Community-Execution payout flow).
+    .propose([await governor.getAddress()], [0], [encodedFunctionCall], descriptionUpgrade, currentRoundId + 1n, 0, 0, {
       gasLimit: 10_000_000,
     })
 
