@@ -82,17 +82,21 @@ library ChallengeSettlementLogic {
       _updateBestScore(challenge, actions);
     }
 
-    // Pass 2: snapshot the eligible-winner set so the claimable list size stays equal to `bestCount`
-    // regardless of any later personhood drift. Anyone NOT marked here at completion can never claim,
-    // even if they regain personhood afterwards — otherwise an account with raw actions == bestScore
-    // that was filtered out of bestCount could pop back in and double-pay the pot.
+    // Pass 2: snapshot the eligible-winner set AND the count used as the payout divisor. Both are frozen
+    // at completion so neither the membership nor the share size can drift after the fact. Without the
+    // explicit `eligibleWinnerCount`, `_payoutRecipientCount` would have to fall back to `bestCount` —
+    // safe today only because the two are derived from the same filter, but a fragile coupling that
+    // historically stranded a per-winner share when a live personhood re-check blocked a counted winner.
     if (challenge.bestCount > 0) {
       uint256 bestScore = challenge.bestScore;
+      uint256 eligibleCount;
       for (uint256 i; i < participantsLen; i++) {
         if (isPersonCache[i] && cachedActions[i] == bestScore) {
           $.isEligibleWinner[challengeId][challenge.participants[i]] = true;
+          eligibleCount++;
         }
       }
+      $.eligibleWinnerCount[challengeId] = eligibleCount;
     }
 
     challenge.settlementMode = challenge.bestCount == 0
@@ -133,7 +137,7 @@ library ChallengeSettlementLogic {
       revert IChallenges.NothingToClaim(challengeId, msg.sender);
     }
 
-    uint256 recipientCount = _payoutRecipientCount(challenge);
+    uint256 recipientCount = _payoutRecipientCount(challengeId, challenge);
     amount = _payoutAmount(challenge.totalPrize, recipientCount, challenge.payoutsClaimed);
 
     $.hasClaimed[challengeId][msg.sender] = true;
@@ -346,11 +350,17 @@ library ChallengeSettlementLogic {
     return account == challenge.creator ? challenge.totalPrize : 0;
   }
 
-  function _payoutRecipientCount(ChallengeTypes.Challenge storage challenge) private view returns (uint256) {
+  function _payoutRecipientCount(
+    uint256 challengeId,
+    ChallengeTypes.Challenge storage challenge
+  ) private view returns (uint256) {
     if (challenge.settlementMode == ChallengeTypes.SettlementMode.CreatorRefund) {
       return 1;
     }
-    return challenge.bestCount;
+    // Bind the divisor to the snapshot: anything else (including `bestCount`) re-opens the door to
+    // diverging from the claimable membership and stranding a per-winner share in the contract.
+    ChallengeStorageTypes.ChallengesStorage storage $ = ChallengeStorageTypes.getChallengesStorage();
+    return $.eligibleWinnerCount[challengeId];
   }
 
   function _payoutAmount(

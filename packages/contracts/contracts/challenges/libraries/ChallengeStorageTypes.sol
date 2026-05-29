@@ -29,11 +29,16 @@ library ChallengeStorageTypes {
     uint256 minBetAmount;
     mapping(uint256 challengeId => mapping(address account => bool isWinner)) isSplitWinWinner;
     // Snapshot of MaxActions winners chosen at `completeChallenge` time: person AND actions == bestScore.
-    // Frozen at completion so the claimable set size always equals `bestCount`, even if a participant's
-    // personhood verdict changes afterwards (otherwise a non-person at completion who later becomes a
-    // person could claim a slot that `recipientCount` never accounted for, draining the pot).
+    // Frozen at completion so the claimable set size always equals `eligibleWinnerCount`, even if a
+    // participant's personhood verdict changes afterwards (otherwise a non-person at completion who later
+    // becomes a person could claim a slot that `recipientCount` never accounted for, draining the pot).
     // MUST stay at the end of the struct — appended in V2.
     mapping(uint256 challengeId => mapping(address account => bool eligible)) isEligibleWinner;
+    // Companion counter for `isEligibleWinner`. Used by `_payoutRecipientCount` so the payout divisor is
+    // bound to the actual claimable set — not to `bestCount`, which is a tally of the top-scoring person
+    // participants and stays useful for indexers/events but is no longer the source of truth for payouts.
+    // MUST stay at the end of the struct — appended in V2.
+    mapping(uint256 challengeId => uint256 count) eligibleWinnerCount;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.Challenges")) - 1)) & ~bytes32(uint256(0xff))

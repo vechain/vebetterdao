@@ -423,6 +423,75 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     expect(await b3tr.balanceOf(bob.address)).to.equal(bobBalanceBefore + ethers.parseEther("300"))
   })
 
+  it("regression: 3-way tie pays the full pot without stranding a share when one tied winner loses personhood mid-claim", async function () {
+    // The bug under fix: with a live `_requirePerson` re-check in claimChallengePayout, a tied winner who
+    // lost personhood after completion would forfeit a fixed `baseShare = totalPrize / bestCount` that was
+    // never paid out and never redistributed — stranded in the contract.
+    // The fix binds the divisor to the snapshot (`eligibleWinnerCount`) and removes the live re-check, so
+    // each winner that was eligible at completion can always claim their share.
+    const { admin, alice, bob, carol, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    // Stake challenge with admin (auto-joined) + alice + bob + carol. Alice/bob/carol all tied at 10 actions.
+    await challenges.createChallenge({
+      kind: ChallengeKind.Stake,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      stakeAmount: STAKE_AMOUNT,
+      startRound: 2,
+      endRound: 3,
+      threshold: 0,
+      numWinners: 0,
+      appIds: [APP_1],
+      invitees: [alice.address, bob.address, carol.address],
+      title: "",
+      description: "",
+      imageURI: "",
+      metadataURI: "",
+    })
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+    await challenges.connect(carol).joinChallenge(1)
+
+    await passport.setUserRoundActionCountApp(admin.address, 2, APP_1, 0)
+    await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 10)
+    await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 10)
+    await passport.setUserRoundActionCountApp(carol.address, 2, APP_1, 10)
+
+    await roundGovernor.setCurrentRoundId(4)
+    await challenges.completeChallenge(1)
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.settlementMode).to.equal(SettlementMode.TopWinners)
+    expect(challenge.bestScore).to.equal(10n)
+    expect(challenge.bestCount).to.equal(3n)
+
+    // 4 participants × 100 B3TR stake = 400 B3TR total prize.
+    const totalPrize = ethers.parseEther("400")
+    const challengesAddress = await challenges.getAddress()
+    expect(await b3tr.balanceOf(challengesAddress)).to.equal(totalPrize)
+
+    const aliceBefore = await b3tr.balanceOf(alice.address)
+    const bobBefore = await b3tr.balanceOf(bob.address)
+    const carolBefore = await b3tr.balanceOf(carol.address)
+
+    await challenges.connect(alice).claimChallengePayout(1)
+    await challenges.connect(bob).claimChallengePayout(1)
+
+    // Carol loses personhood AFTER two of the three winners already claimed. The frozen snapshot still
+    // recognises her as eligible — her share is NOT stranded.
+    await passport.setIsPerson(carol.address, false, "User is blacklisted")
+    await challenges.connect(carol).claimChallengePayout(1)
+
+    const alicePaid = (await b3tr.balanceOf(alice.address)) - aliceBefore
+    const bobPaid = (await b3tr.balanceOf(bob.address)) - bobBefore
+    const carolPaid = (await b3tr.balanceOf(carol.address)) - carolBefore
+
+    // Full totalPrize distributed across the three eligible winners; no funds left in the contract.
+    expect(alicePaid + bobPaid + carolPaid).to.equal(totalPrize)
+    expect(await b3tr.balanceOf(challengesAddress)).to.equal(0n)
+  })
+
   // ──── Refund paths stay open for non-persons ────
 
   it("claimChallengeRefund still succeeds for a non-person participant on a cancelled stake challenge", async function () {
