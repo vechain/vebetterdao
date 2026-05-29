@@ -2,7 +2,7 @@ import { Box, Button, Card, Field, Heading, HStack, InputGroup, Text, VStack } f
 import { compareAddresses, isValid as isAddressValid } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { WalletAddressInput } from "../../../components/Input/WalletAddressInput"
@@ -24,16 +24,40 @@ export const AdminMigrationCard = () => {
   const isToAddressValid = isAddressValid(toAddress) && !compareAddresses(toAddress, fromAddress)
   const toDiscovery = useDiscoverHeldRoles(isToAddressValid ? toAddress : undefined)
 
+  // Selection of contracts to include in the migration tx. Defaults to all
+  // discovered contracts; lets the user uncheck a contract for debugging when a
+  // single clause is causing the whole multi-clause tx to revert.
+  const [selectedContractAddresses, setSelectedContractAddresses] = useState<Set<string>>(new Set())
+
+  const heldContractAddressesSignature = useMemo(
+    () =>
+      Array.from(new Set(fromDiscovery.heldRoles.map(r => r.contractAddress)))
+        .sort()
+        .join(","),
+    [fromDiscovery.heldRoles],
+  )
+
+  useEffect(() => {
+    setSelectedContractAddresses(
+      new Set(heldContractAddressesSignature ? heldContractAddressesSignature.split(",") : []),
+    )
+  }, [heldContractAddressesSignature])
+
+  const selectedHeldRoles = useMemo(
+    () => fromDiscovery.heldRoles.filter(r => selectedContractAddresses.has(r.contractAddress)),
+    [fromDiscovery.heldRoles, selectedContractAddresses],
+  )
+
   const { grantAll, renounceAll } = useMigrateRoles({
     from: fromAddress,
     to: toAddress,
-    heldRoles: fromDiscovery.heldRoles,
+    heldRoles: selectedHeldRoles,
     onGrantSuccess: () => setConfirmMode(null),
     onRenounceSuccess: () => setConfirmMode(null),
   })
 
-  const canGrant = isToAddressValid && fromDiscovery.heldRoles.length > 0 && !grantAll.isTransactionPending
-  const canRenounce = fromDiscovery.heldRoles.length > 0 && !renounceAll.isTransactionPending
+  const canGrant = isToAddressValid && selectedHeldRoles.length > 0 && !grantAll.isTransactionPending
+  const canRenounce = selectedHeldRoles.length > 0 && !renounceAll.isTransactionPending
 
   const handleConfirm = () => {
     if (confirmMode === "grant") grantAll.sendTransaction()
@@ -183,6 +207,19 @@ export const AdminMigrationCard = () => {
         from={fromAddress}
         to={toAddress}
         heldRoles={fromDiscovery.heldRoles}
+        selectedContractAddresses={selectedContractAddresses}
+        onToggleContract={addr => {
+          setSelectedContractAddresses(prev => {
+            const next = new Set(prev)
+            if (next.has(addr)) next.delete(addr)
+            else next.add(addr)
+            return next
+          })
+        }}
+        onSelectAll={() => {
+          setSelectedContractAddresses(new Set(fromDiscovery.heldRoles.map(r => r.contractAddress)))
+        }}
+        onDeselectAll={() => setSelectedContractAddresses(new Set())}
         onClose={() => setConfirmMode(null)}
         onConfirm={handleConfirm}
       />

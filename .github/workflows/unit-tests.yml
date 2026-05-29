@@ -179,6 +179,8 @@ jobs:
             label: VeBetterPassport - Entities
           - shard: shard8f
             label: VeBetterPassport - Delegation
+          - shard: shard8g
+            label: VeBetterPassport - V6 Actor-Keyed Counts
           - shard: shard9
             label: VOT3
           - shard: shard9a

@@ -1,9 +1,9 @@
-import { Box, Button, Checkbox, CloseButton, Dialog, HStack, Portal, Text, VStack } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { Badge, Box, Button, Checkbox, CloseButton, Dialog, HStack, Portal, Text, VStack, Wrap } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { HeldRole } from "./hooks/useDiscoverHeldRoles"
-import { RolesByContract } from "./RolesByContract"
 
 type Props = {
   open: boolean
@@ -11,11 +11,27 @@ type Props = {
   from: string
   to: string
   heldRoles: HeldRole[]
+  selectedContractAddresses: Set<string>
+  onToggleContract: (contractAddress: string) => void
+  onSelectAll: () => void
+  onDeselectAll: () => void
   onClose: () => void
   onConfirm: () => void
 }
 
-export const MigrationConfirmationModal = ({ open, mode, from, to, heldRoles, onClose, onConfirm }: Props) => {
+export const MigrationConfirmationModal = ({
+  open,
+  mode,
+  from,
+  to,
+  heldRoles,
+  selectedContractAddresses,
+  onToggleContract,
+  onSelectAll,
+  onDeselectAll,
+  onClose,
+  onConfirm,
+}: Props) => {
   const { t } = useTranslation()
   const [acknowledged, setAcknowledged] = useState(false)
 
@@ -24,8 +40,27 @@ export const MigrationConfirmationModal = ({ open, mode, from, to, heldRoles, on
   }, [open, mode])
 
   const isGrant = mode === "grant"
-  const totalClauses = heldRoles.length
-  const totalContracts = new Set(heldRoles.map(r => r.contractName)).size
+
+  const groupedHeldRoles = useMemo(() => {
+    const groups: Record<string, { contractName: string; contractAddress: string; roles: string[] }> = {}
+    for (const r of heldRoles) {
+      if (!groups[r.contractAddress]) {
+        groups[r.contractAddress] = {
+          contractName: r.contractName,
+          contractAddress: r.contractAddress,
+          roles: [],
+        }
+      }
+      groups[r.contractAddress]!.roles.push(r.role)
+    }
+    return Object.values(groups)
+  }, [heldRoles])
+
+  const selectedRolesCount = heldRoles.filter(r => selectedContractAddresses.has(r.contractAddress)).length
+  const totalClauses = selectedRolesCount
+  const totalContracts = selectedContractAddresses.size
+  const allSelected =
+    groupedHeldRoles.length > 0 && groupedHeldRoles.every(g => selectedContractAddresses.has(g.contractAddress))
 
   return (
     <Dialog.Root
@@ -96,13 +131,73 @@ export const MigrationConfirmationModal = ({ open, mode, from, to, heldRoles, on
                   </Box>
                 )}
 
-                {/* Roles list */}
+                {/* Roles list with per-contract selection */}
                 <Box>
-                  <Text textStyle="sm" fontWeight="bold" mb={2}>
-                    {isGrant ? t("Roles to grant") : t("Roles to renounce")}
-                  </Text>
+                  <HStack justify="space-between" mb={2}>
+                    <Text textStyle="sm" fontWeight="bold">
+                      {isGrant ? t("Roles to grant") : t("Roles to renounce")}
+                    </Text>
+                    <Button size="xs" variant="ghost" onClick={allSelected ? onDeselectAll : onSelectAll}>
+                      {allSelected ? t("Deselect all") : t("Select all")}
+                    </Button>
+                  </HStack>
                   <Box maxH="320px" overflowY="auto" pr={1}>
-                    <RolesByContract heldRoles={heldRoles} isLoading={false} />
+                    <VStack gap={2} alignItems="stretch" w="full">
+                      {groupedHeldRoles.map(({ contractName, contractAddress, roles }) => {
+                        const checked = selectedContractAddresses.has(contractAddress)
+                        const hasAdmin = roles.includes("DEFAULT_ADMIN_ROLE")
+                        return (
+                          <Box
+                            key={contractAddress}
+                            borderWidth={1}
+                            borderRadius="md"
+                            p={3}
+                            opacity={checked ? 1 : 0.55}>
+                            <Checkbox.Root
+                              checked={checked}
+                              onCheckedChange={() => onToggleContract(contractAddress)}
+                              colorPalette={isGrant ? "blue" : "red"}
+                              alignItems="start"
+                              w="full">
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control mt="1" />
+                              <Checkbox.Label w="full">
+                                <VStack alignItems="stretch" gap={2} w="full">
+                                  <HStack justify="space-between" gap={3}>
+                                    <HStack gap={2} flex={1} minW={0}>
+                                      <Text textStyle="sm" fontWeight="bold" truncate>
+                                        {contractName}
+                                      </Text>
+                                      <Badge size="sm" colorPalette="gray">
+                                        {roles.length}
+                                      </Badge>
+                                      {hasAdmin && (
+                                        <Badge size="sm" colorPalette="red" textTransform="none">
+                                          {"DEFAULT_ADMIN"}
+                                        </Badge>
+                                      )}
+                                    </HStack>
+                                    <Text textStyle="xs" color="text.muted" fontFamily="mono" flexShrink={0}>
+                                      {humanAddress(contractAddress)}
+                                    </Text>
+                                  </HStack>
+                                  <Wrap gap={2}>
+                                    {roles.map(role => (
+                                      <Badge
+                                        key={role}
+                                        colorPalette={role === "DEFAULT_ADMIN_ROLE" ? "red" : "blue"}
+                                        textTransform="none">
+                                        {role}
+                                      </Badge>
+                                    ))}
+                                  </Wrap>
+                                </VStack>
+                              </Checkbox.Label>
+                            </Checkbox.Root>
+                          </Box>
+                        )
+                      })}
+                    </VStack>
                   </Box>
                 </Box>
 
@@ -131,7 +226,10 @@ export const MigrationConfirmationModal = ({ open, mode, from, to, heldRoles, on
               <Dialog.ActionTrigger asChild>
                 <Button variant="outline">{t("Cancel")}</Button>
               </Dialog.ActionTrigger>
-              <Button colorPalette={isGrant ? "blue" : "red"} disabled={!acknowledged} onClick={onConfirm}>
+              <Button
+                colorPalette={isGrant ? "blue" : "red"}
+                disabled={!acknowledged || totalClauses === 0}
+                onClick={onConfirm}>
                 {isGrant ? t("Confirm and sign") : t("Renounce all roles")}
               </Button>
             </Dialog.Footer>

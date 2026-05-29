@@ -143,7 +143,7 @@ describe("VeBetterPassport Upgrades - @shard8d", function () {
         forceDeploy: true,
       })
 
-      expect(await veBetterPassport.version()).to.equal("5")
+      expect(await veBetterPassport.version()).to.equal("6")
     })
     it("Should not be able to initialize twice", async function () {
       const config = createTestConfig()
@@ -4949,7 +4949,7 @@ describe("VeBetterPassport - @shard16-pop", function () {
         expect(await veBetterPassport.userRoundActionCountApp(otherAccount.address, 1, app2Id)).to.equal(1)
       })
 
-      it("attributes entity registrations to the linked passport", async function () {
+      it("attributes entity registrations to the entity wallet, not the linked passport (V6 actor-keyed)", async function () {
         const { veBetterPassport, owner, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -4972,8 +4972,14 @@ describe("VeBetterPassport - @shard16-pop", function () {
         await veBetterPassport.connect(owner).registerActionForRound(entity, app1Id, 1)
         await veBetterPassport.connect(owner).registerActionForRound(entity, app1Id, 1)
 
-        expect(await veBetterPassport.userRoundActionCountApp(passport.address, 1, app1Id)).to.equal(2)
-        expect(await veBetterPassport.userRoundActionCountApp(entity.address, 1, app1Id)).to.equal(0)
+        // Counts are keyed by actor: the entity's slot holds the entity's actions.
+        expect(await veBetterPassport.userRoundActionCountApp(entity.address, 1, app1Id)).to.equal(2)
+        // The passport's slot does NOT pool linked entities' actions — fixes B3MO Quests sybil-via-entity-linkage.
+        expect(await veBetterPassport.userRoundActionCountApp(passport.address, 1, app1Id)).to.equal(0)
+
+        // Scores remain passport-keyed so PoP still aggregates linked entities.
+        const securityMultiplier = await veBetterPassport.securityMultiplier(1)
+        expect(await veBetterPassport.userRoundScore(passport.address, 1)).to.equal(securityMultiplier * 2n)
       })
 
       it("does not increment action count when user is blacklisted", async function () {

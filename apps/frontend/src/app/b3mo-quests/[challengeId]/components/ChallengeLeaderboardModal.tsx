@@ -1,14 +1,17 @@
-import { Button, Heading, Icon, Separator, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
+import { Button, chakra, Heading, HStack, Icon, Separator, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { Group, SendDiagonal } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { FiInfo } from "react-icons/fi"
 
 import { type ChallengeDetail, ChallengeStatus, ChallengeType } from "@/api/challenges/types"
 import type { ChallengeParticipantActionsEntry } from "@/api/challenges/useChallengeParticipantActions"
+import { useAccountLinking } from "@/api/contracts/vePassport/hooks/useAccountLinking"
 import { BaseModal } from "@/components/BaseModal"
+import { Tooltip } from "@/components/ui/tooltip"
 
 import { ChallengeActionsRow } from "./ChallengeActionsRow"
 import { ChallengeUserActionsModal, type ChallengeUserActionsParticipant } from "./ChallengeUserActionsModal"
@@ -44,6 +47,7 @@ export const ChallengeLeaderboardModal = ({
 }: ChallengeLeaderboardModalProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { isLinked: viewerHasLinkedAccounts } = useAccountLinking()
   const [selectedParticipant, setSelectedParticipant] = useState<ChallengeUserActionsParticipant | null>(null)
 
   const isPending = challenge.status === ChallengeStatus.Pending
@@ -169,6 +173,38 @@ export const ChallengeLeaderboardModal = ({
           <Heading size="lg" textAlign="center">
             {challenge.title ?? t("B3MO Quest Leaderboard")}
           </Heading>
+
+          {viewerHasLinkedAccounts && (
+            <HStack gap={1} justify="center" color="text.subtle">
+              <Text textStyle="xs" textAlign="center">
+                {t("Only actions performed by this wallet count toward the score.")}
+              </Text>
+              <Tooltip
+                content={t(
+                  "Each wallet's quest score reflects only the actions performed by that wallet. Actions from other wallets linked to the same VeBetter Passport are not pooled into a single score.",
+                )}
+                contentProps={{ maxW: "xs" }}
+                positioning={{ placement: "top" }}>
+                <chakra.button
+                  type="button"
+                  aria-label={t(
+                    "Each wallet's quest score reflects only the actions performed by that wallet. Actions from other wallets linked to the same VeBetter Passport are not pooled into a single score.",
+                  )}
+                  display="inline-flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  cursor="pointer"
+                  color="text.subtle"
+                  flexShrink={0}
+                  bg="transparent"
+                  borderWidth="0"
+                  p="0"
+                  lineHeight="0">
+                  <Icon as={FiInfo} boxSize={3} />
+                </chakra.button>
+              </Tooltip>
+            </HStack>
+          )}
 
           {showTabs ? (
             <Tabs.Root defaultValue="joined" variant="line" fitted>
