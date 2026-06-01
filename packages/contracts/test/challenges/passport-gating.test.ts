@@ -95,7 +95,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
       metadataURI: "",
     })
 
-    await passport.setIsPerson(alice.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(alice.address, true)
 
     await expect(challenges.connect(alice).joinChallenge(1))
       .to.be.revertedWithCustomError(challenges, "NotVerifiedPerson")
@@ -125,7 +125,8 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
       metadataURI: "",
     })
 
-    await passport.setIsPerson(alice.address, false, "User has been signaled too many times")
+    await passport.setSignalingThreshold(5)
+    await passport.setSignaledCounter(alice.address, 5)
 
     await expect(challenges.connect(alice).joinChallenge(1))
       .to.be.revertedWithCustomError(challenges, "NotVerifiedPerson")
@@ -137,7 +138,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
   it("rejects createChallenge when a non-person creator would auto-join a Stake challenge", async function () {
     const { admin, alice, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
-    await passport.setIsPerson(admin.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(admin.address, true)
 
     await expect(
       challenges.createChallenge({
@@ -164,7 +165,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
   it("allows createChallenge with a non-person creator for Sponsored challenges (no auto-join)", async function () {
     const { admin, alice, roundGovernor, passport, challenges } = await deployFixture()
     await roundGovernor.setCurrentRoundId(1)
-    await passport.setIsPerson(admin.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(admin.address, true)
 
     // Sponsored creators do not participate, so personhood is not required to fund the prize pool.
     await challenges.createChallenge({
@@ -227,7 +228,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
 
     // alice is blacklisted AFTER the challenge ended. The winner set was frozen at completion,
     // so the verdict cannot retroactively revoke her slot — otherwise the pot would be stranded.
-    await passport.setIsPerson(alice.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(alice.address, true)
 
     const balanceBefore = await b3tr.balanceOf(alice.address)
     await challenges.connect(alice).claimChallengePayout(1)
@@ -266,7 +267,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     await passport.setUserRoundActionCountApp(admin.address, 2, APP_1, 0)
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 10)
     await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 10)
-    await passport.setIsPerson(bob.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(bob.address, true)
 
     await roundGovernor.setCurrentRoundId(4)
     await challenges.completeChallenge(1)
@@ -277,8 +278,8 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     expect(challenge.bestCount).to.equal(1n)
     expect(challenge.settlementMode).to.equal(SettlementMode.TopWinners)
 
-    // B regains personhood after the snapshot.
-    await passport.setIsPerson(bob.address, true, "")
+    // B clears their sybil flags after the snapshot.
+    await passport.setIsBlacklisted(bob.address, false)
 
     // B is NOT in the eligible-winner snapshot, so the live attempt reverts.
     // Without the fix, B would pass _isEligibleForPayout (actions == bestScore) and take the entire pot.
@@ -319,8 +320,8 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
 
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 5)
     await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 7)
-    await passport.setIsPerson(alice.address, false, "User is blacklisted")
-    await passport.setIsPerson(bob.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(alice.address, true)
+    await passport.setIsBlacklisted(bob.address, true)
 
     await roundGovernor.setCurrentRoundId(4)
     await challenges.completeChallenge(1)
@@ -330,7 +331,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     expect(challenge.settlementMode).to.equal(SettlementMode.CreatorRefund)
 
     // Creator also becomes non-person; the refund branch must still pay out.
-    await passport.setIsPerson(admin.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(admin.address, true)
     const balanceBefore = await b3tr.balanceOf(admin.address)
     await challenges.claimChallengePayout(1)
     expect(await b3tr.balanceOf(admin.address)).to.equal(balanceBefore + STAKE_AMOUNT)
@@ -364,11 +365,11 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     await challenges.syncChallenge(1)
 
     await passport.setUserRoundActionCount(alice.address, 2, 5)
-    await passport.setIsPerson(alice.address, false, "User does not meet the criteria to be considered a person")
+    await passport.setIsBlacklisted(alice.address, true)
 
     await expect(challenges.connect(alice).claimSplitWinPrize(1))
       .to.be.revertedWithCustomError(challenges, "NotVerifiedPerson")
-      .withArgs(alice.address, "User does not meet the criteria to be considered a person")
+      .withArgs(alice.address, "User is blacklisted")
   })
 
   // ──── completeChallenge: skip non-persons from bestScore selection ────
@@ -401,7 +402,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     await passport.setUserRoundActionCountApp(admin.address, 2, APP_1, 1)
     await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 100)
     await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 7)
-    await passport.setIsPerson(alice.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(alice.address, true)
 
     await roundGovernor.setCurrentRoundId(4)
     await challenges.completeChallenge(1)
@@ -480,7 +481,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
 
     // Carol loses personhood AFTER two of the three winners already claimed. The frozen snapshot still
     // recognises her as eligible — her share is NOT stranded.
-    await passport.setIsPerson(carol.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(carol.address, true)
     await challenges.connect(carol).claimChallengePayout(1)
 
     const alicePaid = (await b3tr.balanceOf(alice.address)) - aliceBefore
@@ -520,7 +521,7 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
     expect(await challenges.getChallengeStatus(1)).to.equal(ChallengeStatus.Cancelled)
 
     // alice becomes non-person AFTER joining — she should still get her stake back.
-    await passport.setIsPerson(alice.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(alice.address, true)
 
     const balanceBefore = await b3tr.balanceOf(alice.address)
     await challenges.connect(alice).claimChallengeRefund(1)
@@ -557,10 +558,63 @@ describe("B3TRChallenges - Passport gating - @shard9b", function () {
 
     // After endRound, no winners; creator reclaims the whole pool via the refund path even when non-person.
     await roundGovernor.setCurrentRoundId(4)
-    await passport.setIsPerson(admin.address, false, "User is blacklisted")
+    await passport.setIsBlacklisted(admin.address, true)
 
     const balanceBefore = await b3tr.balanceOf(admin.address)
     await challenges.claimCreatorSplitWinRefund(1)
     expect(await b3tr.balanceOf(admin.address)).to.equal(balanceBefore + sponsorAmount)
+  })
+
+  // ──── Hotfix: veDelegate delegators must NOT be blocked ────
+
+  it("hotfix: a veDelegate delegator (would fail isPerson) can still join and claim", async function () {
+    // VeBetterPassport.isPerson returns (false, "User has delegated their personhood") for accounts that
+    // delegated their passport via veDelegate. The original V2 used isPerson, which would lock these honest
+    // users out of quests. The hotfix switched to a soft sybil check (blacklist + signaling threshold) that
+    // accepts delegators. We simulate the delegator by leaving the legacy isPerson verdict false but
+    // crucially NOT blacklisting them and NOT pushing them over the signaling threshold.
+    const { admin, alice, bob, b3tr, roundGovernor, passport, challenges } = await deployFixture()
+    await roundGovernor.setCurrentRoundId(1)
+
+    // Mark alice as failing the legacy isPerson check (simulating the veDelegate delegator state).
+    // Crucially: she is NOT blacklisted and NOT signaled. The new check must accept her.
+    await passport.setIsPerson(alice.address, false, "User has delegated their personhood")
+
+    await challenges.createChallenge({
+      kind: ChallengeKind.Stake,
+      visibility: ChallengeVisibility.Private,
+      challengeType: ChallengeType.MaxActions,
+      stakeAmount: STAKE_AMOUNT,
+      startRound: 2,
+      endRound: 3,
+      threshold: 0,
+      numWinners: 0,
+      appIds: [APP_1],
+      invitees: [alice.address, bob.address],
+      title: "",
+      description: "",
+      imageURI: "",
+      metadataURI: "",
+    })
+
+    // alice (the delegator) joins — must not revert.
+    await challenges.connect(alice).joinChallenge(1)
+    await challenges.connect(bob).joinChallenge(1)
+
+    await passport.setUserRoundActionCountApp(admin.address, 2, APP_1, 0)
+    await passport.setUserRoundActionCountApp(alice.address, 2, APP_1, 10)
+    await passport.setUserRoundActionCountApp(bob.address, 2, APP_1, 4)
+
+    await roundGovernor.setCurrentRoundId(4)
+    await challenges.completeChallenge(1)
+
+    const challenge = await challenges.getChallenge(1)
+    expect(challenge.bestScore).to.equal(10n)
+    expect(challenge.bestCount).to.equal(1n)
+
+    // alice (the delegator) can also claim the prize.
+    const balanceBefore = await b3tr.balanceOf(alice.address)
+    await challenges.connect(alice).claimChallengePayout(1)
+    expect(await b3tr.balanceOf(alice.address)).to.equal(balanceBefore + ethers.parseEther("300"))
   })
 })

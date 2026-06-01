@@ -6,6 +6,12 @@
  *
  * No new storage or reinitializer args — the upgrade only swaps the implementation
  * (and redeploys the challenge libraries).
+ *
+ * Pre-check: aborts if any already-Completed MaxActions/TopWinners challenge still has unclaimed
+ * payouts. Those winners depend on the V2 `isEligibleWinner` snapshot which is populated only by V2's
+ * completeChallenge — for a challenge that completed pre-upgrade the snapshot is empty and winners
+ * would lose claim ability. The safety property therefore has to hold ON-CHAIN at upgrade time, not
+ * just at scan time.
  */
 import { getConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
@@ -13,7 +19,54 @@ import { ethers } from "hardhat"
 
 import { upgradeProxy } from "../../../helpers"
 import { challengesLibraries } from "../../../libraries"
-import { B3TRChallenges } from "../../../../typechain-types"
+import { B3TRChallenges, B3TRChallengesV1 } from "../../../../typechain-types"
+
+const ChallengeStatusCompleted = 2
+const ChallengeTypeMaxActions = 0
+const SettlementModeTopWinners = 1
+
+/**
+ * Reverts if any MaxActions/TopWinners challenge has unclaimed payouts at upgrade time.
+ * `eligibleWinnerCount`/`isEligibleWinner` are not exposed on the public ABI, so we conservatively flag
+ * every completed TopWinners challenge whose `payoutsClaimed < bestCount`. On healthy state this is a
+ * no-op; if it fires, the operator should investigate (admin `withdraw` + off-chain remediation, or
+ * wait for the unclaimed winner to call before retrying).
+ */
+async function assertNoAtRiskChallenges(contract: B3TRChallengesV1) {
+  const total: bigint = await contract.challengeCount()
+  const atRisk: Array<{ id: number; bestCount: bigint; payoutsClaimed: bigint; totalPrize: bigint }> = []
+  for (let i = 1n; i <= total; i++) {
+    const c = await contract.getChallenge(i)
+    if (
+      Number(c.status) === ChallengeStatusCompleted &&
+      Number(c.challengeType) === ChallengeTypeMaxActions &&
+      Number(c.settlementMode) === SettlementModeTopWinners &&
+      c.payoutsClaimed < c.bestCount
+    ) {
+      atRisk.push({
+        id: Number(i),
+        bestCount: c.bestCount,
+        payoutsClaimed: c.payoutsClaimed,
+        totalPrize: c.totalPrize,
+      })
+    }
+  }
+  if (atRisk.length === 0) {
+    console.log(`Pre-check OK — 0 at-risk challenges across ${total} total.`)
+    return
+  }
+  for (const r of atRisk) {
+    console.error(
+      `  AT-RISK challenge #${r.id} bestCount=${r.bestCount} payouts=${r.payoutsClaimed} totalPrize=${r.totalPrize}`,
+    )
+  }
+  throw new Error(
+    `Refusing to upgrade: ${atRisk.length} MaxActions/TopWinners challenge(s) have unclaimed payouts. ` +
+      `Those winners would lose claim ability post-upgrade because the V2 isEligibleWinner snapshot is empty for ` +
+      `challenges completed before the upgrade. Investigate (admin withdraw + off-chain remediation, or wait for ` +
+      `the unclaimed winner to call) before retrying.`,
+  )
+}
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -26,6 +79,10 @@ async function main() {
   const b3trChallengesV1 = await ethers.getContractAt("B3TRChallengesV1", config.challengesContractAddress)
   const currentVersion = await b3trChallengesV1.version()
   console.log("Current B3TRChallenges version:", currentVersion)
+
+  // Safety gate — enforced on-chain state, not just an advisory script.
+  console.log("Running pre-upgrade at-risk scan…")
+  await assertNoAtRiskChallenges(b3trChallengesV1)
 
   console.log(
     `Upgrading B3TRChallenges V1 → V2 at ${config.challengesContractAddress} on ${config.network.name} with ${deployer.address}`,
