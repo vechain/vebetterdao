@@ -37,9 +37,9 @@ type Props = {
 
 export const RoundActivityCard: React.FC<Props> = ({ activity }) => {
   const { t } = useTranslation()
-  const { votersCount, vot3Total, topApps } = activity.metadata
+  const { votersCount, totalVotes, topApps } = activity.metadata
   const formatter = getCompactFormatter(1)
-  const formattedVot3 = formatter.format(Number(vot3Total || "0"))
+  const formattedVot3 = formatter.format(Number(totalVotes || "0"))
 
   const topAppIds = useMemo(() => topApps.map(a => a.appId), [topApps])
   const { data: topAppsEarnings } = useMultipleXAppRoundEarnings(activity.roundId, topAppIds)
