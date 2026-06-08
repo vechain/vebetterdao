@@ -1,11 +1,11 @@
-name: Start Emissions Round Lambda Deployment
+name: Distribute Weekly App Rewards Lambda Deployment
 
 on:
   pull_request:
     paths:
-      - 'terraform/start-emissions-round/**'
-      - 'packages/lambda/src/startEmissionsRound/**'
-      - '.github/workflows/start-emissions-round.yml'
+      - 'terraform/distribute-weekly-app-rewards/**'
+      - 'packages/lambda/src/distributeWeeklyAppRewards/**'
+      - '.github/workflows/distribute-weekly-app-rewards.yml'
   workflow_dispatch:
     inputs:
       workspace:
@@ -39,9 +39,9 @@ jobs:
     uses: ./.github/workflows/lambda-infrastructure-deploy.yml
     with:
       workspace: ${{ github.event.inputs.workspace || 'dev' }}
-      lambda_name: startEmissionsRound
-      terraform_dir: terraform/start-emissions-round
+      lambda_name: distributeWeeklyAppRewards
+      terraform_dir: terraform/distribute-weekly-app-rewards
     secrets:
       AWS_ACCESS_ROLE: ${{ secrets.AWS_ACCESS_ROLE }}
       DEV_AWS_ACC_ROLE: ${{ secrets.DEV_AWS_ACC_ROLE }}
-      VECHAINCI_SSH_PRIVATE_KEYS: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }} 
+      VECHAINCI_SSH_PRIVATE_KEYS: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
