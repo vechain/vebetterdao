@@ -254,7 +254,19 @@ contract DBAPool is
    * Rules (replicating the off-chain filterEligibleAppsForDBA logic):
    *  1. App was in the round → comes from `xAllocationVoting.getAppIdsOfRound(roundId)`
    *  2. App had at least 1 action with proof → `veBetterPassport.appRoundActionCount(appId, roundId) > 0`
-   *  3. App NOT excluded by endorsement → not (`!isEligible(snapshot)` && `!isEligible(deadline)`)
+   *  3. App NOT excluded by endorsement → not (unendorsed at snapshot AND unendorsed at deadline)
+   *
+   * Rule 3 uses the historical endorsement score (`getScoreAtTimepoint`) against the
+   * current threshold rather than `isEligible`. `isEligible` is the wrong primitive because:
+   *   a. Apps in `getAppIdsOfRound` are by construction eligible at the snapshot — that list
+   *      IS the eligibility snapshot — so `isEligible(_, snapshot)` is structurally always
+   *      true and the AND would never short-circuit.
+   *   b. During the endorsement grace period the eligibility checkpoint stays at 1 even
+   *      after the unendorsed-set membership flips, so an app that lost its endorser for
+   *      the whole round still reads `isEligible == true` at both boundaries.
+   *
+   * Score-based comparison gives the actual "was the score above the endorsement threshold
+   * at block X" answer, which matches what `isAppUnendorsed` returned off-chain.
    */
   function _buildEligibleApps(
     DBAPoolStorage storage $,
@@ -263,9 +275,10 @@ contract DBAPool is
     bytes32[] memory appsOfRound = $.xAllocationVoting.getAppIdsOfRound(_roundId);
     eligibleApps = new bytes32[](appsOfRound.length);
 
-    // Round bounds for the endorsement checkpoint reads (Trace208 clock fits in uint48)
+    // Round bounds for the endorsement-score checkpoint reads
     uint256 snapshot = $.xAllocationVoting.roundSnapshot(_roundId);
     uint256 deadline = $.xAllocationVoting.roundDeadline(_roundId);
+    uint256 threshold = $.x2EarnApps.endorsementScoreThreshold();
 
     for (uint256 i = 0; i < appsOfRound.length; i++) {
       bytes32 appId = appsOfRound[i];
@@ -276,9 +289,9 @@ contract DBAPool is
       }
 
       // Rule 3: exclude only if unendorsed at BOTH boundaries
-      bool eligibleAtStart = $.x2EarnApps.isEligible(appId, snapshot);
-      bool eligibleAtEnd = $.x2EarnApps.isEligible(appId, deadline);
-      if (!eligibleAtStart && !eligibleAtEnd) {
+      bool unendorsedAtStart = $.x2EarnApps.getScoreAtTimepoint(appId, snapshot) < threshold;
+      bool unendorsedAtEnd = $.x2EarnApps.getScoreAtTimepoint(appId, deadline) < threshold;
+      if (unendorsedAtStart && unendorsedAtEnd) {
         continue;
       }
 
