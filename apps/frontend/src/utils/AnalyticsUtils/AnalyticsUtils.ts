@@ -12,9 +12,9 @@ export interface Properties {
 export const initialise = () => {
   if (MIX_PANEL_TOKEN) {
     mixpanel.init(MIX_PANEL_TOKEN, {
-      // debug: true,
       track_pageview: true,
       ignore_dnt: true,
+      api_host: "https://api-eu.mixpanel.com",
     })
     mixpanel.identify(uuid.v4())
     isInitialized = true
