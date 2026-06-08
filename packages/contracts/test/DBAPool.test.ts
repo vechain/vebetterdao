@@ -427,11 +427,9 @@ describe("DBA Pool - @shard7b", async function () {
           forceDeploy: true,
         })
 
-        const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-        await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, distributor.address)
-
         await dynamicBaseAllocationPool.connect(owner).pause()
 
+        // V4 distribute is permissionless — the only gate left is `whenNotPaused`
         await catchRevert(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(1))
       })
     })
@@ -605,12 +603,17 @@ describe("DBA Pool - @shard7b", async function () {
   })
 
   describe("DBA Rewards Distribution", () => {
-    it("Should revert if caller doesn't have DISTRIBUTOR_ROLE", async function () {
+    it("V4: distribute is permissionless (any account can call)", async function () {
       const { dynamicBaseAllocationPool, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).distributeDBARewards(1))
+      // Pre-V4 this reverted with AccessControl. V4 derives the eligible set on-chain
+      // so the caller no longer has any leverage over who gets paid → no role gate.
+      // The call still reverts but with the round-state guard, not access control.
+      await expect(dynamicBaseAllocationPool.connect(otherAccount).distributeDBARewards(1)).to.be.revertedWith(
+        "DBAPool: Round invalid or not ready to distribute",
+      )
     })
 
     it("Should revert if round is before distributionStartRound", async function () {
@@ -618,11 +621,9 @@ describe("DBA Pool - @shard7b", async function () {
         forceDeploy: true,
       })
 
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, distributor.address)
-
       await dynamicBaseAllocationPool.connect(owner).setDistributionStartRound(10)
 
+      // Permissionless after V4 — anyone can call; the round-state guard kicks in
       await expect(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(5)).to.be.revertedWith(
         "DBAPool: Round invalid or not ready to distribute",
       )

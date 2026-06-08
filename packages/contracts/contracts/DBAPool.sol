@@ -151,9 +151,14 @@ contract DBAPool is
    * unendorsed at BOTH round-start and round-end. Excluded apps still consume their share of the pool
    * via the merit-cap overflow path, which is routed to the treasury alongside the integer-division
    * remainder.
+   *
+   * Permissionless: now that the eligible set is derived from chain state the caller has no
+   * leverage over who gets paid, so `DISTRIBUTOR_ROLE` was dropped. Anyone may trigger
+   * distribution; idempotency is enforced by `dbaRewardsDistributed[_roundId]`.
+   *
    * @param _roundId The round ID for which to distribute DBA rewards.
    */
-  function distributeDBARewards(uint256 _roundId) external nonReentrant onlyRole(DISTRIBUTOR_ROLE) whenNotPaused {
+  function distributeDBARewards(uint256 _roundId) external nonReentrant whenNotPaused {
     DBAPoolStorage storage $ = _getDBAPoolStorage();
 
     // Validate that round can be distributed based on different criteria
