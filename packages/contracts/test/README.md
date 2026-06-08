@@ -29,6 +29,9 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard6**: TimeLock
 - **shard7**: Treasury
 - **shard7b**: Dynamic Base Allocation Pool
+- **shard7d**: DBA Pool - V4 Upgrade (V3→V4 storage preservation + setters)
+- **shard7e**: DBA Pool - V4 Compatibility (on-chain eligibility filter rules)
+- **shard7f**: DBA Pool - V4 Scalability (gas budget at 10/50/100 apps)
 - **shard8-core**: VeBetterPassport - Core (Contract parameters, Checks, Configurator, Clock)
 - **shard8a**: VeBetterPassport - Upgrade
 - **shard8b**: VeBetterPassport - Signaling

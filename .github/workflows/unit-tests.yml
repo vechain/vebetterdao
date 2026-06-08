@@ -165,6 +165,12 @@ jobs:
             label: Treasury
           - shard: shard7b
             label: Dynamic Base Allocation Pool
+          - shard: shard7d
+            label: DBA Pool - V4 Upgrade
+          - shard: shard7e
+            label: DBA Pool - V4 Compatibility
+          - shard: shard7f
+            label: DBA Pool - V4 Scalability
           - shard: shard8-core
             label: VeBetterPassport - Core
           - shard: shard8a

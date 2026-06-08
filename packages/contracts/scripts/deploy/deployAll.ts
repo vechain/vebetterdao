@@ -22,6 +22,7 @@ import {
   DBAPool,
   DBAPoolV1,
   DBAPoolV2,
+  DBAPoolV3,
   StargateNFT,
   Stargate,
   NodeManagementV3,
@@ -1208,18 +1209,31 @@ export async function deployAll(config: ContractsConfig) {
 
   // Upgrade to V3
   console.log("Upgrading DBAPool to V3...")
-  const dynamicBaseAllocationPool = (await upgradeProxy(
+  const dbaPoolV3 = (await upgradeProxy(
     "DBAPoolV2",
-    "DBAPool",
+    "DBAPoolV3",
     await dbaPoolV2.getAddress(),
     [await treasury.getAddress()],
     {
       version: 3,
       logOutput: true,
     },
+  )) as DBAPoolV3
+
+  // Upgrade to V4
+  console.log("Upgrading DBAPool to V4...")
+  const dynamicBaseAllocationPool = (await upgradeProxy(
+    "DBAPoolV3",
+    "DBAPool",
+    await dbaPoolV3.getAddress(),
+    [await veBetterPassport.getAddress(), await xAllocationVoting.getAddress()],
+    {
+      version: 4,
+      logOutput: true,
+    },
   )) as DBAPool
 
-  console.log("DBAPool deployed and upgraded to V3")
+  console.log("DBAPool deployed and upgraded to V4")
 
   console.log("Setting X2EarnApps addresses and upgrading to X2EarnAppsV8...")
   // Setup X2EarnApps addresses

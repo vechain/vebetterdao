@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.20;
 
-interface IDynamicBaseAllocationPool {
+interface IDynamicBaseAllocationPoolV3 {
   /**
    * @notice Emitted when funds are distributed to an app
    * @param appId The ID of the app
@@ -15,12 +15,7 @@ interface IDynamicBaseAllocationPool {
 
   function canDistributeDBARewards(uint256 _roundId) external view returns (bool);
 
-  /// @notice Distributes DBA rewards to apps eligible under the on-chain rules for the given round.
-  /// Eligibility is derived on-chain — no app list is taken from the caller.
-  function distributeDBARewards(uint256 _roundId) external;
-
-  /// @notice Returns the apps eligible for DBA rewards in a given round (same filter used internally).
-  function eligibleAppsForRound(uint256 _roundId) external view returns (bytes32[] memory);
+  function distributeDBARewards(uint256 _roundId, bytes32[] memory _appIds) external;
 
   function fundsForRound(uint256 _roundId) external view returns (uint256);
 
