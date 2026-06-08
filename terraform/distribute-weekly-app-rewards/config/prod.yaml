@@ -5,14 +5,15 @@ aws_account_id: "851725442887"
 environment: "mainnet"
 
 # Lambda Configuration
-lambda_function_name: "start-emissions-round"
+lambda_function_name: "distribute-weekly-app-rewards"
 lambda_handler: "index.handler"
 lambda_runtime: "nodejs20.x"
 lambda_memory_size: 512
 lambda_timeout: 900
 
 # Lambda Build Path
-lambda_source_dir: "packages/lambda/dist/mainnet/startEmissionsRound"
+lambda_source_dir: "packages/lambda/dist/mainnet/distributeWeeklyAppRewards"
 
 # Schedule Configuration
-schedule_expression: "cron(45 6 ? * MON *)" # Runs every Monday at 6:45 AM UTC
+# 5 minutes after start-emissions-round (cron(45 6 ? * MON *))
+schedule_expression: "cron(50 6 ? * MON *)"
