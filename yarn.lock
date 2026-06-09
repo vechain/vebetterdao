@@ -3632,15 +3632,15 @@
   resolved "https://registry.npmjs.org/@mixpanel/rrweb-types/-/rrweb-types-2.0.0-alpha.18.2.tgz#c541e4764a1176484c18bcbaf8bfc7f15623aaeb"
   integrity sha512-ucIYe1mfJ2UksvXW+d3bOySTB2/0yUSqQJlUydvbBz6OO2Bhq3nJHyLXV9ExkgUMZm1ZyDcvvmNUd1+5tAXlpA==
 
-"@mixpanel/rrweb-utils@^2.0.0-alpha.18":
-  version "2.0.0-alpha.18.2"
-  resolved "https://registry.npmjs.org/@mixpanel/rrweb-utils/-/rrweb-utils-2.0.0-alpha.18.2.tgz#fe544fd82d3fcb78735226a2730e587b971092d6"
-  integrity sha512-OomKIB6GTx5xvCLJ7iic2khT/t/tnCJUex13aEqsbSqIT/UzUUsqf+LTrgUK5ex+f6odmkCNjre2y5jvpNqn+g==
-
 "@mixpanel/rrweb-utils@2.0.0-alpha.18.4":
   version "2.0.0-alpha.18.4"
   resolved "https://registry.yarnpkg.com/@mixpanel/rrweb-utils/-/rrweb-utils-2.0.0-alpha.18.4.tgz#ddf2faada57cd5d4b04894fcae87cfe3b61d919a"
   integrity sha512-c3nUbQl19kxHjf8nowFMeXlJw0ZqLesIVBb9t4g1nC4WtaNEPkFotWRdGt5V2cJNQ+aY38/v2uYb8Ren4IcdSQ==
+
+"@mixpanel/rrweb-utils@^2.0.0-alpha.18":
+  version "2.0.0-alpha.18.2"
+  resolved "https://registry.npmjs.org/@mixpanel/rrweb-utils/-/rrweb-utils-2.0.0-alpha.18.2.tgz#fe544fd82d3fcb78735226a2730e587b971092d6"
+  integrity sha512-OomKIB6GTx5xvCLJ7iic2khT/t/tnCJUex13aEqsbSqIT/UzUUsqf+LTrgUK5ex+f6odmkCNjre2y5jvpNqn+g==
 
 "@mixpanel/rrweb@2.0.0-alpha.18.2":
   version "2.0.0-alpha.18.2"
@@ -7320,23 +7320,23 @@
   resolved "https://registry.yarnpkg.com/@vechain/contract-getters/-/contract-getters-1.3.0.tgz#77d19b7529a85d3379399029eef9355e67c50899"
   integrity sha512-Um+vEMoc7yBOIFR+t04XbTth5QaJro2I/8JIpmKyG8jSwVdsN5Jz6Vh+moeRVvhcGaX514tJZJ8ezvZG08h5Vg==
 
-"@vechain/dapp-kit-react@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-2.2.0.tgz#cee86e72a58bb9dddff9a4aaefe254a8a2895985"
-  integrity sha512-203TiCqihRwtBcdI56iNOqdhJXyg6PIkJ/aHgYqX/KbP0RpiJ8LeapHI3Kgw3N0jvfTxq4MTj7mxvLpWyFzpYA==
+"@vechain/dapp-kit-react@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-2.3.2.tgz#95aa52488d0c6974d55eaef9e7dc30fa018acec5"
+  integrity sha512-XiYBHvW49z1XaHo6z7xSFMxmBAebISM4aUO9u61LXgytMdHeCk8ACsoMC0obJOO+tgdiOkY3Z7VH9dGc2owfeA==
   dependencies:
     "@lit/react" "^1.0.7"
-    "@vechain/dapp-kit" "2.2.0"
-    "@vechain/dapp-kit-ui" "2.2.0"
+    "@vechain/dapp-kit" "2.3.2"
+    "@vechain/dapp-kit-ui" "2.3.2"
     "@vechain/sdk-core" "^2.0.0"
     valtio "1.13.2"
 
-"@vechain/dapp-kit-ui@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-2.2.0.tgz#db2e420d7259ca55e771ac8475e5d4971329ee51"
-  integrity sha512-EwR/gja1kI57RnvgVZNMG41/V7sDyCx92y7Vhe5I8DYK4+0wF93CloI0P4apFoXWsWyrD80jUtYDkNGSlXrlMg==
+"@vechain/dapp-kit-ui@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-2.3.2.tgz#98fc808c732e59199a4981712ed49e72b4d48e30"
+  integrity sha512-Y+Rme0xYVGgQT74U//th96InMvtlkZd+MXwstrm2Gv0K1w/LxfDv4bCPDA+2pkEtv2DoeF6JvJBgHPbOAwcXEg==
   dependencies:
-    "@vechain/dapp-kit" "2.2.0"
+    "@vechain/dapp-kit" "2.3.2"
     "@vechain/picasso" "2.1.1"
     "@vechain/sdk-core" "^2.0.0"
     "@vechain/sdk-network" "^2.0.0"
@@ -7347,10 +7347,10 @@
     qrcode "1.5.4"
     valtio "1.13.2"
 
-"@vechain/dapp-kit@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-2.2.0.tgz#a4ed9afc19a7735e1e45847e1f15a40e738167fd"
-  integrity sha512-CUVCiTDshvaEArqFV3gLarmxTw4crgQMNUQb4ZZbzTsL2C7CzJLgG/6xk+PCxIaTv39KCMFSRleJ8zAswOC8Mg==
+"@vechain/dapp-kit@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-2.3.2.tgz#4b0f01e7a4b0df959f71a547523984dd1db89674"
+  integrity sha512-k5CI06t/i5UA3K2UZfufd7rRnf7fecmUBYBzjQ/A8JiNr9yX+6KI7L4b9cpOoLpzty4KAOFL5L6GOOL+F5HllA==
   dependencies:
     "@vechain/connex-wallet-buddy" "^0.1.12"
     "@vechain/sdk-core" "^2.0.0"
@@ -7528,10 +7528,10 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.11.0":
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.11.0.tgz#620c22106f3c99f5e720efe78b6b4e3d47de119b"
-  integrity sha512-2cYf5E1g4MzPo/cDIkXBbYaqWfGMuUnhv7QDsfOnfXGeXxm6GSprbiwBvs6yjU3dcD/IG6tb9WGtSlwbUjcsjQ==
+"@vechain/vechain-kit@2.12.0":
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.12.0.tgz#9258878bf559d985e39675949ca1f650cc4af141"
+  integrity sha512-sMorgplxl5HxO5COBhhD6o7chjee9Dx2aiH7InaFwTppY80OOIBNeg7PCa8xNt4HWAQHmhGLHSNo59Yh0yWzJg==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
@@ -7542,7 +7542,7 @@
     "@tanstack/react-query" "^5.64.2"
     "@tanstack/react-query-devtools" "^5.64.1"
     "@vechain/contract-getters" "1.3.0"
-    "@vechain/dapp-kit-react" "2.2.0"
+    "@vechain/dapp-kit-react" "2.3.2"
     "@vechain/picasso" "^2.1.1"
     "@vechain/vechain-contract-types" "1.6.0-rc"
     "@wagmi/core" "^2.17.2"
@@ -13767,9 +13767,9 @@ hoist-non-react-statics@^3.3.1:
     react-is "^16.7.0"
 
 hono@^4.10.2, hono@^4.10.3:
-  version "4.12.23"
-  resolved "https://registry.yarnpkg.com/hono/-/hono-4.12.23.tgz#998b91651686149f0e6edbb8564d604da04f3cf8"
-  integrity sha512-eIaZ9qDgu7XV0pxOCrg7/WhnQ6Ivm22UcxhXx/A3dcbqbbYgBEkc6e/J/s7j2tS96zoB0S9VBdLwQNCWwUo4LA==
+  version "4.12.25"
+  resolved "https://registry.yarnpkg.com/hono/-/hono-4.12.25.tgz#f2d9996a54e8c9c0c5f5de1c8f3a962e43a98c4e"
+  integrity sha512-2NFaIyNVgJmBs/ecmtGzlmluTFs5cHEWGTdu0t1HBwYzoGXOL5nUQBRMXsXWla5i4KkG//QMzVP88m1+I3fdAQ==
 
 hosted-git-info@^2.1.4:
   version "2.8.9"
@@ -15012,6 +15012,11 @@ json-buffer@3.0.1:
   resolved "https://registry.npmjs.org/json-buffer/-/json-buffer-3.0.1.tgz#9338802a30d3b6605fbe0613e094008ca8c05a13"
   integrity sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==
 
+json-logic-js@2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/json-logic-js/-/json-logic-js-2.0.5.tgz#55f0c687dd6f56b02ccdcfdd64171ed998ab5499"
+  integrity sha512-rTT2+lqcuUmj4DgWfmzupZqQDA64AdmYqizzMPWj3DxGdfFNsxPpcNVSaTj4l8W2tG/+hg7/mQhxjU3aPacO6g==
+
 json-parse-even-better-errors@^2.3.0:
   version "2.3.1"
   resolved "https://registry.npmjs.org/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz#7c47805a94319928e05777405dc12e1f7a4ee02d"
@@ -15089,11 +15094,6 @@ jsonfile@^6.0.1:
     universalify "^2.0.0"
   optionalDependencies:
     graceful-fs "^4.1.6"
-
-json-logic-js@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/json-logic-js/-/json-logic-js-2.0.5.tgz#55f0c687dd6f56b02ccdcfdd64171ed998ab5499"
-  integrity sha512-rTT2+lqcuUmj4DgWfmzupZqQDA64AdmYqizzMPWj3DxGdfFNsxPpcNVSaTj4l8W2tG/+hg7/mQhxjU3aPacO6g==
 
 jsonschema@^1.2.4:
   version "1.5.0"
@@ -19997,9 +19997,9 @@ tinyspy@^4.0.3:
   integrity sha512-azl+t0z7pw/z958Gy9svOTuzqIk6xq+NSheJzn5MMWtWTFywIacg2wUlzKFGtt3cthx0r2SxMK0yzJOR0IES7Q==
 
 tmp@0.0.33, tmp@^0.2.4:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.2.6.tgz#0dfac10fd09a9319288eb0e8f0ed524604e183b4"
-  integrity sha512-5sJPdPjfI5Kx+qbrDesxkglRBxW//g7hCsqspEjwkewGvBMGIKMOTKzLt1hFVJzyadba3lDUN20O9qhvbQUSTA==
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.2.7.tgz#26f4db11d1601ce8012dcb8a798ece1c06a99059"
+  integrity sha512-e0votIpp4Uo2AJYSzVHV6xCcawuiez3DzqDAbrTc3YxBkplN6e+dM13ZeIcZnDg/QpSuU2zfZ3rzwY8ukEnaXw==
 
 tmpl@1.0.5:
   version "1.0.5"
