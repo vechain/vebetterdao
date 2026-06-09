@@ -93,14 +93,14 @@ jobs:
           fi
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@acca2b1b2070338fb9fd1ca27ecee81d687e58e5 # v6.1.2
         with:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: ${{ secrets.aws_role_arn }}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7 # v2.1.4
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
 
       - name: Generate image metadata
         id: meta
@@ -117,7 +117,7 @@ jobs:
       # Create/reuse a persistent BuildKit builder
       # Named builder persists cache mounts on self-hosted runners
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
         with:
           driver: docker-container
           driver-opts: |
@@ -132,7 +132,7 @@ jobs:
       - name: Build and push Docker image
         env:
           CONTEXT_PATH: ${{ inputs.context_path }}
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: ${{ env.CONTEXT_PATH }}
           file: ${{ steps.dockerfile.outputs.path }}
