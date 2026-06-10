@@ -26,6 +26,7 @@
     "dev:down": "vechain-dev down",
     "dev:clean": "rm -f packages/config/local.ts && vechain-dev clean",
     "dev:deploy": "yarn contracts:compile && yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- vechain-dev deploy",
+    "dev:status": "vechain-dev status",
     "dev:local": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- turbo run dev --filter=frontend",
     "dev:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -e .env -- turbo dev:staging --",
     "dev:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
