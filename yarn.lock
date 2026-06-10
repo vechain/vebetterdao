@@ -7363,10 +7363,10 @@
     valtio "1.13.2"
     viem "2.23.2"
 
-"@vechain/dev-stack@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@vechain/dev-stack/-/dev-stack-0.2.0.tgz#fa46a0897f2480c0f3fb27572c2fec8069717db9"
-  integrity sha512-MKbVmELHMvEQPsbBiSkDsvmqcK1jJ01wWxzQ/KjhvPnPqmQk3cmlEi2yviwXK93qfl18ufYXnmrUJcOxPNF+aw==
+"@vechain/dev-stack@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@vechain/dev-stack/-/dev-stack-0.3.2.tgz#2f8088a8b7bc36a45380ef5059374f0d495ea42d"
+  integrity sha512-MjVVG8v0HgcMP9pMmfE3asH0rpcreMOOIPpvpVmDwalvXgAx0N6HMdjMIrarJCjL78DPzQa/ZFDRNTdzwa1KuA==
 
 "@vechain/picasso@2.1.1", "@vechain/picasso@^2.1.1":
   version "2.1.1"
