@@ -3,27 +3,12 @@
 pragma solidity 0.8.20;
 
 /**
- * @title IX2EarnRewardsPool
+ * @title IX2EarnRewardsPoolV8
  * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
  * Funds can be deposited into this contract by specifying the app id that can access the funds.
  * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
  */
-interface IX2EarnRewardsPool {
-  /**
-   * @dev Categorisation of non-sustainable rewards that MUST NOT count toward passport personhood.
-   * Apps use this when distributing bonus/secondary rewards (endorser payouts, leaderboard prizes,
-   * streak bonuses, cashback, etc.) so that indexers and the passport contract can separate
-   * sustainable actions from incentive payouts.
-   */
-  enum NonProofRewardCategory {
-    Endorser,
-    Leaderboard,
-    Streak,
-    Cashback,
-    Referral,
-    Other
-  }
-
+interface IX2EarnRewardsPoolV8 {
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
    *
@@ -124,27 +109,6 @@ interface IX2EarnRewardsPool {
    */
   event RewardsPoolBalanceUpdated(bytes32 indexed appId, uint256 amount, uint256 availableFunds, uint256 rewardsPoolBalance);
 
-  /**
-   * @dev Event emitted when a non-sustainable reward is distributed by an app.
-   * @notice This reward DOES NOT register a passport action and MUST NOT be counted
-   * by indexers toward passport activity / personhood.
-   *
-   * @param amount The amount of $B3TR rewarded.
-   * @param appId The ID of the app that emitted the reward.
-   * @param receiver The address of the user that received the reward.
-   * @param category The reward category (endorser, leaderboard, streak, etc.).
-   * @param description Optional free-text description of the reward.
-   * @param distributor The address of the user that distributed the reward.
-   */
-  event NonProofRewardDistributed(
-    uint256 amount,
-    bytes32 indexed appId,
-    address indexed receiver,
-    NonProofRewardCategory indexed category,
-    string description,
-    address distributor
-  );
-
 
   /**
    * @dev Retrieves the current version of the contract.
@@ -215,11 +179,6 @@ interface IX2EarnRewardsPool {
   /**
    * @dev Function used by x2earn apps to reward users that performed sustainable actions.
    *
-   * @notice DEPRECATED. This function registers a passport action without requiring an on-chain proof,
-   * which allows non-sustainable rewards (leaderboards, bonuses) to keep passports active. New
-   * integrations MUST use either `distributeRewardWithProof` (sustainable actions, mandatory proof)
-   * or `distributeNonProofReward` (bonus/secondary rewards, does not register a passport action).
-   *
    * @param appId the app id that is emitting the reward
    * @param amount the amount of B3TR token the user is rewarded with
    * @param receiver the address of the user that performed the sustainable action and is rewarded
@@ -237,25 +196,6 @@ interface IX2EarnRewardsPool {
    * @param proof the JSON string that contains the proof and impact of the sustainable action
    */
   function distributeRewardDeprecated(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
-
-  /**
-   * @dev Counterpart of distributeRewardDeprecated that attributes the passport action to a specific round.
-   * @notice This function is deprecated in favor of distributeRewardWithProofForRound. Kept for parity with
-   * the legacy distributeRewardDeprecated entrypoint that some apps still rely on.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof the JSON string that contains the proof and impact of the sustainable action
-   * @param actionRound the round in which the action was actually performed
-   */
-  function distributeRewardDeprecatedForRound(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    string memory proof,
-    uint256 actionRound
-  ) external;
 
   /**
    * @dev Function used by x2earn apps to reward users that performed sustainable actions.
@@ -372,25 +312,6 @@ interface IX2EarnRewardsPool {
     string memory description,
     string memory metadata,
     uint256 actionRound
-  ) external;
-
-  /**
-   * @dev Distributes a non-sustainable / bonus reward that DOES NOT register a passport action.
-   * Use this for endorser payouts, leaderboard prizes, streak bonuses, cashback, etc.
-   * Emits {NonProofRewardDistributed} so indexers can exclude this reward from personhood signals.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that receives the bonus reward
-   * @param category the category of the non-sustainable reward
-   * @param description optional free-text description (e.g. "Week 12 leaderboard - 3rd place")
-   */
-  function distributeNonProofReward(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    NonProofRewardCategory category,
-    string memory description
   ) external;
 
   /**
