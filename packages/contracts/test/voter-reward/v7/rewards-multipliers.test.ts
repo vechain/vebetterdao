@@ -485,7 +485,7 @@ describe("Rewards Multipliers - @shard10b", function () {
   describe("Upgrade Safety", function () {
     it("VoterRewards V7 should preserve version and functions after upgrade chain", async () => {
       const { voterRewards } = await getOrDeployContractInstances({ forceDeploy: true })
-      expect(await voterRewards.version()).to.equal("7")
+      expect(await voterRewards.version()).to.equal("8")
 
       const [t1, t2, t3] = await voterRewards.getFreshnessMultipliers(0)
       expect(t1).to.be.gte(10000n)

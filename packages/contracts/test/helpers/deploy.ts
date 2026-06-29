@@ -1163,7 +1163,7 @@ export const getOrDeployContractInstances = async ({
   // Upgrade VoterRewards V6 -> V7 (needs navigator params)
   voterRewards = (await upgradeProxy(
     "VoterRewardsV6",
-    "VoterRewards",
+    "VoterRewardsV7",
     await voterRewards.getAddress(),
     [
       0, // roundStartTimepoint — no active round during initial deploy, 0 ensures values take effect immediately
@@ -1178,6 +1178,11 @@ export const getOrDeployContractInstances = async ({
       version: 7,
     },
   )) as VoterRewards
+
+  // Upgrade VoterRewards V7 -> V8 (logic-only fix: snapshot delegation state + decoupled CLAIM action)
+  voterRewards = (await upgradeProxy("VoterRewardsV7", "VoterRewards", await voterRewards.getAddress(), [], {
+    version: 8,
+  })) as VoterRewards
 
   // Deploy DBAPool V1
   const dbaPoolV1 = (await deployProxy("DBAPoolV1", [

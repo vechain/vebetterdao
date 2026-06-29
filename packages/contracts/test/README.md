@@ -74,5 +74,6 @@ All active shards are listed in `.github/workflows/unit-tests.yml`.
 - **shard19h**: Navigator - Security (malicious users/navigators/relayers, access control, numerical correctness)
 - **shard19i**: Navigator - Staked Voting Power (B3TR/VOT3 conversion accounting, checkpoints, voting power inclusion, slash conversion, no double-counting)
 - **shard20e2e**: Navigator - Relayer E2E (full ecosystem auto-voting + citizen + governance + multi-relayer scenarios)
+- **shard21**: VoterRewards - V8 Delegation Snapshot Fix (snapshot-based fee gates, decoupled CLAIM action, V7→V8 upgrade)
 
 When adding new tests, assign them to an appropriate shard to maintain balanced execution times across all shards.

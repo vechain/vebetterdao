@@ -9,7 +9,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Voter Rewards": {
     name: "voter-rewards",
     configAddressField: "voterRewardsContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
       v3: "Vechain Nodes x GM upgrades feature",
@@ -17,6 +17,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Proposal Execution: Add GM Pool for GM Holder Rewards",
       v6: "Integrate Auto-voting relayer rewards pool and fees",
       v7: "Add rewards multipliers (freshness + governance intent) + NavigatorRegistry",
+      v8: "Fix navigator/relayer fee gates to use snapshot delegation state; decouple CLAIM action registration from relayerFee > 0 (unblocks rounds when citizens un-delegate mid-cycle)",
     },
   },
   B3TRGovernor: {

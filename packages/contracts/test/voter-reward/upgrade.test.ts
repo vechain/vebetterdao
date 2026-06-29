@@ -1385,7 +1385,11 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
       storageSlotsV5.push(await ethers.provider.getStorage(await voterRewardsV5.getAddress(), i))
     }
 
-    // Upgrade from V5 to V6 (will be updated after XAllocationVoting upgrade)
+    // Upgrade from V5 to V6 (will be updated after XAllocationVoting upgrade).
+    // Targets the LATEST implementation so newer XAllocationVoting (upgraded later in this
+    // test) can call cross-contract functions like getFreshnessMultipliers that didn't
+    // exist in V6. Only V6 initializer args are applied — V7/V8 storage stays at zero,
+    // which returns neutral fallback values from getFreshnessMultipliers/getIntentMultipliers.
     const voterRewardsV6 = (await upgradeProxy(
       "VoterRewardsV5",
       "VoterRewards",
@@ -1407,8 +1411,8 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
       }
     }
 
-    // Verify V6 initialization
-    expect(await voterRewardsV6.version()).to.equal("7")
+    // Verify V6 initialization (implementation is at latest version but V6 init args were applied)
+    expect(await voterRewardsV6.version()).to.equal("8")
     expect(await voterRewardsV6.relayerRewardsPool()).to.equal(await relayerRewardsPool.getAddress())
 
     // Test V6 relayer fee functionality with real voting round
@@ -1537,8 +1541,8 @@ describe("VoterRewards Upgrade Test - @shard10a", function () {
     // FINAL STATE INTEGRITY VERIFICATION
     // ========================================
 
-    // Verify V6 contract is functional and state is intact
-    expect(await voterRewardsV6.version()).to.equal("7", "V7 contract should report correct version")
+    // Verify contract is functional and state is intact (implementation = latest, init = V6 args)
+    expect(await voterRewardsV6.version()).to.equal("8", "Implementation should report latest version")
 
     // Verify V6 fee logic works correctly (core V6 functionality)
     expect(voter1Fee).to.be.gt(0, "V6: Auto-voting user should have relayer fees")
