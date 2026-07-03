@@ -15,7 +15,7 @@
     "simulate:local:signal-bot-user": "TEST_ENVIRONMENT=local npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.1050.0",
+    "@aws-sdk/client-secrets-manager": "^3.1064.0",
     "@vechain/vebetterdao-contracts": "*",
     "lambda-local": "^2.1.2"
   },
