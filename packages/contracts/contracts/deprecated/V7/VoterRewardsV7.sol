@@ -25,16 +25,16 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import "./interfaces/IGalaxyMember.sol";
-import "./interfaces/IEmissions.sol";
-import "./interfaces/IB3TR.sol";
+import "../../interfaces/IGalaxyMember.sol";
+import "../../interfaces/IEmissions.sol";
+import "../../interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import "@openzeppelin/contracts/utils/types/Time.sol";
-import "./interfaces/IXAllocationVotingGovernor.sol";
-import "./interfaces/IRelayerRewardsPool.sol";
-import "./interfaces/INavigatorRegistry.sol";
+import "../../interfaces/IXAllocationVotingGovernor.sol";
+import "../../interfaces/IRelayerRewardsPool.sol";
+import "../../interfaces/INavigatorRegistry.sol";
 
 /**
  * @title VoterRewards
@@ -98,21 +98,8 @@ import "./interfaces/INavigatorRegistry.sol";
  * - New events: FreshnessMultipliersSet, IntentMultipliersSet, NavigatorFeeTaken, NavigatorRegistryAddressUpdated
  * - New view: getNavigatorFee(cycle, voter)
  * - setNavigatorRegistry() setter
- *
- * ------------------ Version 8 Changes ------------------
- * - Bugfix: navigator/relayer fee gates now use snapshot delegation state via
- *   isDelegatedAtTimepoint(voter, roundSnapshot) instead of isDelegated(voter).
- *   Previously, a citizen who un-delegated (or whose navigator exited) between
- *   round snapshot and claim caused both fees to drop to 0 — and because
- *   registerRelayerAction(CLAIM) was gated on relayerFee > 0, the pool's
- *   expected claim weight was never satisfied and the round locked.
- *   Affected mainnet rounds: 101, 102.
- * - registerRelayerAction(CLAIM) decoupled from relayerFee > 0; now fires
- *   whenever the user qualified at snapshot (hadAutoVoting || wasDelegated),
- *   matching the pool's expected-actions accounting. Closes the same deadlock
- *   for future fee-config edge cases (feeCap=0, relayerFeePercentage=0).
  */
-contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract VoterRewardsV7 is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
 
   /// @notice The role that can register votes for rewards calculation.
@@ -508,13 +495,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
     bool hadAutoVotingEnabled = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
-    // Use snapshot delegation state — citizen may have un-delegated (or navigator may have exited)
-    // between round snapshot and claim; the round's expected actions were sized at snapshot time.
-    bool wasDelegated = address($.navigatorRegistry) != address(0)
-      && $.navigatorRegistry.isDelegatedAtTimepoint(voter, emissionCycleStartBlock);
+    bool isDelegated = address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter);
 
     // Early access check applies to both auto-voters and navigator citizens
-    if (hadAutoVotingEnabled || wasDelegated) {
+    if (hadAutoVotingEnabled || isDelegated) {
       _checkEarlyAccessEligibility(cycle, voter);
     }
 
@@ -548,20 +532,15 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
       emit NavigatorFeeTaken(navigator, voter, navigatorFee, cycle);
     }
 
-    // Relayer fee deposit + event are gated on a non-zero fee (no point depositing 0 / emitting noise).
+    // Relayer fee: deposit to RelayerRewardsPool
     if (relayerFee > 0) {
       require($.b3tr.approve(address($.relayerRewardsPool), relayerFee), "VoterRewards: pool fee approval failed");
       $.relayerRewardsPool.deposit(relayerFee, cycle);
 
-      emit RelayerFeeTaken(msg.sender, relayerFee, cycle, voter);
-    }
-
-    // CLAIM action registration is decoupled from fee > 0: the pool's expected-actions count
-    // sizes one CLAIM credit for every allocation user who qualified at snapshot, regardless of
-    // whether a fee was actually collected. Without this, a zero fee (un-delegated mid-cycle,
-    // or feeCap/relayerFeePercentage set to 0) leaves the round permanently locked.
-    if (hadAutoVotingEnabled || wasDelegated) {
+      // Register CLAIM action for the relayer
       $.relayerRewardsPool.registerRelayerAction(msg.sender, voter, cycle, RelayerAction.CLAIM);
+
+      emit RelayerFeeTaken(msg.sender, relayerFee, cycle, voter);
     }
 
     // Transfer the remaining reward to the voter
@@ -660,22 +639,19 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
       return (0, 0, 0, 0);
     }
 
-    // Both fee gates use snapshot delegation state — see Version 8 changelog and claimReward().
-    uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
-    bool wasDelegated = address($.navigatorRegistry) != address(0)
-      && $.navigatorRegistry.isDelegatedAtTimepoint(voter, emissionCycleStartBlock);
-
-    // Navigator fee: deducted first if voter was delegated to a navigator at the snapshot
+    // Navigator fee: deducted first if voter is delegated to a navigator
     uint256 afterNavFee = totalReward;
-    if (wasDelegated) {
+    if (address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter)) {
       navigatorFee = (totalReward * $.navigatorRegistry.getFeePercentage()) / MULTIPLIER_SCALE;
       afterNavFee = totalReward - navigatorFee;
     }
 
     // Relayer fee: applies to auto-voting users AND navigator citizens (on amount after navigator fee)
     uint256 afterAllFees = afterNavFee;
+    uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
+    bool isDelegated = address($.navigatorRegistry) != address(0) && $.navigatorRegistry.isDelegated(voter);
     bool hadAutoVoting = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
-    if (hadAutoVoting || wasDelegated) {
+    if (hadAutoVoting || isDelegated) {
       relayerFee = $.relayerRewardsPool.calculateRelayerFee(afterNavFee);
       afterAllFees = afterNavFee - relayerFee;
     }
@@ -943,7 +919,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "8";
+    return "7";
   }
 
   /// @dev Clock used for flagging checkpoints.
