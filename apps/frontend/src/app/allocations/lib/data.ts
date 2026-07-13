@@ -232,5 +232,5 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
     totalVoters: Number(roundDetails.totalVoters),
     apps: appsWithVotes,
     previous3RoundsEarnings: rounds.data,
-  }) as AllocationRoundDetails
+  }) as unknown as AllocationRoundDetails
 }
