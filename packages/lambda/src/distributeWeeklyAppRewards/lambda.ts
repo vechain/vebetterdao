@@ -6,6 +6,7 @@ import { AppEnv } from "@repo/config/contracts"
 import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { buildClaimClause, getAllApps, getIdsOfUnclaimed } from "../helpers/xApps"
+import { detectRoundState } from "../helpers/emissions"
 import { getSecret } from "../helpers/secret"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts"
@@ -397,6 +398,21 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       isPollingEnabled: false,
     })
 
+    // Only distribute after the new round has started. Cycle blocks drift later in wall-clock
+    // time every week, so scheduled runs can fire before Emissions.distribute() was called for
+    // the current cycle; in that case currentRound - 1 points at the round that was already
+    // distributed last week and this run would be a misleading no-op.
+    const roundState = await detectRoundState(thorClient, CONFIG)
+    if (!roundState.hasRoundStarted) {
+      logger.info(
+        `Round ${roundState.currentCycle} has not started yet (${roundState.blocksUntilNextCycle} blocks until next cycle). Skipping distribution, a later catch-up run will handle it.`,
+      )
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ skipped: true, reason: "roundNotStartedYet", roundState }),
+      }
+    }
+
     // Distribute X-Allocations in batches to avoid exceeding block gas limit
     let xAllocationsResult
     try {
@@ -424,12 +440,9 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     const { receipts: receiptsClaim, allClaimed, failedBatches } = xAllocationsResult
 
     if (allClaimed) {
+      // Log only: catch-up runs after a successful distribution land here on every execution,
+      // publishing to Slack would spam the channel.
       console.log("No X-Apps need to claim allocations - skipping")
-      await publishMessage(
-        client,
-        SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: No eligible X-Apps found to claim allocations`,
-      )
     } else if (receiptsClaim.length > 0) {
       console.log(`X-Allocations distributed in ${receiptsClaim.length} batch(es)`)
       const failedMsg = failedBatches > 0 ? ` (${failedBatches} batch(es) failed)` : ""
@@ -478,19 +491,12 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     })
 
     if (notDeployed) {
+      // Log only: on environments without a DBA Pool every catch-up run would land here.
       console.log("DBA Pool not deployed yet, skipping")
-      await publishMessage(
-        client,
-        SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: DBA Pool not deployed yet, skipping DBA distribution`,
-      )
     } else if (notReady) {
+      // Log only: catch-up runs after a successful distribution land here on every execution,
+      // publishing to Slack would spam the channel.
       console.log("DBA distribution not ready yet (already distributed or round not ready)")
-      await publishMessage(
-        client,
-        SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: DBA distribution not ready (already distributed or round not ready yet)`,
-      )
     } else if (skipped) {
       console.log("DBA distribution skipped (no eligible apps)")
     } else if (!receiptDBA) {

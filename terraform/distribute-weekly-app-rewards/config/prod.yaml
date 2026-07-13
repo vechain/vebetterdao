@@ -17,3 +17,6 @@ lambda_source_dir: "packages/lambda/dist/mainnet/distributeWeeklyAppRewards"
 # Schedule Configuration
 # 5 minutes after start-emissions-round (cron(45 6 ? * MON *))
 schedule_expression: "cron(50 6 ? * MON *)"
+# Catch-up runs every 10 min (7:05-12:55 UTC), offset 5 min after the start-emissions-round
+# catch-up runs. The lambda skips idempotently while the round is pending / after distribution.
+catchup_schedule_expression: "cron(5/10 7-12 ? * MON *)"

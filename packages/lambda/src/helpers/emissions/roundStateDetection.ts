@@ -23,7 +23,24 @@ export interface RoundState {
    * Negative = We're past the distribution block (round has already started)
    */
   blocksUntilNextCycle: number
+  /**
+   * Whether distribute() was already called for the current cycle.
+   *
+   * True = The next cycle block is far in the future (> ROUND_STARTED_THRESHOLD_BLOCKS),
+   *        which only happens right after a round has started.
+   * False = The round start is still pending (we're at/past the distribution block, or the
+   *         scheduler fired early because cycle blocks drift later in wall-clock time).
+   */
+  hasRoundStarted: boolean
 }
+
+/**
+ * Blocks-until-next-cycle above this value mean the round was already started.
+ * Cycle start blocks drift later in wall-clock time (VeChain misses blocks), but the drift is
+ * measured in minutes/hours, while a fresh cycle is at least 2 days (~17k blocks) away.
+ * 8640 blocks = 24 hours.
+ */
+export const ROUND_STARTED_THRESHOLD_BLOCKS = 8640
 
 // Detects the current state of the emissions round
 export async function detectRoundState(thor: ThorClient, config: AppConfig): Promise<RoundState> {
@@ -60,6 +77,8 @@ export async function detectRoundState(thor: ThorClient, config: AppConfig): Pro
 
   const shouldSkipDistribute = isBeforeDistributionBlock && !isWithinWaitingWindow
 
+  const hasRoundStarted = blocksUntilNextCycle > ROUND_STARTED_THRESHOLD_BLOCKS
+
   return {
     currentCycle,
     nextCycleBlock,
@@ -67,5 +86,6 @@ export async function detectRoundState(thor: ThorClient, config: AppConfig): Pro
     isBeforeDistributionBlock,
     shouldSkipDistribute,
     blocksUntilNextCycle,
+    hasRoundStarted,
   }
 }
