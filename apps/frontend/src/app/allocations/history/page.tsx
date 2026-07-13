@@ -5,7 +5,7 @@ import { ButtonGroup, IconButton, Pagination, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts/factories/Emissions__factory"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/factories/x-allocation-voting-governance/XAllocationVoting__factory"
-import { ThorClient, executeCallClause, executeMultipleClausesCall } from "@vechain/vechain-kit"
+import { ThorClient, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import Link from "next/link"
 import { Suspense } from "react"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
@@ -51,23 +51,13 @@ interface RoundsPageResponse {
   currentRoundId: number
 }
 
-export const getRoundsDates = async (thor: ThorClient) => {
-  const [currentRound] = await executeCallClause({
-    thor,
-    abi: xAllocationVotingabi,
-    contractAddress: xAllocationVotingContractAddress,
-    method: "currentRoundId" as const,
-    args: [],
-  })
-  const currentRoundId = Number(currentRound)
-  const roundsArray = Array(currentRoundId)
-    .fill(null)
-    .map((_, idx) => currentRoundId - idx)
+export const getRoundsDates = async (thor: ThorClient, roundIds: number[]) => {
+  if (roundIds.length === 0) return new Map<number, { startDate: Date; endDate: Date }>()
 
   const bestBlockCompressed = await thor.blocks.getBestBlockCompressed()
   const rounds = await executeMultipleClausesCall({
     thor,
-    calls: roundsArray.map(
+    calls: roundIds.map(
       round =>
         ({
           abi: xAllocationVotingabi,
@@ -84,7 +74,7 @@ export const getRoundsDates = async (thor: ThorClient) => {
       const endBlock = round.voteStart + round.voteDuration
 
       return [
-        roundsArray[idx],
+        roundIds[idx]!,
         {
           startDate: blockNumberToDate(BigInt(startBlock), bestBlockCompressed),
           endDate: blockNumberToDate(BigInt(endBlock), bestBlockCompressed),
@@ -136,7 +126,7 @@ export const getRounds = async ({
       ),
     })
 
-    const roundsDatesMap = await getRoundsDates(thor)
+    const roundsDatesMap = await getRoundsDates(thor, roundIds)
 
     const roundsData: RoundEarnings[] = earningsResults
       .map((earnings, idx) => {

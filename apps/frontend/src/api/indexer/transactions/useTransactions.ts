@@ -35,9 +35,10 @@ export const useTransactions = (account: string, queryOptions?: TransactionsQuer
     "get",
     "/api/v2/history/{account}",
     {
-      params: { path: { account }, query: { ...queryOptions, eventName }, enabled: !!account },
+      params: { path: { account }, query: { ...queryOptions, eventName } },
     },
     {
+      enabled: !!account,
       pageParamName: "page",
       initialPageParam: 0,
       getNextPageParam: (
