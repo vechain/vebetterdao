@@ -51,8 +51,20 @@ export const TotalRewardsDistributionModal = ({
   onClose: VoidFunction
 }) => {
   const { t } = useTranslation()
-  const { apps, totalVoters, vote2EarnAmount, gmAmount, xAllocationsAmount, treasuryAmount, id, currentRoundId } =
-    roundDetails
+  const {
+    apps,
+    totalVoters,
+    vote2EarnAmount: vote2EarnAmountRaw,
+    gmAmount: gmAmountRaw,
+    xAllocationsAmount: xAllocationsAmountRaw,
+    treasuryAmount: treasuryAmountRaw,
+    id,
+    currentRoundId,
+  } = roundDetails
+  const vote2EarnAmount = BigInt(vote2EarnAmountRaw)
+  const gmAmount = BigInt(gmAmountRaw)
+  const xAllocationsAmount = BigInt(xAllocationsAmountRaw)
+  const treasuryAmount = BigInt(treasuryAmountRaw)
   const isCurrentRound = id === currentRoundId
 
   // For the active round, estimate how much DBA overflow goes to treasury (merit cap leftovers)

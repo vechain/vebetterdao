@@ -43,7 +43,7 @@ const PAGE_SIZE = 10
 export type RoundEarnings = AppEarnings[number] & {
   roundStart: Date
   roundEnd: Date
-  vote2EarnAmount: bigint
+  vote2EarnAmount: string
 }
 
 interface RoundsPageResponse {
@@ -137,7 +137,7 @@ export const getRounds = async ({
           roundId,
           roundStart,
           roundEnd,
-          vote2EarnAmount: roundsVote2EarnAmounts[idx],
+          vote2EarnAmount: roundsVote2EarnAmounts[idx]!.toString(),
           totalAmount: earnings.totalAmount || 0,
           unallocatedAmount: earnings.unallocatedAmount || 0,
           teamAllocationAmount: earnings.teamAllocationAmount || 0,

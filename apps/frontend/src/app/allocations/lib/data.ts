@@ -22,10 +22,10 @@ export interface AppWithVotes {
   teamWalletAddress: string
   name: string
   metadataURI: string
-  createdAtTimestamp: bigint
+  createdAtTimestamp: string
   appAvailableForAllocationVoting: boolean
   voters: number
-  votesReceived: bigint
+  votesReceived: string
   metadata?: Awaited<ReturnType<typeof getXAppMetadata>>
   earnings?: AppEarnings[number]
 }
@@ -34,18 +34,22 @@ export interface AllocationRoundDetails {
   id: number
   currentRoundId: number
   totalVoters: number
-  totalVP: bigint
+  totalVP: string
   roundStart?: Date
   roundEnd?: Date
   currentRoundDeadline?: Date
   apps: AppWithVotes[]
-  cycleTotal: bigint
-  vote2EarnAmount: bigint
-  gmAmount: bigint
-  xAllocationsAmount: bigint
-  treasuryAmount: bigint
+  cycleTotal: string
+  vote2EarnAmount: string
+  gmAmount: string
+  xAllocationsAmount: string
+  treasuryAmount: string
   previous3RoundsEarnings: RoundEarnings[]
 }
+
+/** BigInt values cannot cross the RSC boundary — stringify before passing to client components. */
+export const serializeForClient = <T>(value: T): T =>
+  JSON.parse(JSON.stringify(value, (_key, v) => (typeof v === "bigint" ? v.toString() : v))) as T
 
 const xAllocationVotingAbi = XAllocationVoting__factory.abi
 const xAllocationVotingAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
@@ -166,7 +170,9 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
 
   const apps = roundDetails!.apps
   const appIds = apps.map(app => app.id)
-  const appsMetadata = await Promise.all(apps.map(app => getXAppMetadata(`ipfs://${app.metadataURI}`)))
+  const appsMetadata = await Promise.all(
+    apps.map(app => getXAppMetadata(`ipfs://${app.metadataURI}`).catch(() => undefined)),
+  )
 
   const earnings = await (currentRoundId === roundId
     ? executeMultipleClausesCall({
@@ -219,12 +225,12 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
     })
     .sort((appA, appB) => (appA.votesReceived > appB.votesReceived ? -1 : 1))
 
-  return {
+  return serializeForClient({
     id: roundId,
     currentRoundId: Number(currentRoundId),
     ...roundDetails,
     totalVoters: Number(roundDetails.totalVoters),
     apps: appsWithVotes,
     previous3RoundsEarnings: rounds.data,
-  }
+  }) as AllocationRoundDetails
 }
