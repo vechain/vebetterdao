@@ -16,3 +16,6 @@ lambda_source_dir: "packages/lambda/dist/mainnet/startEmissionsRound"
 
 # Schedule Configuration
 schedule_expression: "cron(45 6 ? * MON *)" # Runs every Monday at 6:45 AM UTC
+# Catch-up runs every 10 min (7:00-12:50 UTC) to absorb the weekly wall-clock drift of the
+# cycle start block. The lambda skips idempotently once the round has started.
+catchup_schedule_expression: "cron(0/10 7-12 ? * MON *)"

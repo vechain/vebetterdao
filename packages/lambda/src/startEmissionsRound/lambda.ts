@@ -241,15 +241,28 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       logger.info(
         `Skipping start round. Current block: ${roundState.currentBlock}, Next cycle block: ${roundState.nextCycleBlock}, Blocks until next cycle: ${roundState.blocksUntilNextCycle}`,
       )
+
+      // Round already started (by a previous catch-up run or manually): skip silently, this is
+      // the expected outcome for every catch-up run after the round has started.
+      if (roundState.hasRoundStarted) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ skipped: true, reason: "roundAlreadyStarted", roundState }),
+        }
+      }
+
+      // Round start is pending but still too far away to wait for within the lambda timeout.
+      // Cycle blocks drift later in wall-clock time every week, this run is expected to be
+      // picked up by a later catch-up schedule run.
       await publishMessage(
         client,
         SLACK_CHANNEL_ID,
-        `${SLACK_MESSAGE_PREFIX}:information_source: Round ${roundState.currentCycle}. Skipping start round because we are (${roundState.blocksUntilNextCycle} blocks away, exceeds waiting period).`,
+        `${SLACK_MESSAGE_PREFIX}:information_source: Round ${roundState.currentCycle}. Round start is ${roundState.blocksUntilNextCycle} blocks away (~${Math.round((roundState.blocksUntilNextCycle * 10) / 60)} min, exceeds waiting period). A catch-up run will start it.`,
       )
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ skipped: true, reason: "shouldSkipDistribute", roundState }),
+        body: JSON.stringify({ skipped: true, reason: "roundStartPending", roundState }),
       }
     }
 
