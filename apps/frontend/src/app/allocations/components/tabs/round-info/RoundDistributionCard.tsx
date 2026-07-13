@@ -28,9 +28,13 @@ export function RoundDistributionCard({ roundDetails }: { roundDetails: Allocati
   const dbaOverflow = dbaEstimate?.treasuryOverflow ? parseEther(dbaEstimate.treasuryOverflow) : 0n
 
   const distribution = useMemo(() => {
-    const toApps = Number(roundDetails.xAllocationsAmount - dbaOverflow)
-    const toVoters = Number(roundDetails.vote2EarnAmount + roundDetails.gmAmount)
-    const toTreasury = Number(roundDetails.treasuryAmount + dbaOverflow)
+    const xAllocationsAmount = BigInt(roundDetails.xAllocationsAmount)
+    const vote2EarnAmount = BigInt(roundDetails.vote2EarnAmount)
+    const gmAmount = BigInt(roundDetails.gmAmount)
+    const treasuryAmount = BigInt(roundDetails.treasuryAmount)
+    const toApps = Number(xAllocationsAmount - dbaOverflow)
+    const toVoters = Number(vote2EarnAmount + gmAmount)
+    const toTreasury = Number(treasuryAmount + dbaOverflow)
     const total = toApps + toVoters + toTreasury
 
     const appsPercent = (toApps / total) * 100
