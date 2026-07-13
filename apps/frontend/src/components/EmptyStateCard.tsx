@@ -13,6 +13,8 @@ interface EmptyStateRootProps {
     label: string
     onClick: () => void
   } & Omit<ButtonProps, "children" | "onClick">
+  /** Optional custom action when the CTA needs its own wrapper (for example, a dialog trigger). */
+  actionNode?: ReactNode
 }
 interface EmptyStateCardProps extends EmptyStateRootProps {
   /** EmptyState.Root props - size, py, and all other Chakra props */
@@ -33,6 +35,7 @@ export const EmptyStateCard = ({
   title,
   description,
   action,
+  actionNode,
   rootProps = {},
   contentProps = {},
   indicatorProps = {},
@@ -53,6 +56,7 @@ export const EmptyStateCard = ({
               {label}
             </Button>
           )}
+          {actionNode}
         </VStack>
       </EmptyState.Content>
     </EmptyState.Root>

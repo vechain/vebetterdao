@@ -8,6 +8,7 @@ import { DashboardAllocationRounds } from "../proposals/components/components/Da
 import { ActionBanner } from "./ActionBanners/ActionBanner"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
+import { HomeQuestStatusCard } from "./HomeQuestStatusCard"
 import { NavigatorDiscoveryCard } from "./NavigatorDiscoveryCard"
 import { OnboardingCard } from "./OnboardingCard/OnboardingCard"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
@@ -36,6 +37,7 @@ export const HomePageContent = () => {
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
+            <HomeQuestStatusCard />
             {isAboveMd && (
               <>
                 <CantVoteCard />

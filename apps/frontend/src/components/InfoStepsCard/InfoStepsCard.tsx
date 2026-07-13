@@ -8,17 +8,18 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
   Image,
   List,
   Steps,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
 import { motion, AnimatePresence, useAnimate } from "framer-motion"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
+import { LuArrowLeft, LuX } from "react-icons/lu"
 
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
@@ -111,9 +112,29 @@ export const InfoStepsCard = ({ steps, isOpen, onClose, lastStepButtonText, onLa
         height="100%">
         <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
           <HStack w="full" justify="space-between" alignItems="center">
-            {currentStepIndex > 0 && <UilArrowLeft onClick={goToPrevious} cursor="pointer" />}
+            {currentStepIndex > 0 ? (
+              <IconButton
+                variant="plain"
+                minW="11"
+                h="11"
+                aria-label={t("Back")}
+                data-cy="info-steps-back"
+                onClick={goToPrevious}>
+                <LuArrowLeft />
+              </IconButton>
+            ) : (
+              <Box boxSize="11" aria-hidden="true" />
+            )}
             <StepIndicator activeStep={currentStepIndex} count={steps.length} />
-            <UilTimes onClick={onClose} cursor="pointer" size={24} />
+            <IconButton
+              variant="plain"
+              minW="11"
+              h="11"
+              aria-label={t("Close")}
+              data-cy="info-steps-close"
+              onClick={onClose}>
+              <LuX />
+            </IconButton>
           </HStack>
           <Box pt={5}>
             <VStack w="full" textAlign="center" gap={4}>
@@ -143,7 +164,7 @@ export const InfoStepsCard = ({ steps, isOpen, onClose, lastStepButtonText, onLa
                 ))}
               </List.Root>
               <HStack w="full" justifyContent="flex-start" pt={5}>
-                <Button variant="primary" w="full" onClick={handleNext}>
+                <Button variant="primary" minH="11" w="full" data-cy="info-steps-next" onClick={handleNext}>
                   {isLastStep ? resolvedLastStepText : t("Next")}
                 </Button>
               </HStack>
@@ -202,14 +223,14 @@ export const InfoStepsCard = ({ steps, isOpen, onClose, lastStepButtonText, onLa
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.4, ease: [0.25, 0.25, 0.25, 0.2] }}>
-                      <Button variant="secondary" w="32" onClick={goToPrevious}>
+                      <Button variant="secondary" minH="11" w="32" data-cy="info-steps-back" onClick={goToPrevious}>
                         {t("Back")}
                       </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <Button ref={scope} variant="primary" onClick={handleNext} w="32">
+                <Button ref={scope} variant="primary" minH="11" data-cy="info-steps-next" onClick={handleNext} w="32">
                   {isLastStep ? resolvedLastStepText : t("Next")}
                 </Button>
               </HStack>
@@ -224,7 +245,15 @@ export const InfoStepsCard = ({ steps, isOpen, onClose, lastStepButtonText, onLa
             justifyContent="center"
             position="relative">
             <Box position="absolute" top={3} right={5} p={0}>
-              <UilTimes onClick={onClose} cursor="pointer" size={24} />
+              <IconButton
+                variant="plain"
+                minW="11"
+                h="11"
+                aria-label={t("Close")}
+                data-cy="info-steps-close"
+                onClick={onClose}>
+                <LuX />
+              </IconButton>
             </Box>
             <motion.div
               initial={{ opacity: 0 }}

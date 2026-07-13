@@ -91,7 +91,7 @@ Pagination: `CHALLENGES_PAGE_SIZE = 12`. Indexer `data[].challengeId` drives the
 
 ### Build helpers (contract multicall)
 
-- [`buildChallengeView.ts`](apps/frontend/src/api/challenges/buildChallengeView.ts): multicall `getChallenge + getChallengeStatus + getParticipantStatus + isInvitationEligible + isSplitWinWinner + getParticipantActions` per id, then `resolveChallengeDetail` → `ChallengeView`
+- [`buildChallengeView.ts`](apps/frontend/src/api/challenges/buildChallengeView.ts): multicall `getChallenge + getChallengeStatus + getParticipantStatus + isInvitationEligible + isSplitWinWinner + getParticipantActions` per id, then `resolveChallengeDetail` → `ChallengeView`. List views retain `viewerActions` so progress can be shown without another contract read.
 - [`buildChallengeDetail.ts`](apps/frontend/src/api/challenges/buildChallengeDetail.ts): same + `getChallengeParticipants/Invited/Declined/SelectedApps/Winners` + `fetchChallengeClaimedBy` + `ChallengeCreated` event lookup for `createdAt`
 
 ### Wei/Ether boundary
@@ -132,12 +132,15 @@ Pure function from raw state → per-viewer `canX` booleans. Key rules:
 
 [ChallengesPageContent](apps/frontend/src/app/b3mo-quests/components/ChallengesPageContent.tsx) is a 2-tab shell:
 
-- **Current** ([CurrentTab.tsx](apps/frontend/src/app/b3mo-quests/components/CurrentTab.tsx)): 4 `SectionCarousel`s (Action needed, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`).
+- **Participation guide** ([QuestParticipationGuide.tsx](apps/frontend/src/app/b3mo-quests/components/QuestParticipationGuide.tsx)): reusable in-product explanation of funding modes, winner rules, valid action windows, claims, and refunds. It replaces the former `ChallengeStepsCard` while preserving the dismissible desktop/mobile flow.
+- **Current** ([CurrentTab.tsx](apps/frontend/src/app/b3mo-quests/components/CurrentTab.tsx)): a prioritized `NextChallengeStatusCard` followed by 4 `SectionCarousel`s (Action needed, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: the highlighted next move is removed first, then items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`), and a fully empty connected-wallet view offers the existing Stake/private creation flow.
 - **History** ([HistoryTab.tsx](apps/frontend/src/app/b3mo-quests/components/HistoryTab.tsx)): `ChallengesGrid` infinite scroll, items deduped by `challengeId`. **No filters** (sections already segment meaningfully; filters added noise).
 
 `SectionCarousel` uses Swiper with `onReachEnd` → auto `fetchNextPage`, skeleton slides while `isFetchingNextPage`. `ChallengesGrid` uses an IntersectionObserver sentinel + skeleton grid cards.
 
 `ChallengeCard` action buttons come from `canX` flags; detail page uses the same flags (`ChallengeActionsRow`, modals under [`[challengeId]/components/`](apps/frontend/src/app/b3mo-quests/[challengeId]/components/)).
+
+`nextChallengeStatus.ts` selects one wallet-aware state in urgency order (claim/refund/finalize, invitation/action, live progress, upcoming, fully-claimed Split Win outcome). The shared `NextChallengeStatusCard` is used by both the Quest hub and the connected-wallet homepage; Max Actions copy reports progress without implying a guaranteed win.
 
 ## Section Hooks ([useChallengeSections.ts](apps/frontend/src/api/challenges/useChallengeSections.ts))
 
@@ -160,9 +163,9 @@ Builds multi-clause txs (approve+action for stake joins, leave+decline for invit
 Frontend:
 - Transport (indexer): [api/indexer/challenges/](apps/frontend/src/api/indexer/challenges/) — `fetchWalletChallenges`, `fetchPublicChallenges`, hand-typed response types (swap for schema-derived once `yarn generate:schema` picks up the new endpoints)
 - Orchestration + domain: [api/challenges/](apps/frontend/src/api/challenges/) — `useChallengeSections.ts`, `useChallengeDetail.ts`, `useChallengeActions.ts`, `resolveChallengeDetail.ts`, `types.ts`, `buildChallengeView.ts`, `buildChallengeDetail.ts`, `claimState.ts`, `fetchChallengeEvents.ts`, `fetchMaxParticipants.ts`
-- Hub UI: [app/b3mo-quests/components/](apps/frontend/src/app/b3mo-quests/components/) (ChallengesPageContent, CurrentTab, HistoryTab, SectionCarousel, ChallengeCard, ChallengesGrid, ChallengeFilters, ChallengeStepsCard, CreateChallengeModal/, CompactSkeleton)
+- Hub UI: [app/b3mo-quests/components/](apps/frontend/src/app/b3mo-quests/components/) (ChallengesPageContent, CurrentTab, HistoryTab, SectionCarousel, ChallengeCard, ChallengesGrid, ChallengeFilters, QuestParticipationGuide, CreateChallengeModal/, CompactSkeleton)
 - Detail UI: [app/b3mo-quests/[challengeId]/components/](apps/frontend/src/app/b3mo-quests/[challengeId]/components/)
-- Shared UI: [app/b3mo-quests/shared/](apps/frontend/src/app/b3mo-quests/shared/)
+- Shared UI: [app/b3mo-quests/shared/](apps/frontend/src/app/b3mo-quests/shared/) (`NextChallengeStatusCard` plus shared status, badge, action, and description helpers)
 - Hooks: [hooks/useChallengesDeployBlock.ts](apps/frontend/src/hooks/useChallengesDeployBlock.ts) (returns `0`)
 
 Contracts:

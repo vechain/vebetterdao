@@ -13,6 +13,7 @@ import { AppBalanceCard } from "./AppBalanceCard/AppBalanceCard"
 import { AppCreationSteps } from "./AppCreationSteps/AppCreationSteps"
 import { AppDetailOverview } from "./AppDetailOverview/AppDetailOverview"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
+import { AppQuestLaunchpadCard } from "./AppQuestLaunchpadCard"
 import { AppRewardStatsCard } from "./AppRewardStatsCard"
 import { AppScreenshots } from "./AppScreenshots"
 import { ProofValidationAlert } from "./ProofValidationAlert/ProofValidationAlert"
@@ -67,6 +68,7 @@ export const AppDetailPageContent = () => {
             </Box>
           </Stack>
           {shouldRenderBalance && <AppBalanceCard />}
+          {isAppAdmin && <AppQuestLaunchpadCard />}
         </Stack>
       </GridItem>
       <GridItem w="full" colSpan={[1, 1, 2]} order={[2, 2, 1]}>

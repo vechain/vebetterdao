@@ -1,4 +1,4 @@
-import { Button, Heading, HStack, Icon, Link, Stack, Tabs, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Stack, Tabs, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useQueryClient } from "@tanstack/react-query"
 import { useWallet } from "@vechain/vechain-kit"
@@ -9,11 +9,11 @@ import { ChallengeKind } from "@/api/challenges/types"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 
-import { ChallengeStepsCard } from "./ChallengeStepsCard"
 import { CreateChallengeModal } from "./CreateChallengeModal"
 import { CurrentTab } from "./CurrentTab"
 import { GuestActiveTab } from "./GuestActiveTab"
 import { HistoryTab } from "./HistoryTab"
+import { QuestParticipationGuide } from "./QuestParticipationGuide"
 
 const QUESTS_STEPS_CARD_DISMISSED_KEY = "vebetterdao:quests-steps-card-dismissed"
 
@@ -26,6 +26,9 @@ export const ChallengesPageContent = () => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
   const queryClient = useQueryClient()
+  const questParticipationGuideLabel = t("How Quests work", {
+    defaultValue: "How Quests work",
+  })
 
   /** null = before first client read of localStorage */
   const [stepsOpen, setStepsOpen] = useState<boolean | null>(null)
@@ -76,29 +79,32 @@ export const ChallengesPageContent = () => {
         <HStack alignItems="center" textAlign="center" justifyContent="flex-start">
           <Heading size={{ base: "2xl", lg: "3xl" }}>{t("B3MO Quests")}</Heading>
           {!open && (
-            <Link
-              display="inline-flex"
-              alignItems="center"
-              fontWeight={500}
+            <Button
+              variant="plain"
+              size="sm"
+              minW="11"
+              minH="11"
+              aria-label={questParticipationGuideLabel}
+              data-cy="quest-participation-guide"
               color="primary.500"
               px={0}
               textStyle={{ base: "xs", lg: "md" }}
               onClick={onOpen}>
               <Icon as={UilInfoCircle} boxSize={4} />
-              {!isMobile && t("More info")}
-            </Link>
+              {!isMobile && questParticipationGuideLabel}
+            </Button>
           )}
         </HStack>
         {viewerAddress && (
           <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={round}>
-            <Button variant="primary" size="sm">
-              {t("Create B3MO Quest")}
+            <Button variant="primary" size="sm" minH="11" data-cy="challenge-someone">
+              {t("Challenge someone")}
             </Button>
           </CreateChallengeModal>
         )}
       </Stack>
 
-      <ChallengeStepsCard isOpen={open} onClose={onClose} />
+      <QuestParticipationGuide isOpen={open} onClose={onClose} />
 
       {viewerAddress ? (
         <Tabs.Root
