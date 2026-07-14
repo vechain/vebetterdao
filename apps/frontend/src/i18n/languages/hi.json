@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "अपने प्रोजेक्ट, मांगी गई धनराशि और वितरण चरणों का वर्णन करें।",
   "Describe your revenue model": "अपने राजस्व मॉडल का वर्णन करें",
   "Description": "विवरण",
+  "Description (optional)": "विवरण (वैकल्पिक)",
   "Description cannot be empty.": "विवरण खाली नहीं हो सकता।",
   "Description must be at least 20 characters": "विवरण कम से कम 20 अक्षरों का होना चाहिए",
   "Description required": "विवरण आवश्यक है",

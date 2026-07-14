@@ -61,6 +61,12 @@ Indexed topics in parens. All lifecycle events have `challengeId` as first index
 - `maxParticipants()` → default max for MaxActions
 - `minBetAmount()` → minimum stake (wei)
 
+## Quest Metadata
+
+`createChallenge` already accepts optional `title`, `description`, `imageURI`, and `metadataURI` fields. The frontend currently exposes title for every quest and description for public quests; when either text field is empty, the UI keeps its generated `B3MO Quest #<id>` title and contextual description fallback. Contract byte limits are 120 bytes for title and 500 bytes for description.
+
+The deployed contract has no function to update quest metadata after creation. Do not simulate creator edits in frontend-only or indexer-only storage: editable titles/descriptions require a contract upgrade with creator authorization and an update event that downstream readers can index.
+
 ## Frontend Architecture
 
 ```mermaid

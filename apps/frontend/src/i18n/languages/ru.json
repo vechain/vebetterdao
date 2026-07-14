@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "Опишите ваш проект, запрашиваемые средства и этапы выполнения.",
   "Describe your revenue model": "Опишите вашу модель доходов",
   "Description": "Описание",
+  "Description (optional)": "Описание (необязательно)",
   "Description cannot be empty.": "Описание не может быть пустым.",
   "Description must be at least 20 characters": "Описание должно содержать минимум 20 символов",
   "Description required": "Описание обязательно",

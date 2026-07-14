@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "프로젝트 설명, 요청한 자금 및 전달 마일스톤을 설명하세요.",
   "Describe your revenue model": "수익 모델을 설명하세요",
   "Description": "설명",
+  "Description (optional)": "설명(선택 사항)",
   "Description cannot be empty.": "설명은 비워둘 수 없습니다.",
   "Description must be at least 20 characters": "설명은 최소 20자 이상이어야 합니다.",
   "Description required": "설명 필수",

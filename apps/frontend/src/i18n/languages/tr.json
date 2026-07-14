@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "Projenizi, talep edilen fonları ve teslimat kilometre taşlarını tanımlayın.",
   "Describe your revenue model": "Gelir modelinizi açıklayınız",
   "Description": "Açıklama",
+  "Description (optional)": "Açıklama (isteğe bağlı)",
   "Description cannot be empty.": "Açıklama boş olamaz.",
   "Description must be at least 20 characters": "Açıklama en az 20 karakter olmalıdır",
   "Description required": "Açıklama gerekli",

@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "描述您的項目、申請的資金以及交付的里程碑。",
   "Describe your revenue model": "描述您的營收模式",
   "Description": "描述",
+  "Description (optional)": "描述（選填）",
   "Description cannot be empty.": "描述不能為空。",
   "Description must be at least 20 characters": "描述至少要有20個字符",
   "Description required": "需要描述",

@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "Beskriv ditt projekt, de begärda medlen och leveransmilstolparna.",
   "Describe your revenue model": "Beskriv din intäktsmodell",
   "Description": "Beskrivning",
+  "Description (optional)": "Beskrivning (valfritt)",
   "Description cannot be empty.": "Beskrivningen kan inte vara tom.",
   "Description must be at least 20 characters": "Beskrivningen måste vara minst 20 tecken",
   "Description required": "Beskrivning krävs",

@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "Mô tả dự án của bạn, khoản tài trợ yêu cầu và các mốc giao hàng.",
   "Describe your revenue model": "Mô tả mô hình doanh thu của bạn",
   "Description": "Mô tả",
+  "Description (optional)": "Mô tả (không bắt buộc)",
   "Description cannot be empty.": "Mô tả không được để trống.",
   "Description must be at least 20 characters": "Mô tả phải có ít nhất 20 ký tự",
   "Description required": "Mô tả là bắt buộc",

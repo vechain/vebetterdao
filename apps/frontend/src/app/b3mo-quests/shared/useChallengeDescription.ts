@@ -3,8 +3,13 @@ import { useTranslation } from "react-i18next"
 
 import { ChallengeKind, ChallengeStatus, ChallengeType, ChallengeView, SettlementMode } from "@/api/challenges/types"
 
+import { getCustomChallengeDescription } from "./challengeDescription"
+
 export const useChallengeDescription = (challenge: ChallengeView): string => {
   const { t } = useTranslation()
+
+  const customDescription = getCustomChallengeDescription(challenge)
+  if (customDescription) return customDescription
 
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
   const isStake = challenge.kind === ChallengeKind.Stake
