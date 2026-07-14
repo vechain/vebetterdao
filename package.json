@@ -116,7 +116,7 @@
   },
   "dependencies": {
     "dotenv-cli": "latest",
-    "turbo": "^2.10.2"
+    "turbo": "^2.10.4"
   },
   "devDependencies": {
     "@vechain/dev-stack": "^0.3.2",
