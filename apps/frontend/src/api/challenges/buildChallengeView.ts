@@ -218,16 +218,9 @@ export const buildChallengeViews = async ({
       participantActions,
     })
 
-    // ChallengeView is a subset of ChallengeDetail; the Card list uses the lighter shape.
-    const {
-      participants: _p,
-      invited: _i,
-      declined: _d,
-      selectedApps: _s,
-      winners: _w,
-      viewerActions: _va,
-      ...view
-    } = detail
+    // ChallengeView is a subset of ChallengeDetail; list surfaces keep the viewer's
+    // action count so they can present progress without another contract read.
+    const { participants: _p, invited: _i, declined: _d, selectedApps: _s, winners: _w, ...view } = detail
     views.push(view)
   }
 

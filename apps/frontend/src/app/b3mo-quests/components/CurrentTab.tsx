@@ -1,17 +1,19 @@
-import { VStack } from "@chakra-ui/react"
-import { UilCompass } from "@iconscout/react-unicons"
+import { Button, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { LuCompass } from "react-icons/lu"
 
-import { ChallengeView } from "@/api/challenges/types"
+import { ChallengeKind, ChallengeView } from "@/api/challenges/types"
 import {
   useNeededActionsSection,
   useOpenToJoinSection,
   useUserChallengesSection,
   useWhatOthersAreDoingSection,
 } from "@/api/challenges/useChallengeSections"
-import { EmptyState } from "@/components/ui/empty-state"
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { EmptyStateCard } from "@/components/EmptyStateCard"
 
+import { CreateChallengeModal } from "./CreateChallengeModal"
 import { SectionCarousel } from "./SectionCarousel"
 
 interface CurrentTabProps {
@@ -20,6 +22,7 @@ interface CurrentTabProps {
 
 export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
   const { t } = useTranslation()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const neededActions = useNeededActionsSection(viewerAddress)
   const userChallenges = useUserChallengesSection(viewerAddress)
   const openToJoin = useOpenToJoinSection(viewerAddress)
@@ -50,14 +53,24 @@ export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
     userChallenges.items.length === 0 &&
     openToJoin.items.length === 0 &&
     whatOthers.items.length === 0
+  const noPublicDiscovery =
+    !openToJoin.isLoading && !whatOthers.isLoading && openToJoin.items.length === 0 && whatOthers.items.length === 0
 
   if (noItems) {
     return (
-      <EmptyState
-        py="16"
-        icon={<UilCompass />}
+      <EmptyStateCard
+        icon={<LuCompass />}
         title={t("No B3MO quests to show")}
         description={t("There are no active B3MO quests right now. Check back later or create one.")}
+        actionNode={
+          viewerAddress ? (
+            <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={Number(currentRoundId ?? 0)}>
+              <Button variant="primary" size="sm" minH="11" data-cy="challenge-someone-empty">
+                {t("Challenge someone")}
+              </Button>
+            </CreateChallengeModal>
+          ) : undefined
+        }
       />
     )
   }
@@ -68,6 +81,21 @@ export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
       {viewerAddress && <SectionCarousel title={t("Your B3MO Quests")} section={userChallenges} items={deduped.user} />}
       <SectionCarousel title={t("Open to Join")} section={openToJoin} items={deduped.open} />
       <SectionCarousel title={t("Live Quests You Missed")} section={whatOthers} items={deduped.others} />
+      {noPublicDiscovery && (
+        <EmptyStateCard
+          rootProps={{ py: "10" }}
+          icon={<LuCompass />}
+          title={t("No public B3MO Quests right now")}
+          description={t("Start a duel while you wait for the next public Quest.")}
+          actionNode={
+            <CreateChallengeModal defaultKind={ChallengeKind.Stake} currentRound={Number(currentRoundId ?? 0)}>
+              <Button variant="secondary" size="sm" minH="11" data-cy="challenge-someone-discovery-empty">
+                {t("Challenge someone")}
+              </Button>
+            </CreateChallengeModal>
+          }
+        />
+      )}
     </VStack>
   )
 }

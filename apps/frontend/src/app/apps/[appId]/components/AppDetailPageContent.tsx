@@ -13,6 +13,7 @@ import { AppBalanceCard } from "./AppBalanceCard/AppBalanceCard"
 import { AppCreationSteps } from "./AppCreationSteps/AppCreationSteps"
 import { AppDetailOverview } from "./AppDetailOverview/AppDetailOverview"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
+import { AppQuestLaunchpadCard } from "./AppQuestLaunchpadCard"
 import { AppRewardStatsCard } from "./AppRewardStatsCard"
 import { AppScreenshots } from "./AppScreenshots"
 import { ProofValidationAlert } from "./ProofValidationAlert/ProofValidationAlert"
@@ -29,6 +30,7 @@ export const AppDetailPageContent = () => {
   } = useAppEndorsementStatus(app?.id ?? "")
   const { data: maxPointsPerAppValue } = useMaxPointsPerApp()
   const isTeamWalletAddress = compareAddresses(app?.teamWalletAddress, account?.address)
+  const canManageApp = isAppModerator || isAppAdmin || isTeamWalletAddress
   const appHasBeenIntoAllocationRounds = app?.createdAtTimestamp !== "0"
   const shouldRenderCreationSteps = useMemo(() => {
     return !appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin)
@@ -51,6 +53,7 @@ export const AppDetailPageContent = () => {
             endorsementStatus={endorsementStatus}
             isEndorsementStatusLoading={isEndorsementStatusLoading}
           />
+          {canManageApp && <AppQuestLaunchpadCard />}
           <AppScreenshots />
           <Stack direction={["column", "column", "row"]} gap={4} justifyContent="stretch" w="full" h="full">
             <Box flex={2} minW={0}>
