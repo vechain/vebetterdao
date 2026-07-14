@@ -92,13 +92,13 @@ None — can start immediately.
 ### What to build
 
 Improve the Quest hub so private participation, invitations, and the option to start
-a duel remain visible when no public quests are available. Present one prioritized
-`Your next move` area and an honest empty state that invites peer competition.
+a duel remain visible when no public quests are available. Keep wallet-relevant
+Quests in their live sections and show an honest empty state that invites peer competition.
 
 ### Acceptance criteria
 
-- [ ] The hub highlights the wallet's highest-priority actionable or participating
-      Quest before public discovery content.
+- [ ] Actionable and participating Quests remain visible in the existing wallet-scoped
+      live sections without duplicating the homepage status banner.
 - [ ] A persistent `Challenge someone` action exposes the existing stake/private
       creation flow.
 - [ ] When no public quests exist, the page explains that clearly and suggests

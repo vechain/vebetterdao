@@ -133,14 +133,16 @@ Pure function from raw state → per-viewer `canX` booleans. Key rules:
 [ChallengesPageContent](apps/frontend/src/app/b3mo-quests/components/ChallengesPageContent.tsx) is a 2-tab shell:
 
 - **Participation guide** ([QuestParticipationGuide.tsx](apps/frontend/src/app/b3mo-quests/components/QuestParticipationGuide.tsx)): reusable in-product explanation of funding modes, winner rules, valid action windows, claims, and refunds. It replaces the former `ChallengeStepsCard` while preserving the dismissible desktop/mobile flow.
-- **Current** ([CurrentTab.tsx](apps/frontend/src/app/b3mo-quests/components/CurrentTab.tsx)): a prioritized `NextChallengeStatusCard` followed by 4 `SectionCarousel`s (Action needed, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: the highlighted next move is removed first, then items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`), and a fully empty connected-wallet view offers the existing Stake/private creation flow.
+- **Current** ([CurrentTab.tsx](apps/frontend/src/app/b3mo-quests/components/CurrentTab.tsx)): 4 `SectionCarousel`s (Action needed, Your Challenges, Open to Join, What Others Are Doing). **Cross-section dedup at the UI layer**: items are assigned to the first matching section in render order; later sections drop duplicates via `SectionCarousel`'s `items` override prop. Empty sections auto-hide (`hideWhenEmpty`), and a fully empty connected-wallet view offers the existing Stake/private creation flow.
 - **History** ([HistoryTab.tsx](apps/frontend/src/app/b3mo-quests/components/HistoryTab.tsx)): `ChallengesGrid` infinite scroll, items deduped by `challengeId`. **No filters** (sections already segment meaningfully; filters added noise).
 
 `SectionCarousel` uses Swiper with `onReachEnd` → auto `fetchNextPage`, skeleton slides while `isFetchingNextPage`. `ChallengesGrid` uses an IntersectionObserver sentinel + skeleton grid cards.
 
 `ChallengeCard` action buttons come from `canX` flags; detail page uses the same flags (`ChallengeActionsRow`, modals under [`[challengeId]/components/`](apps/frontend/src/app/b3mo-quests/[challengeId]/components/)).
 
-`nextChallengeStatus.ts` selects one wallet-aware state in urgency order (claim/refund/finalize, invitation/action, live progress, upcoming, fully-claimed Split Win outcome). The shared `NextChallengeStatusCard` is used by both the Quest hub and the connected-wallet homepage; Max Actions copy reports progress without implying a guaranteed win.
+`nextChallengeStatus.ts` selects one wallet-aware state in urgency order (claim/refund/finalize, invitation/action, live progress, upcoming, fully-claimed Split Win outcome). The `NextChallengeStatusCard` is a homepage summary only; the Quest hub keeps the same Quest in its relevant live carousel, avoiding a duplicate card and a no-op “See all” loop. Max Actions copy reports progress without implying a guaranteed win.
+
+The app-detail Quest launchpad is shown near the top of the page to app admins, moderators, and the configured team wallet. It exposes sponsored Quest creation, the readiness/compliance checklist, and the participation guide.
 
 ## Section Hooks ([useChallengeSections.ts](apps/frontend/src/api/challenges/useChallengeSections.ts))
 

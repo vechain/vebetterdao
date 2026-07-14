@@ -1,10 +1,12 @@
 import { Button, Card, Heading, HStack, Icon, List, Stack, Text, VStack } from "@chakra-ui/react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCircleCheck, LuRocket } from "react-icons/lu"
 
 import { ChallengeKind } from "@/api/challenges/types"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { CreateChallengeModal } from "@/app/b3mo-quests/components/CreateChallengeModal"
+import { QuestParticipationGuide } from "@/app/b3mo-quests/components/QuestParticipationGuide"
 
 const readinessChecks = [
   "Every eligible action includes the time it happened.",
@@ -16,6 +18,7 @@ const readinessChecks = [
 export const AppQuestLaunchpadCard = () => {
   const { t } = useTranslation()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const [isGuideOpen, setIsGuideOpen] = useState(false)
 
   return (
     <Card.Root w="full" variant="primary" data-testid="app-quest-launchpad-card">
@@ -60,18 +63,24 @@ export const AppQuestLaunchpadCard = () => {
             </VStack>
           </VStack>
 
-          <CreateChallengeModal defaultKind={ChallengeKind.Sponsored} currentRound={Number(currentRoundId ?? 0)}>
+          <VStack align="stretch" gap="3" flexShrink={0}>
+            <CreateChallengeModal defaultKind={ChallengeKind.Sponsored} currentRound={Number(currentRoundId ?? 0)}>
+              <Button variant="primary" minH="11" w={{ base: "full", lg: "auto" }} data-cy="create-sponsored-quest">
+                {t("Create sponsored B3MO quest")}
+              </Button>
+            </CreateChallengeModal>
             <Button
-              variant="primary"
-              flexShrink={0}
+              variant="secondary"
               minH="11"
               w={{ base: "full", lg: "auto" }}
-              data-cy="create-sponsored-quest">
-              {t("Create sponsored B3MO quest")}
+              data-cy="app-quest-participation-guide"
+              onClick={() => setIsGuideOpen(true)}>
+              {t("How Quests work")}
             </Button>
-          </CreateChallengeModal>
+          </VStack>
         </Stack>
       </Card.Body>
+      <QuestParticipationGuide isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
     </Card.Root>
   )
 }

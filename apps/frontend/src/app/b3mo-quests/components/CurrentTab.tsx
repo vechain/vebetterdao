@@ -3,7 +3,6 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCompass } from "react-icons/lu"
 
-import { selectNextChallengeStatus } from "@/api/challenges/nextChallengeStatus"
 import { ChallengeKind, ChallengeView } from "@/api/challenges/types"
 import {
   useNeededActionsSection,
@@ -12,7 +11,6 @@ import {
   useWhatOthersAreDoingSection,
 } from "@/api/challenges/useChallengeSections"
 import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { NextChallengeStatusCard } from "@/app/b3mo-quests/shared/NextChallengeStatusCard"
 import { EmptyStateCard } from "@/components/EmptyStateCard"
 
 import { CreateChallengeModal } from "./CreateChallengeModal"
@@ -30,15 +28,10 @@ export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
   const openToJoin = useOpenToJoinSection(viewerAddress)
   const whatOthers = useWhatOthersAreDoingSection(viewerAddress)
 
-  const nextMove = useMemo(
-    () => selectNextChallengeStatus([...neededActions.items, ...userChallenges.items]),
-    [neededActions.items, userChallenges.items],
-  )
-
   // Dedupe across sections in render order: a challenge matching multiple
   // sections is kept only in the first (highest-priority) one.
   const deduped = useMemo(() => {
-    const seen = new Set<number>(nextMove ? [nextMove.challenge.challengeId] : [])
+    const seen = new Set<number>()
     const take = (items: ChallengeView[]) =>
       items.filter(v => {
         if (seen.has(v.challengeId)) return false
@@ -51,7 +44,7 @@ export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
       open: take(openToJoin.items),
       others: take(whatOthers.items),
     }
-  }, [neededActions.items, userChallenges.items, openToJoin.items, whatOthers.items, nextMove])
+  }, [neededActions.items, userChallenges.items, openToJoin.items, whatOthers.items])
 
   const anyLoading = neededActions.isLoading || userChallenges.isLoading || openToJoin.isLoading || whatOthers.isLoading
   const noItems =
@@ -84,13 +77,6 @@ export const CurrentTab = ({ viewerAddress }: CurrentTabProps) => {
 
   return (
     <VStack align="stretch" gap="8" w="full">
-      {viewerAddress && (
-        <NextChallengeStatusCard
-          status={nextMove}
-          isLoading={neededActions.isLoading || userChallenges.isLoading}
-          title={t("Your next move")}
-        />
-      )}
       {viewerAddress && <SectionCarousel title={t("Action needed")} section={neededActions} items={deduped.needed} />}
       {viewerAddress && <SectionCarousel title={t("Your B3MO Quests")} section={userChallenges} items={deduped.user} />}
       <SectionCarousel title={t("Open to Join")} section={openToJoin} items={deduped.open} />
