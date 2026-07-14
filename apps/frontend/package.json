@@ -64,7 +64,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-lottie": "^1.2.10",
     "react-markdown": "^10.1.0",
-    "react-tweet": "^3.3.0",
+    "react-tweet": "^3.3.1",
     "recharts": "^3.2.1",
     "rehype-sanitize": "^6.0.0",
     "swiper": "^12.2.0",
