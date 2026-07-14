@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "Beschreiben Sie Ihr Projekt, die angeforderten Mittel und die Liefermeilensteine.",
   "Describe your revenue model": "Beschreiben Sie Ihr Einnahmenmodell",
   "Description": "Beschreibung",
+  "Description (optional)": "Beschreibung (optional)",
   "Description cannot be empty.": "Beschreibung darf nicht leer sein.",
   "Description must be at least 20 characters": "Die Beschreibung muss mindestens 20 Zeichen lang sein",
   "Description required": "Beschreibung erforderlich",

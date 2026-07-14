@@ -740,6 +740,7 @@
   "Describe your project, requested funds, and delivery milestones.": "あなたのプロジェクト、要求資金、配達マイルストーンを説明してください。",
   "Describe your revenue model": "収益モデルを説明してください",
   "Description": "説明",
+  "Description (optional)": "説明（任意）",
   "Description cannot be empty.": "説明は空にできません。",
   "Description must be at least 20 characters": "説明は少なくとも20文字でなければなりません",
   "Description required": "説明が必要です",

@@ -8,6 +8,7 @@ import {
   SimpleGrid,
   Skeleton,
   Text,
+  Textarea,
   VStack,
   Wrap,
 } from "@chakra-ui/react"
@@ -81,6 +82,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     hasInsufficientB3tr,
     hasInvalidStartRound,
     hasReachedSelectedAppsLimit,
+    hasDescriptionTooLong,
     stakeAmountWei,
     minBetAmountWei,
     b3trBalance,
@@ -105,6 +107,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
     splitWinNumWinnersConfirmed,
     splitWinThresholdConfirmed,
     titleConfirmed,
+    descriptionConfirmed,
     amountConfirmed,
     startRoundChosen,
     durationChosen,
@@ -345,6 +348,50 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
           </Field.Root>
           <HStack justify="flex-end">
             <Button size="sm" variant={primaryVariant} disabled={hasTitleTooLong} onClick={flow.confirmTitle}>
+              {t("Continue")}
+            </Button>
+          </HStack>
+        </VStack>
+      ),
+    },
+    {
+      key: "description",
+      isRelevant: !isPrivate,
+      isComplete: descriptionConfirmed,
+      prompt: (
+        <Text textStyle="sm" fontWeight="semibold">
+          {t("Description (optional)")}
+        </Text>
+      ),
+      answer: (
+        <Text textStyle="sm" color="inherit" wordBreak="break-word" overflowWrap="anywhere" lineClamp={3}>
+          {form.description || t("Skip")}
+        </Text>
+      ),
+      controls: (
+        <VStack align="stretch" gap="3">
+          <Field.Root invalid={hasDescriptionTooLong}>
+            <Textarea
+              aria-label={t("Description (optional)")}
+              data-cy="quest-description-input"
+              value={form.description}
+              maxLength={challengeMetadataByteLimits.description}
+              resize="vertical"
+              onChange={e => flow.updateDescription(e.target.value)}
+            />
+            {hasDescriptionTooLong && (
+              <Field.ErrorText>
+                {t("{{fieldName}} is too long", { fieldName: t("Description (optional)") })}
+              </Field.ErrorText>
+            )}
+          </Field.Root>
+          <HStack justify="flex-end">
+            <Button
+              data-cy="quest-description-continue"
+              size="sm"
+              variant={primaryVariant}
+              disabled={hasDescriptionTooLong}
+              onClick={flow.confirmDescription}>
               {t("Continue")}
             </Button>
           </HStack>
@@ -828,6 +875,7 @@ export const buildSteps = (flow: CreateChallengeFlow, t: TFunction): StepDefinit
                 <SummaryItem label={t("Prize per winner")} value={`${formatWei(splitWinPrizePerWinner)} B3TR`} />
               )}
               <SummaryItem label={t("Title (optional)")} value={form.title || t("Skip")} />
+              {!isPrivate && <SummaryItem label={t("Description (optional)")} value={form.description || t("Skip")} />}
               <SummaryItem label={t(amountLabelKey)} value={`${form.stakeAmount} B3TR`} />
               <SummaryItem label={t("Start round")} value={form.startRound} />
               <SummaryItem label={t("Duration")} value={`${duration} ${duration === 1 ? t("round") : t("rounds")}`} />

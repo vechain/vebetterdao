@@ -16,6 +16,7 @@ import { useXApps } from "@/api/contracts/xApps/hooks/useXApps"
 import { useGetB3trBalance } from "@/hooks/useGetB3trBalance"
 import { useGetAddressFromVetDomains } from "@/hooks/useGetVetDomains"
 
+import { getPublicChallengeDescription } from "../../shared/challengeDescription"
 import {
   countResolvedInvitees,
   getInviteeValidationError,
@@ -51,6 +52,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const [splitWinNumWinnersConfirmed, setSplitWinNumWinnersConfirmed] = useState(false)
   const [splitWinThresholdConfirmed, setSplitWinThresholdConfirmed] = useState(false)
   const [titleConfirmed, setTitleConfirmed] = useState(false)
+  const [descriptionConfirmed, setDescriptionConfirmed] = useState(false)
   const [amountConfirmed, setAmountConfirmed] = useState(false)
   const [startRoundChosen, setStartRoundChosen] = useState(false)
   const [durationChosen, setDurationChosen] = useState(false)
@@ -122,6 +124,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     setSplitWinNumWinnersConfirmed(false)
     setSplitWinThresholdConfirmed(false)
     setTitleConfirmed(false)
+    setDescriptionConfirmed(false)
     setAmountConfirmed(false)
     setStartRoundChosen(false)
     setDurationChosen(false)
@@ -202,6 +205,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     [form.description, form.imageURI, form.metadataURI, form.title],
   )
   const hasTitleTooLong = metadataLengthError?.field === "title"
+  const hasDescriptionTooLong = metadataLengthError?.field === "description"
   const hasMetadataLengthError = metadataLengthError !== null
   const domainInvitees = useMemo(() => form.invitees.map(value => value.trim()).filter(isVetDomain), [form.invitees])
   const {
@@ -245,6 +249,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
             challengeType: ChallengeType.MaxActions,
             threshold: "0",
             numWinners: "0",
+            description: "",
           }
         : {
             // Sponsored defaults to Public + SplitWin (the only Sponsored Public option).
@@ -259,6 +264,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       setTypeExplainerSeen(false)
       setSplitWinNumWinnersConfirmed(false)
       setSplitWinThresholdConfirmed(false)
+      setDescriptionConfirmed(false)
     })
   }
 
@@ -269,7 +275,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       // Sponsored Public must be SplitWin; Private resets to MaxActions and clears any previous splitwin choice.
       ...(value === ChallengeVisibility.Public
         ? { challengeType: ChallengeType.SplitWin }
-        : { challengeType: ChallengeType.MaxActions, threshold: "0", numWinners: "0" }),
+        : { challengeType: ChallengeType.MaxActions, threshold: "0", numWinners: "0", description: "" }),
       ...(value === ChallengeVisibility.Public ? { invitees: [] } : {}),
     }))
     withTyping(() => {
@@ -278,6 +284,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       setTypeExplainerSeen(false)
       setSplitWinNumWinnersConfirmed(false)
       setSplitWinThresholdConfirmed(false)
+      setDescriptionConfirmed(false)
       if (value === ChallengeVisibility.Public) setInviteesConfirmed(false)
     })
   }
@@ -337,6 +344,11 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
   const updateTitle = (value: string) => {
     update("title", value)
     setTitleConfirmed(false)
+  }
+
+  const updateDescription = (value: string) => {
+    update("description", value)
+    setDescriptionConfirmed(false)
   }
 
   const addApp = (appId: string) => {
@@ -416,6 +428,11 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     withTyping(() => setTitleConfirmed(true))
   }
 
+  const confirmDescription = () => {
+    if (hasDescriptionTooLong) return
+    withTyping(() => setDescriptionConfirmed(true))
+  }
+
   const confirmStartRound = () => {
     if (hasInvalidStartRound) return
     withTyping(() => setStartRoundChosen(true))
@@ -453,6 +470,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     if (index <= STEP_ORDER.indexOf("challengeType")) setChallengeTypeChosen(false)
     if (index <= STEP_ORDER.indexOf("typeExplainer")) setTypeExplainerSeen(false)
     if (index <= STEP_ORDER.indexOf("title")) setTitleConfirmed(false)
+    if (index <= STEP_ORDER.indexOf("description")) setDescriptionConfirmed(false)
     if (index <= STEP_ORDER.indexOf("amount")) setAmountConfirmed(false)
     if (index <= STEP_ORDER.indexOf("splitWinNumWinners")) setSplitWinNumWinnersConfirmed(false)
     if (index <= STEP_ORDER.indexOf("splitWinThreshold")) setSplitWinThresholdConfirmed(false)
@@ -490,7 +508,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
       ...form,
       invitees: sanitizedInvitees,
       title: form.title.trim(),
-      description: form.description.trim(),
+      description: getPublicChallengeDescription(form.description, form.visibility === ChallengeVisibility.Public),
       imageURI: form.imageURI.trim(),
       metadataURI: form.metadataURI.trim(),
     }
@@ -514,6 +532,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     hasInsufficientB3tr,
     hasBelowMinimumBetAmount,
     hasTitleTooLong,
+    hasDescriptionTooLong,
     thresholdValue,
     numWinnersValue,
     splitWinPrizePerWinner,
@@ -550,6 +569,7 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     splitWinNumWinnersConfirmed,
     splitWinThresholdConfirmed,
     titleConfirmed,
+    descriptionConfirmed,
     amountConfirmed,
     startRoundChosen,
     durationChosen,
@@ -565,6 +585,8 @@ export const useCreateChallengeFlow = (defaultKind: number, currentRound: number
     setChallengeType: setChallengeTypeChoice,
     updateTitle,
     confirmTitle,
+    updateDescription,
+    confirmDescription,
     confirmAmount,
     chooseStartRound,
     confirmStartRound,

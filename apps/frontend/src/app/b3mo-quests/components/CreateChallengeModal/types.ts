@@ -29,6 +29,7 @@ export const STEP_ORDER = [
   "challengeType",
   "typeExplainer",
   "title",
+  "description",
   "amount",
   "splitWinNumWinners",
   "splitWinThreshold",
