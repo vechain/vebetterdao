@@ -12,7 +12,6 @@ import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { buildTxBody, buildGasEstimate, withRetry } from "../helpers"
 import { slackIds } from "../helpers/slack/slackIds"
-import { filterEligibleAppsForDBA } from "../helpers/dba"
 import { logger } from "../helpers/logger"
 
 interface NetworkConfig {
@@ -107,7 +106,8 @@ const client = new SecretsManagerClient({
   region: "eu-west-1",
 })
 
-// DBAPool ABI - extracted from contract interface
+// DBAPool ABI (V4) - extracted from contract interface. The eligible-apps array is no longer passed;
+// the contract derives it on-chain from XAllocationVoting + VeBetterPassport + X2EarnApps state.
 const DBAPoolAbi = [
   {
     inputs: [{ internalType: "uint256", name: "_roundId", type: "uint256" }],
@@ -117,10 +117,7 @@ const DBAPoolAbi = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "uint256", name: "_roundId", type: "uint256" },
-      { internalType: "bytes32[]", name: "_appIds", type: "bytes32[]" },
-    ],
+    inputs: [{ internalType: "uint256", name: "_roundId", type: "uint256" }],
     name: "distributeDBARewards",
     outputs: [],
     stateMutability: "nonpayable",
@@ -128,8 +125,8 @@ const DBAPoolAbi = [
   },
   {
     inputs: [{ internalType: "uint256", name: "_roundId", type: "uint256" }],
-    name: "fundsForRound",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "eligibleAppsForRound",
+    outputs: [{ internalType: "bytes32[]", name: "", type: "bytes32[]" }],
     stateMutability: "view",
     type: "function",
   },
@@ -287,40 +284,21 @@ async function distributeDBARewards(thor: ThorClient) {
     return { receipt: null, eligibleAppsCount: 0, skipped: true, notReady: true }
   }
 
-  // Filter eligible apps
-  const eligibleApps = await filterEligibleAppsForDBA(thor, CONFIG, roundId)
-
-  if (eligibleApps.length === 0) {
-    console.log(`No eligible apps found for round ${roundId}`)
-    await publishMessage(
-      client,
-      SLACK_CHANNEL_ID,
-      `${SLACK_MESSAGE_PREFIX}:information_source: No eligible apps found for DBA distribution in round ${roundId}`,
-    )
-    return { receipt: null, eligibleAppsCount: 0, skipped: true }
-  }
-
-  console.log(`Found ${eligibleApps.length} eligible apps for DBA distribution`)
-
-  // Get the amount to be distributed
-  const fundsRes = await thor.contracts.executeCall(
+  // Read the contract's view of the eligible set for monitoring/logging purposes. The contract
+  // will independently re-derive it during the distribute call — we don't pass it.
+  const eligibleRes = await thor.contracts.executeCall(
     CONFIG.dbaPoolContractAddress,
-    ABIContract.ofAbi(DBAPoolAbi).getFunction("fundsForRound"),
+    ABIContract.ofAbi(DBAPoolAbi).getFunction("eligibleAppsForRound"),
     [roundId],
   )
+  const eligibleApps = (eligibleRes.result?.array?.[0] as string[] | undefined) ?? []
+  console.log(`On-chain eligible set has ${eligibleApps.length} app(s) for round ${roundId}`)
 
-  if (!fundsRes.success) {
-    throw new Error("Failed to get funds for round")
-  }
-
-  const totalFunds = fundsRes.result?.array?.[0] ?? 0n
-  console.log(`Total funds to distribute: ${totalFunds}`)
-
-  // Prepare the contract function call
+  // Prepare the V4 contract function call (no array argument)
   const clause = Clause.callFunction(
     Address.of(CONFIG.dbaPoolContractAddress),
     ABIContract.ofAbi(DBAPoolAbi).getFunction("distributeDBARewards"),
-    [roundId, eligibleApps],
+    [roundId],
   )
 
   // Estimate the gas cost for the transaction

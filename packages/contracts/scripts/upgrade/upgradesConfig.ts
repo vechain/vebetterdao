@@ -138,10 +138,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "DBA Pool": {
     name: "dba-pool",
     configAddressField: "dbaPoolContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Add tracking of DBA rewards per app per round and seed function for historical data",
       v3: "Merit-capped flat distribution with treasury overflow routing",
+      v4: "On-chain eligibility filtering (no app list parameter); wires VeBetterPassport + XAllocationVoting",
     },
   },
   "Grants Manager": {

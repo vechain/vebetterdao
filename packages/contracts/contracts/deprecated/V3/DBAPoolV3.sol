@@ -2,17 +2,15 @@
 
 pragma solidity 0.8.20;
 
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
-import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { IDynamicBaseAllocationPool } from "./interfaces/IDynamicBaseAllocationPool.sol";
+import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
+import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
+import { IDynamicBaseAllocationPoolV3 } from "./interfaces/IDynamicBaseAllocationPoolV3.sol";
 
 /**
  * @title DynamicBaseAllocationPool (DBA)
@@ -27,20 +25,13 @@ import { IDynamicBaseAllocationPool } from "./interfaces/IDynamicBaseAllocationP
  * - Merit-capped flat distribution: each app gets min(flatShare, meritCapMultiplier * voteAllocation)
  * - Overflow from merit cap + integer remainder sent to VBD Treasury
  * - Treasury address and meritCapMultiplier stored on-chain
- *
- * --------- Version 4 ---------
- * - On-chain eligibility filtering: distributeDBARewards no longer takes an app list, derives it from chain state
- *   using the 3 historical rules (in-round participation + at least one rewarded action + endorsement boundaries)
- * - New contract refs: VeBetterPassport (for appRoundActionCount) and XAllocationVoting (for getAppIdsOfRound +
- *   roundSnapshot + roundDeadline)
- * - The duplicate-check pass is removed (set is derived, duplicate-free by construction)
  */
-contract DBAPool is
+contract DBAPoolV3 is
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable,
   UUPSUpgradeable,
   PausableUpgradeable,
-  IDynamicBaseAllocationPool
+  IDynamicBaseAllocationPoolV3
 {
   /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -61,9 +52,6 @@ contract DBAPool is
     // V3
     address treasuryAddress; // The address to which overflow from the merit cap is routed
     uint256 meritCapMultiplier; // Multiplier for the merit cap (e.g. 2 = 2x vote allocation)
-    // V4
-    IVeBetterPassport veBetterPassport; // Used to read appRoundActionCount (rule 2)
-    IXAllocationVotingGovernor xAllocationVoting; // Used to read getAppIdsOfRound + roundSnapshot + roundDeadline (rules 1 & 3)
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.DBAPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -123,17 +111,6 @@ contract DBAPool is
     $.meritCapMultiplier = 2;
   }
 
-  /// @notice V4 reinitializer: wires VeBetterPassport and XAllocationVoting for on-chain eligibility filtering
-  /// @param _veBetterPassport The VeBetterPassport address (action count source)
-  /// @param _xAllocationVoting The XAllocationVoting address (round apps + boundaries source)
-  function initializeV4(address _veBetterPassport, address _xAllocationVoting) public reinitializer(4) {
-    require(_veBetterPassport != address(0), "DBAPool: veBetterPassport is the zero address");
-    require(_xAllocationVoting != address(0), "DBAPool: xAllocationVoting is the zero address");
-    DBAPoolStorage storage $ = _getDBAPoolStorage();
-    $.veBetterPassport = IVeBetterPassport(_veBetterPassport);
-    $.xAllocationVoting = IXAllocationVotingGovernor(_xAllocationVoting);
-  }
-
   // ---------- Authorizers ---------- //
 
   /**
@@ -145,20 +122,29 @@ contract DBAPool is
   // ---------- Setters ---------- //
 
   /**
-   * @notice Distributes DBA rewards to apps eligible under the on-chain rules for a specific round.
-   * @dev Eligibility is derived on-chain: the contract loops over `xAllocationVoting.getAppIdsOfRound(_roundId)`
-   * and includes apps that (a) registered at least one action with proof in the round and (b) were not
-   * unendorsed at BOTH round-start and round-end. Excluded apps still consume their share of the pool
-   * via the merit-cap overflow path, which is routed to the treasury alongside the integer-division
-   * remainder.
-   *
-   * Permissionless: now that the eligible set is derived from chain state the caller has no
-   * leverage over who gets paid, so `DISTRIBUTOR_ROLE` was dropped. Anyone may trigger
-   * distribution; idempotency is enforced by `dbaRewardsDistributed[_roundId]`.
-   *
+   * @notice Distributes DBA rewards to eligible apps for a specific round.
+   * @dev The DBA pool is split evenly across all eligible apps (flat share).
+   * Each app's reward is capped at 2x its vote allocation for the round.
+   * Any overflow from the merit cap plus the integer-division remainder
+   * is routed to the VBD Treasury.
    * @param _roundId The round ID for which to distribute DBA rewards.
+   * @param _appIds Array of eligible app IDs (pre-filtered by off-chain service).
    */
-  function distributeDBARewards(uint256 _roundId) external nonReentrant whenNotPaused {
+  function distributeDBARewards(
+    uint256 _roundId,
+    bytes32[] memory _appIds
+  ) external nonReentrant onlyRole(DISTRIBUTOR_ROLE) whenNotPaused {
+    require(_appIds.length > 0, "DBAPool: no apps to distribute to");
+
+    // Validate no duplicate appIds
+    // While O(n²) time complexity, this is actually more gas-efficient than
+    // storage-based approaches for typical array sizes in smart contracts
+    for (uint256 i = 0; i < _appIds.length; i++) {
+      for (uint256 j = i + 1; j < _appIds.length; j++) {
+        require(_appIds[i] != _appIds[j], "DBAPool: duplicate app IDs not allowed");
+      }
+    }
+
     DBAPoolStorage storage $ = _getDBAPoolStorage();
 
     // Validate that round can be distributed based on different criteria
@@ -167,38 +153,26 @@ contract DBAPool is
     // Validate that contract has enough funds
     require($.b3tr.balanceOf(address(this)) > 0, "DBAPool: no funds available");
 
-    // Build the eligible set on-chain by applying the 3 rules to every app in the round
-    (bytes32[] memory eligibleApps, uint256 eligibleCount) = _buildEligibleApps($, _roundId);
-
-    // Mark round as distributed even if the eligible set is empty, to prevent re-triggering.
-    $.dbaRewardsDistributed[_roundId] = true;
-
-    uint256 dbaPoolAmount = $.xAllocationPool.unallocatedFunds(_roundId);
-
-    if (eligibleCount == 0) {
-      // No eligible apps — entire pool is overflow and routed to treasury
-      if (dbaPoolAmount > 0) {
-        require($.b3tr.transfer($.treasuryAddress, dbaPoolAmount), "DBAPool: Transfer of overflow to treasury failed");
-      }
-      emit FundsDistributedToTreasury(dbaPoolAmount, _roundId);
-      return;
-    }
-
     // Calculate flat share per app and initialize overflow with integer-division remainder
+    uint256 dbaPoolAmount = $.xAllocationPool.unallocatedFunds(_roundId);
+    uint256 eligibleCount = _appIds.length;
     uint256 flatSharePerApp = dbaPoolAmount / eligibleCount;
     uint256 totalOverflow = dbaPoolAmount % eligibleCount;
+
+    // Mark round as distributed
+    $.dbaRewardsDistributed[_roundId] = true;
 
     // Cache base allocation (same for all apps in the round)
     uint256 baseAllocation = $.xAllocationPool.baseAllocationAmount(_roundId);
 
-    // Distribute to each eligible app
+    // Distribute to each app
     for (uint256 i = 0; i < eligibleCount; i++) {
-      bytes32 appId = eligibleApps[i];
+      bytes32 appId = _appIds[i];
 
-      // Sanity check: app must exist (apps coming from getAppIdsOfRound must exist by construction)
+      // Validate app exists
       require($.x2EarnApps.appExists(appId), "DBAPool: app does not exist");
 
-      // Cap each app's DBA reward relative to a multiple of its vote-based XAllocation earnings
+      // Cap each app's DBA reward relative to a multiple of its vote-based XAllocation earnings 
       // (excluding the base amount all apps receive equally)
       //
       // * Example 1: if the multiplier is 2, and the app vote earnings are 200, the merit cap is 400
@@ -244,82 +218,7 @@ contract DBAPool is
     }
   }
 
-  // ---------- Internal eligibility filter ---------- //
-
-  /**
-   * @dev Applies the 3 historical eligibility rules on-chain. Returns an over-allocated
-   * memory array sized to the round's app count plus the actual number of eligible apps,
-   * so callers can iterate `[0, eligibleCount)` ignoring the tail.
-   *
-   * Rules (replicating the off-chain filterEligibleAppsForDBA logic):
-   *  1. App was in the round → comes from `xAllocationVoting.getAppIdsOfRound(roundId)`
-   *  2. App had at least 1 action with proof → `veBetterPassport.appRoundActionCount(appId, roundId) > 0`
-   *  3. App NOT excluded by endorsement → not (unendorsed at snapshot AND unendorsed at deadline)
-   *
-   * Rule 3 uses the historical endorsement score (`getScoreAtTimepoint`) against the
-   * current threshold rather than `isEligible`. `isEligible` is the wrong primitive because:
-   *   a. Apps in `getAppIdsOfRound` are by construction eligible at the snapshot — that list
-   *      IS the eligibility snapshot — so `isEligible(_, snapshot)` is structurally always
-   *      true and the AND would never short-circuit.
-   *   b. During the endorsement grace period the eligibility checkpoint stays at 1 even
-   *      after the unendorsed-set membership flips, so an app that lost its endorser for
-   *      the whole round still reads `isEligible == true` at both boundaries.
-   *
-   * Score-based comparison gives the actual "was the score above the endorsement threshold
-   * at block X" answer, which matches what `isAppUnendorsed` returned off-chain.
-   */
-  function _buildEligibleApps(
-    DBAPoolStorage storage $,
-    uint256 _roundId
-  ) internal view returns (bytes32[] memory eligibleApps, uint256 eligibleCount) {
-    bytes32[] memory appsOfRound = $.xAllocationVoting.getAppIdsOfRound(_roundId);
-    eligibleApps = new bytes32[](appsOfRound.length);
-
-    // Round bounds for the endorsement-score checkpoint reads
-    uint256 snapshot = $.xAllocationVoting.roundSnapshot(_roundId);
-    uint256 deadline = $.xAllocationVoting.roundDeadline(_roundId);
-    uint256 threshold = $.x2EarnApps.endorsementScoreThreshold();
-
-    for (uint256 i = 0; i < appsOfRound.length; i++) {
-      bytes32 appId = appsOfRound[i];
-
-      // Rule 2: at least one rewarded action in the round
-      if ($.veBetterPassport.appRoundActionCount(appId, _roundId) == 0) {
-        continue;
-      }
-
-      // Rule 3: exclude only if unendorsed at BOTH boundaries
-      bool unendorsedAtStart = $.x2EarnApps.getScoreAtTimepoint(appId, snapshot) < threshold;
-      bool unendorsedAtEnd = $.x2EarnApps.getScoreAtTimepoint(appId, deadline) < threshold;
-      if (unendorsedAtStart && unendorsedAtEnd) {
-        continue;
-      }
-
-      eligibleApps[eligibleCount] = appId;
-      unchecked {
-        eligibleCount++;
-      }
-    }
-  }
-
   // ---------- Getters ---------- //
-
-  /**
-   * @notice Returns the apps eligible for DBA rewards in a given round
-   * @dev Same on-chain filter used internally by `distributeDBARewards`. Useful for
-   * off-chain monitoring and pre-distribution simulation.
-   * @param _roundId The round ID to check
-   * @return The eligible app IDs (trimmed to actual count)
-   */
-  function eligibleAppsForRound(uint256 _roundId) external view returns (bytes32[] memory) {
-    DBAPoolStorage storage $ = _getDBAPoolStorage();
-    (bytes32[] memory eligibleApps, uint256 eligibleCount) = _buildEligibleApps($, _roundId);
-    bytes32[] memory trimmed = new bytes32[](eligibleCount);
-    for (uint256 i = 0; i < eligibleCount; i++) {
-      trimmed[i] = eligibleApps[i];
-    }
-    return trimmed;
-  }
 
   /**
    * @notice Gets the reward amount distributed to a specific app for a specific round
@@ -453,29 +352,11 @@ contract DBAPool is
   }
 
   /**
-   * @notice Gets the VeBetterPassport contract (V4)
-   * @return The contract interface
-   */
-  function veBetterPassport() external view returns (IVeBetterPassport) {
-    DBAPoolStorage storage $ = _getDBAPoolStorage();
-    return $.veBetterPassport;
-  }
-
-  /**
-   * @notice Gets the XAllocationVoting contract (V4)
-   * @return The contract interface
-   */
-  function xAllocationVoting() external view returns (IXAllocationVotingGovernor) {
-    DBAPoolStorage storage $ = _getDBAPoolStorage();
-    return $.xAllocationVoting;
-  }
-
-  /**
    * @notice Gets the contract version
    * @return The version string
    */
   function version() external pure returns (string memory) {
-    return "4";
+    return "3";
   }
 
   // ---------- Admin functions ---------- //
@@ -552,26 +433,6 @@ contract DBAPool is
     require(_meritCapMultiplier > 0, "DBAPool: merit cap multiplier is zero");
     DBAPoolStorage storage $ = _getDBAPoolStorage();
     $.meritCapMultiplier = _meritCapMultiplier;
-  }
-
-  /**
-   * @notice Updates the VeBetterPassport contract used for on-chain action count reads
-   * @param _veBetterPassport The new contract interface
-   */
-  function setVeBetterPassport(IVeBetterPassport _veBetterPassport) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(address(_veBetterPassport) != address(0), "DBAPool: zero address");
-    DBAPoolStorage storage $ = _getDBAPoolStorage();
-    $.veBetterPassport = _veBetterPassport;
-  }
-
-  /**
-   * @notice Updates the XAllocationVoting contract used for on-chain round/endorsement reads
-   * @param _xAllocationVoting The new contract interface
-   */
-  function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(address(_xAllocationVoting) != address(0), "DBAPool: zero address");
-    DBAPoolStorage storage $ = _getDBAPoolStorage();
-    $.xAllocationVoting = _xAllocationVoting;
   }
 
   /**

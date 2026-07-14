@@ -38,6 +38,7 @@ import {
   DBAPool,
   DBAPoolV1,
   DBAPoolV2,
+  DBAPoolV3,
   Stargate,
   AdministrationUtilsV6,
   EndorsementUtilsV6,
@@ -1208,13 +1209,25 @@ export const getOrDeployContractInstances = async ({
   })) as DBAPoolV2
 
   // Upgrade to V3
-  const dynamicBaseAllocationPool = (await upgradeProxy(
+  const dbaPoolV3 = (await upgradeProxy(
     "DBAPoolV2",
-    "DBAPool",
+    "DBAPoolV3",
     await dbaPoolV2.getAddress(),
     [owner.address], // treasuryAddress
     {
       version: 3,
+      logOutput: false,
+    },
+  )) as DBAPoolV3
+
+  // Upgrade to V4
+  const dynamicBaseAllocationPool = (await upgradeProxy(
+    "DBAPoolV3",
+    "DBAPool",
+    await dbaPoolV3.getAddress(),
+    [await veBetterPassport.getAddress(), await xAllocationVoting.getAddress()],
+    {
+      version: 4,
       logOutput: false,
     },
   )) as DBAPool

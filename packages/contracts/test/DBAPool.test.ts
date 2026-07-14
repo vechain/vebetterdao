@@ -15,7 +15,31 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { endorseApp } from "./helpers/xnodes"
-import { DBAPoolV1, DBAPoolV2 } from "../typechain-types"
+import { DBAPoolV1, DBAPoolV2, DBAPoolV3, VeBetterPassport } from "../typechain-types"
+
+/**
+ * Test helper: under V4 the DBA pool derives the eligible set on-chain by reading
+ * `veBetterPassport.appRoundActionCount(appId, round)`. Tests that want a specific app to
+ * be considered eligible must register at least one action for it on the passport.
+ *
+ * Apps NOT registered here are filtered out (rule 2), so tests can keep the V3 pattern of
+ * choosing which subset of round apps gets rewards by listing them here.
+ */
+async function makeAppsEligibleForDBA(
+  veBetterPassport: VeBetterPassport,
+  owner: HardhatEthersSigner,
+  actor: HardhatEthersSigner,
+  appIds: string[],
+  roundId: bigint | number,
+) {
+  const role = await veBetterPassport.ACTION_REGISTRAR_ROLE()
+  if (!(await veBetterPassport.hasRole(role, owner.address))) {
+    await veBetterPassport.connect(owner).grantRole(role, owner.address)
+  }
+  for (const appId of appIds) {
+    await veBetterPassport.connect(owner).registerActionForRound(actor.address, appId, roundId)
+  }
+}
 
 describe("DBA Pool - @shard7b", async function () {
   // Environment params
@@ -58,7 +82,7 @@ describe("DBA Pool - @shard7b", async function () {
         forceDeploy: true,
       })
 
-      expect(await dynamicBaseAllocationPool.version()).to.eql("3")
+      expect(await dynamicBaseAllocationPool.version()).to.eql("4")
     })
 
     it("Should revert if admin is set to zero address in initialization", async () => {
@@ -403,13 +427,10 @@ describe("DBA Pool - @shard7b", async function () {
           forceDeploy: true,
         })
 
-        const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-        await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, distributor.address)
-
         await dynamicBaseAllocationPool.connect(owner).pause()
 
-        const appIds = [ethers.encodeBytes32String("app1")]
-        await catchRevert(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(1, appIds))
+        // V4 distribute is permissionless — the only gate left is `whenNotPaused`
+        await catchRevert(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(1))
       })
     })
 
@@ -582,25 +603,16 @@ describe("DBA Pool - @shard7b", async function () {
   })
 
   describe("DBA Rewards Distribution", () => {
-    it("Should revert if caller doesn't have DISTRIBUTOR_ROLE", async function () {
+    it("V4: distribute is permissionless (any account can call)", async function () {
       const { dynamicBaseAllocationPool, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      const appIds = [ethers.encodeBytes32String("app1")]
-      await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).distributeDBARewards(1, appIds))
-    })
-
-    it("Should revert if no apps provided", async function () {
-      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, distributor.address)
-
-      await expect(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(1, [])).to.be.revertedWith(
-        "DBAPool: no apps to distribute to",
+      // Pre-V4 this reverted with AccessControl. V4 derives the eligible set on-chain
+      // so the caller no longer has any leverage over who gets paid → no role gate.
+      // The call still reverts but with the round-state guard, not access control.
+      await expect(dynamicBaseAllocationPool.connect(otherAccount).distributeDBARewards(1)).to.be.revertedWith(
+        "DBAPool: Round invalid or not ready to distribute",
       )
     })
 
@@ -609,13 +621,10 @@ describe("DBA Pool - @shard7b", async function () {
         forceDeploy: true,
       })
 
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, distributor.address)
-
       await dynamicBaseAllocationPool.connect(owner).setDistributionStartRound(10)
 
-      const appIds = [ethers.encodeBytes32String("app1")]
-      await expect(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(5, appIds)).to.be.revertedWith(
+      // Permissionless after V4 — anyone can call; the round-state guard kicks in
+      await expect(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(5)).to.be.revertedWith(
         "DBAPool: Round invalid or not ready to distribute",
       )
     })
@@ -641,84 +650,14 @@ describe("DBA Pool - @shard7b", async function () {
       const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, distributor.address)
 
-      const appIds = [ethers.encodeBytes32String("app1")]
-
       // This will fail on one of the validation checks
-      await catchRevert(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(1, appIds))
+      await catchRevert(dynamicBaseAllocationPool.connect(distributor).distributeDBARewards(1))
     })
 
-    it("Should revert if app does not exist", async function () {
-      const { dynamicBaseAllocationPool, owner, b3tr, minterAccount, xAllocationPool } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
-
-      // Give DBA pool some funds
-      await b3tr.connect(minterAccount).mint(await dynamicBaseAllocationPool.getAddress(), ethers.parseEther("1000"))
-
-      // Use a non-existent app ID
-      const nonExistentAppId = ethers.encodeBytes32String("nonexistent")
-
-      // This will fail validation checks before getting to app existence check
-      await catchRevert(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [nonExistentAppId]))
-    })
-
-    it("Should revert if duplicate app IDs are provided", async function () {
-      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
-
-      // Create random app IDs
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("app1"))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("app2"))
-      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("app3"))
-
-      // Try to distribute with duplicate app IDs - should revert before any other checks
-      await expect(
-        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [app1Id, app2Id, app1Id]),
-      ).to.be.revertedWith("DBAPool: duplicate app IDs not allowed")
-
-      // Verify with consecutive duplicates
-      await expect(
-        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [app2Id, app2Id]),
-      ).to.be.revertedWith("DBAPool: duplicate app IDs not allowed")
-
-      // Verify with duplicates at the end
-      await expect(
-        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [app1Id, app2Id, app3Id, app2Id]),
-      ).to.be.revertedWith("DBAPool: duplicate app IDs not allowed")
-    })
-
-    it("Should handle large number of app IDs efficiently (scalability test)", async function () {
-      this.timeout(180000) // 3 minutes timeout for this test
-
-      const { dynamicBaseAllocationPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
-
-      // Create 1000 unique app IDs
-      const appIds = []
-      for (let i = 0; i < 1000; i++) {
-        appIds.push(ethers.keccak256(ethers.toUtf8Bytes(`app${i}`)))
-      }
-
-      // Add a duplicate at the end to test worst-case scenario
-      appIds.push(appIds[0])
-
-      // This should detect the duplicate even with 1001 items
-      await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, appIds)).to.be.revertedWith(
-        "DBAPool: duplicate app IDs not allowed",
-      )
-    })
+    // Note: V4 derives the eligible set on-chain from getAppIdsOfRound + appRoundActionCount + isEligible.
+    // Tests for "no apps provided", "duplicate IDs", "non-existent app", and 1000-id scalability are obsolete:
+    // the array argument was removed entirely. New on-chain semantics covered by test/dba-pool/v4-compatibility.test.ts
+    // and test/dba-pool/v4-scalability.test.ts.
   })
 
   describe("Integration Tests - Full Distribution Flow", () => {
@@ -804,8 +743,11 @@ describe("DBA Pool - @shard7b", async function () {
       const flatShare = unallocatedAmount // single app gets all
       const expectedReward = flatShare < meritCap ? flatShare : meritCap
 
-      // Distribute to single app
-      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
+      // V4: only register actions for app2 → app1 is filtered out by rule 2
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app2Id], round1)
+
+      // Distribute (eligible set derived on-chain)
+      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       await expect(tx)
         .to.emit(dynamicBaseAllocationPool, "FundsDistributedToApp")
@@ -890,7 +832,8 @@ describe("DBA Pool - @shard7b", async function () {
       const meritCapR1 = (app2EarningsR1 - baseAllocR1) * 2n
       const expectedR1 = unallocatedR1 < meritCapR1 ? unallocatedR1 : meritCapR1
 
-      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app2Id], round1)
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       const dbaRoundRewardsForApp1Round1 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app1Id)
       expect(dbaRoundRewardsForApp1Round1).to.equal(0n)
@@ -915,7 +858,8 @@ describe("DBA Pool - @shard7b", async function () {
       const meritCapR2 = (app2EarningsR2 - baseAllocR2) * 2n
       const expectedR2 = unallocatedR2 < meritCapR2 ? unallocatedR2 : meritCapR2
 
-      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round2, [app2Id])
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app2Id], round2)
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round2)
 
       const dbaRoundRewardsForApp1Round2 = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round2, app1Id)
       expect(dbaRoundRewardsForApp1Round2).to.equal(0n)
@@ -984,15 +928,17 @@ describe("DBA Pool - @shard7b", async function () {
       const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
 
-      // Try to distribute to non-existent app
-      await expect(
-        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [nonExistentAppId]),
-      ).to.be.revertedWith("DBAPool: app does not exist")
+      // V4: non-existent app cannot end up in the eligible set because the contract
+      // pulls the candidate list from `xAllocationVoting.getAppIdsOfRound`, which is
+      // populated only via `X2EarnApps.submitApp`. The unused `nonExistentAppId` literal
+      // is kept for documentation parity with the V3 expectations.
+      void nonExistentAppId
 
-      // Verify can still distribute to existing app after failed attempt
+      // Distribute to the only existing app
       const initialApp1Funds = await x2EarnRewardsPool.availableFunds(app1Id)
 
-      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app1Id])
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app1Id], round1)
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       const finalApp1Funds = await x2EarnRewardsPool.availableFunds(app1Id)
       expect(finalApp1Funds - initialApp1Funds).to.equal(ethers.parseEther("3500"))
@@ -1071,7 +1017,7 @@ describe("DBA Pool - @shard7b", async function () {
       await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
 
       // Should not be able to distribute yet
-      await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])).to.be.revertedWith(
+      await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)).to.be.revertedWith(
         "DBAPool: Round invalid or not ready to distribute",
       )
 
@@ -1090,7 +1036,8 @@ describe("DBA Pool - @shard7b", async function () {
       // Now distribution should succeed
       const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
 
-      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id])
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app2Id], round1)
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       const finalApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
       expect(finalApp2Funds - initialApp2Funds).to.equal(ethers.parseEther("2100"))
@@ -1211,7 +1158,8 @@ describe("DBA Pool - @shard7b", async function () {
       const expectedAmountPerApp = ethers.parseEther("1050")
       expect(dbaPoolBalance / BigInt(eligibleApps.length)).to.equal(expectedAmountPerApp)
 
-      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, eligibleApps)
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], eligibleApps, round1)
+      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       // Verify events were emitted for each app
       await expect(tx)
@@ -1239,9 +1187,9 @@ describe("DBA Pool - @shard7b", async function () {
       expect(await dynamicBaseAllocationPool.isDBARewardsDistributed(round1)).to.equal(true)
 
       // Verify cannot distribute again for same round
-      await expect(
-        dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, eligibleApps),
-      ).to.be.revertedWith("DBAPool: Round invalid or not ready to distribute")
+      await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)).to.be.revertedWith(
+        "DBAPool: Round invalid or not ready to distribute",
+      )
     })
   })
 
@@ -1294,8 +1242,7 @@ describe("DBA Pool - @shard7b", async function () {
       await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).setDistributionStartRound(5))
 
       // Test distributor function
-      const appIds = [ethers.encodeBytes32String("app1")]
-      await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).distributeDBARewards(1, appIds))
+      await catchRevert(dynamicBaseAllocationPool.connect(otherAccount).distributeDBARewards(1))
     })
 
     it("Should properly validate all input parameters", async function () {
@@ -1319,12 +1266,7 @@ describe("DBA Pool - @shard7b", async function () {
         "DBAPool: distribution start round is zero",
       )
 
-      // Empty array validation
-      const DISTRIBUTOR_ROLE = await dynamicBaseAllocationPool.DISTRIBUTOR_ROLE()
-      await dynamicBaseAllocationPool.connect(owner).grantRole(DISTRIBUTOR_ROLE, owner.address)
-      await expect(dynamicBaseAllocationPool.connect(owner).distributeDBARewards(1, [])).to.be.revertedWith(
-        "DBAPool: no apps to distribute to",
-      )
+      // V4: empty-array validation no longer applies (no array argument)
     })
   })
 
@@ -1736,8 +1678,9 @@ describe("DBA Pool - @shard7b", async function () {
       const v2X2EarnApps = await dbaPoolV2.x2EarnApps()
       const v2DistributionStartRound = await dbaPoolV2.distributionStartRound()
 
-      // Upgrade to V3 with initializeV3
-      const DBAPoolV3Factory = await ethers.getContractFactory("DBAPool")
+      // Upgrade to V3 with initializeV3 — use the deprecated V3 contract explicitly
+      // so this test verifies V2 → V3 storage preservation (not the latest version).
+      const DBAPoolV3Factory = await ethers.getContractFactory("DBAPoolV3")
       const dbaPoolV3Impl = await DBAPoolV3Factory.deploy()
       await dbaPoolV3Impl.waitForDeployment()
 
@@ -1746,7 +1689,7 @@ describe("DBA Pool - @shard7b", async function () {
       await dbaPoolV2.connect(owner).upgradeToAndCall(await dbaPoolV3Impl.getAddress(), initData)
 
       // Get V3 instance
-      const dbaPoolV3 = await ethers.getContractAt("DBAPool", await dbaPoolV1.getAddress())
+      const dbaPoolV3 = (await ethers.getContractAt("DBAPoolV3", await dbaPoolV1.getAddress())) as DBAPoolV3
 
       // Verify V3 version and that V2 storage is preserved
       expect(await dbaPoolV3.version()).to.equal("3")
@@ -1878,7 +1821,9 @@ describe("DBA Pool - @shard7b", async function () {
       const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
       const initialTreasuryBalance = await b3tr.balanceOf(treasuryAddr)
 
-      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app1Id, app2Id])
+      void initialApp2Funds // referenced in surrounding assertions below
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app1Id, app2Id], round1)
+      const tx = await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       // app2's reward should be capped at 2x its vote-only allocation if flatShare > meritCap
       const app2Reward = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)
@@ -1976,7 +1921,8 @@ describe("DBA Pool - @shard7b", async function () {
       const treasuryAddr = await dynamicBaseAllocationPool.treasuryAddress()
       const initialTreasuryBalance = await b3tr.balanceOf(treasuryAddr)
 
-      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app2Id, app3Id])
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app2Id, app3Id], round1)
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       const app2Reward = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)
       const app3Reward = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app3Id)
@@ -2071,7 +2017,8 @@ describe("DBA Pool - @shard7b", async function () {
 
       const initialApp2Funds = await x2EarnRewardsPool.availableFunds(app2Id)
 
-      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1, [app1Id, app2Id])
+      await makeAppsEligibleForDBA(veBetterPassport, owner, otherAccounts[0], [app1Id, app2Id], round1)
+      await dynamicBaseAllocationPool.connect(owner).distributeDBARewards(round1)
 
       const app2Reward = await dynamicBaseAllocationPool.dbaRoundRewardsForApp(round1, app2Id)
       expect(app2Reward).to.equal(flatSharePerApp)
