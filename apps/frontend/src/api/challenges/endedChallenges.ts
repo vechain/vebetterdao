@@ -1,4 +1,4 @@
-import { ChallengeStatus, ChallengeView } from "./types"
+import { ChallengeStatus, ChallengeView, ChallengeVisibility } from "./types"
 
 type EndedChallengeCandidate = Pick<ChallengeView, "status" | "endRound">
 
@@ -11,17 +11,23 @@ type EndedChallengeCandidate = Pick<ChallengeView, "status" | "endRound">
  *   carousel, so without this branch they stay invisible to everyone but their participants.
  *
  * `Cancelled` / `Invalid` quests never ran, so they are not "past" — they stay out.
- *
- * Private quests are included: a quest's existence, prize, rules and outcome are public
- * regardless of visibility. Only its participation stays private — see
- * `isChallengeParticipationVisible`.
  */
 export const isEndedChallenge = (challenge: EndedChallengeCandidate, currentRound: number) =>
   challenge.status === ChallengeStatus.Completed ||
   (challenge.status === ChallengeStatus.Active && challenge.endRound < currentRound)
 
-/** Ended quests, newest first. */
-export const selectEndedChallenges = (challenges: ChallengeView[], currentRound: number): ChallengeView[] =>
+/**
+ * Ended quests, newest first. Public and private quests are surfaced in separate rows,
+ * so pass the `visibility` the row is for; omit it to get both.
+ */
+export const selectEndedChallenges = (
+  challenges: ChallengeView[],
+  currentRound: number,
+  visibility?: ChallengeVisibility,
+): ChallengeView[] =>
   challenges
-    .filter(challenge => isEndedChallenge(challenge, currentRound))
+    .filter(
+      challenge =>
+        isEndedChallenge(challenge, currentRound) && (visibility === undefined || challenge.visibility === visibility),
+    )
     .sort((a, b) => b.challengeId - a.challengeId)

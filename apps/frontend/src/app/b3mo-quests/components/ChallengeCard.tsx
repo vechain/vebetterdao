@@ -18,7 +18,6 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { LuClock, LuTarget, LuTicket, LuTrophy, LuUsers } from "react-icons/lu"
 
-import { isChallengeParticipationVisible } from "@/api/challenges/challengeParticipation"
 import { ChallengeKind, ChallengeType, ChallengeView, ParticipantStatus, SettlementMode } from "@/api/challenges/types"
 import { useChallengeActions } from "@/api/challenges/useChallengeActions"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
@@ -68,7 +67,6 @@ export const ChallengeCard = ({ challenge, onJoinOverride }: ChallengeCardProps)
   const isReacceptingInvite = challenge.canAccept && challenge.viewerStatus === ParticipantStatus.Declined
   const challengeTitle = challenge.title || t("B3MO Quest #{{id}}", { id: challenge.challengeId })
   const challengeDescription = useChallengeDescription(challenge)
-  const showParticipation = isChallengeParticipationVisible(challenge)
 
   const prizeLabel = `${getCompactFormatter(2).format(Number(challenge.totalPrize))} B3TR`
   const stakeLabel = humanNumber(challenge.stakeAmount, challenge.stakeAmount, "B3TR")
@@ -124,7 +122,7 @@ export const ChallengeCard = ({ challenge, onJoinOverride }: ChallengeCardProps)
                     <ChallengeStatusBadge challenge={challenge} outlined />
                   </Box>
                 </HStack>
-                {showParticipation && <ChallengeCreatorChip creator={challenge.creator} noBackground />}
+                <ChallengeCreatorChip creator={challenge.creator} noBackground />
                 <Text textStyle="sm" color="text.subtle">
                   {challengeDescription}
                 </Text>

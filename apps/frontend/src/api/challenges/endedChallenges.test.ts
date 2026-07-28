@@ -80,26 +80,31 @@ describe("isEndedChallenge", () => {
     expect(isEndedChallenge(challenge({ status: ChallengeStatus.Invalid }), CURRENT_ROUND)).toBe(false)
   })
 
-  it("keeps private quests — visibility does not gate discovery", () => {
+  it("ignores visibility — private quests end like any other", () => {
     expect(isEndedChallenge(challenge({ visibility: ChallengeVisibility.Private }), CURRENT_ROUND)).toBe(true)
   })
 })
 
 describe("selectEndedChallenges", () => {
-  it("returns only ended quests, newest first, private included", () => {
-    const selected = selectEndedChallenges(
-      [
-        challenge({ challengeId: 1 }),
-        challenge({ challengeId: 2, status: ChallengeStatus.Active, endRound: 19 }),
-        challenge({ challengeId: 3, status: ChallengeStatus.Active, endRound: 25 }),
-        challenge({ challengeId: 4, status: ChallengeStatus.Cancelled }),
-        challenge({ challengeId: 5, visibility: ChallengeVisibility.Private }),
-        challenge({ challengeId: 6 }),
-      ],
-      CURRENT_ROUND,
-    )
+  const all = [
+    challenge({ challengeId: 1 }),
+    challenge({ challengeId: 2, status: ChallengeStatus.Active, endRound: 19 }),
+    challenge({ challengeId: 3, status: ChallengeStatus.Active, endRound: 25 }),
+    challenge({ challengeId: 4, status: ChallengeStatus.Cancelled }),
+    challenge({ challengeId: 5, visibility: ChallengeVisibility.Private }),
+    challenge({ challengeId: 6 }),
+    challenge({ challengeId: 7, visibility: ChallengeVisibility.Private, status: ChallengeStatus.Invalid }),
+  ]
 
-    expect(selected.map(c => c.challengeId)).toEqual([6, 5, 2, 1])
+  it("returns every ended quest, newest first, when no visibility is given", () => {
+    expect(selectEndedChallenges(all, CURRENT_ROUND).map(c => c.challengeId)).toEqual([6, 5, 2, 1])
+  })
+
+  it("splits the rows by visibility", () => {
+    expect(selectEndedChallenges(all, CURRENT_ROUND, ChallengeVisibility.Public).map(c => c.challengeId)).toEqual([
+      6, 2, 1,
+    ])
+    expect(selectEndedChallenges(all, CURRENT_ROUND, ChallengeVisibility.Private).map(c => c.challengeId)).toEqual([5])
   })
 
   it("does not mutate the input", () => {

@@ -9,7 +9,7 @@ import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks
 import { guestViewerReads, RawChallengeView, toChallengeView } from "./buildChallengeView"
 import { selectEndedChallenges } from "./endedChallenges"
 import { fetchMaxParticipants } from "./fetchMaxParticipants"
-import { ChallengeStatus, ChallengeView, PaginatedChallengeSection } from "./types"
+import { ChallengeStatus, ChallengeView, ChallengeVisibility, PaginatedChallengeSection } from "./types"
 import { CHALLENGES_PAGE_SIZE } from "./useChallengeSections"
 
 const abi = B3TRChallenges__factory.abi
@@ -21,7 +21,9 @@ export const getEndedChallengesQueryKey = (contractAddress: string) =>
   ["challenges", "ended", contractAddress.toLowerCase()] as const
 
 /**
- * Every ended quest, public and private alike, read straight from the contract.
+ * Ended quests of one visibility, read straight from the contract. Public quests and private
+ * duels get their own row, so each call passes the `visibility` it renders; omitting it returns
+ * both. Every call shares one cached query — the visibility split happens client-side.
  *
  * The indexer's wallet-scoped History filter only returns quests the viewer was involved in, so a
  * quest that ran without them was visible nowhere once it left the live carousels. There are ~100
@@ -30,14 +32,10 @@ export const getEndedChallengesQueryKey = (contractAddress: string) =>
  * client-side. The contract scan is also what makes private quests reachable — the indexer's
  * public `GET /b3tr/challenges` endpoint only ever returns public ones.
  *
- * Private quests are included on purpose: a quest's existence, prize, rules and outcome are public
- * regardless of visibility, and only its participation is hidden from outsiders (see
- * `isChallengeParticipationVisible`).
- *
  * Cards render read-only (no viewer reads, no claim-event scan): the viewer's own past quests,
  * including anything still claimable, stay in the wallet-scoped History tab.
  */
-export const useEndedChallenges = (): PaginatedChallengeSection => {
+export const useEndedChallenges = (visibility?: ChallengeVisibility): PaginatedChallengeSection => {
   const thor = useThor()
   const queryClient = useQueryClient()
   const contractAddress = getConfig().challengesContractAddress
@@ -104,8 +102,8 @@ export const useEndedChallenges = (): PaginatedChallengeSection => {
   // Re-filtered against the live round rather than the round at fetch time, so a quest whose
   // window closes mid-cache still lands here.
   const ended = useMemo(
-    () => (currentRound === undefined ? [] : selectEndedChallenges(query.data ?? [], currentRound)),
-    [query.data, currentRound],
+    () => (currentRound === undefined ? [] : selectEndedChallenges(query.data ?? [], currentRound, visibility)),
+    [query.data, currentRound, visibility],
   )
 
   const items = useMemo(() => ended.slice(0, (page + 1) * CHALLENGES_PAGE_SIZE), [ended, page])

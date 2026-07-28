@@ -16,7 +16,6 @@ import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { isChallengeParticipationVisible } from "@/api/challenges/challengeParticipation"
 import {
   ChallengeDetail,
   ChallengeKind,
@@ -130,7 +129,7 @@ export const ChallengeHeaderCard = ({ challenge }: ChallengeHeaderCardProps) => 
             <Wrap gap="1.5">
               <ChallengeVisibilityBadge challenge={challenge} />
               <ChallengeWinnerTypeBadge challenge={challenge} />
-              {isChallengeParticipationVisible(challenge) && <ChallengeCreatorChip creator={challenge.creator} />}
+              <ChallengeCreatorChip creator={challenge.creator} />
             </Wrap>
             <HStack gap="5">
               {isReacceptingInvite && (
