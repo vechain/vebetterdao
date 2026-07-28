@@ -18,7 +18,9 @@ import BigNumber from "bignumber.js"
 import { Group } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { LuLock } from "react-icons/lu"
 
+import { isChallengeParticipationVisible } from "@/api/challenges/challengeParticipation"
 import { type ChallengeDetail, ChallengeKind, ChallengeStatus, ChallengeType } from "@/api/challenges/types"
 import { useChallengeParticipantActions } from "@/api/challenges/useChallengeParticipantActions"
 import { useChallengePersonhoodBatch } from "@/api/challenges/useChallengePersonhood"
@@ -49,6 +51,7 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedParticipant, setSelectedParticipant] = useState<ChallengeUserActionsParticipant | null>(null)
 
+  const showParticipation = isChallengeParticipationVisible(challenge)
   const isPending = challenge.status === ChallengeStatus.Pending
   const isCompleted = challenge.status === ChallengeStatus.Completed
   const isSponsored = challenge.kind === ChallengeKind.Sponsored
@@ -87,7 +90,8 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
   const { leaderboard, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage, loadedCount, totalCount } =
     useChallengeParticipantActions(
       challenge.challengeId,
-      challenge.participants,
+      // Skip the per-participant multicall entirely when identities stay hidden.
+      showParticipation ? challenge.participants : [],
       isSplitWin ? challenge.winners : undefined,
     )
 
@@ -165,11 +169,23 @@ export const ChallengeParticipantsCard = ({ challenge }: ChallengeParticipantsCa
       />
     ))
 
-  const hasOverflow = totalCount > LEADERBOARD_SIZE || allPendingInvitees.length > PENDING_SIZE
+  const hasOverflow = showParticipation && (totalCount > LEADERBOARD_SIZE || allPendingInvitees.length > PENDING_SIZE)
 
   const hasNoUsers = challenge.participants.length === 0 && allPendingInvitees.length === 0
 
   const renderContent = () => {
+    if (!showParticipation) {
+      return (
+        <VStack gap={3} align="center" w="full" py={6}>
+          <Icon as={LuLock} boxSize="10" color="icon.subtle" />
+          <Heading size="md">{t("Participation is private")}</Heading>
+          <Text textStyle="sm" color="text.subtle" textAlign="center">
+            {t("This B3MO quest was private — who took part in it is not shown")}
+          </Text>
+        </VStack>
+      )
+    }
+
     if (isPending && hasNoUsers) {
       return (
         <VStack gap={3} align="center" w="full" py={6}>

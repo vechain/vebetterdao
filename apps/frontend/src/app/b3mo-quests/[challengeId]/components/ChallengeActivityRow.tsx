@@ -42,9 +42,11 @@ const ActivityName = ({ address }: { address: string }) => {
 interface ChallengeActivityRowProps {
   entry: ChallengeActivityEntry
   challenge?: Pick<ChallengeView, "status" | "kind" | "participantCount">
+  /** Replaces the actor's name with a placeholder — see `isChallengeParticipationVisible`. */
+  hideIdentity?: boolean
 }
 
-export const ChallengeActivityRow = ({ entry, challenge }: ChallengeActivityRowProps) => {
+export const ChallengeActivityRow = ({ entry, challenge, hideIdentity = false }: ChallengeActivityRowProps) => {
   const { t } = useTranslation()
   const formattedAmount = entry.amount ? humanNumber(entry.amount) : undefined
 
@@ -60,7 +62,14 @@ export const ChallengeActivityRow = ({ entry, challenge }: ChallengeActivityRowP
         <Text textStyle="sm" color={color} lineClamp={2}>
           {entry.address ? (
             <>
-              <ActivityName address={entry.address} /> {label}
+              {hideIdentity ? (
+                <Text as="span" fontWeight="semibold">
+                  {t("Someone")}
+                </Text>
+              ) : (
+                <ActivityName address={entry.address} />
+              )}{" "}
+              {label}
             </>
           ) : (
             label

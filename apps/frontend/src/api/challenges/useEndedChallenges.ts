@@ -21,14 +21,18 @@ export const getEndedChallengesQueryKey = (contractAddress: string) =>
   ["challenges", "ended", contractAddress.toLowerCase()] as const
 
 /**
- * Every ended public quest, read straight from the contract.
+ * Every ended quest, public and private alike, read straight from the contract.
  *
- * The indexer's wallet-scoped History filter only returns quests the viewer was involved in,
- * so a public quest that ran without them was visible nowhere once it left the live carousels.
- * There are ~100 quests in total, so a batched scan of `challengeCount` ids is cheap: one
- * `challengeCount` call plus `ceil(count / CHUNK_SIZE)` parallel multicalls, cached for a minute
- * and paginated client-side. If quests ever grow past a few hundred, swap the scan for the
- * indexer's `GET /b3tr/challenges?status=Completed` endpoint — the returned shape is unchanged.
+ * The indexer's wallet-scoped History filter only returns quests the viewer was involved in, so a
+ * quest that ran without them was visible nowhere once it left the live carousels. There are ~100
+ * quests in total, so a batched scan of `challengeCount` ids is cheap: one `challengeCount` call
+ * plus `ceil(count / CHUNK_SIZE)` parallel multicalls, cached for a minute and paginated
+ * client-side. The contract scan is also what makes private quests reachable — the indexer's
+ * public `GET /b3tr/challenges` endpoint only ever returns public ones.
+ *
+ * Private quests are included on purpose: a quest's existence, prize, rules and outcome are public
+ * regardless of visibility, and only its participation is hidden from outsiders (see
+ * `isChallengeParticipationVisible`).
  *
  * Cards render read-only (no viewer reads, no claim-event scan): the viewer's own past quests,
  * including anything still claimable, stay in the wallet-scoped History tab.

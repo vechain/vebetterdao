@@ -1,4 +1,4 @@
-import { isEndedPublicChallenge, selectEndedChallenges } from "./endedChallenges"
+import { isEndedChallenge, selectEndedChallenges } from "./endedChallenges"
 import {
   ChallengeKind,
   ChallengeStatus,
@@ -61,38 +61,32 @@ const challenge = (overrides: Partial<ChallengeView> = {}): ChallengeView => ({
   ...overrides,
 })
 
-describe("isEndedPublicChallenge", () => {
-  it("keeps settled public quests", () => {
-    expect(isEndedPublicChallenge(challenge(), CURRENT_ROUND)).toBe(true)
+describe("isEndedChallenge", () => {
+  it("keeps settled quests", () => {
+    expect(isEndedChallenge(challenge(), CURRENT_ROUND)).toBe(true)
   })
 
-  it("keeps public quests whose window closed without settlement", () => {
-    expect(isEndedPublicChallenge(challenge({ status: ChallengeStatus.Active, endRound: 19 }), CURRENT_ROUND)).toBe(
-      true,
-    )
+  it("keeps quests whose window closed without settlement", () => {
+    expect(isEndedChallenge(challenge({ status: ChallengeStatus.Active, endRound: 19 }), CURRENT_ROUND)).toBe(true)
   })
 
-  it("drops public quests still inside their window", () => {
-    expect(isEndedPublicChallenge(challenge({ status: ChallengeStatus.Active, endRound: 20 }), CURRENT_ROUND)).toBe(
-      false,
-    )
-    expect(isEndedPublicChallenge(challenge({ status: ChallengeStatus.Pending, endRound: 30 }), CURRENT_ROUND)).toBe(
-      false,
-    )
+  it("drops quests still inside their window", () => {
+    expect(isEndedChallenge(challenge({ status: ChallengeStatus.Active, endRound: 20 }), CURRENT_ROUND)).toBe(false)
+    expect(isEndedChallenge(challenge({ status: ChallengeStatus.Pending, endRound: 30 }), CURRENT_ROUND)).toBe(false)
   })
 
   it("drops quests that never ran", () => {
-    expect(isEndedPublicChallenge(challenge({ status: ChallengeStatus.Cancelled }), CURRENT_ROUND)).toBe(false)
-    expect(isEndedPublicChallenge(challenge({ status: ChallengeStatus.Invalid }), CURRENT_ROUND)).toBe(false)
+    expect(isEndedChallenge(challenge({ status: ChallengeStatus.Cancelled }), CURRENT_ROUND)).toBe(false)
+    expect(isEndedChallenge(challenge({ status: ChallengeStatus.Invalid }), CURRENT_ROUND)).toBe(false)
   })
 
-  it("drops private quests", () => {
-    expect(isEndedPublicChallenge(challenge({ visibility: ChallengeVisibility.Private }), CURRENT_ROUND)).toBe(false)
+  it("keeps private quests — visibility does not gate discovery", () => {
+    expect(isEndedChallenge(challenge({ visibility: ChallengeVisibility.Private }), CURRENT_ROUND)).toBe(true)
   })
 })
 
 describe("selectEndedChallenges", () => {
-  it("returns only ended public quests, newest first", () => {
+  it("returns only ended quests, newest first, private included", () => {
     const selected = selectEndedChallenges(
       [
         challenge({ challengeId: 1 }),
@@ -105,7 +99,7 @@ describe("selectEndedChallenges", () => {
       CURRENT_ROUND,
     )
 
-    expect(selected.map(c => c.challengeId)).toEqual([6, 2, 1])
+    expect(selected.map(c => c.challengeId)).toEqual([6, 5, 2, 1])
   })
 
   it("does not mutate the input", () => {

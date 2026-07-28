@@ -1,10 +1,9 @@
-import { ChallengeStatus, ChallengeView, ChallengeVisibility } from "./types"
+import { ChallengeStatus, ChallengeView } from "./types"
 
-type EndedChallengeCandidate = Pick<ChallengeView, "visibility" | "status" | "endRound">
+type EndedChallengeCandidate = Pick<ChallengeView, "status" | "endRound">
 
 /**
- * Whether a quest is a public quest whose competition window is over. Two on-chain
- * shapes qualify:
+ * Whether a quest's competition window is over. Two on-chain shapes qualify:
  * - `Completed`: the contract settled it (every Split Win slot claimed, or the creator
  *   reclaimed the unclaimed pool after `endRound`).
  * - `Active` past its `endRound`: the window closed but nobody triggered settlement, so the
@@ -12,14 +11,17 @@ type EndedChallengeCandidate = Pick<ChallengeView, "visibility" | "status" | "en
  *   carousel, so without this branch they stay invisible to everyone but their participants.
  *
  * `Cancelled` / `Invalid` quests never ran, so they are not "past" — they stay out.
+ *
+ * Private quests are included: a quest's existence, prize, rules and outcome are public
+ * regardless of visibility. Only its participation stays private — see
+ * `isChallengeParticipationVisible`.
  */
-export const isEndedPublicChallenge = (challenge: EndedChallengeCandidate, currentRound: number) =>
-  challenge.visibility === ChallengeVisibility.Public &&
-  (challenge.status === ChallengeStatus.Completed ||
-    (challenge.status === ChallengeStatus.Active && challenge.endRound < currentRound))
+export const isEndedChallenge = (challenge: EndedChallengeCandidate, currentRound: number) =>
+  challenge.status === ChallengeStatus.Completed ||
+  (challenge.status === ChallengeStatus.Active && challenge.endRound < currentRound)
 
-/** Ended public quests, newest first. */
+/** Ended quests, newest first. */
 export const selectEndedChallenges = (challenges: ChallengeView[], currentRound: number): ChallengeView[] =>
   challenges
-    .filter(challenge => isEndedPublicChallenge(challenge, currentRound))
+    .filter(challenge => isEndedChallenge(challenge, currentRound))
     .sort((a, b) => b.challengeId - a.challengeId)

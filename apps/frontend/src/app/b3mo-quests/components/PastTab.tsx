@@ -12,7 +12,7 @@ export const PastTab = () => {
     <ChallengesGrid
       items={ended.items}
       section={ended}
-      emptyDescription={t("Public B3MO Quests show up here once they end")}
+      emptyDescription={t("B3MO Quests show up here once they end")}
     />
   )
 }

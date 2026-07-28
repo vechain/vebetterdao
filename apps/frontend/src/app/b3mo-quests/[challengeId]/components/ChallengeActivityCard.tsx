@@ -2,6 +2,7 @@ import { Box, Card, Heading, HStack, Icon, Skeleton, VStack } from "@chakra-ui/r
 import { Activity } from "iconoir-react"
 import { useTranslation } from "react-i18next"
 
+import { isChallengeParticipationVisible } from "@/api/challenges/challengeParticipation"
 import { type ChallengeDetail } from "@/api/challenges/types"
 import { useChallengeActivityLog } from "@/api/challenges/useChallengeActivityLog"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -15,6 +16,7 @@ interface ChallengeActivityCardProps {
 export const ChallengeActivityCard = ({ challenge }: ChallengeActivityCardProps) => {
   const { t } = useTranslation()
   const { entries, isLoading } = useChallengeActivityLog(challenge)
+  const hideIdentity = !isChallengeParticipationVisible(challenge)
 
   return (
     <Card.Root
@@ -47,7 +49,7 @@ export const ChallengeActivityCard = ({ challenge }: ChallengeActivityCardProps)
           <Box overflowY="auto" maxH={{ md: "400px" }}>
             <VStack align="stretch" gap="0">
               {entries.map(entry => (
-                <ChallengeActivityRow key={entry.id} entry={entry} challenge={challenge} />
+                <ChallengeActivityRow key={entry.id} entry={entry} challenge={challenge} hideIdentity={hideIdentity} />
               ))}
             </VStack>
           </Box>
