@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@chakra-ui/cli": "^3.5.0",
-    "@next/bundle-analyzer": "16.2.6",
+    "@next/bundle-analyzer": "16.2.11",
     "@next/eslint-plugin-next": "^16.2.6",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
