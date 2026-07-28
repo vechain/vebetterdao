@@ -1781,25 +1781,34 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@datadog/browser-core@6.33.0":
-  version "6.33.0"
-  resolved "https://registry.yarnpkg.com/@datadog/browser-core/-/browser-core-6.33.0.tgz#2e5cea2ecb4ce81e6ad4a853e4a19e8ca63f2e53"
-  integrity sha512-h/xuBuY4Xi32CbBHkChMMWlOQ4al/mFF08x3o0hqrderfJvX7VO5tD3OVNwF+pfMXOGlDtBCIhwazr9sn24h3g==
-
-"@datadog/browser-rum-core@6.33.0":
-  version "6.33.0"
-  resolved "https://registry.yarnpkg.com/@datadog/browser-rum-core/-/browser-rum-core-6.33.0.tgz#0119855918401a88f565fdb0837407d1370fbc93"
-  integrity sha512-Ais4x7zQBrBI6JyILYwFAmjUsqy0iQp2C7JcEEfzU4YYYcVO3DGpyVuYYrqHT27jY1QToHY8EnQUr3Yaj6saDA==
+"@datadog/browser-core@7.6.0":
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-core/-/browser-core-7.6.0.tgz#304d3add11fa26c65c28bb163686de2b076bc0cf"
+  integrity sha512-BxcEQakwHFuc1jTb698o92St/zeh6IdepWwrEVEMZI+lQcVM6xQZ3Zuh8gW1BuwmHfTia89aXn1F9EwhtYsKtw==
   dependencies:
-    "@datadog/browser-core" "6.33.0"
+    "@datadog/js-core" "0.0.6"
 
-"@datadog/browser-rum@^6.33.0":
-  version "6.33.0"
-  resolved "https://registry.yarnpkg.com/@datadog/browser-rum/-/browser-rum-6.33.0.tgz#b9773c2058f2e17d66733931d0065527301240a8"
-  integrity sha512-zdxs1PyKt1RQ/fdxsmaCJUeBhB+leCIaPJBcum7uDi/DL8nuu9A9NUc5qGVPlY9zc12v7t2NI8bLpOrMjv+jTg==
+"@datadog/browser-rum-core@7.6.0":
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-rum-core/-/browser-rum-core-7.6.0.tgz#aac5c855b869475b68f7c57458337fb229424239"
+  integrity sha512-r5nX6J3DsmWLTyTURiprsirUct5GRqZLWakZiGAnhbVP2tcVJ637agiJwBMfCBijrkVRnI+YT9u4Kh8ndrleMA==
   dependencies:
-    "@datadog/browser-core" "6.33.0"
-    "@datadog/browser-rum-core" "6.33.0"
+    "@datadog/browser-core" "7.6.0"
+    "@datadog/js-core" "0.0.6"
+
+"@datadog/browser-rum@^7.6.0":
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-rum/-/browser-rum-7.6.0.tgz#26acba80bffd327af2c95ad7876846246291401c"
+  integrity sha512-xzVUKuyC/CrpngYD19u/xKmAV+IrPIO4HxeIjJG2o+d06IrCKoJ8f3pl4DG3xvJqHSJbb2M4VAIGUMPErZ+uDQ==
+  dependencies:
+    "@datadog/browser-core" "7.6.0"
+    "@datadog/browser-rum-core" "7.6.0"
+    "@datadog/js-core" "0.0.6"
+
+"@datadog/js-core@0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@datadog/js-core/-/js-core-0.0.6.tgz#9cb200c2e0a322d2572682fabcb18046ea4a65c4"
+  integrity sha512-CYoSwQAxKX2vEkGzZ8Er+CyxkRaC9gztf9kWhrcnYXC34RXDVlwr5sd+4ROaPyCQfMfp5pqUpB2AMyqyVO5WHg==
 
 "@discoveryjs/json-ext@0.5.7":
   version "0.5.7"
@@ -9751,12 +9760,12 @@ axios-retry@^4.5.0:
   dependencies:
     is-retry-allowed "^2.2.0"
 
-axios@1.16.0, axios@^1.11.0, axios@^1.12.2, axios@^1.15.0, axios@^1.16.0, axios@^1.5.1:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.16.0.tgz#f8e5dd931cef2a5f8c32216d5784eda2f8750eb7"
-  integrity sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==
+axios@1.15.0, axios@^1.11.0, axios@^1.12.2, axios@^1.15.0, axios@^1.16.0, axios@^1.5.1:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.15.0.tgz#0fcee91ef03d386514474904b27863b2c683bf4f"
+  integrity sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==
   dependencies:
-    follow-redirects "^1.16.0"
+    follow-redirects "^1.15.11"
     form-data "^4.0.5"
     proxy-from-env "^2.1.0"
 
@@ -12858,7 +12867,7 @@ focus-lock@^1.3.6:
   dependencies:
     tslib "^2.0.3"
 
-follow-redirects@^1.12.1, follow-redirects@^1.16.0:
+follow-redirects@^1.12.1, follow-redirects@^1.15.11:
   version "1.16.0"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.16.0.tgz#28474a159d3b9d11ef62050a14ed60e4df6d61bc"
   integrity sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==
