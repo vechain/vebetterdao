@@ -13,11 +13,12 @@ import { CreateChallengeModal } from "./CreateChallengeModal"
 import { CurrentTab } from "./CurrentTab"
 import { GuestActiveTab } from "./GuestActiveTab"
 import { HistoryTab } from "./HistoryTab"
+import { PastTab } from "./PastTab"
 import { QuestParticipationGuide } from "./QuestParticipationGuide"
 
 const QUESTS_STEPS_CARD_DISMISSED_KEY = "vebetterdao:quests-steps-card-dismissed"
 
-type TabId = "current" | "history"
+type TabId = "current" | "history" | "past"
 
 export const ChallengesPageContent = () => {
   const { account } = useWallet()
@@ -117,12 +118,16 @@ export const ChallengesPageContent = () => {
           <Tabs.List overflowX="auto" overflowY="hidden">
             <Tabs.Trigger value="current">{t("Current")}</Tabs.Trigger>
             <Tabs.Trigger value="history">{t("History")}</Tabs.Trigger>
+            <Tabs.Trigger value="past">{t("Past")}</Tabs.Trigger>
           </Tabs.List>
           <Tabs.Content value="current" pt="5">
             <CurrentTab viewerAddress={viewerAddress} />
           </Tabs.Content>
           <Tabs.Content value="history" pt="5">
             <HistoryTab viewerAddress={viewerAddress} />
+          </Tabs.Content>
+          <Tabs.Content value="past" pt="5">
+            <PastTab />
           </Tabs.Content>
         </Tabs.Root>
       ) : (

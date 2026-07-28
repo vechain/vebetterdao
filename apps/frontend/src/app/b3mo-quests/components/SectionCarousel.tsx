@@ -4,8 +4,7 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 import { A11y, Navigation } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
-import { ChallengeView } from "@/api/challenges/types"
-import { ChallengeSectionResult } from "@/api/challenges/useChallengeSections"
+import { ChallengeView, PaginatedChallengeSection } from "@/api/challenges/types"
 
 import "@/app/theme/swiper-custom.css"
 import "swiper/css"
@@ -16,7 +15,7 @@ import { CompactSkeleton } from "./CompactSkeleton"
 
 interface SectionCarouselProps {
   title: string
-  section: ChallengeSectionResult
+  section: PaginatedChallengeSection
   /** Override for section.items (e.g. after cross-section dedup). Falls back to section.items. */
   items?: ChallengeView[]
   hideWhenEmpty?: boolean

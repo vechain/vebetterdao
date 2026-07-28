@@ -17,7 +17,7 @@ import {
 
 const abi = B3TRChallenges__factory.abi
 
-type RawChallengeView = {
+export type RawChallengeView = {
   challengeId: bigint
   kind: number
   visibility: number
@@ -134,6 +134,72 @@ const toResolverInput = ({
   }
 }
 
+/** Per-viewer contract reads for a single challenge. */
+export interface ChallengeViewerReads {
+  viewerParticipantStatus: ParticipantStatus
+  isInvitationEligible: boolean
+  isSplitWinWinner: boolean
+  participantActions: bigint
+}
+
+/** Viewer reads for surfaces with no connected viewer (or deliberately read-only ones). */
+export const guestViewerReads: ChallengeViewerReads = {
+  viewerParticipantStatus: ParticipantStatus.None,
+  isInvitationEligible: false,
+  isSplitWinWinner: false,
+  participantActions: 0n,
+}
+
+interface ToChallengeViewParams {
+  raw: RawChallengeView
+  /** Computed status from `getChallengeStatus` — overrides the struct's stored status. */
+  status: ChallengeStatus
+  createdAt: number
+  currentRound: number
+  maxParticipants: number
+  viewer?: string
+  claimed: ViewerClaimState | null
+  viewerReads: ChallengeViewerReads
+}
+
+/**
+ * Maps a single raw `getChallenge` struct into the frontend `ChallengeView`.
+ * Shared by the paginated section multicall and the contract-wide past-quests scan.
+ */
+export const toChallengeView = ({
+  raw,
+  status,
+  createdAt,
+  currentRound,
+  maxParticipants,
+  viewer,
+  claimed,
+  viewerReads,
+}: ToChallengeViewParams): ChallengeView => {
+  const input = toResolverInput({
+    raw: { ...raw, status },
+    createdAt,
+    viewer,
+    viewerParticipantStatus: viewerReads.viewerParticipantStatus,
+    isInvitationEligible: viewerReads.isInvitationEligible,
+    isSplitWinWinner: viewerReads.isSplitWinWinner,
+    claimed,
+    maxParticipants,
+  })
+
+  const detail = resolveChallengeDetail({
+    challenge: input,
+    viewerAddress: viewer,
+    currentRound,
+    participantActions: viewerReads.participantActions,
+  })
+
+  // ChallengeView is a subset of ChallengeDetail; list surfaces keep the viewer's
+  // action count so they can present progress without another contract read.
+  const { participants: _p, invited: _i, declined: _d, selectedApps: _s, winners: _w, ...view } = detail
+  return view
+}
+
 interface BuildChallengeViewsParams {
   thor: ThorClient
   contractAddress: string
@@ -197,31 +263,18 @@ export const buildChallengeViews = async ({
     const isSplitWinWinner = hasViewer ? Boolean(results[base + 4]) : false
     const participantActions = hasViewer ? BigInt(results[base + 5] as bigint | number | string) : 0n
 
-    const merged: RawChallengeView = { ...raw, status: computedStatus }
-    const createdAt = createdAtById?.get(id) ?? 0
-
-    const input = toResolverInput({
-      raw: merged,
-      createdAt,
-      viewer,
-      viewerParticipantStatus,
-      isInvitationEligible,
-      isSplitWinWinner,
-      claimed,
-      maxParticipants,
-    })
-
-    const detail = resolveChallengeDetail({
-      challenge: input,
-      viewerAddress: viewer,
-      currentRound,
-      participantActions,
-    })
-
-    // ChallengeView is a subset of ChallengeDetail; list surfaces keep the viewer's
-    // action count so they can present progress without another contract read.
-    const { participants: _p, invited: _i, declined: _d, selectedApps: _s, winners: _w, ...view } = detail
-    views.push(view)
+    views.push(
+      toChallengeView({
+        raw,
+        status: computedStatus,
+        createdAt: createdAtById?.get(id) ?? 0,
+        currentRound,
+        maxParticipants,
+        viewer,
+        claimed,
+        viewerReads: { viewerParticipantStatus, isInvitationEligible, isSplitWinWinner, participantActions },
+      }),
+    )
   }
 
   return views
