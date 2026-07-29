@@ -31,7 +31,10 @@ export const usePreviousRoundProposalActivities = (
   const data = useMemo((): ActivityItem[] => {
     if (!previousRoundId || previousRoundId === "0") return []
 
-    const date = round?.voteEndTimestamp?.unix() ?? 0
+    const voteEndTimestamp = round?.voteEndTimestamp
+    if (!voteEndTimestamp) return []
+
+    const date = voteEndTimestamp.unix()
 
     return enrichedProposals
       .filter(p => p.votingRoundId === previousRoundId && stateToActivityType[p.state] !== undefined)
