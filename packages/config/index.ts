@@ -5,7 +5,6 @@ import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
 import { AppEnv, EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
-import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "./datadog"
 import { getEnvMixPanel } from "./mixPanel"
 
 type B3TRGovernorLibraries = {
@@ -103,4 +102,4 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
   }
 }
 
-export { getContractsConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel }
+export { getContractsConfig, getEnvMixPanel }
