@@ -13,6 +13,9 @@ import { usePreviousRoundProposalActivities } from "./usePreviousRoundProposalAc
 import { useRoundActivities } from "./useRoundActivities"
 import { useUserVotingActivities } from "./useUserVotingActivities"
 
+const tiebreakKey = (item: ActivityItem): string =>
+  "proposalId" in item.metadata ? item.metadata.proposalId : item.title
+
 export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[]; isLoading: boolean } => {
   const { data: fetchedRoundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
 
@@ -41,9 +44,9 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
       ...navigators,
     ].sort((a, b) => {
       if (b.date !== a.date) return b.date - a.date
-      const roundDiff = Number(b.roundId) - Number(a.roundId)
-      if (roundDiff !== 0) return roundDiff
-      return a.type.localeCompare(b.type)
+      const typeDiff = a.type.localeCompare(b.type)
+      if (typeDiff !== 0) return typeDiff
+      return tiebreakKey(a).localeCompare(tiebreakKey(b))
     })
   }, [prevProposals, currProposals, grants, apps, gmUpgrades, rounds, emissions, userVoting, navigators])
 
