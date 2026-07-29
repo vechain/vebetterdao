@@ -79,7 +79,4 @@ const mockConfig = {
 
 export const getConfig = () => mockConfig
 export const getContractsConfig = () => ({})
-export const getEnvDatadogApp = () => undefined
-export const getEnvDatadogClient = () => undefined
-export const getEnvDatadogEnv = () => undefined
 export const getEnvMixPanel = () => undefined

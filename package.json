@@ -120,7 +120,6 @@
   },
   "devDependencies": {
     "@vechain/dev-stack": "^0.3.2",
-    "@datadog/browser-rum": "^6.33.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@vechain/picasso": "^2.1.1",

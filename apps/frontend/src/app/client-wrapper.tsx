@@ -1,7 +1,6 @@
 "use client"
 import { Container, Flex, VStack } from "@chakra-ui/react"
-import { datadogRum } from "@datadog/browser-rum"
-import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
+import { getEnvMixPanel } from "@repo/config"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
@@ -43,10 +42,6 @@ const FreshDeskWidget = dynamic(
     ssr: false,
   },
 )
-// Datadog RUM config - will be initialized after page load
-const datadog_app_token = getEnvDatadogApp()
-const datadog_client_token = getEnvDatadogClient()
-const datadog_env = getEnvDatadogEnv()
 
 // workaround for "@iconscout/react-unicons and data-new-gr-c-s-check-loaded
 const error = console.error
@@ -63,23 +58,6 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return
 
     const initAnalytics = () => {
-      // Initialize Datadog RUM
-      if (isProduction && datadog_app_token && datadog_client_token) {
-        datadogRum.init({
-          applicationId: datadog_app_token,
-          clientToken: datadog_client_token,
-          site: "datadoghq.eu",
-          service: "b3tr",
-          env: datadog_env,
-          sessionSampleRate: 100,
-          sessionReplaySampleRate: 20,
-          trackUserInteractions: true,
-          trackResources: true,
-          trackLongTasks: true,
-          defaultPrivacyLevel: "mask-user-input",
-        })
-      }
-
       // Initialize Mixpanel
       if (mixpanelToken) {
         AnalyticsUtils.initialise()
