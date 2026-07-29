@@ -16,7 +16,10 @@ export const useRoundActivities = (previousRoundId?: string): { data: ActivityIt
   const data = useMemo((): ActivityItem[] => {
     if (!previousRoundId || previousRoundId === "0") return []
 
-    const date = round?.voteEndTimestamp?.unix() ?? 0
+    const voteEndTimestamp = round?.voteEndTimestamp
+    if (!voteEndTimestamp) return []
+
+    const date = voteEndTimestamp.unix()
     const votersCount = voters ? Number(voters) : 0
     const topApps = mostVotedApps.slice(0, 3).map(a => ({
       appId: a.id,

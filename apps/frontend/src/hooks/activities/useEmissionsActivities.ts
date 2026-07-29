@@ -43,7 +43,10 @@ export const useEmissionsActivities = (
 
     const percentageChange = previousTotal !== 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0
 
-    const date = round?.voteStartTimestamp?.unix() ?? 0
+    const voteStartTimestamp = round?.voteStartTimestamp
+    if (!voteStartTimestamp) return []
+
+    const date = voteStartTimestamp.unix()
 
     return [
       {

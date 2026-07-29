@@ -39,7 +39,12 @@ export const useActivityFeed = (selectedRoundId?: string): { data: ActivityItem[
       ...emissions,
       ...userVoting,
       ...navigators,
-    ].sort((a, b) => b.date - a.date)
+    ].sort((a, b) => {
+      if (b.date !== a.date) return b.date - a.date
+      const roundDiff = Number(b.roundId) - Number(a.roundId)
+      if (roundDiff !== 0) return roundDiff
+      return a.type.localeCompare(b.type)
+    })
   }, [prevProposals, currProposals, grants, apps, gmUpgrades, rounds, emissions, userVoting, navigators])
 
   const isLoading =
