@@ -93,7 +93,6 @@ FROM node:20-slim
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
 # standalone omits static/ and public/ — copy them separately
@@ -103,4 +102,5 @@ COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
 
 EXPOSE 3000
 
-CMD ["node", "apps/frontend/server.js"]
+# App Runner injects HOSTNAME at runtime; force it here so server.js binds to 0.0.0.0
+CMD ["sh", "-c", "HOSTNAME=0.0.0.0 exec node apps/frontend/server.js"]
