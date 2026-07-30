@@ -8,7 +8,7 @@ import {
 } from "@/api/indexer/navigators/useNavigators"
 import { useGetVetDomains } from "@/hooks/useGetVetDomains"
 
-export type NavigatorStatusFilter = "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
+export type NavigatorStatusFilter = "notDeactivated" | "all" | "ACTIVE" | "EXITING" | "DEACTIVATED"
 
 type NavigatorStatus = NavigatorEntity["status"]
 
@@ -19,6 +19,8 @@ type NavigatorFilterValues = {
 }
 
 const STATUS_TO_API: Record<NavigatorStatusFilter, NavigatorStatus[]> = {
+  // Default view: navigators that already completed their exit are noise for delegators.
+  notDeactivated: ["ACTIVE", "EXITING"],
   all: [],
   ACTIVE: ["ACTIVE"],
   EXITING: ["EXITING"],

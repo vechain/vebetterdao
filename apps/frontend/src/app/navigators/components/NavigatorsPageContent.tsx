@@ -40,9 +40,9 @@ export const NavigatorsPageContent = () => {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [orderBy, setOrderBy] = useState<NavigatorOrderBy>("totalDelegated")
-  const [statusFilter, setStatusFilter] = useState<NavigatorStatusFilter>("all")
+  const [statusFilter, setStatusFilter] = useState<NavigatorStatusFilter>("notDeactivated")
 
-  const hasActiveFilters = searchTerm !== "" || orderBy !== "totalDelegated" || statusFilter !== "all"
+  const hasActiveFilters = searchTerm !== "" || orderBy !== "totalDelegated" || statusFilter !== "notDeactivated"
   const filterValues = useNavigatorFilterValues(orderBy, statusFilter)
   const { data: rawNavigators, isLoading: navigatorsLoading } = useNavigators({
     ...filterValues,

@@ -60,6 +60,7 @@ export const NavigatorFilters = ({
             value={statusFilter}
             onChange={e => onStatusFilterChange(e.target.value as NavigatorStatusFilter)}
             {...selectFieldStyles}>
+            <option value="notDeactivated">{`${t("Filter by:")} ${t("Hide deactivated")}`}</option>
             <option value="all">{`${t("Filter by:")} ${t("All")}`}</option>
             <option value="ACTIVE">{`${t("Filter by:")} ${t("Active")}`}</option>
             <option value="EXITING">{`${t("Filter by:")} ${t("Exiting")}`}</option>
