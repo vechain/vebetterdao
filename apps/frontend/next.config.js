@@ -8,9 +8,6 @@ if (typeof self === "undefined") {
 }
 
 const nextConfig = {
-  // Emit a self-contained server bundle so the runtime image only ships
-  // .next/standalone (+ .next/static + public) instead of the whole
-  // node_modules + apps + packages tree.
   output: "standalone",
   outputFileTracingRoot: join(__dirname, "../.."),
   experimental: {

@@ -96,9 +96,7 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
-# Next.js standalone output: a self-contained server + traced node_modules.
-# static/ and public/ are NOT included in standalone and must be copied
-# alongside it. See https://nextjs.org/docs/app/api-reference/config/next-config-js/output
+# standalone omits static/ and public/ — copy them separately
 COPY --from=builder /app/apps/frontend/.next/standalone ./
 COPY --from=builder /app/apps/frontend/.next/static ./apps/frontend/.next/static
 COPY --from=builder /app/apps/frontend/public ./apps/frontend/public

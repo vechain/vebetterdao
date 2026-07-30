@@ -141,10 +141,6 @@ jobs:
           platforms: linux/amd64
           provenance: false
           sbom: false
-          # Rely on the persistent self-hosted BuildKit builder (b3tr-builder,
-          # cleanup: false) for cache reuse. Keep GHA cache import as a fallback
-          # for cold runners, and export in mode=min so we don't pay minutes
-          # uploading intermediate layers on every build.
           cache-from: type=gha,scope=v2
           cache-to: type=gha,mode=min,scope=v2
           build-args: |
