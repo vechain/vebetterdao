@@ -93,15 +93,14 @@ FROM node:20-slim
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=3000
 
-# Copy only what's needed to run the application
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/yarn.lock ./
-COPY --from=builder /app/turbo.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps ./apps
-COPY --from=builder /app/packages ./packages
+# standalone omits static/ and public/ — copy them separately
+COPY --from=builder /app/apps/frontend/.next/standalone ./
+COPY --from=builder /app/apps/frontend/.next/static ./apps/frontend/.next/static
+COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
 
 EXPOSE 3000
 
-CMD ["yarn", "workspace", "frontend", "start", "--hostname", "0.0.0.0", "--port", "3000"]
+# App Runner injects HOSTNAME at runtime; force it here so server.js binds to 0.0.0.0
+CMD ["sh", "-c", "HOSTNAME=0.0.0.0 exec node apps/frontend/server.js"]

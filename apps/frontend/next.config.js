@@ -8,6 +8,8 @@ if (typeof self === "undefined") {
 }
 
 const nextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: join(__dirname, "../.."),
   experimental: {
     optimizePackageImports: [
       "@vechain/vebetterdao-contracts",
