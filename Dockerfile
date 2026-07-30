@@ -51,7 +51,7 @@ ENV NODE_OPTIONS=${NODE_OPTIONS}
 RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
     --mount=type=cache,target=/app/node_modules/.cache/turbo,id=turbo-cache \
     --mount=type=cache,target=/app/apps/frontend/.next/cache,id=nextjs-cache \
-    yarn build:mainnet
+    yarn build
 
 # ============================================================================
 # Production stage (minimal image)
