@@ -308,12 +308,14 @@ jobs:
           # Extract and append SSM config from source environment
           echo "Extracting config from ${SOURCE_CONFIG}..."
 
-          # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
+          # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names,
+          # runtime_env_secret_names, and runtime_env_vars_inline (NEXT_PUBLIC_* etc.)
           yq eval '{
             "ssm_parameter_prefix": .ssm_parameter_prefix,
             "route53_zone_name": .route53_zone_name,
             "runtime_env_var_names": (.runtime_env_var_names // []),
-            "runtime_env_secret_names": (.runtime_env_secret_names // [])
+            "runtime_env_secret_names": (.runtime_env_secret_names // []),
+            "runtime_env_vars_inline": (.runtime_env_vars_inline // {})
           } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
 
           # Step 6: Show the generated config for debugging

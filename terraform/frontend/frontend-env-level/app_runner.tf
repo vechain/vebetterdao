@@ -2,6 +2,17 @@ locals {
   service_name             = "governance-${local.env.environment}"
   custom_domain_enabled    = lookup(local.env, "enable_custom_domain", false)
   ssm_parameter_prefix = lookup(local.env, "ssm_parameter_prefix", "/b3tr/frontend/")
+
+  # NEXT_PUBLIC_* runtime env vars live inline in the env yaml (they're all
+  # client-visible IDs — Privy client ID, WalletConnect project ID, etc.).
+  # NEXT_PUBLIC_APP_VERSION is derived from image_tag so it stays consistent
+  # with the deployed image without duplicating in yaml.
+  inline_env_vars = merge(
+    lookup(local.env, "runtime_env_vars_inline", {}),
+    {
+      NEXT_PUBLIC_APP_VERSION = local.env.image_tag
+    },
+  )
 }
 
 data "aws_ssm_parameter" "runtime_env_vars" {
@@ -33,10 +44,13 @@ resource "aws_apprunner_service" "frontend" {
 
       image_configuration {
         port = tostring(local.env.port)
-        runtime_environment_variables = {
+        runtime_environment_variables = merge(
+          {
             for name in local.env.runtime_env_var_names :
             name => data.aws_ssm_parameter.runtime_env_vars[name].value
-          }
+          },
+          local.inline_env_vars,
+        )
         runtime_environment_secrets = {
           for name in local.env.runtime_env_secret_names :
           name => data.aws_ssm_parameter.runtime_env_secrets[name].arn

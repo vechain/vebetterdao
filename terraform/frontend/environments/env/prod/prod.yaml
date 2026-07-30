@@ -27,6 +27,18 @@ runtime_env_secret_names:
   - RESET_USER_SIGNAL_COUNT_API_KEY
   - TWITTER_CLIENT_SECRET
 
+# NEXT_PUBLIC_* values are injected into App Runner runtime env; the frontend
+# reads them at request time via window.__ENV__. All are client-visible IDs.
+# NEXT_PUBLIC_APP_VERSION is derived from image_tag by terraform (not here).
+runtime_env_vars_inline:
+  NEXT_PUBLIC_APP_ENV: mainnet
+  NEXT_PUBLIC_DELEGATOR_URL: ""
+  NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN: ""
+  NEXT_PUBLIC_PRIVY_APP_ID: ""
+  NEXT_PUBLIC_PRIVY_CLIENT_ID: ""
+  NEXT_PUBLIC_TRANSAK_API_KEY: ""
+  NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: ""
+
 image_tag: latest
 cpu: 1024
 memory: 2048
