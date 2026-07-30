@@ -1,6 +1,6 @@
 "use client"
 import { useChakraContext } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
+import { getConfig, getPublicEnv } from "@repo/config"
 import { NETWORK_TYPE } from "@repo/constants"
 import { useCurrentLanguage } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
@@ -91,8 +91,8 @@ export function VechainKitProviderWrapper({ children }: Props) {
         },
       }}
       privy={{
-        appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
-        clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID!,
+        appId: getPublicEnv("NEXT_PUBLIC_PRIVY_APP_ID"),
+        clientId: getPublicEnv("NEXT_PUBLIC_PRIVY_CLIENT_ID"),
         loginMethods: ["google", "apple", "sms", "twitter", "github", "farcaster", "discord", "tiktok", "line"],
         appearance: {
           loginMessage: "Select a login method",
@@ -103,13 +103,13 @@ export function VechainKitProviderWrapper({ children }: Props) {
         },
       }}
       feeDelegation={{
-        delegatorUrl: process.env.NEXT_PUBLIC_DELEGATOR_URL!,
+        delegatorUrl: getPublicEnv("NEXT_PUBLIC_DELEGATOR_URL"),
         delegateAllTransactions: false,
       }}
       dappKit={{
         allowedWallets: ["veworld", "wallet-connect"],
         walletConnectOptions: {
-          projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
+          projectId: getPublicEnv("NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID"),
           metadata: {
             name: "VeBetter App",
             description: "This is the official VeBetter app.",

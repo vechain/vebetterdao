@@ -205,6 +205,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    # Match the flavor's GitHub environment so vars.NEXT_PUBLIC_* are visible
+    # to the runtime-env forwarding step below.
+    environment: ${{ matrix.flavor }}
     strategy:
       matrix:
         flavor: [staging, beta]
@@ -308,18 +311,28 @@ jobs:
           # Extract and append SSM config from source environment
           echo "Extracting config from ${SOURCE_CONFIG}..."
 
-          # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names, and runtime_env_secret_names
+          # Extract ssm_parameter_prefix, route53_zone_name, runtime_env_var_names,
+          # runtime_env_secret_names, and runtime_env_vars_inline (NEXT_PUBLIC_* etc.)
           yq eval '{
             "ssm_parameter_prefix": .ssm_parameter_prefix,
             "route53_zone_name": .route53_zone_name,
             "runtime_env_var_names": (.runtime_env_var_names // []),
-            "runtime_env_secret_names": (.runtime_env_secret_names // [])
+            "runtime_env_secret_names": (.runtime_env_secret_names // []),
+            "runtime_env_vars_inline": (.runtime_env_vars_inline // {})
           } | del(.ssm_parameter_prefix | select(. == null))' "${SOURCE_CONFIG}" >> "${TARGET_FILE}"
 
           # Step 6: Show the generated config for debugging
           echo ""
           echo "=== Generated Preview Config ==="
           cat "${TARGET_FILE}"
+
+      - name: Collect NEXT_PUBLIC_* runtime env vars
+        id: next_public
+        env:
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          json=$(printf '%s' "$ALL_VARS" | jq -c 'with_entries(select((.key | startswith("NEXT_PUBLIC_")) and .key != "NEXT_PUBLIC_APP_ENV"))')
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
@@ -331,9 +344,18 @@ jobs:
           WORKSPACE_NAME="preview-pr-${{ needs.setup.outputs.pr_number }}-${{ matrix.flavor }}"
           terraform workspace select ${WORKSPACE_NAME} || terraform workspace new ${WORKSPACE_NAME}
 
+      - name: Terraform Plan
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        env:
+          TF_VAR_next_public_env_vars: ${{ steps.next_public.outputs.json }}
+        run: terraform plan -out=tfplan
+
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_DIR }}
-        run: terraform apply -auto-approve
+        # No TF_VAR here — the plan file already captured the variable value.
+        # Passing it again on apply triggers "Can't change variable when applying
+        # a saved plan file" even if the value is unchanged.
+        run: terraform apply -auto-approve tfplan
 
       - name: Get deployment URL
         working-directory: ${{ env.TERRAFORM_DIR }}

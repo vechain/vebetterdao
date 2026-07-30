@@ -39,35 +39,9 @@ RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
 COPY packages ./packages
 COPY apps ./apps
 
-# Build arguments - these change frequently so they come AFTER source copy
-# This way, source code layer is cached even when version changes
-ARG APP_BUILD_ENV
-ARG NEXT_PUBLIC_APP_ENV
-ARG NEXT_PUBLIC_DELEGATOR_URL
-ARG NEXT_PUBLIC_IPFS_PINNING_SERVICE
-ARG NEXT_PUBLIC_NETWORK_TYPE
-ARG NEXT_PUBLIC_NFT_STORAGE_KEY
-ARG NEXT_PUBLIC_PRIVY_APP_ID
-ARG NEXT_PUBLIC_PRIVY_CLIENT_ID
-ARG NEXT_PUBLIC_TRANSAK_API_KEY
-ARG NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID
-ARG NEXT_PUBLIC_APP_VERSION
-ARG NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN
+# NEXT_PUBLIC_* values are injected at runtime via window.__ENV__ (see apps/frontend/src/app/layout.tsx),
+# so we no longer need per-env build args. One image ships to every environment.
 ARG NODE_OPTIONS
-
-# Set environment variables for build
-ENV APP_BUILD_ENV=${APP_BUILD_ENV}
-ENV NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV}
-ENV NEXT_PUBLIC_DELEGATOR_URL=${NEXT_PUBLIC_DELEGATOR_URL}
-ENV NEXT_PUBLIC_IPFS_PINNING_SERVICE=${NEXT_PUBLIC_IPFS_PINNING_SERVICE}
-ENV NEXT_PUBLIC_NETWORK_TYPE=${NEXT_PUBLIC_NETWORK_TYPE}
-ENV NEXT_PUBLIC_NFT_STORAGE_KEY=${NEXT_PUBLIC_NFT_STORAGE_KEY}
-ENV NEXT_PUBLIC_PRIVY_APP_ID=${NEXT_PUBLIC_PRIVY_APP_ID}
-ENV NEXT_PUBLIC_PRIVY_CLIENT_ID=${NEXT_PUBLIC_PRIVY_CLIENT_ID}
-ENV NEXT_PUBLIC_TRANSAK_API_KEY=${NEXT_PUBLIC_TRANSAK_API_KEY}
-ENV NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID}
-ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
-ENV NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN}
 ENV NODE_OPTIONS=${NODE_OPTIONS}
 
 # Build the application with persistent caches:
@@ -77,13 +51,7 @@ ENV NODE_OPTIONS=${NODE_OPTIONS}
 RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
     --mount=type=cache,target=/app/node_modules/.cache/turbo,id=turbo-cache \
     --mount=type=cache,target=/app/apps/frontend/.next/cache,id=nextjs-cache \
-    case "$APP_BUILD_ENV" in \
-      "staging") yarn build:staging ;; \
-      "dev") yarn build:testnet ;; \
-      "beta") yarn build:mainnet ;; \
-      "prod") yarn build:mainnet ;; \
-      *) echo "Unknown APP_BUILD_ENV: $APP_BUILD_ENV" >&2; exit 1 ;; \
-    esac
+    yarn build
 
 # ============================================================================
 # Production stage (minimal image)

@@ -27,6 +27,13 @@ runtime_env_secret_names:
   - GITHUB_CLIENT_SECRET
   - FRESHDESK_API_TOKEN
 
+# NEXT_PUBLIC_APP_ENV is the environment's own identity — stays with the env
+# declaration here. The rest of the NEXT_PUBLIC_* values come from GitHub
+# environment vars (see deploy workflow) so they can rotate without a code
+# change. NEXT_PUBLIC_APP_VERSION is derived from image_tag by terraform.
+runtime_env_vars_inline:
+  NEXT_PUBLIC_APP_ENV: mainnet
+
 image_tag: beta-latest
 cpu: 1024
 memory: 2048

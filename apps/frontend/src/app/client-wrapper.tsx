@@ -1,6 +1,6 @@
 "use client"
 import { Container, Flex, VStack } from "@chakra-ui/react"
-import { getEnvMixPanel } from "@repo/config"
+import { getPublicEnv } from "@repo/config"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
@@ -33,7 +33,7 @@ function MdEditorColorModeSync() {
   return null
 }
 
-const mixpanelToken = getEnvMixPanel()
+const mixpanelToken = getPublicEnv("NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN")
 const isProduction = process.env.NODE_ENV === "production"
 const Navbar = dynamic(() => import("@/components/Navbar/Navbar").then(mod => mod.Navbar), { ssr: false })
 const FreshDeskWidget = dynamic(

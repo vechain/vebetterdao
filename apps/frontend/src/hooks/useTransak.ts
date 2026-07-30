@@ -1,10 +1,11 @@
+import { getPublicEnv } from "@repo/config"
 import { useQueryClient } from "@tanstack/react-query"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
 import { useWallet, getAccountBalanceQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
 const isProduction = process.env.NODE_ENV === "production"
-const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
+const apiKey = getPublicEnv("NEXT_PUBLIC_TRANSAK_API_KEY")
 export type TransakCrypto = "VTHO" | "VOT3" | "VET"
 export interface UseTransakOptions {
   defaultCryptoCurrency: TransakCrypto

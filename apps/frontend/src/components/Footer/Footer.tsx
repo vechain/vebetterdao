@@ -1,5 +1,6 @@
 "use client"
 import { VStack, Text, Container, HStack, Box, Link, Flex, SimpleGrid, Heading } from "@chakra-ui/react"
+import { getPublicEnv } from "@repo/config"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 
@@ -17,9 +18,9 @@ import {
 import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
 import { BeBetterVeBetterIcon } from "../Icons/BeBetterVeBetterIcon"
 
-// Use build-time injected version from CI/CD, fallback to package.json for local development
+// Use runtime-injected version from window.__ENV__, fallback to package.json for local development
 // Strip "v." prefix from git tags (e.g., "v.1.32.0" -> "1.32.0")
-const rawVersion = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version
+const rawVersion = getPublicEnv("NEXT_PUBLIC_APP_VERSION") || packageJson.version
 const appVersion = rawVersion.replace(/^v\./, "")
 
 import { LanguageSelector } from "./components/LanguageSelector"
