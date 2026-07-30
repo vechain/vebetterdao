@@ -344,11 +344,18 @@ jobs:
           WORKSPACE_NAME="preview-pr-${{ needs.setup.outputs.pr_number }}-${{ matrix.flavor }}"
           terraform workspace select ${WORKSPACE_NAME} || terraform workspace new ${WORKSPACE_NAME}
 
-      - name: Terraform Apply
+      - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_DIR }}
         env:
           TF_VAR_next_public_env_vars: ${{ steps.next_public.outputs.json }}
-        run: terraform apply -auto-approve
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        # No TF_VAR here — the plan file already captured the variable value.
+        # Passing it again on apply triggers "Can't change variable when applying
+        # a saved plan file" even if the value is unchanged.
+        run: terraform apply -auto-approve tfplan
 
       - name: Get deployment URL
         working-directory: ${{ env.TERRAFORM_DIR }}
