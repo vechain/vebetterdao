@@ -1,7 +1,6 @@
-import { getEnvMixPanel } from "@repo/config"
+import { getPublicEnv } from "@repo/config"
 import mixpanel, { Dict } from "mixpanel-browser"
 import * as uuid from "uuid"
-const MIX_PANEL_TOKEN = getEnvMixPanel()
 let isInitialized = false
 export interface Properties {
   [key: string]: unknown
@@ -10,8 +9,9 @@ export interface Properties {
  * Initialise the analytics library with the mixpanel token
  */
 export const initialise = () => {
-  if (MIX_PANEL_TOKEN) {
-    mixpanel.init(MIX_PANEL_TOKEN, {
+  const token = getPublicEnv("NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN")
+  if (token) {
+    mixpanel.init(token, {
       track_pageview: true,
       ignore_dnt: true,
       api_host: "https://api-eu.mixpanel.com",

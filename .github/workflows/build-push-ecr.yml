@@ -144,17 +144,5 @@ jobs:
           cache-from: type=gha,scope=v2
           cache-to: type=gha,mode=min,scope=v2
           build-args: |
-            APP_BUILD_ENV=${{ vars.APP_BUILD_ENV || ''}}
-            NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV || ''}}
-            NEXT_PUBLIC_APP_VERSION=${{ inputs.image_tag }}
-            NEXT_PUBLIC_DELEGATOR_URL=${{ vars.NEXT_PUBLIC_DELEGATOR_URL || ''}}
-            NEXT_PUBLIC_IPFS_PINNING_SERVICE=${{ vars.NEXT_PUBLIC_IPFS_PINNING_SERVICE || ''}}
-            NEXT_PUBLIC_NETWORK_TYPE=${{ vars.NEXT_PUBLIC_NETWORK_TYPE || ''}}
-            NEXT_PUBLIC_NFT_STORAGE_KEY=${{ vars.NEXT_PUBLIC_NFT_STORAGE_KEY || ''}}
-            NEXT_PUBLIC_PRIVY_APP_ID=${{ vars.NEXT_PUBLIC_PRIVY_APP_ID || ''}}
-            NEXT_PUBLIC_PRIVY_CLIENT_ID=${{ vars.NEXT_PUBLIC_PRIVY_CLIENT_ID || ''}}
-            NEXT_PUBLIC_TRANSAK_API_KEY=${{ vars.NEXT_PUBLIC_TRANSAK_API_KEY || ''}}
-            NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=${{ vars.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || ''}}
-            NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN=${{ vars.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN || ''}}
             NODE_OPTIONS=${{ vars.NODE_OPTIONS || ''}}
             CONTRACTS_NPM_VERSION=${{ inputs.contracts_npm_version }}

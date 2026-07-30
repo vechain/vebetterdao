@@ -79,4 +79,5 @@ const mockConfig = {
 
 export const getConfig = () => mockConfig
 export const getContractsConfig = () => ({})
-export const getEnvMixPanel = () => undefined
+export const getPublicEnv = () => ""
+export const PUBLIC_ENV_KEYS = []

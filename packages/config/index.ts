@@ -5,7 +5,7 @@ import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
 import { AppEnv, EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
-import { getEnvMixPanel } from "./mixPanel"
+import { getPublicEnv, PUBLIC_ENV_KEYS, PublicEnvKey } from "./publicEnv"
 
 type B3TRGovernorLibraries = {
   governorClockLogicAddress: string
@@ -83,7 +83,7 @@ export type AppConfig = {
 }
 
 export const getConfig = (env?: EnvConfig): AppConfig => {
-  const appEnv = env || process.env.NEXT_PUBLIC_APP_ENV
+  const appEnv = env || getPublicEnv("NEXT_PUBLIC_APP_ENV")
   if (!appEnv) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set or a type must be passed to getConfig()")
 
   switch (appEnv) {
@@ -102,4 +102,5 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
   }
 }
 
-export { getContractsConfig, getEnvMixPanel }
+export { getContractsConfig, getPublicEnv, PUBLIC_ENV_KEYS }
+export type { PublicEnvKey }

@@ -1,11 +1,18 @@
 export const fetchCache = "force-no-store"
 
-import { getConfig } from "@repo/config"
+import { getConfig, PUBLIC_ENV_KEYS } from "@repo/config"
 import { Metadata, Viewport } from "next"
 
 import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
 
 import { ClientWrapper } from "./client-wrapper"
+
+// Escape `<` to its JS unicode form so no env value can produce a literal
+// `</script>` that would break out of the inline script tag below.
+const runtimeEnvJson = JSON.stringify(Object.fromEntries(PUBLIC_ENV_KEYS.map(k => [k, process.env[k] ?? ""]))).replace(
+  /</g,
+  "\\u003c",
+)
 
 // Get metadata of the platform
 const basePath = getConfig()?.basePath
@@ -62,6 +69,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         scrollBehavior: "smooth",
       }}>
       <head>
+        <script id="__runtime_env__" dangerouslySetInnerHTML={{ __html: `window.__ENV__=${runtimeEnvJson};` }} />
         <link rel="dns-prefetch" href="https://indexer.mainnet.vechain.org" />
         <link rel="dns-prefetch" href="https://euc-widget.freshworks.com" />
         <link rel="preconnect" href="https://indexer.mainnet.vechain.org" crossOrigin="anonymous" />

@@ -1,4 +1,5 @@
 import { Button, Card, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { getPublicEnv } from "@repo/config"
 import { useQueryClient } from "@tanstack/react-query"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
 import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
@@ -11,7 +12,7 @@ import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 
 const isProduction = process.env.NODE_ENV === "production"
-export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
+export const apiKey = getPublicEnv("NEXT_PUBLIC_TRANSAK_API_KEY")
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
