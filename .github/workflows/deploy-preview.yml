@@ -205,6 +205,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    # Match the flavor's GitHub environment so vars.NEXT_PUBLIC_* are visible
+    # to the runtime-env forwarding step below.
+    environment: ${{ matrix.flavor }}
     strategy:
       matrix:
         flavor: [staging, beta]
@@ -323,6 +326,14 @@ jobs:
           echo "=== Generated Preview Config ==="
           cat "${TARGET_FILE}"
 
+      - name: Collect NEXT_PUBLIC_* runtime env vars
+        id: next_public
+        env:
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          json=$(printf '%s' "$ALL_VARS" | jq -c 'with_entries(select((.key | startswith("NEXT_PUBLIC_")) and .key != "NEXT_PUBLIC_APP_ENV"))')
+          echo "json=${json}" >> "$GITHUB_OUTPUT"
+
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
         run: terraform init -backend-config=${{ env.TERRAFORM_BACKEND_CONFIG }}
@@ -335,6 +346,8 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_DIR }}
+        env:
+          TF_VAR_next_public_env_vars: ${{ steps.next_public.outputs.json }}
         run: terraform apply -auto-approve
 
       - name: Get deployment URL

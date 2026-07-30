@@ -3,12 +3,14 @@ locals {
   custom_domain_enabled    = lookup(local.env, "enable_custom_domain", false)
   ssm_parameter_prefix = lookup(local.env, "ssm_parameter_prefix", "/b3tr/frontend/")
 
-  # NEXT_PUBLIC_* runtime env vars live inline in the env yaml (they're all
-  # client-visible IDs — Privy client ID, WalletConnect project ID, etc.).
-  # NEXT_PUBLIC_APP_VERSION is derived from image_tag so it stays consistent
-  # with the deployed image without duplicating in yaml.
+  # NEXT_PUBLIC_APP_ENV comes from the env yaml (identity of the env). The rest
+  # of the NEXT_PUBLIC_* values arrive as var.next_public_env_vars — the deploy
+  # workflow forwards vars.NEXT_PUBLIC_* from the target GitHub environment.
+  # NEXT_PUBLIC_APP_VERSION is derived from image_tag so it tracks the deployed
+  # image without extra plumbing.
   inline_env_vars = merge(
     lookup(local.env, "runtime_env_vars_inline", {}),
+    var.next_public_env_vars,
     {
       NEXT_PUBLIC_APP_VERSION = local.env.image_tag
     },
