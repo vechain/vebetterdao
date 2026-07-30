@@ -2,7 +2,7 @@ name: Deploy Preview Environment
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
     branches:
       - main
 
@@ -11,6 +11,10 @@ on:
 concurrency:
   group: preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+
+# Preview deploys are gated by the `create-preview` label. Removing the label
+# is intentionally a no-op (preview keeps running until PR close). Builds for
+# every PR push live in build-fe-image.yml — this workflow never builds.
 
 env:
   # AWS Configuration
@@ -28,7 +32,8 @@ env:
   TERRAFORM_BACKEND_CONFIG: ../environments/env/preview/backend.config
 
 jobs:
-  # True when the PR touches paths that affect the frontend or preview Terraform
+  # Preview runs when: (a) PR carries the `create-preview` label AND
+  # (b) the PR touches paths that affect the frontend or preview Terraform.
   preview-relevant:
     name: Preview relevance
     runs-on: ubuntu-latest
@@ -36,7 +41,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      run_preview: ${{ steps.filter.outputs.run_preview }}
+      run_preview: ${{ steps.gate.outputs.run_preview }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -45,7 +50,7 @@ jobs:
         id: filter
         with:
           filters: |
-            run_preview:
+            paths_relevant:
               - 'apps/**'
               - 'packages/**'
               - 'terraform/**'
@@ -55,6 +60,20 @@ jobs:
               - 'turbo.json'
               - '.github/workflows/deploy*.yml'
               - '.github/workflows/destroy*.yml'
+              - '.github/workflows/build-fe-image.yml'
+      - name: Combine label + paths gate
+        id: gate
+        env:
+          PATHS_RELEVANT: ${{ steps.filter.outputs.paths_relevant }}
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'create-preview') }}
+        run: |
+          if [ "${PATHS_RELEVANT}" = "true" ] && [ "${HAS_LABEL}" = "true" ]; then
+            echo "run_preview=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Preview will deploy (create-preview label present, PR touches preview-relevant paths)."
+          else
+            echo "run_preview=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Preview skipped (label=${HAS_LABEL}, paths_relevant=${PATHS_RELEVANT})."
+          fi
 
   # Determine which flavors to deploy based on target branch
   setup:
@@ -119,7 +138,7 @@ jobs:
 
             let rows = '';
             for (const flavor of flavors) {
-              rows += `| **${flavor}** | 🔨 Building ([${shortSha}](${commitUrl})) | Building image... | [View Logs →](${runUrl}) |\n`;
+              rows += `| **${flavor}** | 🚀 Deploying ([${shortSha}](${commitUrl})) | Promoting image + applying terraform... | [View Logs →](${runUrl}) |\n`;
             }
 
             const commentBody = [
@@ -130,7 +149,7 @@ jobs:
               rows.trim(),
               '',
               '---',
-              `<sub>Building with commit ${shortSha} • Preview environments are automatically destroyed when PRs are closed</sub>`
+              `<sub>Deploying commit ${shortSha} • Preview environments are automatically destroyed when PRs are closed</sub>`
             ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
@@ -160,51 +179,66 @@ jobs:
               });
             }
 
-  # Build and push Docker image for each flavor
-  build-and-push:
-    name: Build (${{ matrix.flavor }})
+  # Verify the SHA image exists in GHCR (built by build-fe-image.yml on this PR
+  # push). Never builds. Waits up to 15 min for the parallel build to finish.
+  verify-image:
+    name: Verify GHCR image
     needs: [setup, preview-start-comment, preview-relevant]
     if: needs.preview-relevant.outputs.run_preview == 'true'
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
-      pull-requests: write
-    strategy:
-      matrix:
-        flavor: [staging, beta]
-      fail-fast: false
-    uses: ./.github/workflows/build-push-ecr.yml
-    with:
-      ecr_repository: governance-frontend
-      image_tag: pr-${{ needs.setup.outputs.pr_number }}-${{ needs.setup.outputs.short_sha }}-${{ matrix.flavor }}
-      aws_region: eu-west-1
-      environment: "AWS ${{ matrix.flavor }} governance build-time"
-    secrets:
-      aws_role_arn: ${{ secrets.DEV_AWS_ACC_ROLE }}
+      packages: read
+    env:
+      GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
+      SHA_TAG: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Normalize GHCR_IMAGE to lowercase
+        run: echo "GHCR_IMAGE=$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
-  # Same check names as build-and-push, but instant success when nothing app/infra-related changed
-  build-skip:
-    name: Build (${{ matrix.flavor }})
+      - name: GHCR login
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+
+      - name: Wait for GHCR image at PR head SHA
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            if docker buildx imagetools inspect "${GHCR_IMAGE}:${SHA_TAG}" >/dev/null 2>&1; then
+              echo "Found ${GHCR_IMAGE}:${SHA_TAG} on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Attempt ${attempt}/30: ${GHCR_IMAGE}:${SHA_TAG} not present yet; sleeping 30s..."
+            sleep 30
+          done
+          echo "::error::Timed out waiting for ${GHCR_IMAGE}:${SHA_TAG}. build-fe-image.yml may have failed."
+          exit 1
+
+  # Instant-success stand-in when preview is not needed (path-filter or missing label)
+  verify-image-skip:
+    name: Verify GHCR image
     needs: [setup, preview-relevant]
     if: needs.preview-relevant.outputs.run_preview != 'true'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        flavor: [staging, beta]
-      fail-fast: false
     steps:
-      - name: Skip build (no relevant changes)
-        run: echo "::notice::No frontend / preview infra changes in this PR - skipping image build."
+      - name: Skip verify (preview not needed)
+        run: echo "::notice::Preview not deploying — skipping image verification."
 
   # Deploy preview environment for each flavor
   deploy:
     name: Deploy Preview (${{ matrix.flavor }})
-    needs: [setup, build-and-push, preview-relevant]
-    if: needs.preview-relevant.outputs.run_preview == 'true' && always() && needs.build-and-push.result == 'success'
+    needs: [setup, verify-image, preview-relevant]
+    if: needs.preview-relevant.outputs.run_preview == 'true' && always() && needs.verify-image.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
+      packages: read
     # Match the flavor's GitHub environment so vars.NEXT_PUBLIC_* are visible
     # to the runtime-env forwarding step below.
     environment: ${{ matrix.flavor }}
@@ -220,16 +254,49 @@ jobs:
       custom_url_beta: ${{ steps.save-urls.outputs.custom_url_beta }}
       service_url_beta: ${{ steps.save-urls.outputs.service_url_beta }}
       status_beta: ${{ steps.save-urls.outputs.status_beta }}
-
+    env:
+      GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
+      SHA_TAG: ${{ github.event.pull_request.head.sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Normalize GHCR_IMAGE to lowercase
+        run: echo "GHCR_IMAGE=$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2.1.6
+
+      - name: GHCR login
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+
+      - name: Promote GHCR → ECR
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          set -euo pipefail
+          ECR_IMAGE="${ECR_REGISTRY}/${ECR_REPOSITORY}"
+          if aws ecr describe-images \
+              --repository-name "${ECR_REPOSITORY}" \
+              --image-ids "imageTag=${SHA_TAG}" >/dev/null 2>&1; then
+            echo "ECR ${ECR_IMAGE}:${SHA_TAG} already present — skipping copy."
+          else
+            echo "Copying ${GHCR_IMAGE}:${SHA_TAG} → ${ECR_IMAGE}:${SHA_TAG}"
+            docker buildx imagetools create --tag "${ECR_IMAGE}:${SHA_TAG}" "${GHCR_IMAGE}:${SHA_TAG}"
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
@@ -260,7 +327,9 @@ jobs:
 
           # Define paths
           WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
-          IMAGE_TAG="pr-${PR_NUMBER}-${SHORT_SHA}-${FLAVOR}"
+          # Both preview flavors pull the same env-agnostic image from ECR.
+          # The image is content-addressed by full commit SHA (matches GHCR).
+          IMAGE_TAG="${SHA_TAG}"
           SOURCE_CONFIG="${{ env.TERRAFORM_ENV_DIR }}/${FLAVOR}/${FLAVOR}.yaml"
           TARGET_DIR="${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
           TARGET_FILE="${TARGET_DIR}/${WORKSPACE_NAME}.yaml"
@@ -391,7 +460,7 @@ jobs:
   # Update comment with final results
   comment-result:
     name: Update PR Comment
-    needs: [setup, preview-relevant, build-and-push, build-skip, deploy, deploy-skip]
+    needs: [setup, preview-relevant, verify-image, verify-image-skip, deploy, deploy-skip]
     runs-on: ubuntu-latest
     if: always()
     permissions:
@@ -477,7 +546,7 @@ jobs:
           SERVICE_URL_BETA: ${{ needs.deploy.outputs.service_url_beta }}
           STATUS_BETA: ${{ needs.deploy.outputs.status_beta }}
           # Overall job results (for detecting if deploy was skipped due to build failure)
-          BUILD_RESULT: ${{ needs.build-and-push.result }}
+          BUILD_RESULT: ${{ needs.verify-image.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
         with:
           script: |

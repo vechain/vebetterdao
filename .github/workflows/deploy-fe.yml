@@ -1,28 +1,34 @@
 name: Deploy Frontend
 
+# Consolidated deploy workflow. Never builds — verifies the SHA image
+# exists in GHCR (built by build-fe-image.yml), promotes it to the
+# target env's ECR, then terraform applies. Tag push fans out to
+# [staging, beta]; release publish → prod; workflow_dispatch is
+# break-glass for any single env.
+
 on:
-  workflow_call:
+  push:
+    tags: ['v.*']
+  release:
+    types: [published]
+  workflow_dispatch:
     inputs:
-      environment:
-        description: "Environment to deploy to (dev, staging, beta, prod)"
+      target_env:
+        description: 'Environment to deploy to'
         required: true
-        type: string
-      image_tag:
-        description: "Docker image tag to deploy"
-        required: true
-        type: string
+        type: choice
+        options: [dev, staging, beta, prod]
       terraform_action:
-        description: "Terraform action to perform"
+        description: 'Terraform action'
         required: false
-        type: string
-        default: "deploy"
-    secrets:
-      AWS_ACCESS_ROLE:
-        description: "AWS IAM role ARN for prod account"
-        required: true
-      DEV_AWS_ACC_ROLE:
-        description: "AWS IAM role ARN for dev account"
-        required: true
+        default: 'deploy'
+        type: choice
+        options: [dry-run, deploy]
+
+run-name: |
+  Deploy ${{ github.event.release.tag_name || github.ref_name }} → ${{ github.event_name == 'release' && 'prod' || (inputs.target_env || 'staging+beta') }}${{ github.event_name == 'workflow_dispatch' && ' [BREAK-GLASS]' || '' }}
+
+permissions: {}
 
 env:
   AWS_REGION: eu-west-1
@@ -32,48 +38,172 @@ env:
   TERRAFORM_ENV_DIR: terraform/frontend/environments/env
 
 jobs:
-  build-and-push-image:
-    name: Build and Push Image
+  derive:
+    name: Derive targets
+    runs-on: ubuntu-latest
+    outputs:
+      envs: ${{ steps.plan.outputs.envs }}
+      sha: ${{ steps.plan.outputs.sha }}
+      version_tag: ${{ steps.plan.outputs.version_tag }}
+    steps:
+      - name: Derive envs, SHA, version tag
+        id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_ENV: ${{ inputs.target_env }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          case "$EVENT_NAME" in
+            push)
+              # tag push: v.X.Y.Z → deploy to staging + beta
+              if [[ ! "$REF_NAME" =~ ^v\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "::error::Tag '$REF_NAME' does not match v.MAJOR.MINOR.PATCH."
+                exit 1
+              fi
+              envs='["staging","beta"]'
+              version_tag="$REF_NAME"
+              ;;
+            release)
+              # published: v.X.Y.Z → deploy to prod
+              if [[ ! "$RELEASE_TAG" =~ ^v\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "::error::Release tag '$RELEASE_TAG' does not match v.MAJOR.MINOR.PATCH."
+                exit 1
+              fi
+              envs='["prod"]'
+              version_tag="$RELEASE_TAG"
+              ;;
+            workflow_dispatch)
+              envs="[\"${INPUT_ENV}\"]"
+              # v.* if the dispatch ref is a version tag, empty otherwise
+              if [[ "$REF_NAME" =~ ^v\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                version_tag="$REF_NAME"
+              else
+                version_tag=""
+              fi
+              ;;
+            *)
+              echo "::error::Unsupported event: $EVENT_NAME"
+              exit 1
+              ;;
+          esac
+          echo "envs=${envs}" >> "$GITHUB_OUTPUT"
+          echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "version_tag=${version_tag}" >> "$GITHUB_OUTPUT"
+          echo "Deploying to ${envs}, SHA=${GITHUB_SHA}, version=${version_tag:-<none>}"
+
+  verify-image:
+    name: Verify GHCR image
+    needs: [derive]
+    runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
-      pull-requests: write
-    concurrency:
-      group: build-fe-${{ inputs.environment }}
-      cancel-in-progress: true
-    uses: ./.github/workflows/build-push-ecr.yml
-    with:
-      ecr_repository: governance-frontend
-      image_tag: ${{ inputs.image_tag }}
-      aws_region: eu-west-1
-      environment: AWS ${{ inputs.environment }} governance build-time
-    secrets:
-        aws_role_arn: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+      packages: read
+    env:
+      GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
+      SHA_TAG: ${{ needs.derive.outputs.sha }}
+    steps:
+      - name: Normalize GHCR_IMAGE to lowercase
+        run: echo "GHCR_IMAGE=$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - name: GHCR login
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+
+      - name: Wait for GHCR image at SHA
+        run: |
+          set -euo pipefail
+          # build-fe-image.yml may still be running for the same commit.
+          # Wait up to 15 minutes for the SHA tag to appear.
+          for attempt in $(seq 1 30); do
+            if docker buildx imagetools inspect "${GHCR_IMAGE}:${SHA_TAG}" >/dev/null 2>&1; then
+              echo "Found ${GHCR_IMAGE}:${SHA_TAG} on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Attempt ${attempt}/30: ${GHCR_IMAGE}:${SHA_TAG} not present yet; sleeping 30s..."
+            sleep 30
+          done
+          echo "::error::Timed out after 15 minutes waiting for ${GHCR_IMAGE}:${SHA_TAG}. build-fe-image.yml may have failed — deploy will not build on demand."
+          exit 1
 
   deploy:
-    name: Deploy to ${{ inputs.environment }}
-    concurrency:
-      group: deploy-fe-${{ inputs.environment }}
-      cancel-in-progress: false
+    name: Deploy → ${{ matrix.env }}
+    needs: [derive, verify-image]
     runs-on: ubuntu-latest
-    needs: [build-and-push-image]
-    # Run if either build job succeeded (the other will be skipped)
-    if: always() && needs.build-and-push-image.result == 'success'
     permissions:
       id-token: write
       contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        env: ${{ fromJSON(needs.derive.outputs.envs) }}
     environment:
-      name: ${{ inputs.environment }}
-
+      name: ${{ matrix.env }}
+    concurrency:
+      group: deploy-fe-${{ matrix.env }}
+      cancel-in-progress: false
+    env:
+      GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
+      SHA_TAG: ${{ needs.derive.outputs.sha }}
+      VERSION_TAG: ${{ needs.derive.outputs.version_tag }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Normalize GHCR_IMAGE to lowercase
+        run: echo "GHCR_IMAGE=$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
-          role-to-assume: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+          role-to-assume: ${{ matrix.env == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2.1.6
+
+      - name: GHCR login
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+
+      - name: Promote GHCR → ECR (SHA${{ needs.derive.outputs.version_tag != '' && ' + VERSION' || '' }})
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          set -euo pipefail
+          ECR_IMAGE="${ECR_REGISTRY}/${ECR_REPOSITORY}"
+
+          copy_from_sha() {
+            local target_tag="$1"
+            if aws ecr describe-images \
+                --repository-name "${ECR_REPOSITORY}" \
+                --image-ids "imageTag=${target_tag}" >/dev/null 2>&1; then
+              echo "ECR ${ECR_IMAGE}:${target_tag} already present — skipping."
+              return
+            fi
+            echo "Copying ${GHCR_IMAGE}:${SHA_TAG} → ${ECR_IMAGE}:${target_tag}"
+            docker buildx imagetools create \
+              --tag "${ECR_IMAGE}:${target_tag}" \
+              "${GHCR_IMAGE}:${SHA_TAG}"
+          }
+
+          copy_from_sha "${SHA_TAG}"
+          if [ -n "${VERSION_TAG}" ]; then
+            copy_from_sha "${VERSION_TAG}"
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
@@ -81,40 +211,35 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
 
-      - name: Update environment config with new image tag
+      - name: Update env config with image tag
         env:
-          ENVIRONMENT: ${{ inputs.environment }}
-          IMAGE_TAG: ${{ needs.build-and-push-image.outputs.tag }}
+          ENVIRONMENT: ${{ matrix.env }}
         run: |
+          # Pin App Runner to the SHA-tagged image. VERSION tag exists in
+          # ECR too (via promote step) but SHA is the canonical identifier
+          # — one image, one tag, one deployed version.
           CONFIG_FILE="${TERRAFORM_ENV_DIR}/${ENVIRONMENT}/${ENVIRONMENT}.yaml"
-          echo "Updating image_tag in ${CONFIG_FILE} to: ${IMAGE_TAG}"
-          sed -i "s/^image_tag:.*/image_tag: ${IMAGE_TAG}/" "${CONFIG_FILE}"
-          echo "=== Updated config ==="
-          cat "${CONFIG_FILE}"
+          sed -i "s/^image_tag:.*/image_tag: ${SHA_TAG}/" "${CONFIG_FILE}"
+
+      - name: Terraform Init
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        env:
+          ENVIRONMENT: ${{ matrix.env }}
+        run: terraform init -backend-config=../environments/env/${ENVIRONMENT}/backend.config
+
+      - name: Terraform Workspace
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        env:
+          ENVIRONMENT: ${{ matrix.env }}
+        run: terraform workspace select "${ENVIRONMENT}" || terraform workspace new "${ENVIRONMENT}"
 
       - name: Collect NEXT_PUBLIC_* runtime env vars
         id: next_public
         env:
           ALL_VARS: ${{ toJSON(vars) }}
         run: |
-          # Forward vars.NEXT_PUBLIC_* from this GitHub environment into terraform
-          # as a map. Excludes NEXT_PUBLIC_APP_ENV (declared inline in env yaml).
           json=$(printf '%s' "$ALL_VARS" | jq -c 'with_entries(select((.key | startswith("NEXT_PUBLIC_")) and .key != "NEXT_PUBLIC_APP_ENV"))')
           echo "json=${json}" >> "$GITHUB_OUTPUT"
-
-      - name: Terraform Init
-        working-directory: ${{ env.TERRAFORM_DIR }}
-        env:
-          ENVIRONMENT: ${{ inputs.environment }}
-        run: |
-          terraform init -backend-config=../environments/env/${ENVIRONMENT}/backend.config
-
-      - name: Terraform Workspace
-        working-directory: ${{ env.TERRAFORM_DIR }}
-        env:
-          ENVIRONMENT: ${{ inputs.environment }}
-        run: |
-          terraform workspace select "${ENVIRONMENT}" || terraform workspace new "${ENVIRONMENT}"
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_DIR }}
@@ -123,36 +248,62 @@ jobs:
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        if: inputs.terraform_action == 'deploy'
+        if: (inputs.terraform_action || 'deploy') == 'deploy'
         working-directory: ${{ env.TERRAFORM_DIR }}
-        # No TF_VAR here — the plan file already captured the variable value.
-        # Passing it again on apply triggers "Can't change variable when applying
-        # a saved plan file" even if the value is unchanged.
         run: terraform apply -auto-approve tfplan
 
-      - name: Get deployment URL
-        if: inputs.terraform_action == 'deploy'
+      - name: Deployment summary
+        if: (inputs.terraform_action || 'deploy') == 'deploy'
         working-directory: ${{ env.TERRAFORM_DIR }}
-        id: outputs
+        env:
+          ENVIRONMENT: ${{ matrix.env }}
         run: |
+          set -euo pipefail
           CUSTOM_URL=$(terraform output -raw custom_domain_url 2>/dev/null || echo "")
           SERVICE_URL=$(terraform output -raw service_url 2>/dev/null || echo "")
-          echo "custom_url=${CUSTOM_URL}" >> $GITHUB_OUTPUT
-          echo "service_url=${SERVICE_URL}" >> $GITHUB_OUTPUT
+          {
+            echo "### Deployed to \`${ENVIRONMENT}\`"
+            echo ""
+            echo "- Image: \`${SHA_TAG}\`"
+            if [ -n "${VERSION_TAG}" ]; then
+              echo "- Version: \`${VERSION_TAG}\`"
+            fi
+            if [ -n "${CUSTOM_URL}" ]; then
+              echo "- URL: ${CUSTOM_URL}"
+            else
+              echo "- URL: ${SERVICE_URL}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Deployment summary
-        if: inputs.terraform_action == 'deploy'
+  create-release:
+    name: Create GitHub release
+    needs: [derive, deploy]
+    # Only after a successful staging+beta deploy triggered by a tag push,
+    # create the release (as a draft so it must be explicitly published to
+    # trigger the prod deploy).
+    if: |
+      github.event_name == 'push' &&
+      needs.derive.outputs.version_tag != '' &&
+      needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION_TAG: ${{ needs.derive.outputs.version_tag }}
+    steps:
+      - name: Create draft release if not present
         env:
-          ENVIRONMENT: ${{ inputs.environment }}
-          IMAGE_TAG: ${{ needs.build-and-push-image.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "### Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** \`${ENVIRONMENT}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Image Tag:** \`${IMAGE_TAG}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -n "${{ steps.outputs.outputs.custom_url }}" ]; then
-            echo "**URL:** ${{ steps.outputs.outputs.custom_url }}" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "**URL:** ${{ steps.outputs.outputs.service_url }}" >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          if gh release view "${VERSION_TAG}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release ${VERSION_TAG} already exists — skipping."
+            exit 0
           fi
+          latest=$(gh release view --repo "${{ github.repository }}" --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          gh release create "${VERSION_TAG}" \
+            --repo "${{ github.repository }}" \
+            --title "Release ${VERSION_TAG}" \
+            --draft \
+            --generate-notes \
+            ${latest:+--notes-start-tag "${latest}"}
