@@ -4,6 +4,86 @@
  */
 
 export interface paths {
+    "/api/v2/validators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get V2 validators with optional filters
+         * @description Returns validators from the V2 indexer. TVL / yield / NFT-yield fields require VET and VTHO USD prices from the vechain.energy `PriceFeedOracle`; if the oracle is unavailable the endpoint returns 503 rather than a half-populated response. `online` and `totalRewards` are not yet wired up — see `ValidatorV2Response` for the remaining formulas.
+         */
+        get: operations["getValidators"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/validators/{validatorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single V2 validator by ID
+         * @description Returns one validator's V2 stats by their address.
+         */
+        get: operations["getValidatorById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/validators/{validatorId}/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a single validator's slot accounting over a time range
+         * @description Returns one validator's slot accounting across the requested timestamp window (inclusive, Unix seconds). Returns zeroed counts when the validator had no scheduled slots in the window.
+         */
+        get: operations["getSlotStatsForValidator"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/validators/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get per-validator slot accounting over a time range
+         * @description Returns each validator's slot accounting across the requested timestamp window (inclusive, Unix seconds). `missedSlotRatio = missedSlots / (proposedBlocks + missedSlots)`. Validators with no scheduled slots in the window are absent from the response.
+         */
+        get: operations["getSlotStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/history/{account}": {
         parameters: {
             query?: never;
@@ -168,8 +248,16 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get validators with optional filters
-         * @description This endpoint retrieves validator stats.
+         * Get validators with optional filters (deprecated — use /api/v2/validators)
+         * @deprecated
+         * @description **Deprecated:** Replaced by `GET /api/v2/validators`. This endpoint now reads from the
+         *                 V2 indexer (`validators_v2`) and reshapes the V2 document into the V1 wire format.
+         *                 `online` and `totalRewards` are returned as `null` (not populated on V2). `offlineBlocks`
+         *                 is sourced from V2's PoS-schedule misses and is numerically different from the V1
+         *                 transient `OfflineBlock` pointer. `sortBy=nft:<Level>` has no V2 equivalent and silently
+         *                 falls back to the default sort.
+         *
+         *                 This endpoint retrieves validator stats.
          *
          *                 You can filter the results by:
          *                 - `validatorId`: (deprecated - use GET /api/v1/validators/{validatorId} instead)
@@ -182,7 +270,7 @@ export interface paths {
          *                 - `page` and `size`: Controls pagination
          *                 - `direction`: Either `asc` or `desc`
          */
-        get: operations["getValidators"];
+        get: operations["getValidators_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -199,10 +287,11 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get a single validator by ID
-         * @description Returns a single validator's stats by their address.
+         * Get a single validator by ID (deprecated — use /api/v2/validators/{id})
+         * @deprecated
+         * @description **Deprecated:** Replaced by `GET /api/v2/validators/{validatorId}`. Returns a single validator's stats by their address.
          */
-        get: operations["getValidatorById"];
+        get: operations["getValidatorById_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -220,14 +309,10 @@ export interface paths {
         };
         /**
          * Get delegations with optional filters
-         * @description This endpoint retrieves delegation records.
-         *
-         *                 You can filter by:
+         * @description Returns delegations. Filterable by:
          *                 - `validator`: delegations for a specific validator
          *                 - `tokenId`: delegations for a specific NFT tokenId
-         *                 - `statuses`: array of statuses of interest
-         *
-         *                 You can also sort and paginate.
+         *                 - `statuses`: array of statuses of interest (QUEUED / ACTIVE / EXITING / EXITED)
          */
         get: operations["getDelegations"];
         put?: never;
@@ -287,8 +372,9 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get missed blocks percentage for validators
-         * @description Returns missed block percentages for all validators or a specific validator within a specified timeframe. Timeframe options: DAY (last 24h), WEEK (last 7 days), MONTH (last 30 days), YEAR (last 365 days).
+         * Get missed blocks percentage for validators (deprecated)
+         * @deprecated
+         * @description **Deprecated:** Replaced by `GET /api/v2/validators/slots`. `missedPercentage` is `missedSlots / scheduledSlots * 100` over the window. `startBlock` is derived from `endBlock - days * 8640` (VeChain's ~10s block rate); `endBlock` is the current chain head. Only validators with at least one missed slot in the window appear in `validators`.
          */
         get: operations["getMissedBlocksPercentage"];
         put?: never;
@@ -1958,6 +2044,95 @@ export interface components {
              */
             timestamp: number;
         };
+        PaginatedResponseValidatorV2Response: {
+            data: components["schemas"]["ValidatorV2Response"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        PaginationDetail: {
+            hasNext: boolean;
+            cursor?: string;
+        };
+        TokenLevelDecimalValues: {
+            Strength?: number;
+            Thunder?: number;
+            Mjolnir?: number;
+            VeThorX?: number;
+            StrengthX?: number;
+            ThunderX?: number;
+            MjolnirX?: number;
+            Dawn?: number;
+            Lightning?: number;
+            Flash?: number;
+        };
+        ValidatorV2Response: {
+            id: string;
+            endorser?: string;
+            beneficiary?: string;
+            /** @enum {string} */
+            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
+            vetStaked?: number;
+            validatorVetStaked?: number;
+            delegatorVetStaked?: number;
+            queuedVetStaked?: number;
+            validatorQueuedVetStaked?: number;
+            delegatorQueuedVetStaked?: number;
+            exitingVetStaked?: number;
+            validatorExitingVetStaked?: number;
+            delegatorExitingVetStaked?: number;
+            validatorLockedWeight?: number;
+            totalNextPeriodWeight?: number;
+            totalWeight?: number;
+            blockProbability?: number;
+            blocksPerYear?: number;
+            /** Format: int64 */
+            blocksPerEpoch: number;
+            /** Format: int64 */
+            startBlock?: number;
+            /** Format: int64 */
+            exitBlock?: number;
+            /** Format: int64 */
+            cyclePeriodLength?: number;
+            /** Format: int64 */
+            cycleEndBlock?: number;
+            /** Format: int64 */
+            completedPeriods?: number;
+            /** Format: int64 */
+            queuePosition?: number;
+            /** Format: int64 */
+            availableStartBlock?: number;
+            /** Format: int64 */
+            scheduledSlots: number;
+            /** Format: int64 */
+            proposedBlocks: number;
+            /** Format: int64 */
+            missedSlots: number;
+            missedSlotsPercentage?: number;
+            /** Format: int64 */
+            lastProposedBlockNumber?: number;
+            /** Format: int64 */
+            lastMissedBlockNumber?: number;
+            validatorTvl: number;
+            delegatorTvl: number;
+            totalTvl: number;
+            validatorTvlPercentage?: number;
+            validatorYield?: number;
+            tvlBasedYield?: number;
+            avgDelegatorYield?: number;
+            nextCycleValidatorYield?: number;
+            nextCycleTvlBasedYield?: number;
+            nextCycleAvgDelegatorYield?: number;
+            nftYields?: components["schemas"]["TokenLevelDecimalValues"];
+            nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"];
+        };
+        ValidatorSlotStats: {
+            validator: string;
+            /** Format: int64 */
+            proposedBlocks: number;
+            /** Format: int64 */
+            missedSlots: number;
+            /** Format: double */
+            missedSlotRatio: number;
+        };
         AppVote: {
             appId: string;
             voteWeight: string;
@@ -2044,10 +2219,6 @@ export interface components {
         PaginatedResponseIndexedHistoryEvent: {
             data: components["schemas"]["IndexedHistoryEvent"][];
             pagination: components["schemas"]["PaginationDetail"];
-        };
-        PaginationDetail: {
-            hasNext: boolean;
-            cursor?: string;
         };
         ProofV2: {
             image?: string;
@@ -2143,46 +2314,33 @@ export interface components {
             data: components["schemas"]["HistoricProposals"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
-        PaginatedResponseValidator: {
-            data: components["schemas"]["Validator"][];
+        PaginatedResponseValidatorResponse: {
+            data: components["schemas"]["ValidatorResponse"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
-        TokenLevelDecimalValues: {
-            Strength?: number;
-            Thunder?: number;
-            Mjolnir?: number;
-            VeThorX?: number;
-            StrengthX?: number;
-            ThunderX?: number;
-            MjolnirX?: number;
-            Dawn?: number;
-            Lightning?: number;
-            Flash?: number;
-        };
-        Validator: {
+        ValidatorResponse: {
             id: string;
             endorser?: string;
             beneficiary?: string;
             /** @enum {string} */
-            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
-            vetStaked?: number;
-            validatorVetStaked?: number;
-            delegatorVetStaked?: number;
-            queuedVetStaked?: number;
-            validatorQueuedVetStaked?: number;
-            delegatorQueuedVetStaked?: number;
-            validatorExitingVetStaked?: number;
-            delegatorExitingVetStaked?: number;
-            exitingVetStaked?: number;
+            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
+            vetStaked: number;
+            validatorVetStaked: number;
+            delegatorVetStaked: number;
+            queuedVetStaked: number;
+            validatorQueuedVetStaked: number;
+            delegatorQueuedVetStaked: number;
+            validatorExitingVetStaked: number;
+            delegatorExitingVetStaked: number;
+            exitingVetStaked: number;
             /** Format: int64 */
             cycleEndBlock?: number;
             totalRewards?: number;
             blockProbability?: number;
             blocksPerEpoch?: number;
-            totalTvl?: number;
-            validatorTvl?: number;
-            delegatorTvl?: number;
-            validatorTvlPercentage?: number;
+            totalTvl: number;
+            validatorTvl: number;
+            delegatorTvl: number;
             tvlBasedYield?: number;
             validatorYield?: number;
             avgDelegatorYield?: number;
@@ -2192,7 +2350,7 @@ export interface components {
             nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"];
             nftYields?: components["schemas"]["TokenLevelDecimalValues"];
             totalWeight?: number;
-            online?: boolean;
+            online: boolean;
             /** Format: int64 */
             completedPeriods?: number;
             /** Format: int64 */
@@ -2210,20 +2368,20 @@ export interface components {
             /** Format: int64 */
             availableStartBlock?: number;
         };
-        Delegation: {
+        DelegationResponse: {
             id: string;
             validator: string;
             tokenId: string;
             owner: string;
             /** @enum {string} */
-            status: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+            status: "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
             /** @enum {string} */
             tokenLevel: "All" | "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
             stakedAmount: string;
             totalRewardsClaimed: number;
         };
-        PaginatedResponseDelegation: {
-            data: components["schemas"]["Delegation"][];
+        PaginatedResponseDelegationResponse: {
+            data: components["schemas"]["DelegationResponse"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
         DelegationCountsResponse: {
@@ -2253,10 +2411,6 @@ export interface components {
             status: "VALIDATED" | "MISSED";
             delegatorRewards?: number;
             validatorRewards?: number;
-            /** Format: int64 */
-            blocksOffline?: number;
-            /** Format: int64 */
-            onlineBlock?: number;
         };
         AllValidatorsMissedBlocksResponse: {
             /** @enum {string} */
@@ -2398,11 +2552,6 @@ export interface components {
             value: number;
         };
         TotalByBlockDto: {
-            blockId: string;
-            /** Format: int64 */
-            blockNumber: number;
-            /** Format: int64 */
-            blockTimestamp: number;
             total: number;
             byLevel: {
                 [key: string]: number;
@@ -2424,7 +2573,7 @@ export interface components {
             owner: string;
             manager?: string;
             /** @enum {string} */
-            delegationStatus: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+            delegationStatus: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
             validatorId?: string;
             totalRewardsClaimed: number;
             totalBootstrapRewardsClaimed: number;
@@ -2453,12 +2602,7 @@ export interface components {
             /** Format: int64 */
             year: number;
         };
-        NftHoldersByBlockDto: {
-            blockId: string;
-            /** Format: int64 */
-            blockNumber: number;
-            /** Format: int64 */
-            blockTimestamp: number;
+        NftHoldersDto: {
             /** Format: int64 */
             total: number;
             byLevel: {
@@ -3133,6 +3277,332 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getValidators: {
+        parameters: {
+            query?: {
+                /** @description Filter by one or more validator statuses */
+                status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
+                /**
+                 * @description Filter by endorser address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                endorser?: string;
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseValidatorV2Response"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description PriceFeedOracle is unreachable or returned an unusable response */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getValidatorById: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description Validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ValidatorV2Response"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description PriceFeedOracle is unreachable or returned an unusable response */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getSlotStatsForValidator: {
+        parameters: {
+            query: {
+                /**
+                 * @description Start timestamp in Unix seconds (inclusive)
+                 * @example 1704143600
+                 */
+                startTimestamp: number;
+                /**
+                 * @description End timestamp in Unix seconds (inclusive)
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /**
+                 * @description Validator address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                validatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ValidatorSlotStats"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getSlotStats: {
+        parameters: {
+            query: {
+                /**
+                 * @description Start timestamp in Unix seconds (inclusive)
+                 * @example 1704143600
+                 */
+                startTimestamp: number;
+                /**
+                 * @description End timestamp in Unix seconds (inclusive)
+                 * @example 1704153600
+                 */
+                endTimestamp: number;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ValidatorSlotStats"][];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
     getUsersHistoryV2: {
         parameters: {
             query?: {
@@ -3772,7 +4242,7 @@ export interface operations {
             };
         };
     };
-    getValidators: {
+    getValidators_1: {
         parameters: {
             query?: {
                 /**
@@ -3786,7 +4256,7 @@ export interface operations {
                  */
                 validatorId?: string;
                 /** @description Filter by one or more validator statuses */
-                status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+                status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -3817,7 +4287,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PaginatedResponseValidator"];
+                    "*/*": components["schemas"]["PaginatedResponseValidatorResponse"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -3860,9 +4330,19 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
+            /** @description PriceFeedOracle is unreachable or returned an unusable response */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
         };
     };
-    getValidatorById: {
+    getValidatorById_1: {
         parameters: {
             query?: never;
             header?: {
@@ -3886,7 +4366,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["Validator"];
+                    "*/*": components["schemas"]["ValidatorResponse"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -3929,6 +4409,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
+            /** @description PriceFeedOracle is unreachable or returned an unusable response */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
         };
     };
     getDelegations: {
@@ -3942,7 +4432,7 @@ export interface operations {
                 /** @description A valid tokenId */
                 tokenId?: string;
                 /** @description Filter by one or more statuses */
-                statuses?: "NONE" | "QUEUED" | "ACTIVE" | "EXITED" | "EXITING";
+                statuses?: "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
                 /**
                  * @description The zero-based results page number
                  * @example 0
@@ -3971,7 +4461,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["PaginatedResponseDelegation"];
+                    "*/*": components["schemas"]["PaginatedResponseDelegationResponse"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -6778,7 +7268,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["NftHoldersByBlockDto"];
+                    "*/*": components["schemas"]["NftHoldersDto"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
