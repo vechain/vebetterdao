@@ -94,8 +94,8 @@ export type AppConfig = {
   externalContractIntegrations?: ExternalContractIntegrations
 }
 
-// Legacy contract-script callers set NEXT_PUBLIC_APP_ENV (chain-shaped).
-// Map to the default flavor for that chain so they keep working unchanged.
+// Chain-shaped values (from NEXT_PUBLIC_APP_ENV or explicit args in hardhat/scripts)
+// resolve to the default flavor for that chain so contract-side callers work unchanged.
 const chainToFlavor: Record<string, Environment> = {
   [AppEnv.LOCAL]: Environment.LOCAL,
   [AppEnv.E2E]: Environment.E2E,
@@ -104,11 +104,10 @@ const chainToFlavor: Record<string, Environment> = {
   [AppEnv.MAINNET]: Environment.PROD,
 }
 
-export const getConfig = (env?: Environment): AppConfig => {
-  const environment =
-    env || getPublicEnv("NEXT_PUBLIC_ENVIRONMENT") || chainToFlavor[getPublicEnv("NEXT_PUBLIC_APP_ENV")]
-  if (!environment)
-    throw new Error("NEXT_PUBLIC_ENVIRONMENT env variable must be set or a type must be passed to getConfig()")
+export const getConfig = (env?: Environment | EnvConfig): AppConfig => {
+  const raw = env || getPublicEnv("NEXT_PUBLIC_ENVIRONMENT") || getPublicEnv("NEXT_PUBLIC_APP_ENV")
+  if (!raw) throw new Error("NEXT_PUBLIC_ENVIRONMENT env variable must be set or a type must be passed to getConfig()")
+  const environment = chainToFlavor[raw] ?? raw
 
   switch (environment) {
     case Environment.LOCAL:
