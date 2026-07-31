@@ -6,13 +6,13 @@ locals {
   # NEXT_PUBLIC_APP_ENV comes from the env yaml (identity of the env). The rest
   # of the NEXT_PUBLIC_* values arrive as var.next_public_env_vars — the deploy
   # workflow forwards vars.NEXT_PUBLIC_* from the target GitHub environment.
-  # NEXT_PUBLIC_APP_VERSION is derived from image_tag so it tracks the deployed
-  # image without extra plumbing.
+  # NEXT_PUBLIC_APP_VERSION is the semantic version tag when the deploy was
+  # triggered by a v.X.Y.Z tag, else the image SHA.
   inline_env_vars = merge(
     lookup(local.env, "runtime_env_vars_inline", {}),
     var.next_public_env_vars,
     {
-      NEXT_PUBLIC_APP_VERSION = local.env.image_tag
+      NEXT_PUBLIC_APP_VERSION = coalesce(var.app_version, local.env.image_tag)
     },
   )
 }

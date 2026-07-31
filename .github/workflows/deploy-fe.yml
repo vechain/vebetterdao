@@ -245,6 +245,7 @@ jobs:
         working-directory: ${{ env.TERRAFORM_DIR }}
         env:
           TF_VAR_next_public_env_vars: ${{ steps.next_public.outputs.json }}
+          TF_VAR_app_version: ${{ env.VERSION_TAG }}
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
