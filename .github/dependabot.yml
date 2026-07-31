@@ -11,6 +11,18 @@ updates:
     labels:
       - dependencies
       - increment:patch
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      github-actions-major:
+        patterns:
+          - "*"
+        update-types:
+          - major
 
   - package-ecosystem: npm
     directory: /
@@ -23,6 +35,18 @@ updates:
     labels:
       - dependencies
       - increment:patch
+    groups:
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      npm-major:
+        patterns:
+          - "*"
+        update-types:
+          - major
 
   - package-ecosystem: docker
     directory: /
@@ -35,3 +59,15 @@ updates:
     labels:
       - dependencies
       - increment:patch
+    groups:
+      docker-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      docker-major:
+        patterns:
+          - "*"
+        update-types:
+          - major
