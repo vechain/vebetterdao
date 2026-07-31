@@ -31,6 +31,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      pull-requests: write
     env:
       GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
       SHA_TAG: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -72,36 +73,23 @@ jobs:
             --tag "${GHCR_IMAGE}:${VERSION_TAG}" \
             "${GHCR_IMAGE}:${SHA_TAG}"
 
-      - name: Compute build tags
-        id: tags
-        if: steps.probe.outputs.exists == 'false'
-        run: |
-          set -euo pipefail
-          tags="${GHCR_IMAGE}:${SHA_TAG}"
-          if [ -n "${VERSION_TAG}" ]; then
-            tags="${tags}"$'\n'"${GHCR_IMAGE}:${VERSION_TAG}"
-          fi
-          {
-            echo "tags<<EOF"
-            echo "${tags}"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Build & push (SHA${{ env.VERSION_TAG != '' && ' + VERSION' || '' }})
+      - name: Build image (load, no push)
         if: steps.probe.outputs.exists == 'false'
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
-          push: true
+          load: true
+          push: false
           provenance: false
           sbom: false
-          tags: ${{ steps.tags.outputs.tags }}
+          tags: ${{ env.GHCR_IMAGE }}:${{ env.SHA_TAG }}
           cache-from: type=registry,ref=${{ env.GHCR_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.GHCR_IMAGE }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
 
       - name: Scan image with Trivy
+        id: trivy
         if: steps.probe.outputs.exists == 'false'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -109,7 +97,56 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
+          format: table
+          output: trivy-report.txt
           vuln-type: os,library
+
+      - name: Publish Trivy report
+        if: always() && steps.trivy.conclusion != 'skipped'
+        run: |
+          set -euo pipefail
+          [ -f trivy-report.txt ] || { echo "No Trivy report."; exit 0; }
+          echo "--- Trivy report ---"
+          cat trivy-report.txt
+          {
+            echo "### Trivy scan"
+            echo ""
+            echo '```'
+            cat trivy-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment scan failure on PR
+        if: failure() && steps.trivy.conclusion == 'failure' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          {
+            echo "### Frontend image blocked by Trivy"
+            echo ""
+            echo "HIGH/CRITICAL vulnerabilities with upstream fixes were found. Image was **not** pushed to GHCR."
+            echo ""
+            echo "<details><summary>Scan report</summary>"
+            echo ""
+            echo '```'
+            cat trivy-report.txt
+            echo '```'
+            echo ""
+            echo "</details>"
+          } > comment.md
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file comment.md
+
+      - name: Push image
+        if: steps.probe.outputs.exists == 'false'
+        run: |
+          set -euo pipefail
+          docker push "${GHCR_IMAGE}:${SHA_TAG}"
+          if [ -n "${VERSION_TAG}" ]; then
+            docker tag "${GHCR_IMAGE}:${SHA_TAG}" "${GHCR_IMAGE}:${VERSION_TAG}"
+            docker push "${GHCR_IMAGE}:${VERSION_TAG}"
+          fi
 
       - name: Summary
         env:
