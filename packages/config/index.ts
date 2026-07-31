@@ -1,11 +1,23 @@
 import localConfig from "./local"
 import e2eConfig from "./e2e"
-import stagingConfig from "./testnet-staging"
-import testnetConfig from "./testnet"
-import mainnetConfig from "./mainnet"
+import devConfig from "./dev"
+import stagingConfig from "./staging"
+import betaConfig from "./beta"
+import prodConfig from "./prod"
 import { AppEnv, EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
 import { getPublicEnv, PUBLIC_ENV_KEYS, PublicEnvKey } from "./publicEnv"
+
+export const Environment = {
+  LOCAL: "local",
+  E2E: "e2e",
+  DEV: "dev",
+  STAGING: "staging",
+  BETA: "beta",
+  PROD: "prod",
+} as const
+
+export type Environment = (typeof Environment)[keyof typeof Environment]
 
 type B3TRGovernorLibraries = {
   governorClockLogicAddress: string
@@ -82,23 +94,36 @@ export type AppConfig = {
   externalContractIntegrations?: ExternalContractIntegrations
 }
 
-export const getConfig = (env?: EnvConfig): AppConfig => {
-  const appEnv = env || getPublicEnv("NEXT_PUBLIC_APP_ENV")
-  if (!appEnv) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set or a type must be passed to getConfig()")
+// Chain-shaped values (from NEXT_PUBLIC_APP_ENV or explicit args in hardhat/scripts)
+// resolve to the default flavor for that chain so contract-side callers work unchanged.
+const chainToFlavor: Record<string, Environment> = {
+  [AppEnv.LOCAL]: Environment.LOCAL,
+  [AppEnv.E2E]: Environment.E2E,
+  [AppEnv.TESTNET]: Environment.DEV,
+  [AppEnv.TESTNET_STAGING]: Environment.STAGING,
+  [AppEnv.MAINNET]: Environment.PROD,
+}
 
-  switch (appEnv) {
-    case AppEnv.LOCAL:
+export const getConfig = (env?: Environment | EnvConfig): AppConfig => {
+  const raw = env || getPublicEnv("NEXT_PUBLIC_ENVIRONMENT") || getPublicEnv("NEXT_PUBLIC_APP_ENV")
+  if (!raw) throw new Error("NEXT_PUBLIC_ENVIRONMENT env variable must be set or a type must be passed to getConfig()")
+  const environment = chainToFlavor[raw] ?? raw
+
+  switch (environment) {
+    case Environment.LOCAL:
       return localConfig
-    case AppEnv.E2E:
+    case Environment.E2E:
       return e2eConfig
-    case AppEnv.TESTNET_STAGING:
+    case Environment.DEV:
+      return devConfig
+    case Environment.STAGING:
       return stagingConfig
-    case AppEnv.TESTNET:
-      return testnetConfig
-    case AppEnv.MAINNET:
-      return mainnetConfig
+    case Environment.BETA:
+      return betaConfig
+    case Environment.PROD:
+      return prodConfig
     default:
-      throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
+      throw new Error(`Unsupported NEXT_PUBLIC_ENVIRONMENT ${environment}`)
   }
 }
 

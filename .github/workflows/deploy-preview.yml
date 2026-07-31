@@ -319,6 +319,7 @@ jobs:
           yq --version
 
       - name: Create preview environment config
+        id: preview_config
         run: |
           # Get values
           PR_NUMBER="${{ needs.setup.outputs.pr_number }}"
@@ -395,12 +396,20 @@ jobs:
           echo "=== Generated Preview Config ==="
           cat "${TARGET_FILE}"
 
+          # Exposed for the collect step's BASE_PATH override.
+          echo "preview_domain=${PREVIEW_DOMAIN}" >> "$GITHUB_OUTPUT"
+
       - name: Collect NEXT_PUBLIC_* runtime env vars
         id: next_public
         env:
           ALL_VARS: ${{ toJSON(vars) }}
+          PREVIEW_BASE_PATH: https://${{ steps.preview_config.outputs.preview_domain }}
         run: |
-          json=$(printf '%s' "$ALL_VARS" | jq -c 'with_entries(select((.key | startswith("NEXT_PUBLIC_")) and .key != "NEXT_PUBLIC_APP_ENV"))')
+          # ENVIRONMENT lives inline — filter it so a repo var can't override it.
+          # BASE_PATH override so OG / canonicals point at the preview, not the parent flavor.
+          json=$(printf '%s' "$ALL_VARS" | jq -c \
+            --arg base "$PREVIEW_BASE_PATH" \
+            'with_entries(select((.key | startswith("NEXT_PUBLIC_")) and .key != "NEXT_PUBLIC_ENVIRONMENT")) + {NEXT_PUBLIC_BASE_PATH: $base}')
           echo "json=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Terraform Init

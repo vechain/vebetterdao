@@ -1,7 +1,9 @@
 import { AppConfig } from "."
+
+// Chain-level base: mainnet contracts + defaults. Consumed by beta.ts, prod.ts,
+// and by lambdas. basePath is set per env file.
 const config: AppConfig = {
   environment: "mainnet",
-  basePath: "https://governance.vebetterdao.org",
   ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
   ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
   b3trContractAddress: "0x5ef79995FE8a89e0812330E4378eB2660ceDe699",
@@ -91,4 +93,5 @@ const config: AppConfig = {
     },
   },
 }
+
 export default config

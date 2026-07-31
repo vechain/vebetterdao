@@ -1,7 +1,9 @@
 import { AppConfig } from "."
+
+// Chain-level base: testnet contracts + defaults. Consumed by dev.ts and by
+// lambdas that operate against testnet. basePath is set per env file.
 const config: AppConfig = {
   environment: "testnet",
-  basePath: "https://b3tr-frontend.vercel.app",
   ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
   ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
   b3trContractAddress: "0x026771d1be764467f8bdb78bb230df10c924b00d",
@@ -30,7 +32,7 @@ const config: AppConfig = {
   navigatorRegistryContractAddress: "0x91bdc3ca7228bc28f14990039cab813f98ea1d40",
   veDelegateAutoDepositContractAddress: "0xf5DcEfC27461480A75c328402F1633c462Bece6c",
   veDelegateContractAddress: "",
-  indexerUrl: "https://187.124.15.10.nip.io/api/v1",
+  indexerUrl: "https://indexer.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",
@@ -88,4 +90,5 @@ const config: AppConfig = {
     autoVotingLogicAddress: "0x0000000000000000000000000000000000000000",
   },
 }
+
 export default config
