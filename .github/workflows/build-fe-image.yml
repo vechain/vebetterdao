@@ -97,23 +97,35 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
-          format: table
-          output: trivy-report.txt
+          format: json
+          output: trivy-report.json
           vuln-type: os,library
 
-      - name: Publish Trivy report
+      - name: Render Trivy findings
         if: always() && steps.trivy.conclusion != 'skipped'
         run: |
           set -euo pipefail
-          [ -f trivy-report.txt ] || { echo "No Trivy report."; exit 0; }
-          echo "--- Trivy report ---"
-          cat trivy-report.txt
+          [ -f trivy-report.json ] || { echo "No Trivy report."; exit 0; }
+          jq -r '
+            def rows:
+              [ .Results[]?
+                | select(.Vulnerabilities and (.Vulnerabilities|length > 0))
+                | . as $r
+                | .Vulnerabilities[]
+                | "| \(.Severity) | \(.PkgName) | \(.InstalledVersion) | \(.FixedVersion // "-") | [\(.VulnerabilityID)](\(.PrimaryURL // "")) | \($r.Target) |"
+              ];
+            if (rows | length) == 0 then
+              "No HIGH/CRITICAL vulnerabilities with upstream fixes."
+            else
+              "| Severity | Package | Installed | Fixed | CVE | Target |\n|---|---|---|---|---|---|\n" + (rows | join("\n"))
+            end
+          ' trivy-report.json > trivy-findings.md
+          echo "--- Trivy findings ---"
+          cat trivy-findings.md
           {
             echo "### Trivy scan"
             echo ""
-            echo '```'
-            cat trivy-report.txt
-            echo '```'
+            cat trivy-findings.md
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment scan failure on PR
@@ -128,13 +140,7 @@ jobs:
             echo ""
             echo "HIGH/CRITICAL vulnerabilities with upstream fixes were found. Image was **not** pushed to GHCR."
             echo ""
-            echo "<details><summary>Scan report</summary>"
-            echo ""
-            echo '```'
-            cat trivy-report.txt
-            echo '```'
-            echo ""
-            echo "</details>"
+            cat trivy-findings.md
           } > comment.md
           gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file comment.md
 
