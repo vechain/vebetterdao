@@ -1,7 +1,9 @@
 import { AppConfig } from "."
+
+// Chain-level base: staging contracts on testnet + defaults. Consumed by
+// staging.ts and by lambdas. basePath is set per env file.
 const config: AppConfig = {
   environment: "testnet-staging",
-  basePath: "https://b3tr-frontend.vercel.app",
   ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
   ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
   b3trContractAddress: "0x95761346d18244bb91664181bf91193376197088",
@@ -91,4 +93,5 @@ const config: AppConfig = {
     vetDomainsContractAddress: "0xE27C72E252D5C3B2daf871aB7628F29370438589",
   },
 }
+
 export default config

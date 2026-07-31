@@ -27,12 +27,10 @@ runtime_env_secret_names:
   - RESET_USER_SIGNAL_COUNT_API_KEY
   - TWITTER_CLIENT_SECRET
 
-# NEXT_PUBLIC_APP_ENV is the environment's own identity — stays with the env
-# declaration here. The rest of the NEXT_PUBLIC_* values come from GitHub
-# environment vars (see deploy workflow) so they can rotate without a code
-# change. NEXT_PUBLIC_APP_VERSION comes from the deploy workflow (v.X.Y.Z tag).
+# Inline: env identity (must not be overridable). Other NEXT_PUBLIC_* come from
+# GitHub env vars via the deploy workflow; APP_VERSION from the v.X.Y.Z tag.
 runtime_env_vars_inline:
-  NEXT_PUBLIC_APP_ENV: mainnet
+  NEXT_PUBLIC_ENVIRONMENT: prod
 
 image_tag: latest
 cpu: 1024

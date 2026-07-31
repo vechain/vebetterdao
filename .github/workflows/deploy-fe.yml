@@ -238,7 +238,8 @@ jobs:
         env:
           ALL_VARS: ${{ toJSON(vars) }}
         run: |
-          json=$(printf '%s' "$ALL_VARS" | jq -c 'with_entries(select((.key | startswith("NEXT_PUBLIC_")) and .key != "NEXT_PUBLIC_APP_ENV"))')
+          # ENVIRONMENT lives inline — filter it so a repo var can't override it.
+          json=$(printf '%s' "$ALL_VARS" | jq -c 'with_entries(select((.key | startswith("NEXT_PUBLIC_")) and .key != "NEXT_PUBLIC_ENVIRONMENT"))')
           echo "json=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Terraform Plan
