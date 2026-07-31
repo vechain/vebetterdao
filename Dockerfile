@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 # Build stage
-FROM node:20 AS builder
+FROM node:22@sha256:7725a5c2c83eed1d36258c66efae14b1ceccd021db9ed1d9559d3335ed3d68ed AS builder
 
 WORKDIR /app
 
@@ -56,7 +56,7 @@ RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
 # ============================================================================
 # Production stage (minimal image)
 # ============================================================================
-FROM node:20-slim
+FROM node:22-slim@sha256:f32b81066cde10a75dbac96646099533316d94bac4150c55da1636e1f0ffdc46
 
 WORKDIR /app
 
