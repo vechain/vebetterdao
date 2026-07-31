@@ -58,6 +58,13 @@ RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
 # ============================================================================
 FROM node:22-slim@sha256:f32b81066cde10a75dbac96646099533316d94bac4150c55da1636e1f0ffdc46
 
+# Next.js standalone runs `node server.js`; npm/npx/corepack aren't invoked
+# at runtime. Removing them drops the bundled-npm CVE surface (tar,
+# brace-expansion, picomatch, sigstore, ...).
+RUN rm -rf /usr/local/lib/node_modules/npm \
+    /usr/local/bin/npm /usr/local/bin/npx \
+    /usr/local/bin/corepack /opt/yarn-*
+
 WORKDIR /app
 
 ENV NODE_ENV=production
