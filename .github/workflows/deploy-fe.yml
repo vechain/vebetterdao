@@ -3,8 +3,8 @@ name: Deploy Frontend
 # Consolidated deploy workflow. Never builds — verifies the SHA image
 # exists in GHCR (built by build-fe-image.yml), promotes it to the
 # target env's ECR, then terraform applies. Tag push fans out to
-# [staging, beta]; release publish → prod; workflow_dispatch is
-# break-glass for any single env.
+# [staging, beta]; release publish → prod; workflow_dispatch is the
+# only path for dev, and break-glass for staging/beta/prod.
 
 on:
   push:
@@ -26,7 +26,7 @@ on:
         options: [dry-run, deploy]
 
 run-name: |
-  Deploy ${{ github.event.release.tag_name || github.ref_name }} → ${{ github.event_name == 'release' && 'prod' || (inputs.target_env || 'staging+beta') }}${{ github.event_name == 'workflow_dispatch' && ' [BREAK-GLASS]' || '' }}
+  Deploy ${{ github.event.release.tag_name || github.ref_name }} → ${{ github.event_name == 'release' && 'prod' || (inputs.target_env || 'staging+beta') }}${{ github.event_name == 'workflow_dispatch' && inputs.target_env != 'dev' && ' [BREAK-GLASS]' || '' }}
 
 permissions: {}
 
