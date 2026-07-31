@@ -26,7 +26,7 @@
     "@vechain/sdk-network": "2.0.7",
     "aws-lambda": "^1.0.7",
     "eslint-plugin-prettier": "^5.5.5",
-    "ethers": "^6.11.1",
+    "ethers": "^6.17.0",
     "jest": "^30.4.2",
     "ts-jest": "^29.4.11"
   }
