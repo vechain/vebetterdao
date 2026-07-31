@@ -23,3 +23,15 @@ updates:
     labels:
       - dependencies
       - increment:patch
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    pull-request-branch-name:
+      separator: "-"
+    labels:
+      - dependencies
+      - increment:patch
