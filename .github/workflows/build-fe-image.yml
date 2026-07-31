@@ -101,19 +101,15 @@ jobs:
           cache-from: type=registry,ref=${{ env.GHCR_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.GHCR_IMAGE }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
 
-      - name: Scan image with Aikido
+      - name: Scan image with Trivy
         if: steps.probe.outputs.exists == 'false'
-        env:
-          AIKIDO_API_KEY: ${{ secrets.AIKIDO_API_KEY }}
-        run: |
-          set -euo pipefail
-          docker pull "${GHCR_IMAGE}:${SHA_TAG}"
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            aikidosecurity/local-scanner \
-            image-scan "${GHCR_IMAGE}:${SHA_TAG}" \
-            --apikey "$AIKIDO_API_KEY" \
-            --fail-on high
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.GHCR_IMAGE }}:${{ env.SHA_TAG }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          vuln-type: os,library
 
       - name: Summary
         env:
