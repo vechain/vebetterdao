@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 # Build stage
-FROM node:22@sha256:7725a5c2c83eed1d36258c66efae14b1ceccd021db9ed1d9559d3335ed3d68ed AS builder
+FROM node:25@sha256:78839ac448c23517f8eab2e8f7943d9b4f73979eb7f8bed2c73dbf72ff869e7b AS builder
 
 WORKDIR /app
 
@@ -56,7 +56,7 @@ RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
 # ============================================================================
 # Production stage (minimal image)
 # ============================================================================
-FROM node:22-slim@sha256:f32b81066cde10a75dbac96646099533316d94bac4150c55da1636e1f0ffdc46
+FROM node:25-slim@sha256:81db02c4b671288a03915da9534dbd54f96d0e7c24d80ccc54f5b36b2e684370
 
 # Next.js standalone runs `node server.js`; npm/npx/corepack aren't invoked
 # at runtime. Removing them drops the bundled-npm CVE surface (tar,
