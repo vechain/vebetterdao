@@ -120,10 +120,10 @@
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@vechain/picasso": "^2.1.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.4.2",
     "hardhat": "2.19.1",
-    "husky": "^8.0.0",
-    "lint-staged": "12.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "17.2.0",
     "prettier": "^3.8.4"
   },
   "engines": {
