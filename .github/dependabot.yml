@@ -36,9 +36,7 @@ updates:
       - dependencies
       - increment:patch
     ignore:
-      # TS 7 (rewritten "corsa" compiler) is not yet supported by
-      # ts-node, typechain, openapi-typescript, and @typescript-eslint.
-      # Revisit when those tools ship TS-7-compatible releases.
+      # ts-node/typechain/openapi-typescript/@typescript-eslint don't support TS 7 yet
       - dependency-name: "typescript"
         versions: [">=7"]
     groups:
@@ -60,6 +58,10 @@ updates:
     labels:
       - dependencies
       - increment:patch
+    ignore:
+      # engines.node is 22.x
+      - dependency-name: "node"
+        versions: [">=23"]
     groups:
       docker-minor-patch:
         patterns:
