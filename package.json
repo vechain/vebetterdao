@@ -113,7 +113,7 @@
   },
   "dependencies": {
     "dotenv-cli": "latest",
-    "turbo": "^2.10.2"
+    "turbo": "^2.10.7"
   },
   "devDependencies": {
     "@vechain/dev-stack": "^0.3.2",
@@ -121,10 +121,10 @@
     "@repo/typescript-config": "*",
     "@vechain/picasso": "^2.1.1",
     "dotenv": "^16.4.5",
-    "hardhat": "2.19.1",
+    "hardhat": "2.29.0",
     "husky": "^8.0.0",
     "lint-staged": "12.5.0",
-    "prettier": "^3.8.4"
+    "prettier": "^3.9.6"
   },
   "engines": {
     "node": "22.x.x"
