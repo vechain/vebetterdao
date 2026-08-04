@@ -12,10 +12,10 @@
   "dependencies": {
     "@repo/config": "*",
     "@vechain/vebetterdao-contracts": "8.6.0",
-    "ethers": "^6.9.0"
+    "ethers": "^6.17.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "^1.62.0",
     "@types/node": "^25.5.0",
     "typescript": "^6.0.2"
   }
