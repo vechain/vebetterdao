@@ -15,19 +15,19 @@
     "simulate:local:signal-bot-user": "TEST_ENVIRONMENT=local npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.1064.0",
+    "@aws-sdk/client-secrets-manager": "^3.1098.0",
     "@vechain/vebetterdao-contracts": "*",
     "lambda-local": "^2.1.2"
   },
   "devDependencies": {
     "@slack/web-api": "^8.0.0",
-    "@types/aws-lambda": "^8.10.161",
+    "@types/aws-lambda": "^8.10.162",
     "@vechain/sdk-core": "2.0.7",
     "@vechain/sdk-network": "2.0.7",
     "aws-lambda": "^1.0.7",
-    "eslint-plugin-prettier": "^5.5.5",
-    "ethers": "^6.11.1",
+    "eslint-plugin-prettier": "^5.5.6",
+    "ethers": "^6.17.0",
     "jest": "^30.4.2",
-    "ts-jest": "^29.4.11"
+    "ts-jest": "^29.4.12"
   }
 }
