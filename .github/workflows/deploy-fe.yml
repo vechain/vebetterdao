@@ -282,7 +282,8 @@ jobs:
     needs: [derive, deploy]
     # Only after a successful staging+beta deploy triggered by a tag push,
     # create the release (as a draft so it must be explicitly published to
-    # trigger the prod deploy).
+    # trigger the prod deploy). The new draft supersedes any earlier drafts
+    # so there is exactly one unpublished release waiting for prod.
     if: |
       github.event_name == 'push' &&
       needs.derive.outputs.version_tag != '' &&
@@ -293,18 +294,35 @@ jobs:
     env:
       VERSION_TAG: ${{ needs.derive.outputs.version_tag }}
     steps:
+      - name: Supersede existing draft releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Tags are kept (no --cleanup-tag); published releases are untouched.
+          gh release list --repo "${REPO}" --limit 100 \
+            --json tagName,isDraft --jq '.[] | select(.isDraft) | .tagName' \
+          | while read -r tag; do
+              [ -n "${tag}" ] || continue
+              [ "${tag}" != "${VERSION_TAG}" ] || continue
+              echo "Deleting superseded draft release ${tag}"
+              gh release delete "${tag}" --repo "${REPO}" --yes
+            done
+
       - name: Create draft release if not present
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          if gh release view "${VERSION_TAG}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+          if gh release view "${VERSION_TAG}" --repo "${REPO}" >/dev/null 2>&1; then
             echo "Release ${VERSION_TAG} already exists — skipping."
             exit 0
           fi
-          latest=$(gh release view --repo "${{ github.repository }}" --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          latest=$(gh release view --repo "${REPO}" --json tagName --jq '.tagName' 2>/dev/null || echo "")
           gh release create "${VERSION_TAG}" \
-            --repo "${{ github.repository }}" \
+            --repo "${REPO}" \
             --title "Release ${VERSION_TAG}" \
             --draft \
             --generate-notes \
