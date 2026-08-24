@@ -40,7 +40,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   XAllocationVoting: {
     name: "x-allocation-voting",
     configAddressField: "xAllocationVotingContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11"],
     descriptions: {
       v2: "Integrate VeBetterPassport contract",
       v3: "Update X2Earn interface to include new endorsement feature",
@@ -51,6 +51,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v8: "Add Auto-Voting functionality",
       v9: "Refactor to library architecture + freshness multiplier + hasUserVotedForApp + NavigatorRegistry",
       v10: "Fix relayer vote double-processing (auto-vote and navigator)",
+      v11: "Fix expected-actions accounting: always reduce on auto-vote skip (a voter who disabled auto-voting mid-round stranded 4 weighted points and locked the round), and filter navigator preferences to round-eligible apps so one ineligible app can no longer make castNavigatorVote revert for every citizen of that navigator",
     },
   },
   "XAllocation Pool": {
