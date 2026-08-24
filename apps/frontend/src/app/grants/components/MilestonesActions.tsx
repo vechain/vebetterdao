@@ -16,13 +16,7 @@ import {
   buildMilestoneChainMetadata,
   parseMilestoneMetadataDocument,
 } from "@/hooks/proposals/grants/milestoneMetadataDocument"
-import {
-  ExpenditureReport,
-  GrantFormData,
-  GrantProposalEnriched,
-  MilestoneState,
-  ProposalState,
-} from "@/hooks/proposals/grants/types"
+import { ExpenditureReport, GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
 import { useSubmitExpenditureReport } from "@/hooks/proposals/grants/useSubmitExpenditureReport"
 import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
@@ -72,8 +66,6 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
    * accepts proposer + grants receiver + GRANTS_APPROVER_ROLE.
    */
   const canSubmitExpenditureReport = isProposer || isGrantReceiver || isGrantApprover
-
-  const isInDevelopment = proposal?.state === ProposalState.InDevelopment
 
   const handleReportSubmit = useCallback(
     async (report: ExpenditureReport) => {
@@ -273,7 +265,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                           milestoneIndex={index}
                           totalMilestones={milestones.length}
                           expenditureReport={proposal.expenditureReports?.find(r => r.trancheNumber === index + 1)}
-                          canSubmitExpenditureReport={Boolean(isInDevelopment && canSubmitExpenditureReport)}
+                          canSubmitExpenditureReport={canSubmitExpenditureReport}
                           isReportFormOpen={reportFormMilestoneIndex === index}
                           isPublishingReport={isPublishingReport}
                           onOpenReportForm={() => setReportFormMilestoneIndex(index)}
