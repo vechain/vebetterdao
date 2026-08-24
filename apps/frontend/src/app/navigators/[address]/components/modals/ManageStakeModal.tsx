@@ -106,8 +106,10 @@ export const ManageStakeModal = ({ isOpen, onClose, navigator: nav }: Props) => 
 
   useEffect(() => {
     if (!isOpen) return
-    setAmount(currentStake.toString())
-  }, [isOpen, currentStake])
+    // Seed from the exact wei-derived string, not the float, so an unedited value
+    // round-trips to the same wei amount.
+    setAmount(nav.stakeFormatted ?? "0")
+  }, [isOpen, nav.stakeFormatted])
 
   const { sendTransaction: sendAddStake } = useAddStake({ onSuccess: onClose })
   const { sendTransaction: sendReduceStake } = useReduceStake({ onSuccess: onClose })
