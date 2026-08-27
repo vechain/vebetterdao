@@ -258,4 +258,76 @@ library AutoVotingLogic {
 
     return (finalAppIds, voteWeights, votingPower);
   }
+
+  /**
+   * @dev Filter a navigator's allocation preferences down to the apps that are actually
+   *      eligible for the round, rescaling the retained percentages so they still consume
+   *      the citizen's full voting power in the navigator's intended proportions.
+   *
+   * @notice setAllocationPreferences validates count, duplicates and that percentages sum to
+   * BASIS_POINTS, but it cannot validate app eligibility for a round that may not have
+   * started yet. Without this filter a single ineligible app makes countVote revert with
+   * GovernorAppNotAvailableForVoting for EVERY citizen of that navigator — and because
+   * hasSetPreferences is true, castNavigatorVote's skip branch is unreachable, so those
+   * citizens can be neither voted for nor skipped. Their expected actions are then
+   * unreachable for the whole round and the entire relayer reward pool locks permanently.
+   *
+   * Returning an empty array lets the caller take the normal skip path instead.
+   *
+   * @param xAllocationVotingGovernorAddress The address of the XAllocationVotingGovernor contract
+   * @param roundId The round ID to vote in
+   * @param appIds The navigator's preferred app IDs
+   * @param percentages Allocation percentage per app, in basis points
+   * @param votingPower The citizen's delegated voting power at the round snapshot
+   *
+   * @return finalAppIds Eligible app IDs, in the navigator's original order
+   * @return voteWeights Absolute vote weights for those apps, summing to votingPower
+   */
+  function prepareNavigatorVoteArrays(
+    address xAllocationVotingGovernorAddress,
+    uint256 roundId,
+    bytes32[] memory appIds,
+    uint256[] memory percentages,
+    uint256 votingPower
+  ) external view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
+    IXAllocationVotingGovernor xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernorAddress);
+
+    uint256 len = appIds.length;
+    bytes32[] memory tempAppIds = new bytes32[](len);
+    uint256[] memory tempPercentages = new uint256[](len);
+    uint256 count;
+    uint256 retainedBasis;
+
+    for (uint256 i; i < len; ++i) {
+      if (xAllocationVotingGovernor.isEligibleForVote(appIds[i], roundId)) {
+        tempAppIds[count] = appIds[i];
+        tempPercentages[count] = percentages[i];
+        retainedBasis += percentages[i];
+        ++count;
+      }
+    }
+
+    // No eligible apps — caller skips this citizen rather than reverting.
+    if (count == 0 || retainedBasis == 0) {
+      return (new bytes32[](0), new uint256[](0));
+    }
+
+    // Rescale against the retained total, not BASIS_POINTS. When every app is eligible
+    // retainedBasis == BASIS_POINTS and the weights are identical to before this filter.
+    finalAppIds = new bytes32[](count);
+    voteWeights = new uint256[](count);
+    uint256 allocated;
+    for (uint256 i; i < count; ++i) {
+      finalAppIds[i] = tempAppIds[i];
+      voteWeights[i] = (votingPower * tempPercentages[i]) / retainedBasis;
+      allocated += voteWeights[i];
+    }
+
+    // Integer division leaves dust; give it to the first app so the full power is used.
+    if (allocated < votingPower) {
+      voteWeights[0] += votingPower - allocated;
+    }
+
+    return (finalAppIds, voteWeights);
+  }
 }
