@@ -8,15 +8,19 @@ const address = getConfig().navigatorRegistryContractAddress as `0x${string}`
 const abi = NavigatorRegistry__factory.abi
 const method = "getStake" as const
 
+// Callers mix casings (indexer/route params are lowercase, wallet addresses are checksummed),
+// so normalize or the query key built here won't match the one invalidated after a stake tx.
+const normalize = (navigator: string) => navigator.toLowerCase() as `0x${string}`
+
 export const getGetStakeQueryKey = (navigator: string) =>
-  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [navigator as `0x${string}`] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [normalize(navigator)] })
 
 export const useGetStake = (navigator: string) =>
   useCallClause({
     abi,
     address,
     method,
-    args: [navigator as `0x${string}`],
+    args: [normalize(navigator)],
     queryOptions: {
       enabled: !!navigator && !!address,
       placeholderData: keepPreviousData,

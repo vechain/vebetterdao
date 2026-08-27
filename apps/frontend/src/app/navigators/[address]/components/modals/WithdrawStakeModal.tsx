@@ -2,6 +2,7 @@ import { Button, Heading, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
+import { useGetStake } from "@/api/contracts/navigatorRegistry/hooks/useGetStake"
 import { NavigatorEntityFormatted } from "@/api/indexer/navigators/useNavigators"
 import { BaseModal } from "@/components/BaseModal"
 import B3trSvg from "@/components/Icons/svg/b3tr.svg"
@@ -20,8 +21,13 @@ export const WithdrawStakeModal = ({ isOpen, onClose, navigator: nav }: Props) =
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { sendTransaction } = useWithdrawStake({ onSuccess: onClose })
+  const { data: stake } = useGetStake(nav.address)
 
-  const stakeAmount = Number(nav.stakeFormatted ?? 0)
+  // The tx amount must be the exact on-chain stake in wei — withdrawStake reverts with
+  // InsufficientStake on any excess. The indexer value is only used for display while
+  // the on-chain read resolves.
+  const stakeWei = stake?.raw ?? 0n
+  const stakeAmount = Number(stake?.scaled ?? nav.stakeFormatted ?? 0)
 
   return (
     <BaseModal
@@ -73,8 +79,8 @@ export const WithdrawStakeModal = ({ isOpen, onClose, navigator: nav }: Props) =
             w="full"
             rounded="full"
             size="lg"
-            disabled={stakeAmount <= 0}
-            onClick={() => sendTransaction({ amount: stakeAmount.toString() })}>
+            disabled={stakeWei <= 0n}
+            onClick={() => sendTransaction({ amountWei: stakeWei })}>
             {t("Withdraw {{amount}} B3TR", { amount: formatter.format(stakeAmount) })}
           </Button>
           <Button variant="ghost" w="full" rounded="full" size="lg" onClick={onClose}>
