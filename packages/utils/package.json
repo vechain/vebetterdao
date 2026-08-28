@@ -21,8 +21,8 @@
     "./TransactionUtils": "./TransactionUtils/index.ts"
   },
   "dependencies": {
-    "@vechain/sdk-core": "1.2.0-rc.2",
-    "@vechain/sdk-network": "1.2.0-rc.2"
+    "@vechain/sdk-core": "2.1.0",
+    "@vechain/sdk-network": "2.1.0"
   },
   "devDependencies": {
     "happy-dom": "^20.9.0",
