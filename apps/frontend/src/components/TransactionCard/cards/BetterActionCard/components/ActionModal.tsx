@@ -18,11 +18,11 @@ const compactFormatter = getCompactFormatter(2)
 type Props = {
   actionModal: UseDisclosureProps
   proof?: UserB3trActions[number]["proof"]
-  appId?: string
+  appId?: string | null
   blockTimestamp?: number
   blockNumber?: number
   b3trAmount?: number
-  txId?: string
+  txId?: string | null
 }
 export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNumber, b3trAmount, txId }: Props) => {
   const { data: apps } = useXApps()
@@ -77,7 +77,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
     if (proof?.proof?.text) return <Text textStyle="sm">{proof?.proof?.text}</Text>
 
     return (
-      <Link href={proof?.proof?.link} target="_blank" rel="noopener noreferrer">
+      <Link href={proof?.proof?.link ?? undefined} target="_blank" rel="noopener noreferrer">
         <Text textStyle="sm">{proof?.proof?.link}</Text>
       </Link>
     )

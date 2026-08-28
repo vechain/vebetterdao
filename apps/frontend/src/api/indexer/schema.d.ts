@@ -2027,7 +2027,7 @@ export interface components {
              * @description Error message describing what went wrong
              * @example The provided address is invalid
              */
-            message?: string;
+            message?: string | null;
             /**
              * @description Error type/category
              * @example Bad Request
@@ -2050,79 +2050,79 @@ export interface components {
         };
         PaginationDetail: {
             hasNext: boolean;
-            cursor?: string;
+            cursor?: string | null;
         };
         TokenLevelDecimalValues: {
-            Strength?: number;
-            Thunder?: number;
-            Mjolnir?: number;
-            VeThorX?: number;
-            StrengthX?: number;
-            ThunderX?: number;
-            MjolnirX?: number;
-            Dawn?: number;
-            Lightning?: number;
-            Flash?: number;
+            Strength?: number | null;
+            Thunder?: number | null;
+            Mjolnir?: number | null;
+            VeThorX?: number | null;
+            StrengthX?: number | null;
+            ThunderX?: number | null;
+            MjolnirX?: number | null;
+            Dawn?: number | null;
+            Lightning?: number | null;
+            Flash?: number | null;
         };
         ValidatorV2Response: {
             id: string;
-            endorser?: string;
-            beneficiary?: string;
-            /** @enum {string} */
-            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
-            vetStaked?: number;
-            validatorVetStaked?: number;
-            delegatorVetStaked?: number;
-            queuedVetStaked?: number;
-            validatorQueuedVetStaked?: number;
-            delegatorQueuedVetStaked?: number;
-            exitingVetStaked?: number;
-            validatorExitingVetStaked?: number;
-            delegatorExitingVetStaked?: number;
-            validatorLockedWeight?: number;
-            totalNextPeriodWeight?: number;
-            totalWeight?: number;
-            blockProbability?: number;
-            blocksPerYear?: number;
+            endorser?: string | null;
+            beneficiary?: string | null;
+            /** @enum {string|null} */
+            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED" | null;
+            vetStaked?: number | null;
+            validatorVetStaked?: number | null;
+            delegatorVetStaked?: number | null;
+            queuedVetStaked?: number | null;
+            validatorQueuedVetStaked?: number | null;
+            delegatorQueuedVetStaked?: number | null;
+            exitingVetStaked?: number | null;
+            validatorExitingVetStaked?: number | null;
+            delegatorExitingVetStaked?: number | null;
+            validatorLockedWeight?: number | null;
+            totalNextPeriodWeight?: number | null;
+            totalWeight?: number | null;
+            blockProbability?: number | null;
+            blocksPerYear?: number | null;
             /** Format: int64 */
             blocksPerEpoch: number;
             /** Format: int64 */
-            startBlock?: number;
+            startBlock?: number | null;
             /** Format: int64 */
-            exitBlock?: number;
+            exitBlock?: number | null;
             /** Format: int64 */
-            cyclePeriodLength?: number;
+            cyclePeriodLength?: number | null;
             /** Format: int64 */
-            cycleEndBlock?: number;
+            cycleEndBlock?: number | null;
             /** Format: int64 */
-            completedPeriods?: number;
+            completedPeriods?: number | null;
             /** Format: int64 */
-            queuePosition?: number;
+            queuePosition?: number | null;
             /** Format: int64 */
-            availableStartBlock?: number;
+            availableStartBlock?: number | null;
             /** Format: int64 */
             scheduledSlots: number;
             /** Format: int64 */
             proposedBlocks: number;
             /** Format: int64 */
             missedSlots: number;
-            missedSlotsPercentage?: number;
+            missedSlotsPercentage?: number | null;
             /** Format: int64 */
-            lastProposedBlockNumber?: number;
+            lastProposedBlockNumber?: number | null;
             /** Format: int64 */
-            lastMissedBlockNumber?: number;
+            lastMissedBlockNumber?: number | null;
             validatorTvl: number;
             delegatorTvl: number;
             totalTvl: number;
-            validatorTvlPercentage?: number;
-            validatorYield?: number;
-            tvlBasedYield?: number;
-            avgDelegatorYield?: number;
-            nextCycleValidatorYield?: number;
-            nextCycleTvlBasedYield?: number;
-            nextCycleAvgDelegatorYield?: number;
-            nftYields?: components["schemas"]["TokenLevelDecimalValues"];
-            nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"];
+            validatorTvlPercentage?: number | null;
+            validatorYield?: number | null;
+            tvlBasedYield?: number | null;
+            avgDelegatorYield?: number | null;
+            nextCycleValidatorYield?: number | null;
+            nextCycleTvlBasedYield?: number | null;
+            nextCycleAvgDelegatorYield?: number | null;
+            nftYields?: components["schemas"]["TokenLevelDecimalValues"] | null;
+            nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"] | null;
         };
         ValidatorSlotStats: {
             validator: string;
@@ -2139,35 +2139,35 @@ export interface components {
         };
         Impact: {
             /** Format: int64 */
-            carbon?: number;
+            carbon?: number | null;
             /** Format: int64 */
-            water?: number;
+            water?: number | null;
             /** Format: int64 */
-            energy?: number;
+            energy?: number | null;
             /** Format: int64 */
-            waste_mass?: number;
+            waste_mass?: number | null;
             /** Format: int64 */
-            waste_items?: number;
+            waste_items?: number | null;
             /** Format: int64 */
-            waste_reduction?: number;
+            waste_reduction?: number | null;
             /** Format: int64 */
-            biodiversity?: number;
+            biodiversity?: number | null;
             /** Format: int64 */
-            people?: number;
+            people?: number | null;
             /** Format: int64 */
-            timber?: number;
+            timber?: number | null;
             /** Format: int64 */
-            plastic?: number;
+            plastic?: number | null;
             /** Format: int64 */
-            education_time?: number;
+            education_time?: number | null;
             /** Format: int64 */
-            trees_planted?: number;
+            trees_planted?: number | null;
             /** Format: int64 */
-            calories_burned?: number;
+            calories_burned?: number | null;
             /** Format: int64 */
-            clean_energy_production_wh?: number;
+            clean_energy_production_wh?: number | null;
             /** Format: int64 */
-            sleep_quality_percentage?: number;
+            sleep_quality_percentage?: number | null;
         };
         IndexedHistoryEvent: {
             id: string;
@@ -2177,61 +2177,61 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             txId: string;
-            origin?: string;
-            gasPayer?: string;
-            reverted?: boolean;
-            contractAddress?: string;
-            tokenId?: string;
+            origin?: string | null;
+            gasPayer?: string | null;
+            reverted?: boolean | null;
+            contractAddress?: string | null;
+            tokenId?: string | null;
             /** @enum {string} */
             eventName: "B3MO_QUEST_CREATED" | "B3MO_QUEST_JOINED" | "B3MO_QUEST_REWARD_CLAIMED" | "B3MO_QUEST_REFUND_CLAIMED" | "B3MO_QUEST_CREATOR_REFUNDED" | "B3MO_QUEST_LEFT" | "B3MO_QUEST_CANCELLED" | "B3MO_QUEST_DECLINED" | "B3MO_QUEST_COMPLETED" | "B3TR_SWAP_VOT3_TO_B3TR" | "B3TR_SWAP_B3TR_TO_VOT3" | "B3TR_PROPOSAL_SUPPORT" | "B3TR_PROPOSAL_WITHDRAW" | "B3TR_CLAIM_REWARD" | "B3TR_UPGRADE_GM" | "B3TR_ACTION" | "B3TR_PROPOSAL_VOTE" | "B3TR_XALLOCATION_VOTE" | "B3TR_NAVIGATOR_DELEGATION_CREATED" | "B3TR_NAVIGATOR_DELEGATION_INCREASED" | "B3TR_NAVIGATOR_DELEGATION_DECREASED" | "B3TR_NAVIGATOR_DELEGATION_REMOVED" | "B3TR_NAVIGATOR_REGISTERED" | "B3TR_NAVIGATOR_STAKE_ADDED" | "B3TR_NAVIGATOR_STAKE_WITHDRAWN" | "B3TR_NAVIGATOR_SLASHED" | "B3TR_NAVIGATOR_MINOR_SLASHED" | "B3TR_NAVIGATOR_FEE_CLAIMED" | "B3TR_NAVIGATOR_FEE_DEPOSITED" | "TRANSFER_VET" | "TRANSFER_FT" | "TRANSFER_NFT" | "TRANSFER_SF" | "SWAP_VET_TO_FT" | "SWAP_FT_TO_VET" | "SWAP_FT_TO_FT" | "UNKNOWN_TX" | "NFT_SALE" | "STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "VEVOTE_VOTE_CAST";
-            to?: string;
-            from?: string;
-            value?: string;
-            appId?: string;
-            proof?: components["schemas"]["SustainabilityProofV2"];
-            roundId?: string;
-            appVotes?: components["schemas"]["AppVote"][];
-            /** @enum {string} */
-            support?: "AGAINST" | "FOR" | "ABSTAIN";
-            votePower?: string;
-            voteWeight?: string;
-            reason?: string;
-            proposalId?: string;
-            oldLevel?: string;
-            newLevel?: string;
-            inputToken?: string;
-            outputToken?: string;
-            inputValue?: string;
-            outputValue?: string;
-            levelId?: string;
-            owner?: string;
-            vetGeneratedVthoRewards?: string;
-            delegationRewards?: string;
-            migrated?: boolean;
-            autorenew?: boolean;
-            tokenIds?: string[];
-            validator?: string;
-            delegationId?: string;
+            to?: string | null;
+            from?: string | null;
+            value?: string | null;
+            appId?: string | null;
+            proof?: components["schemas"]["SustainabilityProofV2"] | null;
+            roundId?: string | null;
+            appVotes?: components["schemas"]["AppVote"][] | null;
+            /** @enum {string|null} */
+            support?: "AGAINST" | "FOR" | "ABSTAIN" | null;
+            votePower?: string | null;
+            voteWeight?: string | null;
+            reason?: string | null;
+            proposalId?: string | null;
+            oldLevel?: string | null;
+            newLevel?: string | null;
+            inputToken?: string | null;
+            outputToken?: string | null;
+            inputValue?: string | null;
+            outputValue?: string | null;
+            levelId?: string | null;
+            owner?: string | null;
+            vetGeneratedVthoRewards?: string | null;
+            delegationRewards?: string | null;
+            migrated?: boolean | null;
+            autorenew?: boolean | null;
+            tokenIds?: string[] | null;
+            validator?: string | null;
+            delegationId?: string | null;
             /** Format: int64 */
-            periodClaimed?: number;
-            boostedBlocks?: string;
+            periodClaimed?: number | null;
+            boostedBlocks?: string | null;
         };
         PaginatedResponseIndexedHistoryEvent: {
             data: components["schemas"]["IndexedHistoryEvent"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
         ProofV2: {
-            image?: string;
-            link?: string;
-            text?: string;
-            video?: string;
+            image?: string | null;
+            link?: string | null;
+            text?: string | null;
+            video?: string | null;
         };
         SustainabilityProofV2: {
             /** Format: int32 */
             version: number;
-            description?: string;
-            proof?: components["schemas"]["ProofV2"];
-            impact?: components["schemas"]["Impact"];
+            description?: string | null;
+            proof?: components["schemas"]["ProofV2"] | null;
+            impact?: components["schemas"]["Impact"] | null;
         };
         ProposalResult: {
             proposalId: string;
@@ -2241,7 +2241,7 @@ export interface components {
             startRoundId: number;
             /** @enum {string} */
             state: "Pending" | "Active" | "Canceled" | "Defeated" | "Succeeded" | "Queued" | "Executed" | "DepositNotMet" | "InDevelopment" | "Completed";
-            results?: components["schemas"]["VoteResults"];
+            results?: components["schemas"]["VoteResults"] | null;
             description: string;
         };
         Result: {
@@ -2266,7 +2266,7 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             /** Format: int64 */
-            totalAccounts?: number;
+            totalAccounts?: number | null;
         };
         PaginatedResponseVeVoteProposalResult: {
             data: components["schemas"]["VeVoteProposalResult"][];
@@ -2289,21 +2289,21 @@ export interface components {
             proposalId: string;
             contractAddress: string;
             createdDate: string;
-            proposer?: string;
-            title?: string;
-            description?: string;
+            proposer?: string | null;
+            title?: string | null;
+            description?: string | null;
             /** Format: int32 */
-            proposalType?: number;
-            choices?: string[];
+            proposalType?: number | null;
+            choices?: string[] | null;
             /** Format: int64 */
-            createTime?: number;
+            createTime?: number | null;
             /** Format: int64 */
-            votingStartTime?: number;
+            votingStartTime?: number | null;
             /** Format: int64 */
-            votingEndTime?: number;
-            voteTallies?: number[];
+            votingEndTime?: number | null;
+            voteTallies?: number[] | null;
             /** Format: int64 */
-            totalVotes?: number;
+            totalVotes?: number | null;
             blockId: string;
             /** Format: int64 */
             blockNumber: number;
@@ -2320,10 +2320,10 @@ export interface components {
         };
         ValidatorResponse: {
             id: string;
-            endorser?: string;
-            beneficiary?: string;
-            /** @enum {string} */
-            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
+            endorser?: string | null;
+            beneficiary?: string | null;
+            /** @enum {string|null} */
+            status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED" | null;
             vetStaked: number;
             validatorVetStaked: number;
             delegatorVetStaked: number;
@@ -2334,39 +2334,39 @@ export interface components {
             delegatorExitingVetStaked: number;
             exitingVetStaked: number;
             /** Format: int64 */
-            cycleEndBlock?: number;
-            totalRewards?: number;
-            blockProbability?: number;
-            blocksPerEpoch?: number;
+            cycleEndBlock?: number | null;
+            totalRewards?: number | null;
+            blockProbability?: number | null;
+            blocksPerEpoch?: number | null;
             totalTvl: number;
             validatorTvl: number;
             delegatorTvl: number;
-            tvlBasedYield?: number;
-            validatorYield?: number;
-            avgDelegatorYield?: number;
-            nextCycleTvlBasedYield?: number;
-            nextCycleValidatorYield?: number;
-            nextCycleAvgDelegatorYield?: number;
-            nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"];
-            nftYields?: components["schemas"]["TokenLevelDecimalValues"];
-            totalWeight?: number;
+            tvlBasedYield?: number | null;
+            validatorYield?: number | null;
+            avgDelegatorYield?: number | null;
+            nextCycleTvlBasedYield?: number | null;
+            nextCycleValidatorYield?: number | null;
+            nextCycleAvgDelegatorYield?: number | null;
+            nftYieldsIfDelegatedNextCycle?: components["schemas"]["TokenLevelDecimalValues"] | null;
+            nftYields?: components["schemas"]["TokenLevelDecimalValues"] | null;
+            totalWeight?: number | null;
             online: boolean;
             /** Format: int64 */
-            completedPeriods?: number;
+            completedPeriods?: number | null;
             /** Format: int64 */
-            startBlock?: number;
+            startBlock?: number | null;
             /** Format: int64 */
-            cyclePeriodLength?: number;
-            blocksPerYear?: number;
-            percentageOffline?: number;
+            cyclePeriodLength?: number | null;
+            blocksPerYear?: number | null;
+            percentageOffline?: number | null;
             /** Format: int64 */
-            offlineBlocks?: number;
+            offlineBlocks?: number | null;
             /** Format: int64 */
-            exitBlock?: number;
+            exitBlock?: number | null;
             /** Format: int64 */
-            queuePosition?: number;
+            queuePosition?: number | null;
             /** Format: int64 */
-            availableStartBlock?: number;
+            availableStartBlock?: number | null;
         };
         DelegationResponse: {
             id: string;
@@ -2404,13 +2404,13 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             validator: string;
-            blockReward?: number;
-            priorityReward?: number;
-            total?: number;
+            blockReward?: number | null;
+            priorityReward?: number | null;
+            total?: number | null;
             /** @enum {string} */
             status: "VALIDATED" | "MISSED";
-            delegatorRewards?: number;
-            validatorRewards?: number;
+            delegatorRewards?: number | null;
+            validatorRewards?: number | null;
         };
         AllValidatorsMissedBlocksResponse: {
             /** @enum {string} */
@@ -2437,8 +2437,8 @@ export interface components {
             from: string;
             to: string;
             value: string;
-            tokenAddress?: string;
-            tokenId?: string;
+            tokenAddress?: string | null;
+            tokenId?: string | null;
             topics: string[];
             /** @enum {string} */
             eventType: "VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN";
@@ -2452,7 +2452,7 @@ export interface components {
             pagination: components["schemas"]["PaginationDetail"];
         };
         Clause: {
-            to?: string;
+            to?: string | null;
             value: string;
             data: string;
         };
@@ -2460,13 +2460,13 @@ export interface components {
             address: string;
             topics: string[];
             data: string;
-            name?: string;
+            name?: string | null;
             params?: {
-                [key: string]: Record<string, never>;
-            };
+                [key: string]: unknown;
+            } | null;
         };
         DecodedOutputs: {
-            contractAddress?: string;
+            contractAddress?: string | null;
             events: components["schemas"]["DecodedEvent"][];
             transfers: components["schemas"]["TxTransfer"][];
         };
@@ -2478,7 +2478,7 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             /** Format: int64 */
-            type?: number;
+            type?: number | null;
             /** Format: int64 */
             size: number;
             /** Format: int64 */
@@ -2489,12 +2489,12 @@ export interface components {
             /** @description Only returned when expanded=true. */
             clauses?: components["schemas"]["Clause"][];
             /** Format: int64 */
-            gasPriceCoef?: number;
+            gasPriceCoef?: number | null;
             /** Format: int64 */
             gas: number;
-            maxFeePerGas?: string;
-            maxPriorityFeePerGas?: string;
-            dependsOn?: string;
+            maxFeePerGas?: string | null;
+            maxPriorityFeePerGas?: string | null;
+            dependsOn?: string | null;
             nonce: string;
             /** Format: int64 */
             gasUsed: number;
@@ -2571,10 +2571,10 @@ export interface components {
             /** @enum {string} */
             level: "All" | "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
             owner: string;
-            manager?: string;
+            manager?: string | null;
             /** @enum {string} */
             delegationStatus: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
-            validatorId?: string;
+            validatorId?: string | null;
             totalRewardsClaimed: number;
             totalBootstrapRewardsClaimed: number;
             vetStaked: number;
@@ -2631,25 +2631,25 @@ export interface components {
             id: string;
             safe: string;
             txHash: string;
-            proposer?: string;
+            proposer?: string | null;
             /** Format: int64 */
-            proposedBlock?: number;
+            proposedBlock?: number | null;
             /** Format: int64 */
-            proposedTimestamp?: number;
-            proposedVechainTxId?: string;
-            to?: string;
-            value?: number;
-            data?: string;
+            proposedTimestamp?: number | null;
+            proposedVechainTxId?: string | null;
+            to?: string | null;
+            value?: number | null;
+            data?: string | null;
             /** Format: int32 */
-            operation?: number;
-            nonce?: number;
-            description?: string;
-            safeTxGas?: number;
-            baseGas?: number;
-            gasPrice?: number;
-            gasToken?: string;
-            refundReceiver?: string;
-            subcalls?: components["schemas"]["SafeSubcall"][];
+            operation?: number | null;
+            nonce?: number | null;
+            description?: string | null;
+            safeTxGas?: number | null;
+            baseGas?: number | null;
+            gasPrice?: number | null;
+            gasToken?: string | null;
+            refundReceiver?: string | null;
+            subcalls?: components["schemas"]["SafeSubcall"][] | null;
         };
         SafeTxApproval: {
             owner: string;
@@ -2665,12 +2665,12 @@ export interface components {
             txHash: string;
             approvers: components["schemas"]["SafeTxApproval"][];
             executed: boolean;
-            executor?: string;
+            executor?: string | null;
             /** Format: int64 */
-            executedBlock?: number;
+            executedBlock?: number | null;
             /** Format: int64 */
-            executedTimestamp?: number;
-            vechainTxId?: string;
+            executedTimestamp?: number | null;
+            vechainTxId?: string | null;
             failed: boolean;
         };
         PaginatedResponseSafeMembership: {
@@ -2686,9 +2686,9 @@ export interface components {
             /** Format: int64 */
             addedTimestamp: number;
             /** Format: int64 */
-            removedBlock?: number;
+            removedBlock?: number | null;
             /** Format: int64 */
-            removedTimestamp?: number;
+            removedTimestamp?: number | null;
         };
         /** @description Error response returned by the API */
         ExceptionResponse_Public: {
@@ -2707,7 +2707,7 @@ export interface components {
              * @description Error message describing what went wrong
              * @example The provided address is invalid
              */
-            message?: string;
+            message?: string | null;
             /**
              * @description Error type/category
              * @example Bad Request
@@ -2743,7 +2743,7 @@ export interface components {
         };
         PaginationDetail_Public: {
             hasNext: boolean;
-            cursor?: string;
+            cursor?: string | null;
         };
         HistoryEventDto: {
             id: string;
@@ -2753,43 +2753,43 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             txId: string;
-            origin?: string;
-            gasPayer?: string;
-            reverted?: boolean;
-            contractAddress?: string;
-            tokenId?: string;
+            origin?: string | null;
+            gasPayer?: string | null;
+            reverted?: boolean | null;
+            contractAddress?: string | null;
+            tokenId?: string | null;
             eventName: string;
-            to?: string;
-            from?: string;
-            value?: string;
-            appId?: string;
-            proof?: components["schemas"]["SustainabilityProofV2"];
-            roundId?: string;
-            appVotes?: components["schemas"]["AppVote"][];
-            /** @enum {string} */
-            support?: "AGAINST" | "FOR" | "ABSTAIN";
-            votePower?: string;
-            voteWeight?: string;
-            reason?: string;
-            proposalId?: string;
-            oldLevel?: string;
-            newLevel?: string;
-            inputToken?: string;
-            outputToken?: string;
-            inputValue?: string;
-            outputValue?: string;
-            levelId?: string;
-            owner?: string;
-            vetGeneratedVthoRewards?: string;
-            delegationRewards?: string;
-            migrated?: boolean;
-            autorenew?: boolean;
-            tokenIds?: string[];
-            validator?: string;
-            delegationId?: string;
+            to?: string | null;
+            from?: string | null;
+            value?: string | null;
+            appId?: string | null;
+            proof?: components["schemas"]["SustainabilityProofV2"] | null;
+            roundId?: string | null;
+            appVotes?: components["schemas"]["AppVote"][] | null;
+            /** @enum {string|null} */
+            support?: "AGAINST" | "FOR" | "ABSTAIN" | null;
+            votePower?: string | null;
+            voteWeight?: string | null;
+            reason?: string | null;
+            proposalId?: string | null;
+            oldLevel?: string | null;
+            newLevel?: string | null;
+            inputToken?: string | null;
+            outputToken?: string | null;
+            inputValue?: string | null;
+            outputValue?: string | null;
+            levelId?: string | null;
+            owner?: string | null;
+            vetGeneratedVthoRewards?: string | null;
+            delegationRewards?: string | null;
+            migrated?: boolean | null;
+            autorenew?: boolean | null;
+            tokenIds?: string[] | null;
+            validator?: string | null;
+            delegationId?: string | null;
             /** Format: int64 */
-            periodClaimed?: number;
-            boostedBlocks?: string;
+            periodClaimed?: number | null;
+            boostedBlocks?: string | null;
         };
         PaginatedResponseHistoryEventDto: {
             data: components["schemas"]["HistoryEventDto"][];
@@ -2803,18 +2803,18 @@ export interface components {
             blockTimestamp: number;
             cumulativeGasLimit: number;
             cumulativeGasUsed: number;
-            cumulativeBaseFeePerGas?: number;
+            cumulativeBaseFeePerGas?: number | null;
             cumulativeNumTransactions: number;
             cumulativeNumClauses: number;
         };
         AverageFeesPerUser: {
             date: string;
             /** Format: int64 */
-            dayStartTimestamp?: number;
-            totalFeesPaid?: number;
+            dayStartTimestamp?: number | null;
+            totalFeesPaid?: number | null;
             /** Format: int64 */
-            dailyActiveUsers?: number;
-            averageFeesPerUser?: number;
+            dailyActiveUsers?: number | null;
+            averageFeesPerUser?: number | null;
         };
         Contract: {
             address: string;
@@ -2824,9 +2824,9 @@ export interface components {
             /** Format: int64 */
             deploymentClauseIndex: number;
             master: string;
-            isErc20?: boolean;
-            isErc721?: boolean;
-            isErc1155?: boolean;
+            isErc20?: boolean | null;
+            isErc721?: boolean | null;
+            isErc1155?: boolean | null;
         };
         PaginatedResponseContract: {
             data: components["schemas"]["Contract"][];
@@ -2843,7 +2843,7 @@ export interface components {
         XAllocEarningsResponse: {
             /** Format: int32 */
             roundId: number;
-            appId?: string;
+            appId?: string | null;
             totalAmount: number;
             unallocatedAmount: number;
             teamAllocationAmount: number;
@@ -2930,7 +2930,7 @@ export interface components {
             /** @enum {string} */
             category: "EMISSION" | "SURPLUS" | "GM_UPGRADE" | "GRANT" | "OUT" | "OTHER";
             label: string;
-            counterpartyName?: string;
+            counterpartyName?: string | null;
         };
         B3trRichlistItem: {
             address: string;
@@ -2969,13 +2969,13 @@ export interface components {
             /** Format: int32 */
             citizenCount: number;
             totalDelegated: number;
-            metadataURI?: string;
+            metadataURI?: string | null;
             /** Format: int64 */
             registeredAt: number;
-            exitAnnouncedRound?: string;
-            exitEffectiveDeadline?: string;
-            lastReportRound?: string;
-            lastReportURI?: string;
+            exitAnnouncedRound?: string | null;
+            exitEffectiveDeadline?: string | null;
+            lastReportRound?: string | null;
+            lastReportURI?: string | null;
         };
         PaginatedResponseNavigator: {
             data: components["schemas"]["Navigator"][];
@@ -3001,7 +3001,7 @@ export interface components {
             totalDeposited: number;
             claimed: boolean;
             /** Format: int64 */
-            claimedAt?: number;
+            claimedAt?: number | null;
             /** Format: int64 */
             depositedAt: number;
             /** Format: int64 */
@@ -3018,8 +3018,8 @@ export interface components {
             navigator: string;
             citizen: string;
             eventType: string;
-            amount?: number;
-            delta?: number;
+            amount?: number | null;
+            delta?: number | null;
         };
         PaginatedResponseNavigatorDelegationEvent: {
             data: components["schemas"]["NavigatorDelegationEvent"][];
@@ -3113,7 +3113,7 @@ export interface components {
             distributor: string;
             amount: number;
             receiver: string;
-            proof?: components["schemas"]["SustainabilityProofV2"];
+            proof?: components["schemas"]["SustainabilityProofV2"] | null;
         };
         PaginatedResponseAction: {
             data: components["schemas"]["Action"][];
@@ -3122,17 +3122,17 @@ export interface components {
         UserOverview: {
             wallet: string;
             /** Format: int32 */
-            roundId?: number;
-            date?: string;
+            roundId?: number | null;
+            date?: string | null;
             /** Format: double */
             totalRewardAmount: number;
             /** Format: int64 */
             actionsRewarded: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
             /** Format: int64 */
-            rankByReward?: number;
+            rankByReward?: number | null;
             /** Format: int64 */
-            rankByActionsRewarded?: number;
+            rankByActionsRewarded?: number | null;
             uniqueXAppInteractions: string[];
         };
         PaginatedResponseUserDailyActionSummary: {
@@ -3145,22 +3145,22 @@ export interface components {
             /** Format: int64 */
             actionsRewarded: number;
             totalRewardAmount: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
         };
         UserAppOverview: {
             wallet: string;
             appId: string;
             /** Format: int32 */
-            roundId?: number;
+            roundId?: number | null;
             /** Format: double */
             totalRewardAmount: number;
             /** Format: int64 */
             actionsRewarded: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
             /** Format: int64 */
-            rankByReward?: number;
+            rankByReward?: number | null;
             /** Format: int64 */
-            rankByActionsRewarded?: number;
+            rankByActionsRewarded?: number | null;
         };
         PaginatedResponseUserLeaderboardItem: {
             data: components["schemas"]["UserLeaderboardItem"][];
@@ -3169,24 +3169,24 @@ export interface components {
         UserLeaderboardItem: {
             wallet: string;
             /** Format: int32 */
-            roundId?: number;
-            date?: string;
+            roundId?: number | null;
+            date?: string | null;
             /** Format: double */
             totalRewardAmount: number;
             /** Format: int64 */
             actionsRewarded: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
         };
         AppLeaderboardItem: {
             appId: string;
             /** Format: int32 */
-            roundId?: number;
-            date?: string;
+            roundId?: number | null;
+            date?: string | null;
             /** Format: double */
             totalRewardAmount: number;
             /** Format: int64 */
             actionsRewarded: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
         };
         PaginatedResponseAppLeaderboardItem: {
             data: components["schemas"]["AppLeaderboardItem"][];
@@ -3200,40 +3200,40 @@ export interface components {
             appId: string;
             user: string;
             /** Format: int32 */
-            roundId?: number;
-            date?: string;
+            roundId?: number | null;
+            date?: string | null;
             /** Format: double */
             totalRewardAmount: number;
             /** Format: int64 */
             actionsRewarded: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
         };
         GlobalOverview: {
             /** Format: int32 */
-            roundId?: number;
-            date?: string;
+            roundId?: number | null;
+            date?: string | null;
             /** Format: double */
             totalRewardAmount: number;
             /** Format: int64 */
             actionsRewarded: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
             /** Format: int64 */
             totalUniqueUserInteractions: number;
         };
         AppOverview: {
             appId: string;
             /** Format: int32 */
-            roundId?: number;
-            date?: string;
+            roundId?: number | null;
+            date?: string | null;
             /** Format: double */
             totalRewardAmount: number;
             /** Format: int64 */
             actionsRewarded: number;
-            totalImpact?: components["schemas"]["Impact"];
+            totalImpact?: components["schemas"]["Impact"] | null;
             /** Format: int64 */
-            rankByReward?: number;
+            rankByReward?: number | null;
             /** Format: int64 */
-            rankByActionsRewarded?: number;
+            rankByActionsRewarded?: number | null;
             /** Format: int64 */
             totalUniqueUserInteractions: number;
         };
