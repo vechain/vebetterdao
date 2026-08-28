@@ -16,7 +16,7 @@ export const airdropVTHO = async (accounts: Address[], amount: bigint, sourceAcc
     const clauses: TransactionClause[] = []
 
     accountChunk.forEach(address => {
-      clauses.push(Clause.transferVTHOToken(address, VTHO.of(amount)))
+      clauses.push(Clause.transferVTHOToken(address, VTHO.of(amount)).clause)
     })
 
     await TransactionUtils.sendTx(thorClient, clauses, sourceAccount.pk)
