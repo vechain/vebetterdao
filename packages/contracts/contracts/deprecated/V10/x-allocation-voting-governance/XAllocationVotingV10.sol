@@ -32,30 +32,30 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
-import { IEmissions } from "../interfaces/IEmissions.sol";
-import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
-import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
-import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
-import { INavigatorRegistry } from "../interfaces/INavigatorRegistry.sol";
-import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
+import { IXAllocationVotingGovernor, IERC6372 } from "../../../interfaces/IXAllocationVotingGovernor.sol";
+import { IX2EarnApps } from "../../../interfaces/IX2EarnApps.sol";
+import { IEmissions } from "../../../interfaces/IEmissions.sol";
+import { IVoterRewards } from "../../../interfaces/IVoterRewards.sol";
+import { IVeBetterPassport } from "../../../interfaces/IVeBetterPassport.sol";
+import { IB3TRGovernor } from "../../../interfaces/IB3TRGovernor.sol";
+import { IRelayerRewardsPool, RelayerAction } from "../../../interfaces/IRelayerRewardsPool.sol";
+import { INavigatorRegistry } from "../../../interfaces/INavigatorRegistry.sol";
+import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
 
 // Libraries
-import { XAllocationVotingStorageTypes } from "./libraries/XAllocationVotingStorageTypes.sol";
-import { ExternalContractsUtils } from "./libraries/ExternalContractsUtils.sol";
-import { VotingSettingsUtils } from "./libraries/VotingSettingsUtils.sol";
-import { VotesUtils } from "./libraries/VotesUtils.sol";
-import { VotesQuorumFractionUtils } from "./libraries/VotesQuorumFractionUtils.sol";
-import { RoundEarningsSettingsUtils } from "./libraries/RoundEarningsSettingsUtils.sol";
-import { RoundFinalizationUtils } from "./libraries/RoundFinalizationUtils.sol";
-import { RoundsStorageUtils } from "./libraries/RoundsStorageUtils.sol";
-import { RoundVotesCountingUtils } from "./libraries/RoundVotesCountingUtils.sol";
-import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
+import { XAllocationVotingStorageTypes } from "../../../x-allocation-voting-governance/libraries/XAllocationVotingStorageTypes.sol";
+import { ExternalContractsUtils } from "../../../x-allocation-voting-governance/libraries/ExternalContractsUtils.sol";
+import { VotingSettingsUtils } from "../../../x-allocation-voting-governance/libraries/VotingSettingsUtils.sol";
+import { VotesUtils } from "../../../x-allocation-voting-governance/libraries/VotesUtils.sol";
+import { VotesQuorumFractionUtils } from "../../../x-allocation-voting-governance/libraries/VotesQuorumFractionUtils.sol";
+import { RoundEarningsSettingsUtils } from "../../../x-allocation-voting-governance/libraries/RoundEarningsSettingsUtils.sol";
+import { RoundFinalizationUtils } from "../../../x-allocation-voting-governance/libraries/RoundFinalizationUtils.sol";
+import { RoundsStorageUtils } from "../../../x-allocation-voting-governance/libraries/RoundsStorageUtils.sol";
+import { RoundVotesCountingUtils } from "../../../x-allocation-voting-governance/libraries/RoundVotesCountingUtils.sol";
+import { AutoVotingLogic } from "../../../x-allocation-voting-governance/libraries/AutoVotingLogic.sol";
 
 /**
- * @title XAllocationVoting
+ * @title XAllocationVotingV10
  * @notice This contract handles the voting for the most supported x2Earn applications through periodic allocation rounds.
  * The user's voting power is calculated on his VOT3 holdings at the start of each round, using a "Quadratic Funding" formula.
  * @dev Rounds are started by the Emissions contract.
@@ -109,7 +109,7 @@ import { AutoVotingLogic } from "./libraries/AutoVotingLogic.sol";
  *  - Added _relayerVoteProcessed guard to prevent double-processing of relayer-mediated votes
  *  - Both castVoteOnBehalfOf and castNavigatorVote now revert with VoteAlreadyProcessed on retry
  */
-contract XAllocationVoting is
+contract XAllocationVotingV10 is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
@@ -267,30 +267,14 @@ contract XAllocationVoting is
     // - there are no eligible apps
     // - voter has insufficient voting power
     if (!isPerson || finalAppIds.length == 0) {
-      // Always reduce: reaching this branch already proves the voter was counted in this
-      // round's expected actions, because the guard at the top of this function rejects
-      // anyone whose auto-voting was off at roundSnapshot(roundId).
-      //
-      // This used to be nested inside the isAutoVotingEnabled() check below, which reads
-      // CURRENT state rather than the snapshot. Disabling auto-voting deletes the voter's
-      // preferences, so a voter who was counted at the snapshot and then toggled off
-      // mid-round landed here with auto-voting already false: no reduce, yet still marked
-      // processed, so every retry reverts VoteAlreadyProcessed. Four weighted points
-      // stranded for good, and the round's pool locked with them. Round 86 on mainnet has
-      // been locked this way since before navigators existed.
-      //
-      // markRelayerVoteProcessed plus that VoteAlreadyProcessed guard make this branch run
-      // at most once per voter per round, so there is no double-reduce.
-      XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.reduceExpectedActionsForRound(
-        roundId,
-        1
-      );
-
-      // Separately, turn auto-voting off for this voter if it is still on.
+      // Only toggle and reduce expected actions if autovoting is enabled
       if (AutoVotingLogic.isAutoVotingEnabled(voter)) {
         AutoVotingLogic.toggleAutoVoting(address(this), voter, VotesUtils.clock());
+        XAllocationVotingStorageTypes._getExternalContractsStorage()._relayerRewardsPool.reduceExpectedActionsForRound(
+          roundId,
+          1
+        );
       }
-
       RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, voter);
       emit AutoVoteSkipped(voter, roundId, isPerson, finalAppIds.length, votingPower);
       return;
@@ -363,31 +347,24 @@ contract XAllocationVoting is
     _checkEarlyAccessEligibility(roundId, citizen);
 
     // Get navigator's preferences with allocation percentages (basis points, sum to 10000)
-    (bytes32[] memory preferredApps, uint256[] memory percentages) = navigatorRegistryContract
-      .getAllocationPreferences(navigator, roundId);
+    (bytes32[] memory appIds, uint256[] memory percentages) = navigatorRegistryContract.getAllocationPreferences(
+      navigator,
+      roundId
+    );
 
     // Voting power = delegated amount at round snapshot
     uint256 delegatedPower = navigatorRegistryContract.getDelegatedAmountAtTimepoint(citizen, snapshot);
 
-    // Drop any app that is not eligible this round and rescale the rest. Passing an
-    // ineligible app straight through made countVote revert with
-    // GovernorAppNotAvailableForVoting for every citizen of that navigator, and with
-    // preferences set the skip branches above are unreachable — so those citizens could be
-    // neither voted for nor skipped and the round's pool locked for good.
-    (bytes32[] memory appIds, uint256[] memory voteWeights) = AutoVotingLogic.prepareNavigatorVoteArrays(
-      address(this),
-      roundId,
-      preferredApps,
-      percentages,
-      delegatedPower
-    );
-
-    // Every preferred app is ineligible — treat it like preferences never being set.
-    if (appIds.length == 0) {
-      RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
-      pool.reduceUserAllocationVote(roundId, citizen);
-      emit NavigatorVoteSkipped(citizen, navigator, roundId);
-      return;
+    // Convert percentages to absolute VOT3 amounts (countVote expects absolute weights)
+    uint256 basisPoints = navigatorRegistryContract.BASIS_POINTS();
+    uint256[] memory voteWeights = new uint256[](percentages.length);
+    uint256 allocated;
+    for (uint256 i; i < percentages.length; i++) {
+      voteWeights[i] = (delegatedPower * percentages[i]) / basisPoints;
+      allocated += voteWeights[i];
+    }
+    if (allocated < delegatedPower && voteWeights.length > 0) {
+      voteWeights[0] += delegatedPower - allocated;
     }
 
     RoundVotesCountingUtils.markRelayerVoteProcessed(roundId, citizen);
@@ -665,7 +642,7 @@ contract XAllocationVoting is
    * @dev Returns the version of the governor.
    */
   function version() public pure returns (string memory) {
-    return "11";
+    return "10";
   }
 
   /**

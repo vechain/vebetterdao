@@ -124,8 +124,8 @@ describe("XAllocationVoting - V10 Double Process Prevention - @shard14c", functi
   describe("Version check", function () {
     beforeEach(setup)
 
-    it("should report version 10", async function () {
-      expect(await xAllocationVoting.version()).to.equal("10")
+    it("should report version 11", async function () {
+      expect(await xAllocationVoting.version()).to.equal("11")
     })
   })
 

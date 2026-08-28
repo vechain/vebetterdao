@@ -17,7 +17,10 @@ const NavigatorRegistryInterface = NavigatorRegistry__factory.createInterface()
 const navigatorRegistryAddress = getConfig().navigatorRegistryContractAddress
 
 type WithdrawStakeParams = {
-  amount: string
+  // Wei, not a decimal string: withdrawStake reverts with InsufficientStake if the
+  // requested amount exceeds the on-chain stake by even 1 wei, and a float round-trip
+  // of an 18-decimal stake rounds up ~half the time.
+  amountWei: bigint
 }
 
 type Props = {
@@ -29,15 +32,13 @@ export const useWithdrawStake = ({ onSuccess }: Props) => {
   const queryClient = useQueryClient()
 
   const clauseBuilder = useCallback((params: WithdrawStakeParams) => {
-    const amountWei = ethers.parseEther(params.amount)
-
     return [
       buildClause({
         to: navigatorRegistryAddress,
         contractInterface: NavigatorRegistryInterface,
         method: "withdrawStake",
-        args: [amountWei],
-        comment: `Withdraw ${params.amount} B3TR stake`,
+        args: [params.amountWei],
+        comment: `Withdraw ${ethers.formatEther(params.amountWei)} B3TR stake`,
       }),
     ]
   }, [])
