@@ -191,26 +191,24 @@ export const MilestoneItem = ({
   }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
   /**
-   * The expenditure report attached to *this* milestone documents how the funds for it were spent.
-   * Reports are produced after each milestone is claimed and become the proof needed to unlock
-   * the next milestone — i.e. funding Milestone N+1 requires the report for Milestone N.
-   * Milestone 1 (index 0) has no predecessor, so its approval is never gated on a report.
+   * The expenditure report attached to *this* milestone documents what was accomplished and
+   * spent on it. Grant funding is retroactive: the team completes milestone N, reports on it,
+   * the Foundation verifies the report, and only then is milestone N's funding released. So
+   * the report for milestone N is what unlocks milestone N's *own* funding — not the next
+   * one's — and it is written while the milestone is still Pending. That includes Milestone 1,
+   * which is why no index is exempt; the approver override below covers grants whose first
+   * tranche is paid upfront with no prior work.
    */
-  const previousMilestoneReport = useMemo(
-    () => (milestoneIndex > 0 ? proposal.expenditureReports?.find(r => r.trancheNumber === milestoneIndex) : undefined),
-    [proposal.expenditureReports, milestoneIndex],
-  )
-  const requiresPreviousReport = milestoneIndex > 0
-  const isPreviousReportMissing = requiresPreviousReport && !previousMilestoneReport
+  const isReportMissing = !expenditureReport
 
-  const shouldWarnMissingPreviousReport =
+  const shouldWarnMissingReport =
     isCurrentStep &&
-    isPreviousReportMissing &&
+    isReportMissing &&
     proposal.state === ProposalState.InDevelopment &&
     (milestoneData.state === MilestoneState.Pending || milestoneData.state === MilestoneState.Approved)
 
-  /** Approver's Approve & Fund button is gated by an override only when the previous report is missing. */
-  const shouldGateReviewerApproval = shouldShowReviewerActions && isPreviousReportMissing
+  /** Approver's Approve & Fund button is gated by an override until this milestone's report is in. */
+  const shouldGateReviewerApproval = shouldShowReviewerActions && isReportMissing
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -285,22 +283,23 @@ export const MilestoneItem = ({
       />
 
       {/*
-        Missing-previous-report warning — visible to anyone on the current milestone. The report
-        for the previous milestone (whose funds were already claimed) is what reviewers use to
-        decide whether to fund the next one, so the warning lives next to the Approve & Fund action.
+        Missing-report warning — visible to anyone on the current milestone. Funding is
+        retroactive, so this milestone's own report is what reviewers read before releasing its
+        funds. The warning therefore sits next to both the grantee's Submit CTA and the
+        approver's Approve & Fund action, and is worded for both audiences.
       */}
-      {shouldWarnMissingPreviousReport && (
+      {shouldWarnMissingReport && (
         <VStack align="flex-start" w="full" gap={3}>
           <GenericAlert
             type="warning"
             isLoading={false}
-            title={t("Milestone report missing for the previous milestone")}
+            title={t("Milestone report not submitted")}
             message={t(
-              "No milestone report for Milestone {{previous}} is recorded on chain. Confirm before funding Milestone {{current}}.",
-              { previous: milestoneIndex, current: milestoneIndex + 1 },
+              "No report has been submitted for Milestone {{milestone}} yet. Its funding is released after the report has been reviewed.",
+              { milestone: milestoneIndex + 1 },
             )}
           />
-          {/* Approver-only override — required to enable Approve & Fund when the previous report is missing. */}
+          {/* Approver-only override — required to enable Approve & Fund when this milestone's report is missing. */}
           {shouldGateReviewerApproval && (
             <Checkbox.Root
               size="md"
@@ -318,17 +317,26 @@ export const MilestoneItem = ({
         </VStack>
       )}
       {/*
-        Per-milestone expenditure report. The report documents how *this* milestone's funds were
-        spent — which only makes sense after the receiver has actually claimed them. So:
-          - Submit CTA shows only on Claimed milestones (and only to authorized wallets).
-          - Update CTA in the existing report header follows the same rule.
+        Per-milestone expenditure report. Funding is retroactive — the team completes the
+        milestone, reports on what they achieved and spent, and the Foundation releases the funds
+        after reviewing it. So the report is written while the milestone is still Pending, and
+        stays editable through Approved and Claimed. To authorized wallets:
+          - Submit/Update CTA shows on the current milestone and on any already-funded one.
+          - Future milestones (Pending but not the current step) show nothing — their work has
+            not started, so there is nothing to report yet.
+          - Rejected milestones are terminal and never reportable.
+        Completed grants stay editable too: grantState() flips to Completed as soon as the *last*
+        milestone is approved, and reports must survive that.
         Other milestones still render the read-only report card if one exists (historical view).
       */}
       {(() => {
+        const isGrantReportable =
+          proposal.state === ProposalState.InDevelopment || proposal.state === ProposalState.Completed
         const canManageReport =
           canSubmitExpenditureReport &&
-          proposal.state === ProposalState.InDevelopment &&
-          milestoneData.state === MilestoneState.Claimed
+          isGrantReportable &&
+          milestoneData.state !== MilestoneState.Rejected &&
+          (milestoneData.state !== MilestoneState.Pending || isCurrentStep)
 
         if (expenditureReport) {
           return (

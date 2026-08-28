@@ -45,7 +45,7 @@ const BALANCE_EVENT_NAMES = [
   "B3TR_NAVIGATOR_FEE_CLAIMED",
 ] as const
 const compactFormatter = getCompactFormatter(2)
-const fmtValue = (raw?: string) => (raw ? compactFormatter.format(Number(formatEther(BigInt(raw)))) : "0")
+const fmtValue = (raw?: string | null) => (raw ? compactFormatter.format(Number(formatEther(BigInt(raw)))) : "0")
 
 const InfoRow = ({
   icon,

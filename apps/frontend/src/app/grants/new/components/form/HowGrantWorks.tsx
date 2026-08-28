@@ -34,14 +34,12 @@ export const HowGrantWorks = () => {
       ),
     },
     {
-      heading: t("Receive funds"),
-      description: t("If approved, your grant is funded from the DAO Treasury."),
+      heading: t("Report on each milestone"),
+      description: t("Complete the milestone, then submit a standardized report on what you achieved and spent."),
     },
     {
-      heading: t("Report on spending"),
-      description: t(
-        "For each milestone, submit a standardized milestone report so reviewers can verify how funds were used before approving the next tranche.",
-      ),
+      heading: t("Receive funds"),
+      description: t("Once reviewers verify the report, that milestone's funding is released from the DAO Treasury."),
     },
   ]
   return (
