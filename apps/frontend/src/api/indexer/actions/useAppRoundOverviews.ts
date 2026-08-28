@@ -15,7 +15,7 @@ export const useAppRoundOverviews = (appId: string, roundIds: number[]) => {
         const result = await fetchClient.GET("/api/v1/b3tr/actions/apps/{appId}/overview", {
           params: { path: { appId }, query: { roundId } },
         })
-        return { roundId, ...result.data }
+        return { ...result.data, roundId }
       },
       enabled: !!appId && !!roundId,
       staleTime: 5 * 60 * 1000,

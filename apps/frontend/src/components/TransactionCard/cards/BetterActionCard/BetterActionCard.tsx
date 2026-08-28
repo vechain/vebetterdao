@@ -11,7 +11,7 @@ import { ActionModal } from "./components/ActionModal"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
-  appId?: string
+  appId?: string | null
   blockNumber?: number
   blockTimestamp?: number
   amountB3tr?: number
