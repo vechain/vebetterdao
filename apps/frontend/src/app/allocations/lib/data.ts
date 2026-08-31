@@ -217,6 +217,8 @@ export const getHistoricalRoundData = async (round?: number): Promise<Allocation
       const result = resultsMap.get(app.id)
       return {
         ...app,
+        // On-chain name is immutable (app id is derived from it); display the metadata name, which the admin panel updates
+        name: appsMetadata[index]?.name ?? app.name,
         voters: result?.voters ?? 0,
         votesReceived: result?.votesReceived ? BigInt(result.votesReceived.toString()) : 0n,
         metadata: appsMetadata[index],
