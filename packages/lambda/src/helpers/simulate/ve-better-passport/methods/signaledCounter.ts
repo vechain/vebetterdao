@@ -1,20 +1,23 @@
-import { FunctionFragment } from "ethers"
-
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import localConfig from "@repo/config/local"
 
 import { ThorClient } from "@vechain/sdk-network"
+import { ABIContract } from "@vechain/sdk-core"
 
 /**
  * Retrieves the signaled counter of the VeBetterPassport contract.
  * @returns The signaled counter of the contract.
  */
 export const signaledCounter = async (thor: ThorClient, userAddress: string) => {
-  const getSignaledCounter = await thor.contracts.executeContractCall(
+  const res = await thor.contracts.executeCall(
     localConfig.veBetterPassportContractAddress,
-    VeBetterPassport__factory.createInterface().getFunction("signaledCounter") as FunctionFragment,
+    ABIContract.ofAbi(VeBetterPassport__factory.abi).getFunction("signaledCounter"),
     [userAddress],
   )
 
-  return getSignaledCounter[0]
+  if (!res.success) {
+    throw new Error(res.result.errorMessage)
+  }
+
+  return res.result.array?.[0]
 }

@@ -1,7 +1,7 @@
 import path from "path"
 import dotenv from "dotenv"
 
-import { mnemonic } from "@vechain/sdk-core"
+import { Address, HDKey } from "@vechain/sdk-core"
 
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env") })
 
@@ -15,8 +15,13 @@ export const getCallerWalletInfo = (): { walletAddress: string; privateKey: stri
     throw new Error("Mnemonic not found")
   }
 
-  const walletAddress = mnemonic.deriveAddress(PHRASE, "0")
-  const privateKey = mnemonic.derivePrivateKey(PHRASE, "0").toString("hex")
+  const child = HDKey.fromMnemonic(PHRASE).deriveChild(0)
+  if (!child.privateKey) {
+    throw new Error("Private key not found")
+  }
 
-  return { walletAddress, privateKey }
+  return {
+    walletAddress: Address.ofPrivateKey(child.privateKey).toString(),
+    privateKey: Buffer.from(child.privateKey).toString("hex"),
+  }
 }

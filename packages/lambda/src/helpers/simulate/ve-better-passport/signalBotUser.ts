@@ -1,5 +1,3 @@
-import { HttpClient } from "@vechain/sdk-network"
-
 import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
 import { normalize, removePrefix } from "@repo/utils/HexUtils"
@@ -18,7 +16,7 @@ const main = async () => {
 
     console.log("NODE_URL", NODE_URL)
 
-    const thor = new ThorClient(new HttpClient(NODE_URL), { isPollingEnabled: false })
+    const thor = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const getVersion = await version(thor)
     console.log("VeBetterPassport Contract version:", getVersion)
 

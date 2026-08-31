@@ -1,7 +1,5 @@
-import { FunctionFragment } from "ethers"
-
 import { ThorClient } from "@vechain/sdk-network"
-import { clauseBuilder } from "@vechain/sdk-core"
+import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import localConfig from "@repo/config/local"
 
@@ -16,9 +14,9 @@ import { getCallerWalletInfo } from "./config"
 export const resetSignalCounter = async (thor: ThorClient, bannedWallet: string, reason: string) => {
   const { walletAddress, privateKey } = getCallerWalletInfo()
 
-  const clause = clauseBuilder.functionInteraction(
-    localConfig.veBetterPassportContractAddress,
-    VeBetterPassport__factory.createInterface().getFunction("resetUserSignalsWithReason") as FunctionFragment,
+  const clause = Clause.callFunction(
+    Address.of(localConfig.veBetterPassportContractAddress),
+    ABIContract.ofAbi(VeBetterPassport__factory.abi).getFunction("resetUserSignalsWithReason"),
     [bannedWallet, reason],
   )
 
@@ -29,7 +27,7 @@ export const resetSignalCounter = async (thor: ThorClient, bannedWallet: string,
   }
 
   const txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
-  const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+  const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
   const tx = await thor.transactions.sendTransaction(signedTx)
   const receipt = await thor.transactions.waitForTransaction(tx.id)
 

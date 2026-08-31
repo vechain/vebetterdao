@@ -49,7 +49,7 @@ export const waitForNextBlock = async () => {
 
   // since we do not support ethers' evm_mine yet, do a vet transaction to force a block
   const clauses: TransactionClause[] = []
-  clauses.push(Clause.transferVTHOToken(target.address, VTHO.of(1, Units.wei)))
+  clauses.push(Clause.transferVTHOToken(target.address, VTHO.of(1, Units.wei)).clause)
 
   await TransactionUtils.sendTx(thorClient, clauses, source.pk)
 }
