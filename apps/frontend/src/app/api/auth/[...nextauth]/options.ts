@@ -24,6 +24,8 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: githubClientId ?? "",
       clientSecret: githubClientSecret ?? "",
+      // GitHub returns iss (RFC 9207); openid-client rejects the callback unless the issuer is declared
+      issuer: "https://github.com/login/oauth",
       profile(profile) {
         return {
           id: profile.id,
