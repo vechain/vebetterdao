@@ -91,7 +91,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get account history */
+        /**
+         * Get account history
+         * @description An account's history can gain an event at any block, so shared caches may serve a
+         *                 response up to one block old.
+         */
         get: operations["getUsersHistoryV2"];
         put?: never;
         post?: never;
@@ -1364,35 +1368,6 @@ export interface paths {
         };
         /** Get contracts where address is master */
         get: operations["getContractsByMaster"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/blocks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a range of collapsed blocks
-         * @description Returns collapsed (unexpanded) block headers newest-first, starting at `from` and
-         *                 walking backwards, or starting at the indexed head when `from` is omitted. Pass
-         *                 `pagination.cursor` straight back as `from` to fetch the next page.
-         *
-         *                 `isTrunk` and `isFinalized` are omitted. Both are node-local, time-varying properties
-         *                 rather than block contents — `isTrunk` is a live comparison against the node's best
-         *                 chain, and finality lags the head by 360–540 blocks and is derived from validator
-         *                 stake weights — so neither can be served correctly from an index. Use a Thor node's
-         *                 `GET /blocks/{revision}` if you need them, for a single block, or to look up a block
-         *                 by ID.
-         */
-        get: operations["getBlocks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2870,36 +2845,6 @@ export interface components {
         };
         PaginatedResponseContract: {
             data: components["schemas"]["Contract"][];
-            pagination: components["schemas"]["PaginationDetail"];
-        };
-        IndexedBlock: {
-            /** Format: int64 */
-            number: number;
-            id: string;
-            /** Format: int64 */
-            timestamp: number;
-            /** Format: int64 */
-            size: number;
-            parentID: string;
-            /** Format: int64 */
-            gasLimit: number;
-            /** Format: int64 */
-            gasUsed: number;
-            beneficiary: string;
-            /** Format: int64 */
-            totalScore: number;
-            txsRoot: string;
-            /** Format: int32 */
-            txsFeatures: number;
-            stateRoot: string;
-            receiptsRoot: string;
-            com: boolean;
-            signer: string;
-            baseFeePerGas?: string | null;
-            transactions: string[];
-        };
-        PaginatedResponseIndexedBlock: {
-            data: components["schemas"]["IndexedBlock"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
         XAllocResultResponse: {
@@ -8413,80 +8358,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseContract"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getBlocks: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Block number to start from, inclusive. Defaults to the indexed head.
-                 * @example 12345678
-                 */
-                from?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseIndexedBlock"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
