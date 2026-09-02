@@ -133,6 +133,8 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     mutationData.sendTransaction()
   }, [isB3trToVot3, isSmartAccountUpgradeRequired, mutationData, openUpgradeModal])
 
+  const disableConfirmSwap = !!isB3trToVot3 && convertB3trMutation.isDelegationStatusUnknown
+
   const b3trBalanceAfterSwap = useMemo(() => {
     if (isB3trToVot3) {
       return new BigNumber(b3trBalanceScaled).minus(amount).toString()
@@ -193,6 +195,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
             onSubmitTx={handleConvertB3tr}
             b3trBalanceAfterSwap={b3trBalanceAfterSwap}
             vot3BalanceAfterSwap={vot3BalanceAfterSwap}
+            disableSubmitButton={disableConfirmSwap}
           />
         ),
         title: t("Review operation"),
@@ -204,6 +207,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       b3trBalanceScaled,
       convertDescription,
       convertTitle,
+      disableConfirmSwap,
       formData,
       goToNextStep,
       handleConvertB3tr,
