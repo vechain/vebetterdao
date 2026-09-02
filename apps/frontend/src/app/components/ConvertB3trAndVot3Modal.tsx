@@ -524,7 +524,11 @@ export const ConvertB3trAndVot3Modal = ({ title = "Convert tokens", isOpen, onCl
             w="full"
             rounded="full"
             size="lg"
-            disabled={step === PowerUpStep.SWAP && invalidAmount}
+            disabled={
+              step === PowerUpStep.SWAP
+                ? invalidAmount
+                : convertTo === "vot3" && convertB3trMutation.isDelegationStatusUnknown
+            }
             onClick={step === PowerUpStep.SWAP ? goToReview : handleConvert}
             mt="auto">
             {step === PowerUpStep.SWAP ? t("Continue") : t("Convert now")}
