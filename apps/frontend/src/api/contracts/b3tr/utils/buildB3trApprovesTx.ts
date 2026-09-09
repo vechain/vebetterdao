@@ -19,7 +19,7 @@ export const buildB3trApprovesTx = (thor: ThorClient, amount: string | number, s
   if (AddressUtils.isValid(spender) === false) throw new Error("Invalid spender address")
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
   const formattedAddress = FormattingUtils.humanAddress(spender)
-  const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
+  const amountWithDecimals = ethers.parseEther(amount.toString())
   const { clause } = thor.contracts.load(address, abi).clause.approve(spender, amountWithDecimals)
   return {
     ...clause,

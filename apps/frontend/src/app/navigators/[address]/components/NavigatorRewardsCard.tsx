@@ -29,7 +29,7 @@ export const NavigatorRewardsCard = ({ address }: Props) => {
 
   const { totalEarned, totalClaimed, totalClaimable, totalLocked, claimableRoundIds, nextUnlock, isLoading } =
     useNavigatorFeeStatus(address)
-  const { sendTransaction, isPending } = useClaimNavigatorFees({
+  const { sendTransaction, isTransactionPending: isPending } = useClaimNavigatorFees({
     onSuccess: () => setClaimedAmount(totalClaimable),
   })
 

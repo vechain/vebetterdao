@@ -215,7 +215,7 @@ export const ProposalInteractionCard = ({
   const { data: simulatedExecution } = useSimulateExecuteProposal({
     proposal,
     caller: account?.address,
-    enabled: isExecutable && !isAwaitingTimelock,
+    enabled: !!isExecutable && !isAwaitingTimelock,
   })
   const executeWouldRevert = Boolean(simulatedExecution?.wouldRevert)
   const executeRevertReason = simulatedExecution?.revertReason

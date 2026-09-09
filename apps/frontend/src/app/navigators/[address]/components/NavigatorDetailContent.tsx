@@ -133,13 +133,13 @@ export const NavigatorDetailContent = () => {
         wasBelowMinAtRoundStart={wasBelowMinAtRoundStart}
         minStakeScaled={minStakeScaled}
         currentDelegatedNum={currentDelegatedNum}
-        displayName={displayName}
+        displayName={displayName ?? ""}
         delegationInfo={delegationInfo}
       />
 
       <NavigatorHeader
         address={address}
-        displayName={displayName}
+        displayName={displayName ?? ""}
         domainLoading={domainLoading}
         metadata={metadata}
         metadataLoading={metadataLoading}

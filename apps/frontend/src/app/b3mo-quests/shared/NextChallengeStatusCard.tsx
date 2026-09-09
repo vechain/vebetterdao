@@ -53,7 +53,7 @@ export const NextChallengeStatusCard = ({ status, isLoading = false, title }: Ne
                       {challengeTitle}
                     </Text>
                     <Text textStyle="sm" color="text.subtle">
-                      {t(status.messageKey, status.messageValues)}
+                      {t(status.messageKey, { ...status.messageValues, defaultValue: status.messageKey })}
                     </Text>
                   </VStack>
                 </HStack>

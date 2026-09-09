@@ -19,7 +19,7 @@ const abi = [
 const method = "quorumNumeratorByProposalType" as const
 
 export const getProposalQuorumNumeratorByTypeQueryKey = (blockNumber: number, proposalType: ProposalType) =>
-  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [blockNumber, proposalType] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(blockNumber), proposalType] })
 
 /**
  * @dev Gets the quorum numerator (%) for a proposal type at a specific timepoint (block number).
@@ -32,7 +32,7 @@ export const useProposalQuorumNumeratorByType = (blockNumber: number, proposalTy
     abi,
     address,
     method,
-    args: [blockNumber, proposalType],
+    args: [BigInt(blockNumber), proposalType],
     queryOptions: {
       enabled: !!blockNumber,
       select: data => data[0],

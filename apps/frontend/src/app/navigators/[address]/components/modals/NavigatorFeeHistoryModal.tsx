@@ -25,11 +25,11 @@ const STATUS_COLORS: Record<FeeEntryStatus, "green" | "yellow" | "gray"> = {
   claimed: "gray",
 }
 
-const STATUS_LABELS: Record<FeeEntryStatus, string> = {
+const STATUS_LABELS = {
   claimable: "Claimable",
   locked: "Locked",
   claimed: "Claimed",
-}
+} as const satisfies Record<FeeEntryStatus, string>
 
 const SCROLL_TARGET_ID = "fee-history-scroll"
 

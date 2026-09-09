@@ -16,7 +16,7 @@ const VOT3_CONTRACT = config.vot3ContractAddress
  */
 export const buildConvertB3trTx = (thor: ThorClient, amount: string | number): EnhancedClause => {
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
-  const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
+  const amountWithDecimals = ethers.parseEther(amount.toString())
   const { clause } = thor.contracts.load(VOT3_CONTRACT, abi).clause.convertToVOT3(amountWithDecimals)
   return {
     ...clause,

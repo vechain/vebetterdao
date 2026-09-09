@@ -17,7 +17,7 @@ const contractAddress = getConfig().b3trContractAddress
 export const buildMintB3trTx = (thor: ThorClient, address: string, amount: string | number): EnhancedClause => {
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
   const formattedAddress = FormattingUtils.humanAddress(address)
-  const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
+  const amountWithDecimals = ethers.parseEther(amount.toString())
   const { clause } = thor.contracts.load(contractAddress, abi).clause.mint(address, amountWithDecimals)
   return {
     ...clause,

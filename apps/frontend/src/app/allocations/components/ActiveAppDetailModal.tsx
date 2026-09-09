@@ -77,7 +77,7 @@ export const ActiveAppDetailModal = ({
     params: { path: { appId: app.id }, query: { roundId } },
   })
 
-  const votingPowerValue = getCompactFormatter(2).format(Number(formatEther(app.votesReceived, "gwei")))
+  const votingPowerValue = getCompactFormatter(2).format(Number(formatEther(BigInt(app.votesReceived), "gwei")))
   const votersCount = app?.voters || 0
   const isCurrentRound = currentRoundId === roundId
 

@@ -266,7 +266,7 @@ type TaskItemProps = {
   label: string
   doneLabel: string
   pendingLabel: string
-  onClick: () => void
+  onClick?: () => void
   /** Optional action shown instead of the done badge (e.g. View report) */
   doneAction?: React.ReactNode
 }

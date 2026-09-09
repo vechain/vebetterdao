@@ -57,7 +57,7 @@ export function RoundHistoryCard({ round }: { round: RoundEarnings }) {
   const rewardClaimed = rewardClaimedV2 ?? rewardClaimedV1
   const isRewardClaimedLoading = isV2Loading || isV1Loading
 
-  const total = getCompactFormatter(2).format(Number(formatEther(totalReward)))
+  const total = getCompactFormatter(2).format(Number(formatEther(BigInt(totalReward))))
 
   return (
     <LinkBox key={roundId}>
