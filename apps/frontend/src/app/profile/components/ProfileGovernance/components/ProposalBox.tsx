@@ -1,4 +1,15 @@
-import { Badge, BadgeProps, Card, HStack, Icon, LinkBox, LinkOverlay, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  BadgeProps,
+  Card,
+  HStack,
+  Icon,
+  LinkBox,
+  LinkOverlay,
+  Text,
+  useMediaQuery,
+  VStack,
+} from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
