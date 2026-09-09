@@ -38,7 +38,7 @@ type useMintB3trProps = {
 export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: useMintB3trProps) => {
   const thor = useThor()
   const { account } = useWallet()
-  const requiresSelfDelegation = useVot3RequireSelfDelegation()
+  const { requiresSelfDelegation, isDelegationStatusUnknown } = useVot3RequireSelfDelegation()
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
   const convertClause = useMemo(
@@ -52,15 +52,21 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
   const clauseBuilder = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
     if (!account?.address) throw new Error("account address is required")
+    // Fail loudly while the VOT3 delegatee is still unknown. Treating it as "not delegated" would
+    // drop the clause below and mint VOT3 with no voting power at all, which cannot be undone by
+    // delegating later because the snapshot is taken at conversion time.
+    if (isDelegationStatusUnknown) {
+      throw new Error("VOT3 delegation status not yet known — try again in a moment")
+    }
 
     // If the user requires self delegation, add the delegation clause
     // This is required for privy users, in order to be able to capture the vot3 balance at the snapshot block
     // Check https://github.com/vechain/vechain-kit/issues/102 for more info
     if (requiresSelfDelegation) {
-      convertClause.unshift(buildDelegateVot3Tx(thor, account?.address))
+      return [buildDelegateVot3Tx(thor, account?.address), ...convertClause]
     }
     return convertClause
-  }, [contractAmount, account?.address, requiresSelfDelegation, convertClause, thor])
+  }, [contractAmount, account?.address, requiresSelfDelegation, isDelegationStatusUnknown, convertClause, thor])
 
   const refetchQueryKeys = useMemo(
     () => [
@@ -83,6 +89,7 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
 
   return {
     clauses: convertClause,
+    isDelegationStatusUnknown,
     ...useBuildTransaction({
       clauseBuilder,
       refetchQueryKeys,

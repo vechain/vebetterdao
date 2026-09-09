@@ -65,7 +65,7 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const { data: domainData } = useVechainDomain(navigatorAddress ?? "")
   const { data: minStakeData } = useGetMinStake()
   const { data: stakeData } = useGetStake(navigatorAddress ?? "")
-  const requiresSelfDelegation = useVot3RequireSelfDelegation()
+  const { requiresSelfDelegation, isDelegationStatusUnknown } = useVot3RequireSelfDelegation()
   const availableBalance = b3trBalance?.scaled ?? "0"
 
   // Compute free capacity in wei to avoid floating-point precision issues
@@ -106,6 +106,11 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
   const clauseBuilder = useCallback(() => {
     if (!contractAmount || contractAmount === "0") throw new Error("amount is required")
     if (!account?.address) throw new Error("account address is required")
+    // Fail loudly while the VOT3 delegatee is still unknown — see useConvertB3tr for the rationale
+    // (a silently skipped self delegation clause leaves the converted VOT3 with no voting power).
+    if (isDelegationStatusUnknown) {
+      throw new Error("VOT3 delegation status not yet known — try again in a moment")
+    }
 
     const clauses = []
 
@@ -130,7 +135,15 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
     }
 
     return clauses
-  }, [contractAmount, account?.address, requiresSelfDelegation, isDelegated, includeDelegation, thor])
+  }, [
+    contractAmount,
+    account?.address,
+    requiresSelfDelegation,
+    isDelegationStatusUnknown,
+    isDelegated,
+    includeDelegation,
+    thor,
+  ])
 
   const refetchQueryKeys = useMemo(
     () => [
@@ -381,8 +394,14 @@ export const PowerUpModal = ({ isOpen, onClose }: Props) => {
         )}
 
         <VStack gap={2} mt={2} w="full">
-          <Button variant="primary" w="full" rounded="full" size="lg" disabled={invalidAmount} onClick={handleConfirm}>
-            {t("Confirm")}
+          <Button
+            variant="primary"
+            w="full"
+            rounded="full"
+            size="lg"
+            disabled={invalidAmount || isDelegationStatusUnknown}
+            onClick={handleConfirm}>
+            {isDelegationStatusUnknown ? t("Loading...") : t("Confirm")}
           </Button>
           <Button variant="ghost" w="full" rounded="full" size="lg" onClick={onClose}>
             {t("Cancel")}

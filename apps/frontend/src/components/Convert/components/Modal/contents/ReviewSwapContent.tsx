@@ -9,8 +9,14 @@ type Props = {
   b3trBalanceAfterSwap: string
   vot3BalanceAfterSwap: string
   onSubmitTx: () => void
+  disableSubmitButton?: boolean
 }
-export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, onSubmitTx }: Props) => {
+export const ReviewSwapContent = ({
+  b3trBalanceAfterSwap,
+  vot3BalanceAfterSwap,
+  onSubmitTx,
+  disableSubmitButton,
+}: Props) => {
   const { t } = useTranslation()
   return (
     <VStack align={"center"} p={0} gap={2}>
@@ -47,6 +53,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
         w={"full"}
         rounded={"full"}
         onClick={onSubmitTx}
+        disabled={disableSubmitButton}
         size={"lg"}
         py={4}
         mt={4}
