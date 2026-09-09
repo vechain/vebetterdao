@@ -93,31 +93,10 @@ export interface paths {
         };
         /**
          * Get account history
-         * @description An account's history can gain an event at any block, so shared caches may serve a
-         *                 response up to one block old.
+         * @description An account's history can gain an event at any block, so caches may serve a response
+         *                 up to a minute old.
          */
         get: operations["getUsersHistoryV2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/history/token/{tokenId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get token history (deprecated)
-         * @deprecated
-         * @description Deprecated: this endpoint scopes history by tokenId and optional emitter contract only, which is not safe for contract-ambiguous NFT domains such as Stargate. Use /api/v1/stargate/tokens/{tokenId}/history for Stargate token timelines.
-         */
-        get: operations["getTokenHistory"];
         put?: never;
         post?: never;
         delete?: never;
@@ -264,7 +243,7 @@ export interface paths {
          *                 This endpoint retrieves validator stats.
          *
          *                 You can filter the results by:
-         *                 - `validatorId`: (deprecated - use GET /api/v1/validators/{validatorId} instead)
+         *                 - `validatorId`: (deprecated - use GET /api/v2/validators/{validatorId} instead)
          *                 - `status`: validator status
          *                 - `endorser`: endorser address
          *
@@ -275,27 +254,6 @@ export interface paths {
          *                 - `direction`: Either `asc` or `desc`
          */
         get: operations["getValidators_1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/validators/{validatorId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a single validator by ID (deprecated — use /api/v2/validators/{id})
-         * @deprecated
-         * @description **Deprecated:** Replaced by `GET /api/v2/validators/{validatorId}`. Returns a single validator's stats by their address.
-         */
-        get: operations["getValidatorById_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -339,27 +297,6 @@ export interface paths {
          * @description Returns the count of delegations grouped by status (QUEUED, ACTIVE, EXITING) for all validators, or optionally filtered to a specific validator.
          */
         get: operations["getDelegationCounts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/validators/blocks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get validator block records (deprecated)
-         * @deprecated
-         * @description Note: the original description was inaccurate. This endpoint does not return cumulative rewards 'up to the latest block'. It returns a paginated list of individual block reward/miss records, optionally filtered by an exact block number, validator, or status. Deprecated: use /api/v1/validators/block-rewards for paginated listing or /api/v1/validators/block-rewards/{blockNumber} for lookup by block.
-         */
-        get: operations["getValidatorBlocks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -668,8 +605,8 @@ export interface paths {
         };
         /**
          * Get all transactions for a contract address
-         * @description A new transaction can arrive for any contract at any block, so shared caches may serve
-         *                 a response up to one block old.
+         * @description A new transaction can arrive for any contract at any block, so caches may serve a
+         *                 response up to a minute old.
          */
         get: operations["getTransactionsByContract"];
         put?: never;
@@ -1368,6 +1305,38 @@ export interface paths {
         };
         /** Get contracts where address is master */
         get: operations["getContractsByMaster"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a range of collapsed blocks
+         * @description Returns collapsed (unexpanded) block headers newest-first, starting at `from` and
+         *                 walking backwards, or starting at the indexed head when `from` is omitted. Pass
+         *                 `pagination.cursor` straight back as `from` to fetch the next page.
+         *
+         *                 Each block carries `clauseCount` and `totalVthoPaid` (hex wei), the totals over its
+         *                 transactions, which Thor itself only exposes on an expanded block.
+         *
+         *                 `isTrunk` and `isFinalized` are omitted. Both are node-local, time-varying properties
+         *                 rather than block contents — `isTrunk` is a live comparison against the node's best
+         *                 chain, and finality lags the head by 360–540 blocks and is derived from validator
+         *                 stake weights — so neither can be served correctly from an index. Use a Thor node's
+         *                 `GET /blocks/{revision}` if you need them, for a single block, or to look up a block
+         *                 by ID.
+         */
+        get: operations["getBlocks"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2408,9 +2377,19 @@ export interface components {
             /** Format: int64 */
             exiting: number;
         };
-        PaginatedResponseValidatorBlock: {
-            data: components["schemas"]["ValidatorBlock"][];
-            pagination: components["schemas"]["PaginationDetail"];
+        AllValidatorsMissedBlocksResponse: {
+            /** @enum {string} */
+            timeframe: "DAY" | "WEEK" | "MONTH" | "YEAR";
+            /** Format: int64 */
+            startBlock: number;
+            /** Format: int64 */
+            endBlock: number;
+            validators: components["schemas"]["ValidatorMissedBlocksPercentage"][];
+        };
+        ValidatorMissedBlocksPercentage: {
+            validator: string;
+            /** Format: double */
+            missedPercentage: number;
         };
         ValidatorBlock: {
             blockId: string;
@@ -2427,19 +2406,9 @@ export interface components {
             delegatorRewards?: number | null;
             validatorRewards?: number | null;
         };
-        AllValidatorsMissedBlocksResponse: {
-            /** @enum {string} */
-            timeframe: "DAY" | "WEEK" | "MONTH" | "YEAR";
-            /** Format: int64 */
-            startBlock: number;
-            /** Format: int64 */
-            endBlock: number;
-            validators: components["schemas"]["ValidatorMissedBlocksPercentage"][];
-        };
-        ValidatorMissedBlocksPercentage: {
-            validator: string;
-            /** Format: double */
-            missedPercentage: number;
+        PaginatedResponseValidatorBlock: {
+            data: components["schemas"]["ValidatorBlock"][];
+            pagination: components["schemas"]["PaginationDetail"];
         };
         IndexedTransferEvent: {
             id: string;
@@ -2845,6 +2814,39 @@ export interface components {
         };
         PaginatedResponseContract: {
             data: components["schemas"]["Contract"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        IndexedBlock: {
+            /** Format: int64 */
+            number: number;
+            id: string;
+            /** Format: int64 */
+            timestamp: number;
+            /** Format: int64 */
+            size: number;
+            parentID: string;
+            /** Format: int64 */
+            gasLimit: number;
+            /** Format: int64 */
+            gasUsed: number;
+            beneficiary: string;
+            /** Format: int64 */
+            totalScore: number;
+            txsRoot: string;
+            /** Format: int32 */
+            txsFeatures: number;
+            stateRoot: string;
+            receiptsRoot: string;
+            com: boolean;
+            signer: string;
+            baseFeePerGas?: string | null;
+            /** Format: int32 */
+            clauseCount: number;
+            totalVthoPaid: string;
+            transactions: string[];
+        };
+        PaginatedResponseIndexedBlock: {
+            data: components["schemas"]["IndexedBlock"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
         XAllocResultResponse: {
@@ -3719,102 +3721,6 @@ export interface operations {
             };
         };
     };
-    getTokenHistory: {
-        parameters: {
-            query?: {
-                /** @description Filter by specific transaction names. */
-                eventName?: ("STARGATE_DELEGATE_LEGACY" | "STARGATE_CLAIM_REWARDS_BASE_LEGACY" | "STARGATE_CLAIM_REWARDS_DELEGATE_LEGACY" | "STARGATE_UNDELEGATE_LEGACY" | "STARGATE_STAKE" | "STARGATE_UNSTAKE" | "STARGATE_DELEGATE_ACTIVE" | "STARGATE_DELEGATE_REQUEST" | "STARGATE_DELEGATE_EXIT_REQUEST" | "STARGATE_DELEGATION_EXITED_VALIDATOR" | "STARGATE_DELEGATION_EXITED" | "STARGATE_DELEGATE_REQUEST_CANCELLED" | "STARGATE_CLAIM_REWARDS" | "STARGATE_BOOST" | "STARGATE_MANAGER_ADDED" | "STARGATE_MANAGER_REMOVED" | "TRANSFER_NFT" | "NFT_SALE" | "VEVOTE_VOTE_CAST" | "B3TR_UPGRADE_GM")[];
-                /**
-                 * @description A valid address
-                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
-                 */
-                contractAddress?: string;
-                /**
-                 * @description Return records after this time (Unix time in seconds).
-                 * @example 1704143600
-                 */
-                after?: number;
-                /**
-                 * @description Return records before this time (Unix time in seconds).
-                 * @example 1704153600
-                 */
-                before?: number;
-                /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-                /** @description The sort direction */
-                direction?: "ASC" | "DESC";
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path: {
-                /** @description A valid tokenId */
-                tokenId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
     getProposalResult: {
         parameters: {
             query?: never;
@@ -4267,7 +4173,7 @@ export interface operations {
                 endorser?: string;
                 /**
                  * @deprecated
-                 * @description Deprecated: use GET /api/v1/validators/{validatorId} instead.
+                 * @description Deprecated: use GET /api/v2/validators/{validatorId} instead.
                  */
                 validatorId?: string;
                 /** @description Filter by one or more validator statuses */
@@ -4303,85 +4209,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseValidatorResponse"];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description PriceFeedOracle is unreachable or returned an unusable response */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getValidatorById_1: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path: {
-                /**
-                 * @description Validator address
-                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
-                 */
-                validatorId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ValidatorResponse"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -4546,94 +4373,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DelegationCountsResponse"][];
-                };
-            };
-            /** @description Validation errors occurred, eg: invalid input */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Access to the requested resource is forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                    "application/problem+json": string;
-                };
-            };
-            /** @description Requested resource was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-            /** @description Service not available */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExceptionResponse"];
-                    "application/problem+json": components["schemas"]["ExceptionResponse"];
-                };
-            };
-        };
-    };
-    getValidatorBlocks: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Optional block number. If provided, returns the total VTHO rewards as of this block.
-                 * @example 12345678
-                 */
-                blockNumber?: number;
-                /**
-                 * @description Optional validator address
-                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
-                 */
-                validator?: string;
-                /** @description Filter by block status - either VALIDATED or MISSED. */
-                status?: "VALIDATED" | "MISSED";
-                /**
-                 * @description The zero-based results page number
-                 * @example 0
-                 */
-                page?: number;
-                /**
-                 * @description The results page size
-                 * @example 20
-                 */
-                size?: number;
-                /** @description The sort direction */
-                direction?: "ASC" | "DESC";
-            };
-            header?: {
-                /** @description Optional caller/project identifier used for observability and usage tracking. */
-                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["PaginatedResponseValidatorBlock"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -8358,6 +8097,80 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseContract"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getBlocks: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Block number to start from, inclusive. Defaults to the indexed head.
+                 * @example 12345678
+                 */
+                from?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedBlock"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
