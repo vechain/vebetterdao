@@ -85,8 +85,8 @@ jobs:
           provenance: false
           sbom: false
           tags: ${{ env.GHCR_IMAGE }}:${{ env.SHA_TAG }}
-          cache-from: type=registry,ref=${{ env.GHCR_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.GHCR_IMAGE }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
+          # No registry cache: on lockfile changes it never hit, and exporting
+          # it cost ~90s per build.
 
       - name: Scan image with Trivy
         id: trivy
