@@ -44,6 +44,10 @@ COPY apps ./apps
 ARG NODE_OPTIONS
 ENV NODE_OPTIONS=${NODE_OPTIONS}
 
+# Deprecated contract versions are only needed by upgrade tests; skip them here
+# (see SKIP_DEPRECATED_CONTRACTS in packages/contracts/hardhat.config.ts)
+ENV SKIP_DEPRECATED_CONTRACTS=1
+
 # Build the application with persistent caches:
 # - Hardhat cache: Persists Solidity compiler downloads (no more "Downloading compiler 0.8.20")
 # - Turbo cache: Persists turbo build cache across builds

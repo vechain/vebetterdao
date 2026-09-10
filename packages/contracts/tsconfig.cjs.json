@@ -4,5 +4,7 @@
     "target": "es2020",
     "module": "commonjs",
     "outDir": "dist/cjs"
-  }
+  },
+  "files": [],
+  "include": ["index.ts", "artifacts/contracts/**/*.json", "typechain-types/**/*.ts"]
 }
