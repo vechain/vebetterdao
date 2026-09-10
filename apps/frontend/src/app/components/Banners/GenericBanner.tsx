@@ -51,6 +51,7 @@ type B3MOIllustration =
   | "/assets/mascot/mascot-welcoming.webp"
   | "/assets/images/b3mo-stargate-greet.webp"
   | "/assets/mascot/mascot-data.png"
+  | "/assets/mascot/present-zoom.png"
 type GenericBannerProps = {
   title: string
   description: ReactNode

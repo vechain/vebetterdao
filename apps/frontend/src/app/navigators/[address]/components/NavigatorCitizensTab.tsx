@@ -1,5 +1,6 @@
 import { Card, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuUsers } from "react-icons/lu"
 
@@ -15,7 +16,8 @@ type Props = {
 
 export const NavigatorCitizensTab = ({ address }: Props) => {
   const { t } = useTranslation()
-  const { data: citizens, isLoading } = useNavigatorCitizens(address)
+  const { data, isLoading } = useNavigatorCitizens(address)
+  const citizens = useMemo(() => data?.pages.flat() ?? [], [data])
 
   if (isLoading) {
     return (
@@ -27,7 +29,7 @@ export const NavigatorCitizensTab = ({ address }: Props) => {
     )
   }
 
-  if (!citizens || citizens.length === 0) {
+  if (citizens.length === 0) {
     return (
       <Card.Root variant="primary" w="full" mt={4}>
         <Card.Title textStyle="xl">{t("Citizens")}</Card.Title>

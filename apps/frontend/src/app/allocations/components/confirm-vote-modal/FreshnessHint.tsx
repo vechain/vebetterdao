@@ -50,7 +50,7 @@ export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote, hideDescripti
     <>
       <Box bg={getBgColor()} borderRadius="lg" p={3} w="full">
         <HStack gap={2} align="start">
-          <Icon as={Sparks} boxSize={4} color={getTextColor()} mt={0.5} shrink={0} />
+          <Icon as={Sparks} boxSize={4} color={getTextColor()} mt={0.5} flexShrink={0} />
           <VStack gap={0} align="start" flex={1} minW={0}>
             <HStack gap={1} w="full" justify="space-between" align="center">
               <HStack gap={1} flexWrap="wrap">
@@ -69,7 +69,7 @@ export const FreshnessHint = ({ isUpdated, tierLabel, isFirstVote, hideDescripti
                 aria-label={t("How rewards multipliers work")}
                 onClick={openMultiplierModal}
                 color={getTextColor()}
-                shrink={0}>
+                flexShrink={0}>
                 <Icon as={UilInfoCircle} boxSize={4} />
               </IconButton>
             </HStack>

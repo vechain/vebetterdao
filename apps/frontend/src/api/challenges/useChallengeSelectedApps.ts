@@ -1,13 +1,13 @@
 import { getConfig } from "@repo/config"
 import { B3TRChallenges__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { getCallClauseQueryKey, useCallClause } from "@vechain/vechain-kit"
+import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
 const address = getConfig().challengesContractAddress
 const abi = B3TRChallenges__factory.abi
 const method = "getChallengeSelectedApps" as const
 
 export const getChallengeSelectedAppsQueryKey = (challengeId: number) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(challengeId)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(challengeId)] })
 
 /**
  * Fetches only the selected app IDs for a challenge — avoids the heavy useChallenge hook.

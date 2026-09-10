@@ -1,4 +1,15 @@
-import { Badge, Card, HStack, Icon, LinkBox, LinkOverlay, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  BadgeProps,
+  Card,
+  HStack,
+  Icon,
+  LinkBox,
+  LinkOverlay,
+  Text,
+  useMediaQuery,
+  VStack,
+} from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -9,17 +20,17 @@ import { ProposalMetadata } from "../../../../../api/contracts/governance/types"
 import { ProposalStatusBadge } from "../../../../../components/Proposal/ProposalStatusBadge"
 import { VoteType } from "../../../../../types/voting"
 
-const voteTypeBadgeVariant: Record<VoteType, Badge["props"]["variant"]> = {
+const voteTypeBadgeVariant: Record<VoteType, BadgeProps["variant"]> = {
   [VoteType.VOTE_FOR]: "positive",
   [VoteType.VOTE_AGAINST]: "negative",
   [VoteType.ABSTAIN]: "neutral",
 }
 
-const voteTypeLabelKey: Record<VoteType, string> = {
+const voteTypeLabelKey = {
   [VoteType.VOTE_FOR]: "Voted for",
   [VoteType.VOTE_AGAINST]: "Voted against",
   [VoteType.ABSTAIN]: "Abstained",
-}
+} as const satisfies Record<VoteType, string>
 
 type Props = {
   proposalId: string

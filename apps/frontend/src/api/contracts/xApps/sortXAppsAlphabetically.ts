@@ -20,7 +20,7 @@ export const sortXAppsAlphabetically = async ({
         return { ...app, name: metadata?.name || app.name }
       }),
     )
-    return results.map((result, index) => (result.status === "fulfilled" ? result.value : apps[index]))
+    return results.map((result, index) => (result.status === "fulfilled" ? result.value : apps[index]!))
   }
   // Sorting the apps name
   const sortByName = <T extends { name: string }>(apps: T[]): T[] =>

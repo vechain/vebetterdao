@@ -133,7 +133,7 @@ export const AnnounceExitModal = ({ isOpen, onClose }: Props) => {
         </VStack>
 
         <VStack gap={2} mt={2} w="full">
-          <Button variant="negative" w="full" rounded="full" size="lg" onClick={() => sendTransaction({})}>
+          <Button variant="negative" w="full" rounded="full" size="lg" onClick={() => sendTransaction()}>
             {t("Confirm Exit")}
           </Button>
           <Button variant="ghost" w="full" rounded="full" size="lg" onClick={onClose}>

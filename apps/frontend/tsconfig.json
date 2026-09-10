@@ -2,6 +2,7 @@
   "extends": "@repo/typescript-config/nextjs.json",
   "skipLibCheck": true,
   "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["vitest/globals"],
     "module": "ESNext",
     "moduleResolution": "bundler",

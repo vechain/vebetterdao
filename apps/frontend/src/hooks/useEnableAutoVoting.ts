@@ -97,18 +97,22 @@ export const useEnableAutoVotingAndVote = ({
     // When isAutoVotingEnabledInCurrentRound is true, relayer will vote for them
     if (!hasVoted && !isAutoVotingEnabledInCurrentRound) {
       clauses.push(
-        contract.clause.castVote(roundId, appIds, voteWeights, {
-          comment: `Cast your vote on round ${roundId}`,
-        }).clause,
+        contract.clause.castVote(
+          { comment: `Cast your vote on round ${roundId}` },
+          BigInt(roundId),
+          appIds as `0x${string}`[],
+          voteWeights,
+        ).clause,
       )
     }
 
     // When ENABLING: set preferences first, then toggle
     if (shouldEnable && needsPreferenceUpdate) {
       clauses.push(
-        contract.clause.setUserVotingPreferences(appIds, {
-          comment: "Set voting preferences for auto-vote",
-        }).clause,
+        contract.clause.setUserVotingPreferences(
+          { comment: "Set voting preferences for auto-vote" },
+          appIds as `0x${string}`[],
+        ).clause,
       )
     }
 
@@ -116,27 +120,28 @@ export const useEnableAutoVotingAndVote = ({
     // (don't toggle if user never had auto-voting enabled and is just voting normally)
     if (shouldEnable || shouldDisable) {
       clauses.push(
-        contract.clause.toggleAutoVoting(userAddress, {
-          comment: shouldEnable ? "Enable auto-vote" : "Disable auto-vote",
-        }).clause,
+        contract.clause.toggleAutoVoting(
+          { comment: shouldEnable ? "Enable auto-vote" : "Disable auto-vote" },
+          userAddress,
+        ).clause,
       )
     }
 
     // Set preferred relayer (must come after toggleAutoVoting when enabling)
     if (preferredRelayerAddress) {
       clauses.push(
-        relayerPoolContract.clause.setPreferredRelayer(preferredRelayerAddress, {
-          comment: "Set preferred relayer",
-        }).clause,
+        relayerPoolContract.clause.setPreferredRelayer({ comment: "Set preferred relayer" }, preferredRelayerAddress)
+          .clause,
       )
     }
 
     // Clear preferred relayer when disabling auto-voting
     if (shouldDisable) {
       clauses.push(
-        relayerPoolContract.clause.setPreferredRelayer("0x0000000000000000000000000000000000000000", {
-          comment: "Clear preferred relayer",
-        }).clause,
+        relayerPoolContract.clause.setPreferredRelayer(
+          { comment: "Clear preferred relayer" },
+          "0x0000000000000000000000000000000000000000",
+        ).clause,
       )
     }
 

@@ -58,16 +58,16 @@ export const useUpdateVotingPreferences = ({
 
   const clauseBuilder = ({ appIds, preferredRelayerAddress }: ClausesProps) => {
     const clauses = [
-      contract.clause.setUserVotingPreferences(appIds, {
-        comment: "Update voting preferences for auto-voting",
-      }).clause,
+      contract.clause.setUserVotingPreferences(
+        { comment: "Update voting preferences for auto-voting" },
+        appIds as `0x${string}`[],
+      ).clause,
     ]
 
     if (preferredRelayerAddress) {
       clauses.push(
-        relayerPoolContract.clause.setPreferredRelayer(preferredRelayerAddress, {
-          comment: "Set preferred relayer",
-        }).clause,
+        relayerPoolContract.clause.setPreferredRelayer({ comment: "Set preferred relayer" }, preferredRelayerAddress)
+          .clause,
       )
     }
 
