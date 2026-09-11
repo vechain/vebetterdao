@@ -1,4 +1,5 @@
-import { HardhatUserConfig } from "hardhat/config"
+import { HardhatUserConfig, subtask } from "hardhat/config"
+import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from "hardhat/builtin-tasks/task-names"
 import "@nomicfoundation/hardhat-toolbox"
 import "@vechain/sdk-hardhat-plugin"
 import "hardhat-contract-sizer"
@@ -10,6 +11,15 @@ import { EnvConfig } from "@repo/config/contracts"
 import "@nomicfoundation/hardhat-verify"
 import { getMnemonic } from "./scripts/helpers/env"
 import { HDKey } from "@vechain/sdk-core"
+
+// SKIP_DEPRECATED_CONTRACTS=1 excludes contracts/deprecated/** from compilation.
+// Deprecated versions are only needed by upgrade tests; the frontend Docker image
+// sets this to avoid compiling ~440 unused Solidity files.
+subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS, async (_, __, runSuper) => {
+  const paths: string[] = await runSuper()
+  if (process.env.SKIP_DEPRECATED_CONTRACTS !== "1") return paths
+  return paths.filter(p => !p.includes("/contracts/deprecated/"))
+})
 
 const getSoloUrl = () => {
   const url = process.env.NEXT_PUBLIC_APP_ENV
