@@ -5,5 +5,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "outDir": "dist/esm"
-  }
+  },
+  "files": [],
+  "include": ["index.ts", "artifacts/contracts/**/*.json", "typechain-types/**/*.ts"]
 }
