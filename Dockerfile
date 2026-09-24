@@ -60,7 +60,7 @@ RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
 # ============================================================================
 # Production stage (minimal image)
 # ============================================================================
-FROM node:22-slim@sha256:f32b81066cde10a75dbac96646099533316d94bac4150c55da1636e1f0ffdc46
+FROM node:22-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
 
 # Next.js standalone runs `node server.js`; npm/npx/corepack aren't invoked
 # at runtime. Removing them drops the bundled-npm CVE surface (tar,
