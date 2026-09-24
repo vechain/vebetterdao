@@ -189,6 +189,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/vevote/proposals/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get comments for a proposal. */
+        get: operations["getComments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/vevote/proposal/results": {
         parameters: {
             query?: never;
@@ -609,6 +626,32 @@ export interface paths {
          *                 response up to a minute old.
          */
         get: operations["getTransactionsByContract"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get each indexer's latest indexed block
+         * @description Returns one entry per indexer running against this database, newest committed block
+         *                 first seen from its own checkpoint. An indexer that has written nothing yet reports a
+         *                 null `blockNumber`.
+         *
+         *                 Indexers advance independently, so one lagging entry means that domain's endpoints are
+         *                 behind while the rest are current. Compare against a Thor node's best block for the
+         *                 gap, or against the other colour's entries before a blue/green switch.
+         */
+        get: operations["getStatus"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2250,7 +2293,23 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             /** Format: int64 */
-            totalAccounts?: number | null;
+            totalAccounts: number;
+        };
+        PaginatedResponseVeVoteProposalComment: {
+            data: components["schemas"]["VeVoteProposalComment"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        VeVoteProposalComment: {
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            voter: string;
+            proposalId: string;
+            /** @enum {string} */
+            support: "AGAINST" | "FOR" | "ABSTAIN";
+            weight: number;
+            reason: string;
         };
         PaginatedResponseVeVoteProposalResult: {
             data: components["schemas"]["VeVoteProposalResult"][];
@@ -2507,6 +2566,14 @@ export interface components {
             totalRevertedTransactions: number;
             totalRevertedClauses: number;
         };
+        IndexerCheckpoint: {
+            schema: string;
+            /** Format: int32 */
+            version: number;
+            /** Format: int64 */
+            blockNumber?: number | null;
+            blockId?: string | null;
+        };
         PaginatedResponseTotalByPeriodDto: {
             data: components["schemas"]["TotalByPeriodDto"][];
             pagination: components["schemas"]["PaginationDetail"];
@@ -2719,7 +2786,6 @@ export interface components {
             blockId: string;
             /** Format: int64 */
             blockTimestamp: number;
-            blacklisted?: boolean;
         };
         PaginatedResponseIndexedNft_Public: {
             data: components["schemas"]["IndexedNft_Public"][];
@@ -2794,11 +2860,11 @@ export interface components {
         AverageFeesPerUser: {
             date: string;
             /** Format: int64 */
-            dayStartTimestamp?: number | null;
-            totalFeesPaid?: number | null;
+            dayStartTimestamp: number;
+            totalFeesPaid: number;
             /** Format: int64 */
-            dailyActiveUsers?: number | null;
-            averageFeesPerUser?: number | null;
+            dailyActiveUsers: number;
+            averageFeesPerUser: number;
         };
         Contract: {
             address: string;
@@ -2990,9 +3056,9 @@ export interface components {
             /** Format: int64 */
             registeredAt: number;
             exitAnnouncedRound?: string | null;
-            exitEffectiveDeadline?: string | null;
             lastReportRound?: string | null;
             lastReportURI?: string | null;
+            exitEffectiveDeadline?: string | null;
         };
         PaginatedResponseNavigator: {
             data: components["schemas"]["Navigator"][];
@@ -3011,18 +3077,18 @@ export interface components {
             totalClaimed: number;
         };
         NavigatorFee: {
-            id: string;
             navigator: string;
             /** Format: int32 */
             roundId: number;
             totalDeposited: number;
-            claimed: boolean;
             /** Format: int64 */
             claimedAt?: number | null;
             /** Format: int64 */
             depositedAt: number;
             /** Format: int64 */
             unlockRound: number;
+            id: string;
+            claimed: boolean;
         };
         PaginatedResponseNavigatorFee: {
             data: components["schemas"]["NavigatorFee"][];
@@ -3035,8 +3101,8 @@ export interface components {
             navigator: string;
             citizen: string;
             eventType: string;
-            amount?: number | null;
-            delta?: number | null;
+            amount: number;
+            delta: number;
         };
         PaginatedResponseNavigatorDelegationEvent: {
             data: components["schemas"]["NavigatorDelegationEvent"][];
@@ -3961,6 +4027,94 @@ export interface operations {
                 };
                 content: {
                     "*/*": number;
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getComments: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Proposal ID to filter by.
+                 * @example 8.365401932242087e+76
+                 */
+                proposalId?: string;
+                /**
+                 * @description Voter address to filter by.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                voter?: string;
+                /** @description Filter by support. */
+                support?: "FOR" | "AGAINST" | "ABSTAIN";
+                /**
+                 * @description The zero-based results page number
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description The results page size
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The sort direction */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseVeVoteProposalComment"];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
@@ -5705,6 +5859,69 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
+                };
+            };
+            /** @description Validation errors occurred, eg: invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Access to the requested resource is forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Requested resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Service not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getStatus: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["IndexerCheckpoint"][];
                 };
             };
             /** @description Validation errors occurred, eg: invalid input */
