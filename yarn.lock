@@ -7388,7 +7388,7 @@
   dependencies:
     ethers "^6.13.5"
 
-"@vechain/vechain-kit@2.13.1":
+"@vechain/vechain-kit@*":
   version "2.13.1"
   resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.13.1.tgz#affa4869eee958ac02d095534d119890a7a78f19"
   integrity sha512-+4VcoqpkKnQiuVjQHueUognBSSGoANI2mWbWZky1Myrg5ST0N4lZdpbX1S/49vMQzUvc2WLi1o93YwawbZNesQ==
