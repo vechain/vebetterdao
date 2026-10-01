@@ -154,7 +154,7 @@
     "react-dom": "18.3.1",
     "fast-xml-parser": "5.5.7",
     "handlebars": "4.7.9",
-    "next": "16.3.3",
+    "next": "16.3.6",
     "sharp": "0.35.4",
     "undici": "6.24.0",
     "picomatch": "4.0.4",
