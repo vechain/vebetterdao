@@ -5,7 +5,7 @@ import { ZeroAddress } from "ethers"
 import { useVot3Delegates } from "../../api/contracts/vot3/hooks/useVot3Delegates"
 
 export const useVot3RequireSelfDelegation = () => {
-  const { account, connection } = useWallet()
+  const { account } = useWallet()
   // isSuccess, not !isLoading: a query that has not run yet is neither loading nor errored, and an
   // unread delegatee is indistinguishable from one that is genuinely the zero address because
   // compareAddresses returns false for undefined — that is how the self delegation clause was being
@@ -13,8 +13,11 @@ export const useVot3RequireSelfDelegation = () => {
   const { data: vot3DelegatedAddress, isSuccess } = useVot3Delegates(account?.address)
   const isDelegatedToZeroAddress = compareAddresses(vot3DelegatedAddress, ZeroAddress)
 
+  // VOT3._update only auto self-delegates when the receiver is not a contract, so every smart account
+  // (Privy, cross-app, VeWorld smart wallet...) needs the explicit clause. Gating on the wallet type
+  // missed non-Privy smart accounts; for an EOA with no delegatee the extra clause is harmless.
   return {
-    requiresSelfDelegation: !!connection?.isConnectedWithPrivy && isDelegatedToZeroAddress,
+    requiresSelfDelegation: isDelegatedToZeroAddress,
     isDelegationStatusUnknown: !!account?.address && !isSuccess,
   }
 }
