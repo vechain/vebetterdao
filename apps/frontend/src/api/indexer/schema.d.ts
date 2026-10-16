@@ -12,8 +12,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get V2 validators with optional filters
-         * @description Returns validators from the V2 indexer. TVL / yield / NFT-yield fields require VET and VTHO USD prices from the vechain.energy `PriceFeedOracle`; if the oracle is unavailable the endpoint returns 503 rather than a half-populated response. `online` and `totalRewards` are not yet wired up — see `ValidatorV2Response` for the remaining formulas.
+         * List validators
+         * @description Validators with their stake, yield and status. TVL and yield need live VET and VTHO prices; if those are unavailable the request fails with 503 rather than returning partial data. `online` and `totalRewards` aren't filled in yet.
          */
         get: operations["getValidators"];
         put?: never;
@@ -32,8 +32,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get a single V2 validator by ID
-         * @description Returns one validator's V2 stats by their address.
+         * Get a validator
+         * @description One validator's stake, yield and status.
          */
         get: operations["getValidatorById"];
         put?: never;
@@ -52,8 +52,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get a single validator's slot accounting over a time range
-         * @description Returns one validator's slot accounting across the requested timestamp window (inclusive, Unix seconds). Returns zeroed counts when the validator had no scheduled slots in the window.
+         * Get one validator's block production over a time range
+         * @description The same figures as `/slots`, for one validator. A validator with no scheduled slots and no downtime in the range gets zero counts and full uptime.
          */
         get: operations["getSlotStatsForValidator"];
         put?: never;
@@ -72,8 +72,17 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get per-validator slot accounting over a time range
-         * @description Returns each validator's slot accounting across the requested timestamp window (inclusive, Unix seconds). `missedSlotRatio = missedSlots / (proposedBlocks + missedSlots)`. Validators with no scheduled slots in the window are absent from the response.
+         * Get every validator's block production over a time range
+         * @description How each validator did at producing blocks between `startTimestamp` and `endTimestamp`
+         *     (Unix seconds, both included), lowest uptime first.
+         *
+         *     - `missedSlotRatio`: the share of its scheduled slots it missed
+         *     - `uptimeRatio`: the share of the time it was online. Thor stops scheduling a
+         *       validator once it misses a slot, so it counts as offline from then until it next
+         *       produces a block or exits.
+         *
+         *     Validators with no scheduled slots are listed only if they were offline during the
+         *     range.
          */
         get: operations["getSlotStats"];
         put?: never;
@@ -93,8 +102,7 @@ export interface paths {
         };
         /**
          * Get account history
-         * @description An account's history can gain an event at any block, so caches may serve a response
-         *                 up to a minute old.
+         * @description Results can be up to a minute old.
          */
         get: operations["getUsersHistoryV2"];
         put?: never;
@@ -112,7 +120,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the results of a proposal. */
+        /** Get the results of a proposal */
         get: operations["getProposalResult"];
         put?: never;
         post?: never;
@@ -129,7 +137,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all proposal results paginated. */
+        /** List proposal results */
         get: operations["getAllProposalResults"];
         put?: never;
         post?: never;
@@ -147,18 +155,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get cumulative total account counts for a timestamp range
-         * @description Returns cumulative unique-account totals for the requested timestamp range.
+         * Get the number of accounts over time
+         * @description Total number of accounts on VeChain over time, for charting.
          *
-         *                 The API automatically determines the appropriate granularity from the range:
-         *                 RAW, HOURLY, DAILY, WEEKLY, or MONTHLY.
-         *
-         *                 For sampled ranges, the response includes the nearest records at or before the
-         *                 requested boundaries so cumulative charts remain continuous even when sampled
-         *                 points are sparse.
-         *
-         *                 Values are monotonic cumulative totals. To derive accounts added between two
-         *                 consecutive points, subtract the earlier `totalAccounts` from the later one.
+         *     Each point is a running total, so subtract one point from the next to get the accounts
+         *     added in between. Point spacing depends on the length of the range: every block for
+         *     short ranges, then hourly, daily, weekly or monthly as it grows. The response also
+         *     includes the last point at or before each end of the range, so a chart line reaches both
+         *     edges.
          */
         get: operations["getTotalAccountsV2"];
         put?: never;
@@ -178,9 +182,41 @@ export interface paths {
         };
         /**
          * Get total accounts on VeChain
-         * @description Returns the total accounts observed on VeChain.
+         * @description The number of accounts that have appeared on VeChain so far.
          */
         get: operations["getTotalAccountsLatest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/wov/marketplace/buyers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List buyers and what they spent between two times
+         * @description Every address that bought on the marketplace between `from` and `to` (Unix seconds, by
+         *     block time), sorted by address. A purchase at exactly `from` is included and one at
+         *     exactly `to` is not, so back-to-back ranges never count a purchase twice.
+         *
+         *     Each buyer shows the items bought and the amount spent in each payment token, in the
+         *     token's smallest unit. VET and wrapped VET (VVET) are listed separately. Use `from=0`
+         *     for all-time totals.
+         *
+         *     - A `to` later than the newest indexed block gets a 409, with the latest time you can
+         *       ask for in the `X-Indexed-Through` header.
+         *     - When paging, send the same `from` and `to` with each `cursor`.
+         *     - Recent purchases can still be undone by a chain reorganisation. For a reward cutoff,
+         *       query once the chain is finalized past `to`.
+         */
+        get: operations["getBuyers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -196,7 +232,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get comments for a proposal. */
+        /** Get a proposal's comments */
         get: operations["getComments"];
         put?: never;
         post?: never;
@@ -213,7 +249,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Returns a list of results on vote weight per support */
+        /** Get the vote weight for each choice */
         get: operations["getResults"];
         put?: never;
         post?: never;
@@ -230,7 +266,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Fetch all historic proposals */
+        /** List past proposals */
         get: operations["getAllProposals"];
         put?: never;
         post?: never;
@@ -248,27 +284,18 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get validators with optional filters (deprecated — use /api/v2/validators)
+         * List validators (deprecated)
          * @deprecated
-         * @description **Deprecated:** Replaced by `GET /api/v2/validators`. This endpoint now reads from the
-         *                 V2 indexer (`validators_v2`) and reshapes the V2 document into the V1 wire format.
-         *                 `online` and `totalRewards` are returned as `null` (not populated on V2). `offlineBlocks`
-         *                 is sourced from V2's PoS-schedule misses and is numerically different from the V1
-         *                 transient `OfflineBlock` pointer. `sortBy=nft:<Level>` has no V2 equivalent and silently
-         *                 falls back to the default sort.
+         * @description **Deprecated:** use `GET /api/v2/validators`.
          *
-         *                 This endpoint retrieves validator stats.
+         *     Kept for existing clients, with these differences:
          *
-         *                 You can filter the results by:
-         *                 - `validatorId`: (deprecated - use GET /api/v2/validators/{validatorId} instead)
-         *                 - `status`: validator status
-         *                 - `endorser`: endorser address
+         *     - `online` and `totalRewards` are always null
+         *     - `offlineBlocks` counts missed block slots, so its numbers differ from before
+         *     - `sortBy=nft:<Level>` is ignored and the default sort is used
          *
-         *                 You can also sort the results by one of the supported fields and paginate.
-         *
-         *                 - `sortBy`: Choose between `validatorTvl`, `totalTvl`, `blockProbability`, `delegatorTvl`, or `nft:<Level>` (projected next-cycle yield if that NFT were delegated, e.g. `nft:Strength`)
-         *                 - `page` and `size`: Controls pagination
-         *                 - `direction`: Either `asc` or `desc`
+         *     Filter by `status` or `endorser` and sort with `sortBy`: `validatorTvl`, `totalTvl`,
+         *     `blockProbability` or `delegatorTvl`.
          */
         get: operations["getValidators_1"];
         put?: never;
@@ -287,11 +314,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get delegations with optional filters
-         * @description Returns delegations. Filterable by:
-         *                 - `validator`: delegations for a specific validator
-         *                 - `tokenId`: delegations for a specific NFT tokenId
-         *                 - `statuses`: array of statuses of interest (QUEUED / ACTIVE / EXITING / EXITED)
+         * List delegations
+         * @description Delegations, optionally filtered by `validator`, `tokenId` (the Stargate NFT) or `statuses` (QUEUED, ACTIVE, EXITING, EXITED).
          */
         get: operations["getDelegations"];
         put?: never;
@@ -310,8 +334,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get delegation counts by status for all validators
-         * @description Returns the count of delegations grouped by status (QUEUED, ACTIVE, EXITING) for all validators, or optionally filtered to a specific validator.
+         * Count delegations by status
+         * @description Number of delegations in each status (QUEUED, ACTIVE, EXITING), across all validators or for one.
          */
         get: operations["getDelegationCounts"];
         put?: never;
@@ -330,9 +354,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get missed blocks percentage for validators (deprecated)
+         * Get the share of blocks validators missed (deprecated)
          * @deprecated
-         * @description **Deprecated:** Replaced by `GET /api/v2/validators/slots`. `missedPercentage` is `missedSlots / scheduledSlots * 100` over the window. `startBlock` is derived from `endBlock - days * 8640` (VeChain's ~10s block rate); `endBlock` is the current chain head. Only validators with at least one missed slot in the window appear in `validators`.
+         * @description **Deprecated:** use `GET /api/v2/validators/slots`.
+         *
+         *     The percentage of their scheduled block slots each validator missed over `timeframe`.
+         *     Only validators that missed at least one are listed.
          */
         get: operations["getMissedBlocksPercentage"];
         put?: never;
@@ -351,8 +378,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get historic VTHO rewards in a custom time range
-         * @description Returns a time series of VTHO rewards between the given timestamps. Granularity (hourly/daily/weekly/monthly) is automatically chosen based on the time range. For sampled ranges, the response includes the nearest records at or before the requested boundaries. You can filter by validator address.
+         * Get validator VTHO rewards over time
+         * @description VTHO rewards between two times. Point spacing (hourly, daily, weekly or monthly) depends on the length of the range, and the last point at or before each end is included. Pass a validator address for one validator.
          */
         get: operations["getHistoricValidatorRewardsRange"];
         put?: never;
@@ -371,8 +398,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get paginated validator block reward records
-         * @description Returns a paginated list of validator block reward and performance records. You can filter by validator address and/or block status (VALIDATED or MISSED). Results are sorted by block number (default: descending).
+         * List validator block rewards
+         * @description Block rewards and performance per validator, newest block first by default. Filter by validator, or by status: VALIDATED or MISSED.
          */
         get: operations["getValidatorBlockRewards"];
         put?: never;
@@ -391,8 +418,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get validator block records for a specific block number
-         * @description Returns all validator block reward records for a specific block number. You can optionally filter by validator address to narrow to a single record.
+         * Get validator block rewards for one block
+         * @description Every validator's reward record for one block. Pass `validator` for just one.
          */
         get: operations["getBlockByBlockNumber"];
         put?: never;
@@ -410,7 +437,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get transfer events by address or token address */
+        /** List transfers by address or token */
         get: operations["getTransferEvents"];
         put?: never;
         post?: never;
@@ -427,7 +454,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get transfer events by to address */
+        /** List transfers received by an address */
         get: operations["getTransferEventsByTo"];
         put?: never;
         post?: never;
@@ -445,10 +472,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get latest transfer events
-         * @description Returns latest transfer events by block number descending and canonical transfer order
-         *                 within each block. Defaults to all transfer event types; use the eventType query
-         *                 parameter to filter to one or more types.
+         * List the latest transfers
+         * @description The latest transfers, newest block first and in on-chain order within a block. Every transfer type is included unless you pass `eventType`.
          */
         get: operations["getLatestTransfers"];
         put?: never;
@@ -466,7 +491,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all fungible tokens transfers contracts for a given account */
+        /** List the tokens an account has sent or received */
         get: operations["getFungibleTokensContractsByAddress"];
         put?: never;
         post?: never;
@@ -483,7 +508,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get transfer events by from address */
+        /** List transfers sent by an address */
         get: operations["getTransferEventsByFrom"];
         put?: never;
         post?: never;
@@ -500,7 +525,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get transfer events for a specific block */
+        /** List the transfers in a block */
         get: operations["getTransfersForBlock"];
         put?: never;
         post?: never;
@@ -517,7 +542,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all transactions by an origin or delegator address */
+        /** List transactions sent or sponsored by an address */
         get: operations["getTransactionsByOriginOrDelegator"];
         put?: never;
         post?: never;
@@ -534,13 +559,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get transaction by ID
-         * @description A confirmed transaction never changes, so the response is cacheable for as long as it
-         *                 has already been settled: `Cache-Control` grants the age of the containing block,
-         *                 capped at a year. A transaction from moments ago is therefore barely cached, and a
-         *                 reorg can only serve a dropped transaction for as long as it had been on chain.
-         */
+        /** Get a transaction */
         get: operations["getTransactionById"];
         put?: never;
         post?: never;
@@ -558,10 +577,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get latest transactions
-         * @description Returns latest transactions by block number descending and canonical transaction order
-         *                 within each block. The head of the chain moves every block, so shared caches may serve
-         *                 a response up to one block old.
+         * List the latest transactions
+         * @description The latest transactions, newest block first and in on-chain order within a block. Results can be one block (about 10 seconds) old.
          */
         get: operations["getLatestTransactions"];
         put?: never;
@@ -579,7 +596,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all delegated transactions by a delegator address */
+        /** List transactions an address sponsored */
         get: operations["getDelegatedTransactions"];
         put?: never;
         post?: never;
@@ -597,12 +614,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get cumulative transaction, clause, and reverted totals on VeChain
-         * @description Returns the cumulative number of transactions, clauses, reverted transactions, and
-         *                 reverted clauses observed on VeChain up to the most recently indexed block. Clause
-         *                 totals are included because clauses are a property of transactions, and reverted totals
-         *                 cover reverted transactions plus the clauses contained within those reverted
-         *                 transactions.
+         * Get total transactions and clauses on VeChain
+         * @description Running totals of transactions and clauses on VeChain up to the newest indexed block, and how many of each reverted. Every clause in a reverted transaction counts as a reverted clause.
          */
         get: operations["getTransactionCount"];
         put?: never;
@@ -621,9 +634,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get all transactions for a contract address
-         * @description A new transaction can arrive for any contract at any block, so caches may serve a
-         *                 response up to a minute old.
+         * List transactions that called a contract
+         * @description Results can be up to a minute old.
          */
         get: operations["getTransactionsByContract"];
         put?: never;
@@ -642,14 +654,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get each indexer's latest indexed block
-         * @description Returns one entry per indexer running against this database, newest committed block
-         *                 first seen from its own checkpoint. An indexer that has written nothing yet reports a
-         *                 null `blockNumber`.
-         *
-         *                 Indexers advance independently, so one lagging entry means that domain's endpoints are
-         *                 behind while the rest are current. Compare against a Thor node's best block for the
-         *                 gap, or against the other colour's entries before a blue/green switch.
+         * Get the latest block each indexer has saved
+         * @description The latest block each indexer has saved. `blockNumber` is null for an indexer that hasn't saved anything yet. Indexers run independently, so if one is behind, only the endpoints that use it are out of date. Compare with a Thor node's best block to see how far behind.
          */
         get: operations["getStatus"];
         put?: never;
@@ -668,26 +674,15 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate metrics by time period
-         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         * Get Stargate statistics by period
+         * @description Stargate statistics grouped by `{period}`:
          *
-         *         ### Modes:
-         *         **Preset Mode**
-         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *     - `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`: one summary per period
+         *     - `BLOCK`: one entry per block
+         *     - `ALL`: a single all-time summary
          *
-         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
-         *         • `BLOCK` — returns raw per-block totals
-         *         • `ALL` — returns a single all-time summary
-         *
-         *         ### Custom Date Range Mode
-         *         Pass `from` and/or `to` (Unix timestamps).
-         *
-         *         • The `{period}` still controls the aggregation
-         *         • `from`/`to` simply filter which summarized records are returned
-         *           (e.g., DAY summaries within the range)
-         *
-         *         ### Pagination:
-         *         Supports `page`, `size`, and `direction`.
+         *     `from` and `to` (Unix seconds) limit which periods are returned; they don't change the
+         *     grouping.
          */
         get: operations["getVthoGenerated"];
         put?: never;
@@ -706,26 +701,15 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate metrics by time period
-         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         * Get Stargate statistics by period
+         * @description Stargate statistics grouped by `{period}`:
          *
-         *         ### Modes:
-         *         **Preset Mode**
-         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *     - `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`: one summary per period
+         *     - `BLOCK`: one entry per block
+         *     - `ALL`: a single all-time summary
          *
-         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
-         *         • `BLOCK` — returns raw per-block totals
-         *         • `ALL` — returns a single all-time summary
-         *
-         *         ### Custom Date Range Mode
-         *         Pass `from` and/or `to` (Unix timestamps).
-         *
-         *         • The `{period}` still controls the aggregation
-         *         • `from`/`to` simply filter which summarized records are returned
-         *           (e.g., DAY summaries within the range)
-         *
-         *         ### Pagination:
-         *         Supports `page`, `size`, and `direction`.
+         *     `from` and `to` (Unix seconds) limit which periods are returned; they don't change the
+         *     grouping.
          */
         get: operations["getVthoClaimed"];
         put?: never;
@@ -744,26 +728,15 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate metrics by time period
-         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         * Get Stargate statistics by period
+         * @description Stargate statistics grouped by `{period}`:
          *
-         *         ### Modes:
-         *         **Preset Mode**
-         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *     - `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`: one summary per period
+         *     - `BLOCK`: one entry per block
+         *     - `ALL`: a single all-time summary
          *
-         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
-         *         • `BLOCK` — returns raw per-block totals
-         *         • `ALL` — returns a single all-time summary
-         *
-         *         ### Custom Date Range Mode
-         *         Pass `from` and/or `to` (Unix timestamps).
-         *
-         *         • The `{period}` still controls the aggregation
-         *         • `from`/`to` simply filter which summarized records are returned
-         *           (e.g., DAY summaries within the range)
-         *
-         *         ### Pagination:
-         *         Supports `page`, `size`, and `direction`.
+         *     `from` and `to` (Unix seconds) limit which periods are returned; they don't change the
+         *     grouping.
          */
         get: operations["getVETStakedTimeFrame"];
         put?: never;
@@ -782,26 +755,15 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate metrics by time period
-         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         * Get Stargate statistics by period
+         * @description Stargate statistics grouped by `{period}`:
          *
-         *         ### Modes:
-         *         **Preset Mode**
-         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *     - `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`: one summary per period
+         *     - `BLOCK`: one entry per block
+         *     - `ALL`: a single all-time summary
          *
-         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
-         *         • `BLOCK` — returns raw per-block totals
-         *         • `ALL` — returns a single all-time summary
-         *
-         *         ### Custom Date Range Mode
-         *         Pass `from` and/or `to` (Unix timestamps).
-         *
-         *         • The `{period}` still controls the aggregation
-         *         • `from`/`to` simply filter which summarized records are returned
-         *           (e.g., DAY summaries within the range)
-         *
-         *         ### Pagination:
-         *         Supports `page`, `size`, and `direction`.
+         *     `from` and `to` (Unix seconds) limit which periods are returned; they don't change the
+         *     grouping.
          */
         get: operations["getVETDelegatedTimeFrame"];
         put?: never;
@@ -819,7 +781,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get total VTHO generated by Stargate delelegations */
+        /** Get total VTHO generated by Stargate delegations */
         get: operations["getTotalVthoGenerated"];
         put?: never;
         post?: never;
@@ -837,8 +799,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get historic data for total VTHO generated
-         * @description This endpoint returns a time series of total VTHO claimed by all Stargate users.
+         * Get total VTHO generated over time
+         * @description Total VTHO generated by Stargate delegations over time.
          */
         get: operations["getTotalVthoGenerated_1"];
         put?: never;
@@ -908,8 +870,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get historic data for total VTHO claimed
-         * @description This endpoint returns a time series of total VTHO claimed by all Stargate users (Delegation only).
+         * Get total VTHO claimed over time
+         * @description Total VTHO claimed from Stargate delegation over time.
          */
         get: operations["getTotalVthoClaimed_3"];
         put?: never;
@@ -945,8 +907,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get historic data for total VET staked
-         * @description This endpoint returns a time series of total VET staked in Stargate. The time series is sparsely populated, so it may not contain consistent gaps between records.
+         * Get total VET staked over time
+         * @description Total VET staked in Stargate over time. Points are irregularly spaced.
          */
         get: operations["getTotalVetStaked_1"];
         put?: never;
@@ -982,8 +944,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate Tokens
-         * @description Retrieve Stargate Token snapshots. You can filter results by tokenId, manager, owner, or any combination of these parameters. If no filters are provided, all tokens will be returned.
+         * List Stargate NFTs
+         * @description Stargate NFTs. Filter by `tokenId`, `manager`, `owner` or any mix of them; with no filter, every NFT is returned.
          */
         get: operations["getStargateTokens"];
         put?: never;
@@ -1002,8 +964,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate token history
-         * @description Retrieve the Stargate lifecycle timeline for a token, including Stargate protocol events, synthetic delegation lifecycle events, Stargate NFT transfers, NFT sales, and VeVote casts.
+         * Get a Stargate NFT's history
+         * @description Everything that happened to one Stargate NFT: staking and delegation events, transfers, sales and VeVote votes.
          */
         get: operations["getStargateTokenHistory"];
         put?: never;
@@ -1022,12 +984,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate Token rewards
-         * @description Retrieve reward history for a given Stargate delegation token.
-         *             Rewards can be queried by period (CYCLE, DAY, WEEK, MONTH, YEAR).
-         *             All rewards are calculated and rolled over based on UTC time.
-         *
-         *             If no `periodType` is provided, the response defaults to showing the full cumulative rewards.
+         * Get a Stargate NFT's rewards
+         * @description Delegation rewards earned by one Stargate NFT. `periodType` groups them by CYCLE, DAY, WEEK, MONTH or YEAR (UTC days); leave it out for the running total.
          */
         get: operations["getStargateTokenRewards"];
         put?: never;
@@ -1063,26 +1021,15 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Stargate metrics by time period
-         * @description Retrieve Stargate statistics aggregated by a preset time period, optionally filtered by a custom date range.
+         * Get Stargate statistics by period
+         * @description Stargate statistics grouped by `{period}`:
          *
-         *         ### Modes:
-         *         **Preset Mode**
-         *         Pass `{period}` as one of: `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`, `ALL`, or `BLOCK`.
+         *     - `HOUR`, `DAY`, `WEEK`, `MONTH`, `YEAR`: one summary per period
+         *     - `BLOCK`: one entry per block
+         *     - `ALL`: a single all-time summary
          *
-         *         • `DAY`, `WEEK`, `MONTH`, `YEAR` — return aggregated summaries per period
-         *         • `BLOCK` — returns raw per-block totals
-         *         • `ALL` — returns a single all-time summary
-         *
-         *         ### Custom Date Range Mode
-         *         Pass `from` and/or `to` (Unix timestamps).
-         *
-         *         • The `{period}` still controls the aggregation
-         *         • `from`/`to` simply filter which summarized records are returned
-         *           (e.g., DAY summaries within the range)
-         *
-         *         ### Pagination:
-         *         Supports `page`, `size`, and `direction`.
+         *     `from` and `to` (Unix seconds) limit which periods are returned; they don't change the
+         *     grouping.
          */
         get: operations["getNFTHoldersTimeFrame"];
         put?: never;
@@ -1101,8 +1048,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get historic data for total NFT holders
-         * @description This endpoint returns a time series of NFT holders in Stargate. The time series is sparsely populated, so it may not contain consistent gaps between records.
+         * Get the number of NFT holders over time
+         * @description Number of Stargate NFT holders over time. Points are irregularly spaced.
          */
         get: operations["getNftHolders_1"];
         put?: never;
@@ -1122,9 +1069,7 @@ export interface paths {
         };
         /**
          * List proposed transactions for a Safe
-         * @description Returns Safe transactions proposed via the SafeEmitter contract, paginated and sorted
-         *                 newest-first by default. Per-transaction approval / execution status is available from
-         *                 `/safes/{safe}/transactions/{txHash}/state`.
+         * @description Transactions proposed for this Safe, newest first. For a transaction's approvals and whether it ran, use `/safes/{safe}/transactions/{txHash}/state`.
          */
         get: operations["getTransactionsForSafe"];
         put?: never;
@@ -1144,9 +1089,7 @@ export interface paths {
         };
         /**
          * Get Safe transaction state
-         * @description Returns the aggregated state for a single Safe transaction (approvers, executor, and
-         *                 execution status). Returns an empty document with no approvers when the Safe has not
-         *                 seen the txHash yet, so the dapp does not need to fall back to RPC for unknown hashes.
+         * @description Who approved a Safe transaction, who executed it, and whether it ran. A `txHash` the Safe hasn't seen returns an empty result with no approvers, not an error.
          */
         get: operations["getTxState"];
         put?: never;
@@ -1166,9 +1109,7 @@ export interface paths {
         };
         /**
          * List Safes for an owner
-         * @description Returns the Safes that the supplied address is — or has been — an owner of.
-         *                 Use `membership=ALL` (default) for both current and past, `CURRENT` for only active
-         *                 ownerships, and `PAST` for ownerships that have been revoked.
+         * @description Safes the address owns or used to own. `membership` narrows this: `ALL` (default) for both, `CURRENT` for Safes it owns now, `PAST` for Safes it was removed from.
          */
         get: operations["getSafesForOwner"];
         put?: never;
@@ -1186,7 +1127,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all NFTs owned by an address */
+        /** List the NFTs an address owns */
         get: operations["getOwnedNFTs"];
         put?: never;
         post?: never;
@@ -1204,8 +1145,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get NFT token history
-         * @description Retrieve NFT transfer and sale history for a specific contract and token ID. If eventName is omitted, the response includes both TRANSFER_NFT and NFT_SALE events.
+         * Get an NFT's history
+         * @description Transfers and sales of one NFT. Without `eventName`, both are returned.
          */
         get: operations["getNftHistory"];
         put?: never;
@@ -1223,7 +1164,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get all contracts addresses by NFT owner */
+        /** List the NFT collections an address owns from */
         get: operations["getContractsByNFTOwner"];
         put?: never;
         post?: never;
@@ -1261,31 +1202,23 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get block usage statistics for a timestamp range
-         * @description Returns cumulative block usage statistics (gas usage, transaction counts, etc.) for a given timestamp range.
+         * Get gas and transaction totals over time
+         * @description Gas used, transaction counts and other block totals over time, for charting.
          *
-         *                 The API automatically determines the appropriate data granularity based on the size of the time range:
-         *                 - Range ≤ 4,000 seconds: Returns all blocks (~360 data points)
-         *                 - Range ≤ 700,000 seconds: Returns hourly values (~168 data points)
-         *                 - Range ≤ 6,000,000 seconds: Returns daily values (~60 data points)
-         *                 - Range ≤ 35,000,000 seconds: Returns weekly values (~52 data points)
-         *                 - Range > 35,000,000 seconds: Returns monthly values
+         *     Point spacing depends on the length of the range:
          *
-         *                 For sampled ranges, the response also includes the nearest records at or before the requested
-         *                 boundaries so cumulative charts remain continuous even when the sampled points are sparse.
+         *     - up to 4,000 seconds (about an hour): every block
+         *     - up to 700,000 seconds (about 8 days): hourly
+         *     - up to 6,000,000 seconds (about 69 days): daily
+         *     - up to 35,000,000 seconds (about 13 months): weekly
+         *     - longer: monthly
          *
-         *                 Values are represented as a monotonic cumulative counter which means the values increase over time. This is
-         *                 a semantic used by Grafana for example. It requires some processing on the client side to convert to a value
-         *                 for a given block.
+         *     Each value is a running total since the start of the chain, so subtract one point from
+         *     the next to get the amount in between. Divide that by the number of blocks between the
+         *     points for a per-block average.
          *
-         *                 For example to get the gasUsed at block n you would need to do:
-         *
-         *                     gasUsedAtBlockN = gasUsedAtBlockN - gasUsedAtBlock(n-1)
-         *
-         *                 In the case where we return hourly/daily/weekly/monthly values only you can calculate an average over the
-         *                 block range. If the first record in the returned data is at block n and the next record is at block n + k:
-         *
-         *                     averageGasUsedPerBlock = (gasUsedAtBlock(n+k) - gasUsedAtBlockN) / k
+         *     The response also includes the last point at or before each end of the range, so a chart
+         *     line reaches both edges.
          */
         get: operations["getBlockUsage"];
         put?: never;
@@ -1304,14 +1237,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get daily average fees per user for a timestamp range
-         * @description Returns daily AFPU (Average Fees Per User) points for the requested timestamp range.
-         *
-         *                 AFPU is computed per UTC day as:
-         *                     total fees paid that day / distinct transaction origins that day
-         *
-         *                 Values are daily period metrics, not cumulative counters. The source fee amount uses the
-         *                 transaction `paid` value in the native gas token VTHO.
+         * Get the average fee per user for each day
+         * @description Average fee per user for each UTC day in the range: the VTHO paid in fees that day divided by the number of different addresses that sent transactions that day. Each point covers its own day; it isn't a running total.
          */
         get: operations["getAverageFeesPerUser"];
         put?: never;
@@ -1329,7 +1256,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Retrieve a contract by address */
+        /** Get a contract */
         get: operations["getContract"];
         put?: never;
         post?: never;
@@ -1346,7 +1273,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get contracts where address is master */
+        /** List the contracts an address is master of */
         get: operations["getContractsByMaster"];
         put?: never;
         post?: never;
@@ -1364,20 +1291,16 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get a range of collapsed blocks
-         * @description Returns collapsed (unexpanded) block headers newest-first, starting at `from` and
-         *                 walking backwards, or starting at the indexed head when `from` is omitted. Pass
-         *                 `pagination.cursor` straight back as `from` to fetch the next page.
+         * List block headers
+         * @description Block headers, newest first. Starts at block `from`, or the newest indexed block if you
+         *     leave it out, and works backwards. For the next page, pass `pagination.cursor` as
+         *     `from`.
          *
-         *                 Each block carries `clauseCount` and `totalVthoPaid` (hex wei), the totals over its
-         *                 transactions, which Thor itself only exposes on an expanded block.
+         *     Each block includes `clauseCount` and `totalVthoPaid` (hex, in wei), added up over its
+         *     transactions.
          *
-         *                 `isTrunk` and `isFinalized` are omitted. Both are node-local, time-varying properties
-         *                 rather than block contents — `isTrunk` is a live comparison against the node's best
-         *                 chain, and finality lags the head by 360–540 blocks and is derived from validator
-         *                 stake weights — so neither can be served correctly from an index. Use a Thor node's
-         *                 `GET /blocks/{revision}` if you need them, for a single block, or to look up a block
-         *                 by ID.
+         *     `isTrunk` and `isFinalized` aren't returned: they change over time and only a node knows
+         *     them. Ask a Thor node's `GET /blocks/{revision}` for those, or to look up a block by ID.
          */
         get: operations["getBlocks"];
         put?: never;
@@ -1396,8 +1319,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get XAllocation voting results for a round
-         * @description Returns voting results for a specific round, optionally filtered by appId.
+         * Get the votes in an allocation round
+         * @description Votes for each app in one round. Pass `appId` for a single app.
          */
         get: operations["getXAllocResults"];
         put?: never;
@@ -1416,8 +1339,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get XAllocation earnings distribution
-         * @description Returns earnings distribution for a specific app and/or round. At least one parameter (appId or roundId) must be provided. If both are provided, returns earnings for that specific app and round. If only appId is provided, returns earnings for that app across all rounds. If only roundId is provided, returns earnings for all apps in that round.
+         * Get app earnings from allocation rounds
+         * @description App earnings from allocation rounds. Pass `appId`, `roundId` or both:
+         *
+         *     - `appId` only: that app's earnings in every round
+         *     - `roundId` only: every app's earnings in that round
+         *     - both: that app's earnings in that round
          */
         get: operations["getXAllocEarnings"];
         put?: never;
@@ -1435,7 +1362,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the comments made by a user on proposals. */
+        /** Get a wallet's comments on proposals */
         get: operations["getUserProposalComments"];
         put?: never;
         post?: never;
@@ -1453,8 +1380,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get indexed B3TR challenges bucketed for a wallet.
-         * @description Returns challenges bucketed by a semantic `filter` that encodes both a challenge status set and the wallet's relationship to the challenge. See the `filter` parameter for the full list of buckets.
+         * List a wallet's challenges
+         * @description A wallet's challenges, grouped by `filter`: ones needing its action, its own, ones open to join, others in progress, and past ones. The `filter` parameter lists each group.
          */
         get: operations["getWalletChallenges"];
         put?: never;
@@ -1474,7 +1401,7 @@ export interface paths {
         };
         /**
          * Get treasury B3TR transfers
-         * @description Returns B3TR token transfers to/from the treasury, classified by category.
+         * @description B3TR transfers to and from the treasury, each labelled with a category.
          */
         get: operations["getTreasuryTransfers"];
         put?: never;
@@ -1493,10 +1420,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get B3TR richlist
-         * @description Returns the list of holders by balance descending, with cursor pagination.
-         *                 Use scope=ALL (default) for combined VOT3+B3TR, scope=VOT3 or scope=B3TR for a single token.
-         *                 B3TR held by the VOT3 contract is excluded when scope is B3TR or ALL.
+         * List the largest B3TR holders
+         * @description Holders ranked by balance, largest first. `scope` picks what counts: `ALL` (default) adds VOT3 and B3TR together, `VOT3` or `B3TR` ranks one token. B3TR locked in the VOT3 contract is left out so it isn't counted twice.
          */
         get: operations["getRichlist"];
         put?: never;
@@ -1515,9 +1440,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get B3TR rank for an address
-         * @description Returns the address's rank, total holders, and top percentage for the chosen scope.
-         *                 Use scope=ALL (default), scope=VOT3, or scope=B3TR.
+         * Get an address's B3TR rank
+         * @description An address's rank, the number of holders, and the top percentage it falls in. `scope` works as on the richlist.
          */
         get: operations["getAddressRank"];
         put?: never;
@@ -1536,7 +1460,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get the results of a proposal.
+         * Get the results of a proposal (deprecated, use v2)
          * @deprecated
          */
         get: operations["getProposalResultDeprecated"];
@@ -1555,7 +1479,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the comments for a proposal. */
+        /** Get a proposal's comments */
         get: operations["getProposalComments"];
         put?: never;
         post?: never;
@@ -1713,8 +1637,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get B3TR GM Level UserAllTimeActionSummary
-         * @description Returns the current overview (holders, B3TR donated, etc.) for each Galaxy Member level.
+         * Get statistics for each Galaxy Member level
+         * @description Holders, B3TR donated and other totals for each Galaxy Member level.
          */
         get: operations["getLevelOverviews"];
         put?: never;
@@ -1733,8 +1657,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get public indexed B3TR challenges.
-         * @description Returns public challenges across the network. Use `/api/v1/b3tr/users/{wallet}/challenges` for wallet-scoped views.
+         * List public challenges
+         * @description Public challenges. For one wallet's challenges, use `/api/v1/b3tr/users/{wallet}/challenges`.
          */
         get: operations["getChallenges"];
         put?: never;
@@ -1752,7 +1676,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a single indexed B3TR challenge. */
+        /** Get a challenge */
         get: operations["getChallenge"];
         put?: never;
         post?: never;
@@ -1787,14 +1711,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get B3TR action overview for a specific wallet, optionally for a specific round or date.
-         * @description This endpoint retrieves the B3TR action overview for a wallet address.
-         *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
-         *
-         *                 - If roundId is provided, the overview for the specific round is returned.
-         *                 - If date is provided, the overview for the specific date is returned.
-         *                 - If roundId/date are not provided, the all time sustainability overview for the user is returned.
-         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         * Get a wallet's action totals
+         * @description A wallet's action totals. Pass `roundId` for one allocation round or `date` for one day; omit both for all time. Passing both is a 400 error.
          */
         get: operations["getUserOverview"];
         put?: never;
@@ -1812,7 +1730,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get daily action summaries for a specific user within a specified range. */
+        /** Get a wallet's daily action totals over a date range */
         get: operations["getDailySummariesForRange"];
         put?: never;
         post?: never;
@@ -1830,14 +1748,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get B3TR action overview for a user on a specific app, optionally for a specific round or date.
-         * @description This endpoint retrieves the B3TR action overview for a user on a specific app.
-         *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
-         *
-         *                 - If roundId is provided, the overview for the specific round is returned.
-         *                 - If date is provided, the overview for the specific date is returned.
-         *                 - If roundId/date are not provided, the all time sustainability overview for the user on the app is returned.
-         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         * Get a wallet's action totals in one app
+         * @description A wallet's action totals in one app. Pass `roundId` for one allocation round or `date` for one day; omit both for all time. Passing both is a 400 error.
          */
         get: operations["getUserAppOverview"];
         put?: never;
@@ -1856,13 +1768,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get leaderboard of user's B3TR actions.
-         * @description This endpoint retrieves the user leaderboard based on their B3TR actions.
-         *
-         *                 - If roundId is provided, the leaderboard for the specific round is returned.
-         *                 - If date is provided, the leaderboard for the specific date is returned.
-         *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
-         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         * Get the wallet leaderboard
+         * @description Wallets ranked by their B3TR actions. Pass `roundId` for one allocation round or `date` for one day; omit both for all time. Passing both is a 400 error.
          */
         get: operations["getUserLeaderboard"];
         put?: never;
@@ -1881,13 +1788,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get the app B3TR action leaderboard
-         * @description This endpoint retrieves the app B3TR action leaderboard.
-         *
-         *                 - If roundId is provided, the leaderboard for the specific round is returned.
-         *                 - If date is provided, the leaderboard for the specific date is returned.
-         *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
-         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         * Get the app leaderboard
+         * @description Apps ranked by their B3TR actions. Pass `roundId` for one allocation round or `date` for one day; omit both for all time. Passing both is a 400 error.
          */
         get: operations["getAppLeaderboard"];
         put?: never;
@@ -1906,13 +1808,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get the user B3TR action leaderboard for a given app
-         * @description This endpoint retrieves the user B3TR action leaderboard for a given app.
-         *
-         *                 - If roundId is provided, the leaderboard for the specific round is returned.
-         *                 - If date is provided, the leaderboard for the specific date is returned.
-         *                 - If neither roundId nor date are provided, the all-time leaderboard is returned.
-         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         * Get the wallet leaderboard for one app
+         * @description Wallets ranked by their B3TR actions in one app. Pass `roundId` for one allocation round or `date` for one day; omit both for all time. Passing both is a 400 error.
          */
         get: operations["getUserAppLeaderboard"];
         put?: never;
@@ -1931,13 +1828,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get global B3TR action overview, optionally for a specific round or date.
-         * @description This endpoint retrieves the global B3TR action overview.
-         *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
-         *                 - If roundId is provided, the overview for the specific round is returned.
-         *                 - If date is provided, the overview for the specific date is returned.
-         *                 - If roundId/date are not provided, the all time global sustainability overview is returned.
-         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         * Get action totals across all apps
+         * @description Action totals across all apps. Pass `roundId` for one allocation round or `date` for one day; omit both for all time. Passing both is a 400 error.
          */
         get: operations["getGlobalOverview"];
         put?: never;
@@ -1973,14 +1865,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get B3TR action overview for a specific app, optionally for a specific round or date.
-         * @description This endpoint retrieves the B3TR action overview for an app.
-         *                 Optionally, a roundId or a date can be provided to retrieve the overview for a specific round or date.
-         *
-         *                 - If roundId is provided, the overview for the specific round is returned.
-         *                 - If date is provided, the overview for the specific date is returned.
-         *                 - If roundId/date are not provided, the all time sustainability overview for the app is returned.
-         *                 - If both roundId and date are provided, a BadRequest error is returned.
+         * Get an app's action totals
+         * @description An app's action totals. Pass `roundId` for one allocation round or `date` for one day; omit both for all time. Passing both is a 400 error.
          */
         get: operations["getAppOverview"];
         put?: never;
@@ -1999,13 +1885,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Retrieve account overview with VTHO earnings
-         * @description Retrieves the account overview including VTHO earned from three sources:
-         *                 - Block rewards (pre-Hayabusa authority nodes + post-Hayabusa validators)
-         *                 - Passive VTHO generation from VET holdings (genesis to Hayabusa only)
-         *                 - Stargate VTHO claimed (delegation rewards)
+         * Get the VTHO an account has earned
+         * @description VTHO an account has earned, by source, with a total:
          *
-         *                 The response includes individual breakdowns and a computed total.
+         *     - Block rewards, as an authority node before Hayabusa or as a validator after it
+         *     - VTHO generated by holding VET (genesis to Hayabusa only)
+         *     - VTHO claimed from Stargate delegation
          */
         get: operations["getOverview_1"];
         put?: never;
@@ -2056,7 +1941,7 @@ export interface components {
              */
             message?: string | null;
             /**
-             * @description Error type/category
+             * @description HTTP status name, such as Bad Request
              * @example Bad Request
              */
             error: string;
@@ -2138,6 +2023,9 @@ export interface components {
             lastProposedBlockNumber?: number | null;
             /** Format: int64 */
             lastMissedBlockNumber?: number | null;
+            online?: boolean | null;
+            /** Format: int64 */
+            offlineBlock?: number | null;
             validatorTvl: number;
             delegatorTvl: number;
             totalTvl: number;
@@ -2159,6 +2047,8 @@ export interface components {
             missedSlots: number;
             /** Format: double */
             missedSlotRatio: number;
+            /** Format: double */
+            uptimeRatio: number;
         };
         AppVote: {
             appId: string;
@@ -2294,6 +2184,33 @@ export interface components {
             blockTimestamp: number;
             /** Format: int64 */
             totalAccounts: number;
+        };
+        PaginatedResponseWovBuyerStats: {
+            data: components["schemas"]["WovBuyerStats"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        WovBuyerStats: {
+            /** @description The buyer's address. */
+            buyer: string;
+            /**
+             * Format: int64
+             * @description Items bought between `from` and `to`, in any token.
+             */
+            itemCount: number;
+            spend: components["schemas"]["WovSpend"][];
+        };
+        WovSpend: {
+            /** @description The payment token's contract; null for VET. */
+            token?: string | null;
+            /** @description VET, WoV or VVET; null for any other token. */
+            symbol?: string | null;
+            /**
+             * Format: int64
+             * @description Items bought with this token.
+             */
+            items: number;
+            /** @description Amount spent in the token's smallest unit (wei), as a decimal string. */
+            amount: string;
         };
         PaginatedResponseVeVoteProposalComment: {
             data: components["schemas"]["VeVoteProposalComment"][];
@@ -2760,7 +2677,7 @@ export interface components {
              */
             message?: string | null;
             /**
-             * @description Error type/category
+             * @description HTTP status name, such as Bad Request
              * @example Bad Request
              */
             error: string;
@@ -3363,24 +3280,24 @@ export interface operations {
     getValidators: {
         parameters: {
             query?: {
-                /** @description Filter by one or more validator statuses */
+                /** @description Only these statuses. */
                 status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
                 /**
-                 * @description Filter by endorser address
+                 * @description Endorser address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 endorser?: string;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -3401,7 +3318,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseValidatorV2Response"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3411,7 +3328,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3421,7 +3338,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3431,7 +3348,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -3441,7 +3358,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description PriceFeedOracle is unreachable or returned an unusable response */
+            /** @description USD prices are unavailable right now; try again shortly */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -3462,7 +3379,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description Validator address
+                 * @description Validator address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validatorId: string;
@@ -3480,7 +3397,7 @@ export interface operations {
                     "*/*": components["schemas"]["ValidatorV2Response"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3490,7 +3407,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3500,7 +3417,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3510,7 +3427,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -3520,7 +3437,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description PriceFeedOracle is unreachable or returned an unusable response */
+            /** @description USD prices are unavailable right now; try again shortly */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -3536,12 +3453,12 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description Start timestamp in Unix seconds (inclusive)
+                 * @description Start time in Unix seconds, included.
                  * @example 1704143600
                  */
                 startTimestamp: number;
                 /**
-                 * @description End timestamp in Unix seconds (inclusive)
+                 * @description End time in Unix seconds, included.
                  * @example 1704153600
                  */
                 endTimestamp: number;
@@ -3552,7 +3469,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description Validator address
+                 * @description Validator address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validatorId: string;
@@ -3570,7 +3487,7 @@ export interface operations {
                     "*/*": components["schemas"]["ValidatorSlotStats"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3580,7 +3497,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3590,7 +3507,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3600,7 +3517,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -3616,12 +3533,12 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description Start timestamp in Unix seconds (inclusive)
+                 * @description Start time in Unix seconds, included.
                  * @example 1704143600
                  */
                 startTimestamp: number;
                 /**
-                 * @description End timestamp in Unix seconds (inclusive)
+                 * @description End time in Unix seconds, included.
                  * @example 1704153600
                  */
                 endTimestamp: number;
@@ -3644,7 +3561,7 @@ export interface operations {
                     "*/*": components["schemas"]["ValidatorSlotStats"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3654,7 +3571,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3664,7 +3581,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3674,7 +3591,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -3709,16 +3626,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -3745,7 +3662,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3755,7 +3672,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3765,7 +3682,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3775,7 +3692,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -3796,7 +3713,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description Proposal ID to filter by.
+                 * @description Proposal ID.
                  * @example 8.365401932242087e+76
                  */
                 proposalId: string;
@@ -3814,7 +3731,7 @@ export interface operations {
                     "*/*": components["schemas"]["ProposalResult"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3824,7 +3741,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3834,7 +3751,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3844,7 +3761,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -3860,18 +3777,18 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
-                /** @description Filter by proposal states. */
+                /** @description Only proposals in these states. */
                 states?: ("Pending" | "Active" | "Canceled" | "Defeated" | "Succeeded" | "Queued" | "Executed" | "DepositNotMet" | "InDevelopment" | "Completed")[];
             };
             header?: {
@@ -3892,7 +3809,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseProposalResult"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3902,7 +3819,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3912,7 +3829,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3922,7 +3839,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -3966,7 +3883,7 @@ export interface operations {
                     "*/*": components["schemas"]["AccountTotalsSeries"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3976,7 +3893,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3986,7 +3903,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3996,7 +3913,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4029,7 +3946,7 @@ export interface operations {
                     "*/*": number;
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4039,7 +3956,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4049,7 +3966,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4059,7 +3976,99 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getBuyers: {
+        parameters: {
+            query: {
+                /**
+                 * @description Start time in Unix seconds. A purchase at exactly this time is included.
+                 * @example 1704143600
+                 */
+                from: number;
+                /**
+                 * @description End time in Unix seconds. A purchase at exactly this time is not included.
+                 * @example 1704153600
+                 */
+                to: number;
+                /**
+                 * @description Results per page.
+                 * @example 20
+                 */
+                size?: number;
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseWovBuyerStats"];
+                };
+            };
+            /** @description Invalid request, such as a malformed parameter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description `to` is later than the newest indexed block */
+            409: {
+                headers: {
+                    /** @description Timestamp of the newest indexed block (Unix time in seconds). */
+                    "X-Indexed-Through"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4075,28 +4084,28 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Proposal ID to filter by.
+                 * @description Proposal ID.
                  * @example 8.365401932242087e+76
                  */
                 proposalId?: string;
                 /**
-                 * @description Voter address to filter by.
+                 * @description Voter address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 voter?: string;
-                /** @description Filter by support. */
+                /** @description Only votes with this choice. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -4117,7 +4126,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseVeVoteProposalComment"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4127,7 +4136,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4137,7 +4146,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4147,7 +4156,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4163,23 +4172,23 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Proposal ID to filter by.
+                 * @description Proposal ID.
                  * @example 8.365401932242087e+76
                  */
                 proposalId?: string;
-                /** @description Filter by support. */
+                /** @description Only votes with this choice. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -4200,7 +4209,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseVeVoteProposalResult"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4210,7 +4219,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4220,7 +4229,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4230,7 +4239,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4245,16 +4254,16 @@ export interface operations {
     getAllProposals: {
         parameters: {
             query?: {
-                /** @description Proposal ID to filter by. */
+                /** @description Proposal ID. */
                 proposalId?: string;
                 /**
-                 * @description Filter by legacy contract address.
+                 * @description Only proposals from this legacy contract.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 contractAddress?: string;
                 page?: number;
                 size?: number;
-                /** @description If true, include proposals that were used for testing. */
+                /** @description Include test proposals. */
                 testProposals?: boolean;
             };
             header?: {
@@ -4275,7 +4284,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseHistoricProposals"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4285,7 +4294,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4295,7 +4304,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4305,7 +4314,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4321,7 +4330,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Filter by endorser address
+                 * @description Endorser address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 endorser?: string;
@@ -4330,21 +4339,21 @@ export interface operations {
                  * @description Deprecated: use GET /api/v2/validators/{validatorId} instead.
                  */
                 validatorId?: string;
-                /** @description Filter by one or more validator statuses */
+                /** @description Only these statuses. */
                 status?: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
-                /** @description The sort by field */
+                /** @description Field to sort by. */
                 sortBy?: "validatorTvl" | "totalTvl" | "blockProbability" | "delegatorTvl" | "nft:Strength" | "nft:Thunder" | "nft:Mjolnir" | "nft:VeThorX" | "nft:StrengthX" | "nft:ThunderX" | "nft:MjolnirX" | "nft:Dawn" | "nft:Lightning" | "nft:Flash";
             };
             header?: {
@@ -4365,7 +4374,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseValidatorResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4375,7 +4384,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4385,7 +4394,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4395,7 +4404,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4405,7 +4414,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description PriceFeedOracle is unreachable or returned an unusable response */
+            /** @description USD prices are unavailable right now; try again shortly */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -4421,25 +4430,25 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Filter by validator address
+                 * @description Validator address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator?: string;
                 /** @description A valid tokenId */
                 tokenId?: string;
-                /** @description Filter by one or more statuses */
+                /** @description Only these statuses. */
                 statuses?: "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -4460,7 +4469,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseDelegationResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4470,7 +4479,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4480,7 +4489,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4490,7 +4499,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4506,7 +4515,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional validator address to filter by
+                 * @description Only this validator.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator?: string;
@@ -4529,7 +4538,7 @@ export interface operations {
                     "*/*": components["schemas"]["DelegationCountsResponse"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4539,7 +4548,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4549,7 +4558,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4559,7 +4568,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4574,10 +4583,10 @@ export interface operations {
     getMissedBlocksPercentage: {
         parameters: {
             query: {
-                /** @description Time period to calculate missed blocks for */
+                /** @description How far back to look. */
                 timeframe: "DAY" | "WEEK" | "MONTH" | "YEAR";
                 /**
-                 * @description Optional validator address to filter by
+                 * @description Only this validator.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator?: string;
@@ -4600,7 +4609,7 @@ export interface operations {
                     "*/*": components["schemas"]["AllValidatorsMissedBlocksResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4610,7 +4619,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4620,7 +4629,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4630,7 +4639,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4646,12 +4655,12 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description Start timestamp in Unix seconds (inclusive)
+                 * @description Start time in Unix seconds, included.
                  * @example 1704143600
                  */
                 startTimestamp: number;
                 /**
-                 * @description End timestamp in Unix seconds (inclusive)
+                 * @description End time in Unix seconds, included.
                  * @example 1704153600
                  */
                 endTimestamp: number;
@@ -4662,7 +4671,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description Validator address
+                 * @description Validator address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator: string;
@@ -4680,7 +4689,7 @@ export interface operations {
                     "*/*": components["schemas"]["ValidatorBlock"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4690,7 +4699,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4700,7 +4709,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4710,7 +4719,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4726,28 +4735,28 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional validator address to filter by
+                 * @description Only this validator.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator?: string;
                 /**
-                 * @description Filter results by block number. When direction is 'desc' (default), returns records at or before this block. When direction is 'asc', returns records at or after this block.
+                 * @description Start from this block: at or before it when `direction` is desc (default), at or after it when asc.
                  * @example 12345678
                  */
                 blockNumber?: number;
-                /** @description Filter by block status - either VALIDATED or MISSED. */
+                /** @description VALIDATED or MISSED. */
                 status?: "VALIDATED" | "MISSED";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -4768,7 +4777,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseValidatorBlock"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4778,7 +4787,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4788,7 +4797,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4798,7 +4807,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4814,7 +4823,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional validator address to filter by
+                 * @description Only this validator.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator?: string;
@@ -4825,7 +4834,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The block number to look up.
+                 * @description Block number.
                  * @example 12345678
                  */
                 blockNumber: number;
@@ -4843,7 +4852,7 @@ export interface operations {
                     "*/*": components["schemas"]["ValidatorBlock"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4853,7 +4862,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4863,7 +4872,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4873,7 +4882,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4889,16 +4898,16 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description To or from address of the transfer event. Either address or tokenAddress must be provided
+                 * @description Sender or recipient. Give this, `tokenAddress`, or both.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address?: string;
                 /**
-                 * @description The token contract address. Either address or tokenAddress must be provided
+                 * @description Token contract. Give this, `address`, or both.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 tokenAddress?: string;
-                /** @description Filter by transfer event type(s) */
+                /** @description Only these transfer types. */
                 eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
                 /**
                  * @description Return records after this time (Unix time in seconds).
@@ -4911,16 +4920,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -4941,7 +4950,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransferEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4951,7 +4960,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4961,7 +4970,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4971,7 +4980,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -4987,7 +4996,7 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description To address of the transfer event
+                 * @description Recipient address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -4996,7 +5005,7 @@ export interface operations {
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 tokenAddress?: string;
-                /** @description Filter by transfer event type(s) */
+                /** @description Only these transfer types. */
                 eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
                 /**
                  * @description Return records after this time (Unix time in seconds).
@@ -5009,16 +5018,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5039,7 +5048,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransferEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5049,7 +5058,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5059,7 +5068,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5069,7 +5078,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5085,13 +5094,13 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The pagination cursor returned by a previous request. */
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
                 cursor?: string;
-                /** @description Filter by transfer event type(s) */
+                /** @description Only these transfer types. */
                 eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
             };
             header?: {
@@ -5112,7 +5121,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransferEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5122,7 +5131,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5132,7 +5141,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5142,7 +5151,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5158,26 +5167,26 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description The address of origin or destination of the fungible tokens transfer events
+                 * @description Account address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
                 /**
-                 * @description If set to true, only official tokens will be returned. Defaults to false.
+                 * @description Only tokens in the official token registry. Defaults to false.
                  * @example false
                  */
                 officialTokensOnly?: boolean;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5198,7 +5207,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseString"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5208,7 +5217,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5218,7 +5227,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5228,7 +5237,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5244,7 +5253,7 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description From address of the transfer event
+                 * @description Sender address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -5253,7 +5262,7 @@ export interface operations {
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 tokenAddress?: string;
-                /** @description Filter by transfer event type(s) */
+                /** @description Only these transfer types. */
                 eventType?: ("VET" | "FUNGIBLE_TOKEN" | "NFT" | "SEMI_FUNGIBLE_TOKEN")[];
                 /**
                  * @description Return records after this time (Unix time in seconds).
@@ -5266,16 +5275,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5296,7 +5305,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransferEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5306,7 +5315,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5316,7 +5325,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5326,7 +5335,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5349,21 +5358,21 @@ export interface operations {
                  */
                 addresses: string[];
                 /**
-                 * @description Block number to query
+                 * @description Block number.
                  * @example 1000000
                  */
                 blockNumber: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5384,7 +5393,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransferEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5394,7 +5403,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5404,7 +5413,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5414,7 +5423,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5430,7 +5439,7 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description Address of the transaction origin
+                 * @description Sender address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 origin: string;
@@ -5440,21 +5449,21 @@ export interface operations {
                  */
                 includeDelegated?: boolean;
                 /**
-                 * @description Whether to return the expanded model
+                 * @description Return full details instead of the summary.
                  * @example true
                  */
                 expanded?: boolean;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5475,7 +5484,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5485,7 +5494,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5495,7 +5504,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5505,7 +5514,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5521,7 +5530,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Whether to return the expanded model
+                 * @description Return full details instead of the summary.
                  * @example true
                  */
                 expanded?: boolean;
@@ -5532,7 +5541,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description A valid transaction ID
+                 * @description Transaction ID.
                  * @example 0xacc8566c931235a43a775120d48680278d42fa12111aa3c4d4e3a7e8cfcd360a
                  */
                 txId: string;
@@ -5550,7 +5559,7 @@ export interface operations {
                     "*/*": components["schemas"]["IndexedTransaction"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5560,7 +5569,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5570,7 +5579,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5580,7 +5589,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5596,16 +5605,16 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Whether to return the expanded model
+                 * @description Return full details instead of the summary.
                  * @example true
                  */
                 expanded?: boolean;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The pagination cursor returned by a previous request. */
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
                 cursor?: string;
             };
             header?: {
@@ -5626,7 +5635,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5636,7 +5645,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5646,7 +5655,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5656,7 +5665,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5677,21 +5686,21 @@ export interface operations {
                  */
                 delegator: string;
                 /**
-                 * @description Whether to return the expanded model
+                 * @description Return full details instead of the summary.
                  * @example true
                  */
                 expanded?: boolean;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5712,7 +5721,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5722,7 +5731,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5732,7 +5741,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5742,7 +5751,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5775,7 +5784,7 @@ export interface operations {
                     "*/*": components["schemas"]["TransactionCountSummary"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5785,7 +5794,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5795,7 +5804,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5805,7 +5814,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5826,21 +5835,21 @@ export interface operations {
                  */
                 contractAddress: string;
                 /**
-                 * @description Whether to return the expanded model
+                 * @description Return full details instead of the summary.
                  * @example true
                  */
                 expanded?: boolean;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5861,7 +5870,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5871,7 +5880,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5881,7 +5890,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5891,7 +5900,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5924,7 +5933,7 @@ export interface operations {
                     "*/*": components["schemas"]["IndexerCheckpoint"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5934,7 +5943,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5944,7 +5953,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5954,7 +5963,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -5971,26 +5980,26 @@ export interface operations {
             query?: {
                 validator?: string;
                 /**
-                 * @description Optional start of custom date range (Unix seconds)
+                 * @description Earliest period to return (Unix seconds).
                  * @example 1704143600
                  */
                 from?: number;
                 /**
-                 * @description Optional end of custom date range (Unix seconds)
+                 * @description Latest period to return (Unix seconds).
                  * @example 1704153600
                  */
                 to?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -5998,7 +6007,7 @@ export interface operations {
                 "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
             };
             path: {
-                /** @description Preset aggregation period */
+                /** @description How to group the statistics. */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
@@ -6014,7 +6023,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6024,7 +6033,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6034,7 +6043,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6044,7 +6053,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6061,26 +6070,26 @@ export interface operations {
             query?: {
                 validator?: string;
                 /**
-                 * @description Optional start of custom date range (Unix seconds)
+                 * @description Earliest period to return (Unix seconds).
                  * @example 1704143600
                  */
                 from?: number;
                 /**
-                 * @description Optional end of custom date range (Unix seconds)
+                 * @description Latest period to return (Unix seconds).
                  * @example 1704153600
                  */
                 to?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -6088,7 +6097,7 @@ export interface operations {
                 "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
             };
             path: {
-                /** @description Preset aggregation period */
+                /** @description How to group the statistics. */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
@@ -6104,7 +6113,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6114,7 +6123,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6124,7 +6133,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6134,7 +6143,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6150,26 +6159,26 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional start of custom date range (Unix seconds)
+                 * @description Earliest period to return (Unix seconds).
                  * @example 1704143600
                  */
                 from?: number;
                 /**
-                 * @description Optional end of custom date range (Unix seconds)
+                 * @description Latest period to return (Unix seconds).
                  * @example 1704153600
                  */
                 to?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -6177,7 +6186,7 @@ export interface operations {
                 "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
             };
             path: {
-                /** @description Preset aggregation period */
+                /** @description How to group the statistics. */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
@@ -6193,7 +6202,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6203,7 +6212,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6213,7 +6222,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6223,7 +6232,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6239,26 +6248,26 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional start of custom date range (Unix seconds)
+                 * @description Earliest period to return (Unix seconds).
                  * @example 1704143600
                  */
                 from?: number;
                 /**
-                 * @description Optional end of custom date range (Unix seconds)
+                 * @description Latest period to return (Unix seconds).
                  * @example 1704153600
                  */
                 to?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -6266,7 +6275,7 @@ export interface operations {
                 "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
             };
             path: {
-                /** @description Preset aggregation period */
+                /** @description How to group the statistics. */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
@@ -6282,7 +6291,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6292,7 +6301,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6302,7 +6311,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6312,7 +6321,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6328,7 +6337,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional query parameter to get the total VTHO generated at a specific block number. If not provided, the latest value will be returned.
+                 * @description Total as of this block. Defaults to the latest.
                  * @example 12345678
                  */
                 blockNumber?: number;
@@ -6351,7 +6360,7 @@ export interface operations {
                     "*/*": number;
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6361,7 +6370,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6371,7 +6380,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6381,7 +6390,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6420,7 +6429,7 @@ export interface operations {
                     "*/*": components["schemas"]["TimeSeriesRecordBigInteger"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6430,7 +6439,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6440,7 +6449,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6450,7 +6459,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6466,11 +6475,11 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional query parameter to get the total VTHO claimed at a specific block number. If not provided, the latest value will be returned.
+                 * @description Total as of this block. Defaults to the latest.
                  * @example 12345678
                  */
                 blockNumber?: number;
-                /** @description Optional query parameter to filter rewards by type. If not all rewards will be returned. */
+                /** @description Only this reward type. Defaults to all. */
                 rewardsType?: "LEGACY" | "DELEGATION";
             };
             header?: {
@@ -6491,7 +6500,7 @@ export interface operations {
                     "*/*": number;
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6501,7 +6510,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6511,7 +6520,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6521,7 +6530,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6563,7 +6572,7 @@ export interface operations {
                     "*/*": number;
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6573,7 +6582,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6583,7 +6592,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6593,7 +6602,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6637,7 +6646,7 @@ export interface operations {
                     "*/*": number;
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6647,7 +6656,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6657,7 +6666,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6667,7 +6676,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6706,7 +6715,7 @@ export interface operations {
                     "*/*": components["schemas"]["TimeSeriesRecordBigInteger"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6716,7 +6725,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6726,7 +6735,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6736,7 +6745,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6752,7 +6761,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional query parameter to get the total VET staked at a specific block number. If not provided, the latest value will be returned.
+                 * @description Total as of this block. Defaults to the latest.
                  * @example 12345678
                  */
                 blockNumber?: number;
@@ -6775,7 +6784,7 @@ export interface operations {
                     "*/*": components["schemas"]["TotalByBlockDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6785,7 +6794,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6795,7 +6804,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6805,7 +6814,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6820,7 +6829,7 @@ export interface operations {
     getTotalVetStaked_1: {
         parameters: {
             query?: {
-                /** @description Optional query parameter to filter total VET staked by level. If not provided, all levels will be included. */
+                /** @description Only this NFT level. Defaults to all levels. */
                 level?: "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
             };
             header?: {
@@ -6847,7 +6856,7 @@ export interface operations {
                     "*/*": components["schemas"]["TimeSeriesRecordBigInteger"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6857,7 +6866,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6867,7 +6876,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6877,7 +6886,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6916,7 +6925,7 @@ export interface operations {
                     "*/*": components["schemas"]["TotalByBlockDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6926,7 +6935,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6936,7 +6945,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6946,7 +6955,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -6966,16 +6975,16 @@ export interface operations {
                 manager?: string;
                 owner?: string;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -6996,7 +7005,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseStargateToken"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7006,7 +7015,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7016,7 +7025,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7026,7 +7035,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7054,16 +7063,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7087,7 +7096,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7097,7 +7106,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7107,7 +7116,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7117,7 +7126,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7137,19 +7146,19 @@ export interface operations {
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 validator?: string;
-                /** @description Reward period to filter by. Options: CYCLE, DAY, WEEK, MONTH, YEAR, ALL. */
+                /** @description How to group rewards: CYCLE, DAY, WEEK, MONTH, YEAR or ALL. */
                 periodType?: "CYCLE" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7173,7 +7182,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseTokenReward"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7183,7 +7192,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7193,7 +7202,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7203,7 +7212,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7219,7 +7228,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional query parameter to get the total number of NFT holders at a specific block number. If not provided, the latest value will be returned.
+                 * @description Total as of this block. Defaults to the latest.
                  * @example 12345678
                  */
                 blockNumber?: number;
@@ -7242,7 +7251,7 @@ export interface operations {
                     "*/*": components["schemas"]["NftHoldersDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7252,7 +7261,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7262,7 +7271,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7272,7 +7281,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7288,26 +7297,26 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Optional start of custom date range (Unix seconds)
+                 * @description Earliest period to return (Unix seconds).
                  * @example 1704143600
                  */
                 from?: number;
                 /**
-                 * @description Optional end of custom date range (Unix seconds)
+                 * @description Latest period to return (Unix seconds).
                  * @example 1704153600
                  */
                 to?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7315,7 +7324,7 @@ export interface operations {
                 "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
             };
             path: {
-                /** @description Preset aggregation period */
+                /** @description How to group the statistics. */
                 period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL" | "BLOCK";
             };
             cookie?: never;
@@ -7331,7 +7340,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseTotalByPeriodDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7341,7 +7350,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7351,7 +7360,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7361,7 +7370,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7376,7 +7385,7 @@ export interface operations {
     getNftHolders_1: {
         parameters: {
             query?: {
-                /** @description Optional query parameter to filter NFT holders by level. If not provided, all levels will be included. */
+                /** @description Only this NFT level. Defaults to all levels. */
                 level?: "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
             };
             header?: {
@@ -7403,7 +7412,7 @@ export interface operations {
                     "*/*": components["schemas"]["TimeSeriesRecordLong"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7413,7 +7422,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7423,7 +7432,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7433,7 +7442,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7449,16 +7458,16 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7467,7 +7476,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The Safe contract address.
+                 * @description Safe address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 safe: string;
@@ -7485,7 +7494,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseSafeTxProposal"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7495,7 +7504,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7505,7 +7514,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7515,7 +7524,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7536,7 +7545,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The Safe contract address.
+                 * @description Safe address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 safe: string;
@@ -7555,7 +7564,7 @@ export interface operations {
                     "*/*": components["schemas"]["SafeTxState"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7565,7 +7574,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7575,7 +7584,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7585,7 +7594,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7602,16 +7611,16 @@ export interface operations {
             query?: {
                 membership?: "ALL" | "CURRENT" | "PAST";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7620,7 +7629,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The address whose Safe memberships should be returned.
+                 * @description Owner address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -7638,7 +7647,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseSafeMembership"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7648,7 +7657,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7658,7 +7667,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7668,7 +7677,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7684,7 +7693,7 @@ export interface operations {
         parameters: {
             query: {
                 /**
-                 * @description Address of the NFT owner
+                 * @description Owner address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -7696,23 +7705,23 @@ export interface operations {
                 /** @description A valid tokenId */
                 tokenId?: string;
                 /**
-                 * @description The addresses of the collections to exclude. Max 20 collections.
+                 * @description Collections to leave out, up to 20.
                  * @example [
                  *       "0x1234567890123456789012345678901234567890"
                  *     ]
                  */
                 excludeCollections?: string[];
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7733,7 +7742,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedNft_Public"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7743,7 +7752,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse_Public"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7753,7 +7762,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7763,7 +7772,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse_Public"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7798,16 +7807,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7828,7 +7837,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedHistoryEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7838,7 +7847,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7848,7 +7857,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7858,7 +7867,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7879,23 +7888,23 @@ export interface operations {
                  */
                 owner: string;
                 /**
-                 * @description The addresses of the collections to exclude. Max 20 collections.
+                 * @description Collections to leave out, up to 20.
                  * @example [
                  *       "0x1234567890123456789012345678901234567890"
                  *     ]
                  */
                 excludeCollections?: string[];
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -7916,7 +7925,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseString"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7926,7 +7935,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7936,7 +7945,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7946,7 +7955,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -7981,16 +7990,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -8017,7 +8026,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseHistoryEventDto"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8027,7 +8036,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8037,7 +8046,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8047,7 +8056,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8091,7 +8100,7 @@ export interface operations {
                     "*/*": components["schemas"]["BlockUsage"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8101,7 +8110,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8111,7 +8120,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8121,7 +8130,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8165,7 +8174,7 @@ export interface operations {
                     "*/*": components["schemas"]["AverageFeesPerUser"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8175,7 +8184,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8185,7 +8194,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8195,7 +8204,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8216,7 +8225,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The address of the contract to retrieve.
+                 * @description Contract address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -8234,7 +8243,7 @@ export interface operations {
                     "*/*": components["schemas"]["Contract"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8244,7 +8253,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8254,7 +8263,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8264,7 +8273,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8280,16 +8289,16 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -8298,7 +8307,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The address to query as master.
+                 * @description Master address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -8316,7 +8325,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseContract"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8326,7 +8335,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8336,7 +8345,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8346,7 +8355,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8362,12 +8371,12 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Block number to start from, inclusive. Defaults to the indexed head.
+                 * @description First block to return, the newest on the page. Defaults to the newest indexed block.
                  * @example 12345678
                  */
                 from?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
@@ -8390,7 +8399,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseIndexedBlock"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8400,7 +8409,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8410,7 +8419,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8420,7 +8429,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8436,7 +8445,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description App ID to query by.
+                 * @description App ID.
                  * @example 0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a
                  */
                 appId?: string;
@@ -8446,7 +8455,7 @@ export interface operations {
                 "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
             };
             path: {
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId: number;
             };
             cookie?: never;
@@ -8462,7 +8471,7 @@ export interface operations {
                     "*/*": components["schemas"]["XAllocResultResponse"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8472,7 +8481,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8482,7 +8491,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8492,7 +8501,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8508,11 +8517,11 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description App ID to query by.
+                 * @description App ID.
                  * @example 0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a
                  */
                 appId?: string;
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId?: number;
             };
             header?: {
@@ -8533,7 +8542,7 @@ export interface operations {
                     "*/*": components["schemas"]["XAllocEarningsResponse"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8543,7 +8552,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8553,7 +8562,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8563,7 +8572,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8579,23 +8588,23 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description Proposal ID to filter by.
+                 * @description Proposal ID.
                  * @example 8.365401932242087e+76
                  */
                 proposalId?: string;
-                /** @description Filter by support. */
+                /** @description Only votes with this choice. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -8622,7 +8631,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseProposalComment"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8632,7 +8641,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8642,7 +8651,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8652,7 +8661,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8676,16 +8685,16 @@ export interface operations {
                  */
                 filter: "NeededAction" | "MyChallenges" | "OpenToJoin" | "OthersActive" | "History";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -8708,7 +8717,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseChallengeSummaryResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8718,7 +8727,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8728,7 +8737,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8738,7 +8747,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8753,7 +8762,7 @@ export interface operations {
     getTreasuryTransfers: {
         parameters: {
             query?: {
-                /** @description Filter by category: emission, surplus, gm_upgrade, grant, out, other. If omitted, returns all. */
+                /** @description Only this category: emission, surplus, gm_upgrade, grant, out or other. Omit for all. */
                 category?: "EMISSION" | "SURPLUS" | "GM_UPGRADE" | "GRANT" | "OUT" | "OTHER";
                 /**
                  * @description Return records after this time (Unix time in seconds).
@@ -8766,16 +8775,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -8796,7 +8805,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseTreasuryTransfer"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8806,7 +8815,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8816,7 +8825,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8826,7 +8835,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8842,13 +8851,13 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
-                /** @description The pagination cursor returned by a previous request. */
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
                 cursor?: string;
                 scope?: "ALL" | "B3TR" | "VOT3";
             };
@@ -8870,7 +8879,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseB3trRichlistItem"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8880,7 +8889,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8890,7 +8899,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8900,7 +8909,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8923,7 +8932,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The address to get the rank for.
+                 * @description Holder address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -8941,7 +8950,7 @@ export interface operations {
                     "*/*": components["schemas"]["B3trRankResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8951,7 +8960,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -8961,7 +8970,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8971,7 +8980,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -8992,7 +9001,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description Proposal ID to filter by.
+                 * @description Proposal ID.
                  * @example 8.365401932242087e+76
                  */
                 proposalId: string;
@@ -9010,7 +9019,7 @@ export interface operations {
                     "*/*": components["schemas"]["ProposalResultDeprecated"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9020,7 +9029,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9030,7 +9039,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9040,7 +9049,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9055,19 +9064,19 @@ export interface operations {
     getProposalComments: {
         parameters: {
             query?: {
-                /** @description Filter by support. */
+                /** @description Only votes with this choice. */
                 support?: "FOR" | "AGAINST" | "ABSTAIN";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -9076,7 +9085,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description Proposal ID to filter by.
+                 * @description Proposal ID.
                  * @example 8.365401932242087e+76
                  */
                 proposalId: string;
@@ -9094,7 +9103,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseProposalComment"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9104,7 +9113,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9114,7 +9123,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9124,7 +9133,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9144,16 +9153,16 @@ export interface operations {
                 /** @description Field to order results by. */
                 orderBy?: "stake" | "totalDelegated" | "citizenCount" | "registeredAt";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -9174,7 +9183,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseNavigator"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9184,7 +9193,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9194,7 +9203,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9204,7 +9213,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9243,7 +9252,7 @@ export interface operations {
                     "*/*": components["schemas"]["Navigator"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9253,7 +9262,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9263,7 +9272,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9273,7 +9282,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9306,7 +9315,7 @@ export interface operations {
                     "*/*": components["schemas"]["NavigatorOverview"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9316,7 +9325,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9326,7 +9335,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9336,7 +9345,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9375,7 +9384,7 @@ export interface operations {
                     "*/*": components["schemas"]["NavigatorFeeSummary"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9385,7 +9394,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9395,7 +9404,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9405,7 +9414,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9426,16 +9435,16 @@ export interface operations {
                  */
                 navigator: string;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -9456,7 +9465,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseNavigatorFee"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9466,7 +9475,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9476,7 +9485,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9486,7 +9495,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9512,16 +9521,16 @@ export interface operations {
                  */
                 citizen?: string;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -9542,7 +9551,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseNavigatorDelegationEvent"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9552,7 +9561,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9562,7 +9571,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9572,7 +9581,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9593,16 +9602,16 @@ export interface operations {
                  */
                 navigator: string;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -9623,7 +9632,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseNavigatorCitizen"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9633,7 +9642,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9643,7 +9652,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9653,7 +9662,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9668,7 +9677,7 @@ export interface operations {
     getLevelOverviews: {
         parameters: {
             query?: {
-                /** @description Optional level to filter by */
+                /** @description Galaxy Member level. */
                 level?: "ALL" | "EARTH" | "MOON" | "MERCURY" | "VENUS" | "MARS" | "JUPITER" | "SATURN" | "URANUS" | "NEPTUNE" | "GALAXY";
             };
             header?: {
@@ -9689,7 +9698,7 @@ export interface operations {
                     "*/*": components["schemas"]["GMLevelOverview"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9699,7 +9708,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9709,7 +9718,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9719,7 +9728,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9736,16 +9745,16 @@ export interface operations {
             query?: {
                 status?: "Pending" | "Active" | "Completed" | "Cancelled" | "Invalid";
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -9766,7 +9775,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseChallengeSummaryResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9776,7 +9785,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9786,7 +9795,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9796,7 +9805,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9831,7 +9840,7 @@ export interface operations {
                     "*/*": components["schemas"]["ChallengeDetailResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9841,7 +9850,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9851,7 +9860,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9861,7 +9870,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9877,7 +9886,7 @@ export interface operations {
         parameters: {
             query?: {
                 /**
-                 * @description App ID to query by.
+                 * @description App ID.
                  * @example 0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a
                  */
                 appId?: string;
@@ -9892,16 +9901,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -9928,7 +9937,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseAction"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9938,7 +9947,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -9948,7 +9957,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9958,7 +9967,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9973,7 +9982,7 @@ export interface operations {
     getUserOverview: {
         parameters: {
             query?: {
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId?: number;
                 date?: string;
             };
@@ -10001,7 +10010,7 @@ export interface operations {
                     "*/*": components["schemas"]["UserOverview"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10011,7 +10020,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10021,7 +10030,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10031,7 +10040,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10046,21 +10055,21 @@ export interface operations {
     getDailySummariesForRange: {
         parameters: {
             query: {
-                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                /** @description Start date (UTC, yyyy-MM-dd). */
                 startDate: string;
-                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                /** @description End date (UTC, yyyy-MM-dd). */
                 endDate: string;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -10087,7 +10096,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseUserDailyActionSummary"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10097,7 +10106,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10107,7 +10116,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10117,7 +10126,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10132,9 +10141,9 @@ export interface operations {
     getUserAppOverview: {
         parameters: {
             query?: {
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId?: number;
-                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                /** @description Day to filter by (UTC, yyyy-MM-dd). */
                 date?: string;
             };
             header?: {
@@ -10148,7 +10157,7 @@ export interface operations {
                  */
                 wallet: string;
                 /**
-                 * @description App ID to query by.
+                 * @description App ID.
                  * @example 0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a
                  */
                 appId: string;
@@ -10166,7 +10175,7 @@ export interface operations {
                     "*/*": components["schemas"]["UserAppOverview"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10176,7 +10185,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10186,7 +10195,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10196,7 +10205,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10211,19 +10220,19 @@ export interface operations {
     getUserLeaderboard: {
         parameters: {
             query?: {
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId?: number;
                 date?: string;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
-                /** @description The sort by field */
+                /** @description Field to sort by. */
                 sortBy?: "totalRewardAmount" | "actionsRewarded";
-                /** @description The pagination cursor returned by a previous request. */
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
                 cursor?: string;
             };
             header?: {
@@ -10244,7 +10253,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseUserLeaderboardItem"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10254,7 +10263,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10264,7 +10273,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10274,7 +10283,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10289,20 +10298,20 @@ export interface operations {
     getAppLeaderboard: {
         parameters: {
             query?: {
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId?: number;
-                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                /** @description Day to filter by (UTC, yyyy-MM-dd). */
                 date?: string;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
-                /** @description The sort by field */
+                /** @description Field to sort by. */
                 sortBy?: "totalRewardAmount" | "actionsRewarded";
-                /** @description The pagination cursor returned by a previous request. */
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
                 cursor?: string;
             };
             header?: {
@@ -10323,7 +10332,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseAppLeaderboardItem"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10333,7 +10342,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10343,7 +10352,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10353,7 +10362,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10368,20 +10377,20 @@ export interface operations {
     getUserAppLeaderboard: {
         parameters: {
             query?: {
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId?: number;
-                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                /** @description Day to filter by (UTC, yyyy-MM-dd). */
                 date?: string;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
-                /** @description The sort by field */
+                /** @description Field to sort by. */
                 sortBy?: "totalRewardAmount" | "actionsRewarded";
-                /** @description The pagination cursor returned by a previous request. */
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
                 cursor?: string;
             };
             header?: {
@@ -10390,7 +10399,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description App ID to query by.
+                 * @description App ID.
                  * @example 0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a
                  */
                 appId: string;
@@ -10408,7 +10417,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseUserAppLeaderboardItem"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10418,7 +10427,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10428,7 +10437,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10438,7 +10447,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10453,9 +10462,9 @@ export interface operations {
     getGlobalOverview: {
         parameters: {
             query?: {
-                /** @description Round ID to filter by. */
+                /** @description Allocation round ID. */
                 roundId?: number;
-                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                /** @description Day to filter by (UTC, yyyy-MM-dd). */
                 date?: string;
             };
             header?: {
@@ -10476,7 +10485,7 @@ export interface operations {
                     "*/*": components["schemas"]["GlobalOverview"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10486,7 +10495,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10496,7 +10505,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10506,7 +10515,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10532,16 +10541,16 @@ export interface operations {
                  */
                 before?: number;
                 /**
-                 * @description The zero-based results page number
+                 * @description Page number, starting at 0.
                  * @example 0
                  */
                 page?: number;
                 /**
-                 * @description The results page size
+                 * @description Results per page.
                  * @example 20
                  */
                 size?: number;
-                /** @description The sort direction */
+                /** @description Sort order. */
                 direction?: "ASC" | "DESC";
             };
             header?: {
@@ -10550,7 +10559,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description App ID to query by.
+                 * @description App ID.
                  * @example 0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a
                  */
                 appId: string;
@@ -10568,7 +10577,7 @@ export interface operations {
                     "*/*": components["schemas"]["PaginatedResponseAction"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10578,7 +10587,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10588,7 +10597,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10598,7 +10607,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10614,7 +10623,7 @@ export interface operations {
         parameters: {
             query?: {
                 roundId?: number;
-                /** @description A date to filter by. In UTC, format: yyyy-MM-dd. */
+                /** @description Day to filter by (UTC, yyyy-MM-dd). */
                 date?: string;
             };
             header?: {
@@ -10623,7 +10632,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description App ID to query by.
+                 * @description App ID.
                  * @example 0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a
                  */
                 appId: string;
@@ -10641,7 +10650,7 @@ export interface operations {
                     "*/*": components["schemas"]["AppOverview"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10651,7 +10660,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10661,7 +10670,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10671,7 +10680,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10692,7 +10701,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The address of the account to retrieve the overview for.
+                 * @description Account address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -10710,7 +10719,7 @@ export interface operations {
                     "*/*": components["schemas"]["AccountOverviewResponse"];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10720,7 +10729,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10730,7 +10739,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10740,7 +10749,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -10772,7 +10781,7 @@ export interface operations {
             };
             path: {
                 /**
-                 * @description The address to retrieve the VET balance history for.
+                 * @description Account address.
                  * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
                  */
                 address: string;
@@ -10790,7 +10799,7 @@ export interface operations {
                     "*/*": components["schemas"]["VetBalance"][];
                 };
             };
-            /** @description Validation errors occurred, eg: invalid input */
+            /** @description Invalid request, such as a malformed parameter */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10800,7 +10809,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Access to the requested resource is forbidden */
+            /** @description Forbidden */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10810,7 +10819,7 @@ export interface operations {
                     "application/problem+json": string;
                 };
             };
-            /** @description Requested resource was not found */
+            /** @description Not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10820,7 +10829,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ExceptionResponse"];
                 };
             };
-            /** @description Service not available */
+            /** @description Temporarily unavailable; try again shortly */
             500: {
                 headers: {
                     [name: string]: unknown;
