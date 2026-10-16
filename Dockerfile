@@ -60,7 +60,7 @@ RUN --mount=type=cache,target=/app/packages/contracts/cache,id=hardhat-cache \
 # ============================================================================
 # Production stage (minimal image)
 # ============================================================================
-FROM node:22-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+FROM node:22-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392
 
 # Next.js standalone runs `node server.js`; npm/npx/corepack aren't invoked
 # at runtime. Removing them drops the bundled-npm CVE surface (tar,
@@ -68,6 +68,12 @@ FROM node:22-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d
 RUN rm -rf /usr/local/lib/node_modules/npm \
     /usr/local/bin/npm /usr/local/bin/npx \
     /usr/local/bin/corepack /opt/yarn-*
+
+# Upstream slim image lags Debian security fixes; patch flagged packages
+# until a rebuilt digest ships them (perl-base deb12u4).
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends --only-upgrade perl-base \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
