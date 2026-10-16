@@ -116,7 +116,7 @@
     "turbo": "^2.10.2"
   },
   "devDependencies": {
-    "@vechain/dev-stack": "^0.3.2",
+    "@vechain/dev-stack": "^0.4.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@vechain/picasso": "^2.1.1",
