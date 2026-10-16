@@ -11,6 +11,7 @@ export default {
   profiles: [
     'accounts',
     'b3tr',
+    'blocks',
     'contracts',
     'delegation',
     'explorer',
@@ -18,7 +19,6 @@ export default {
     'nfts',
     'stargate',
     'token-reward',
-    'transactions',
     'transfers',
   ],
   deploy: 'yarn contracts:deploy:local',

@@ -82,7 +82,7 @@ yarn dev:up         # join shared @vechain/dev-stack, deploy contracts to thor-s
 yarn dev:local   # start the frontend (run in a separate terminal)
 ```
 
-`yarn dev:up` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects (stargate, multisig). It idempotently brings up the shared thor-solo + mongo + indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, and registers their addresses with the stack. `yarn dev:local` then runs the Next.js dev server.
+`yarn dev:up` delegates to [`@vechain/dev-stack`](https://www.npmjs.com/package/@vechain/dev-stack), the shared local dev environment used by other VeChain projects (stargate, multisig). It idempotently brings up the shared thor-solo + Postgres-backed indexer + block-explorer on the `vechain-thor` Docker network, deploys the VeBetterDAO contracts to solo, and registers their addresses with the stack. `yarn dev:local` then runs the Next.js dev server.
 
 If the contracts are already deployed and the chain is intact, the deploy step short-circuits and just re-uses `packages/config/local.ts`. The `MNEMONIC` variable must be set in the `.env` file (the default one in `.env.example` works for solo).
 
@@ -112,12 +112,14 @@ yarn dev:deploy
 
 Both the block explorer and the indexer are provided by `@vechain/dev-stack` and come up automatically as part of `yarn dev:up`. No separate commands required.
 
-| Service        | Port  | URL                       |
-| -------------- | ----- | ------------------------- |
-| Thor solo      | 8669  | http://localhost:8669     |
-| Block explorer | 8088  | http://localhost:8088     |
-| Indexer API    | 8089  | http://localhost:8089     |
-| MongoDB        | 27017 | mongodb://localhost:27017 |
+| Service          | Port | URL                                                  |
+| ---------------- | ---- | ---------------------------------------------------- |
+| Thor solo        | 8669 | http://localhost:8669                                |
+| Block explorer   | 8088 | http://localhost:8088                                |
+| Indexer API      | 8089 | http://localhost:8089                                |
+| Indexer Postgres | 5432 | postgresql://indexer:password@localhost:5432/vechain |
+
+The indexer's Postgres is tmpfs-backed, so every `yarn dev:up` reindexes from scratch. Set `VECHAIN_DEV_POSTGRES_PORT` if something else already holds port 5432.
 
 B3TR's registered config (profiles + addresses) lives at `~/.vechain-dev/config/b3tr.json` after the first successful `yarn dev:up`.
 
@@ -242,7 +244,7 @@ yarn contracts:deploy:local
 
 The addresses will be outputted in the console. If you want the frontend to use those addresses then copy them in the `local.ts` file inside `./packages/config/`.
 
-> For the normal local-dev flow you should use `yarn dev:up` instead — it brings up the shared `@vechain/dev-stack` (thor-solo + mongo + indexer + block-explorer) and deploys contracts in one step.
+> For the normal local-dev flow you should use `yarn dev:up` instead — it brings up the shared `@vechain/dev-stack` (thor-solo + Postgres-backed indexer + block-explorer) and deploys contracts in one step.
 
 #### Deploy to self hosted solo
 
