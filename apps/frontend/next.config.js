@@ -29,6 +29,9 @@ const nextConfig = {
   },
   turbopack: {
     root: join(__dirname, "../.."),
+    resolveAlias: {
+      "@stripe/stripe-js": "./privy-stubs/stripe-js.js",
+    },
     rules: {
       "*.svg": {
         loaders: ["@svgr/webpack"],
