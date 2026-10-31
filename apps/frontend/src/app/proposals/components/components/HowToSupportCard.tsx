@@ -40,7 +40,7 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
             </Text>
             <Text color="text.subtle" textStyle="sm">
               <Trans
-                i18nKey="Earn them by completing <b>three sustainable actions</b> in any VeBetter App."
+                i18nKey="Earn them by completing <b>sustainable actions</b> in any VeBetter App."
                 components={{
                   b: <b />,
                 }}

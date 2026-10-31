@@ -60,6 +60,7 @@ import { StargateMigrationBanner } from "./components/StargateMigrationBanner/St
 import { UndelegatedVot3Banner } from "./components/UndelegatedVot3Banner"
 import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 import { VeDelegateLeftoverBanner } from "./components/VeDelegateLeftoverBanner"
+import { VePassportThresholdBanner } from "./components/VePassportThresholdBanner"
 import { NodeUpgradeModal } from "./modals/NodeUpgradeModal"
 
 import "swiper/css"
@@ -68,6 +69,7 @@ import "@/app/theme/swiper-custom.css"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
+const VEPASSPORT_UPDATE_SUNSET_ROUND = 128
 
 export const ActionBanner = () => {
   const { account, connection } = useWallet()
@@ -271,6 +273,11 @@ export const ActionBanner = () => {
     if (showDoActionBanner) return <DoActionBanner key="do-action" />
   }, [showSignaledBanner, showLowVthoBanner, showEntityBanner, showDoActionBanner, showDelegatingBanner])
 
+  const showVePassportThresholdBanner =
+    currentRoundId <= VEPASSPORT_UPDATE_SUNSET_ROUND &&
+    !showCantVoteBanners &&
+    (preferences?.[BannerStorageKey.SHOW_VEPASSPORT_THRESHOLD] ?? true)
+
   //Show one of the banners for creator NFTs
   // Only one of the following banners can be shown at a time
   // The order of the banners is as follows:
@@ -320,6 +327,9 @@ export const ActionBanner = () => {
       bannerComponents.push(<ChallengeNeededActionsBanner key="challenge-needed-actions" />)
     if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
+    if (showVePassportThresholdBanner) {
+      bannerComponents.push(<VePassportThresholdBanner key="vepassport-threshold" />)
+    }
     if (showFreshnessMultiplierBanner) bannerComponents.push(<FreshnessMultiplierBanner key="freshness-multiplier" />)
     if (showNavigatorsBanner) bannerComponents.push(<NavigatorsBanner key="navigators" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
@@ -340,6 +350,7 @@ export const ActionBanner = () => {
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
+    showVePassportThresholdBanner,
     showFreshnessMultiplierBanner,
     showNavigatorsBanner,
     showChallengesNeededActionsBanner,
@@ -373,6 +384,8 @@ export const ActionBanner = () => {
         }}>
         <Swiper
           modules={[A11y, Autoplay, Pagination]}
+          observer={true}
+          observeParents={true}
           rewind={true}
           pagination={{
             clickable: true,

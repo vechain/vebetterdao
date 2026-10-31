@@ -22,6 +22,7 @@ export const useThresholdParticipationScore = () => {
     args: [],
     queryOptions: {
       select: data => Number(data[0]),
+      staleTime: 1000 * 60 * 60,
     },
   })
 }

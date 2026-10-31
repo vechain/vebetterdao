@@ -139,7 +139,7 @@ Uses OpenZeppelin **Governor pattern** (AccessControl + UUPSUpgradeable).
 
 ## VePassport (Voting Eligibility)
 
-Verifies wallet authenticity for VeBetterDAO allocation round voting. Requires **3 sustainable actions in the last 12 rounds**.
+Verifies wallet authenticity for VeBetterDAO allocation round voting. Requires **4 sustainable actions in the last 4 rounds**.
 
 | Contract | Network | Address |
 |----------|---------|---------|
