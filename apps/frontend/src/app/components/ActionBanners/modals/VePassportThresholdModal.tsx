@@ -32,8 +32,8 @@ export const VePassportThresholdModal = ({ isOpen, onClose }: Props) => {
         </Text>
 
         <VStack gap={2} w="full">
-          <TierRow label={t("Before")} description={t("3 actions in 12 rounds")} variant="orange" />
-          <TierRow label={t("Now")} description={t("4 actions in 4 rounds")} variant="green" />
+          <TierRow label={t("Before")} description={t("3 actions in 12 rounds")} variant="red" />
+          <TierRow label={t("Now")} description={t("4 actions in 4 rounds")} variant="orange" />
           <TierRow
             label={t("How to stay eligible")}
             description={t("Perform 1 sustainable action per round to maintain your voting rights")}
@@ -43,7 +43,11 @@ export const VePassportThresholdModal = ({ isOpen, onClose }: Props) => {
 
         <Text textStyle="xs" color="text.subtle">
           {t("Holders of a GM NFT (Level 2+) are exempt from App activity requirements.")}{" "}
-          <Link asChild textDecoration="underline">
+          <Link
+            asChild
+            color={{ base: "blue.600", _dark: "blue.400" }}
+            textDecoration="underline"
+            textUnderlineOffset="3px">
             <NextLink href="/galaxy-member" onClick={onClose}>
               {t("Upgrade now!")}
             </NextLink>
@@ -71,7 +75,7 @@ const TierRow = ({
 }: {
   label: string
   description?: string
-  variant: "green" | "orange"
+  variant: "green" | "orange" | "red"
 }) => (
   <Box bg={`${variant}.subtle`} borderRadius="lg" p={3} w="full">
     <HStack justify="space-between" align="start">
