@@ -13,7 +13,7 @@ export const VePassportThresholdBanner = () => {
   return (
     <>
       <GenericBanner
-        title={t("VePassport Activity Threshold Update!")}
+        title={t("VePassport Update is here!")}
         illustration="/assets/icons/new-app-gold.svg"
         description={t(
           "Giving active voters greater influence in governance! Simply perform 1 action per round to maintain your voting eligibility.",
@@ -29,4 +29,3 @@ export const VePassportThresholdBanner = () => {
     </>
   )
 }
-
