@@ -1060,6 +1060,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/stargate/marketplace/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Stargate NFTs for sale
+         * @description Open VET-priced listings whose NFT is still held by its seller. The marketplace contract is the source of truth: verify a listing on-chain before buying.
+         */
+        get: operations["getListings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/stargate/marketplace/listings/{tokenId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a Stargate NFT's open listing
+         * @description The token's open listing, stale or not: `tokenExists` and `sellerIsOwner` say whether it can still be bought. 404 when the token is not listed.
+         */
+        get: operations["getListing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/safes/{safe}/transactions": {
         parameters: {
             query?: never;
@@ -2164,8 +2204,8 @@ export interface components {
         Result: {
             /** Format: int64 */
             voters: number;
-            totalWeight: number;
-            totalPower: number;
+            totalWeight: string;
+            totalPower: string;
         };
         VoteResults: {
             forResult: components["schemas"]["Result"];
@@ -2225,7 +2265,7 @@ export interface components {
             proposalId: string;
             /** @enum {string} */
             support: "AGAINST" | "FOR" | "ABSTAIN";
-            weight: number;
+            weight: string;
             reason: string;
         };
         PaginatedResponseVeVoteProposalResult: {
@@ -2338,7 +2378,7 @@ export interface components {
             /** @enum {string} */
             tokenLevel: "All" | "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
             stakedAmount: string;
-            totalRewardsClaimed: number;
+            totalRewardsClaimed: string;
         };
         PaginatedResponseDelegationResponse: {
             data: components["schemas"]["DelegationResponse"][];
@@ -2374,13 +2414,13 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             validator: string;
-            blockReward?: number | null;
-            priorityReward?: number | null;
-            total?: number | null;
+            blockReward?: string | null;
+            priorityReward?: string | null;
+            total?: string | null;
             /** @enum {string} */
             status: "VALIDATED" | "MISSED";
-            delegatorRewards?: number | null;
-            validatorRewards?: number | null;
+            delegatorRewards?: string | null;
+            validatorRewards?: string | null;
         };
         PaginatedResponseValidatorBlock: {
             data: components["schemas"]["ValidatorBlock"][];
@@ -2478,10 +2518,10 @@ export interface components {
             amount: string;
         };
         TransactionCountSummary: {
-            totalTransactions: number;
-            totalClauses: number;
-            totalRevertedTransactions: number;
-            totalRevertedClauses: number;
+            totalTransactions: string;
+            totalClauses: string;
+            totalRevertedTransactions: string;
+            totalRevertedClauses: string;
         };
         IndexerCheckpoint: {
             schema: string;
@@ -2502,7 +2542,7 @@ export interface components {
             /** Format: int64 */
             blockTimestamp: number;
             timeFrame: string;
-            total: number;
+            total: string;
             /** Format: int64 */
             hourOfDay: number;
             /** Format: int64 */
@@ -2517,12 +2557,12 @@ export interface components {
         TimeSeriesRecordBigInteger: {
             /** Format: int64 */
             timestamp: number;
-            value: number;
+            value: string;
         };
         TotalByBlockDto: {
-            total: number;
+            total: string;
             byLevel: {
-                [key: string]: number;
+                [key: string]: string;
             };
             /** Format: int64 */
             totalNftCount: number;
@@ -2543,9 +2583,9 @@ export interface components {
             /** @enum {string} */
             delegationStatus: "NONE" | "QUEUED" | "ACTIVE" | "EXITING" | "EXITED";
             validatorId?: string | null;
-            totalRewardsClaimed: number;
-            totalBootstrapRewardsClaimed: number;
-            vetStaked: number;
+            totalRewardsClaimed: string;
+            totalBootstrapRewardsClaimed: string;
+            vetStaked: string;
             migrated: boolean;
             boosted: boolean;
         };
@@ -2558,7 +2598,7 @@ export interface components {
             /** Format: int64 */
             cycle: number;
             validator: string;
-            rewards: number;
+            rewards: string;
             /** @enum {string} */
             rewardPeriod: "CYCLE" | "DAY" | "WEEK" | "MONTH" | "YEAR" | "ALL";
             /** Format: int64 */
@@ -2583,13 +2623,36 @@ export interface components {
             /** Format: int64 */
             value: number;
         };
+        ListedAt: {
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+        };
+        MarketplaceListing: {
+            saleId: string;
+            tokenId: string;
+            seller: string;
+            price: string;
+            paymentToken: string;
+            listedAt: components["schemas"]["ListedAt"];
+            /** @enum {string|null} */
+            level?: "All" | "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash" | null;
+            vetStaked?: string | null;
+            tokenExists: boolean;
+            sellerIsOwner: boolean;
+        };
+        PaginatedResponseMarketplaceListing: {
+            data: components["schemas"]["MarketplaceListing"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
         PaginatedResponseSafeTxProposal: {
             data: components["schemas"]["SafeTxProposal"][];
             pagination: components["schemas"]["PaginationDetail"];
         };
         SafeSubcall: {
             target: string;
-            value: number;
+            value: string;
             data: string;
             /** Format: int32 */
             operation: number;
@@ -2606,15 +2669,15 @@ export interface components {
             proposedTimestamp?: number | null;
             proposedVechainTxId?: string | null;
             to?: string | null;
-            value?: number | null;
+            value?: string | null;
             data?: string | null;
             /** Format: int32 */
             operation?: number | null;
-            nonce?: number | null;
+            nonce?: string | null;
             description?: string | null;
-            safeTxGas?: number | null;
-            baseGas?: number | null;
-            gasPrice?: number | null;
+            safeTxGas?: string | null;
+            baseGas?: string | null;
+            gasPrice?: string | null;
             gasToken?: string | null;
             refundReceiver?: string | null;
             subcalls?: components["schemas"]["SafeSubcall"][] | null;
@@ -2768,11 +2831,11 @@ export interface components {
             blockNumber: number;
             /** Format: int64 */
             blockTimestamp: number;
-            cumulativeGasLimit: number;
-            cumulativeGasUsed: number;
-            cumulativeBaseFeePerGas?: number | null;
-            cumulativeNumTransactions: number;
-            cumulativeNumClauses: number;
+            cumulativeGasLimit: string;
+            cumulativeGasUsed: string;
+            cumulativeBaseFeePerGas?: string | null;
+            cumulativeNumTransactions: string;
+            cumulativeNumClauses: string;
         };
         AverageFeesPerUser: {
             date: string;
@@ -2838,7 +2901,7 @@ export interface components {
             appId: string;
             /** Format: int64 */
             voters: number;
-            votesReceived: number;
+            votesReceived: string;
         };
         XAllocEarningsResponse: {
             /** Format: int32 */
@@ -2862,8 +2925,8 @@ export interface components {
             proposalId: string;
             /** @enum {string} */
             support: "AGAINST" | "FOR" | "ABSTAIN";
-            weight: number;
-            power: number;
+            weight: string;
+            power: string;
             reason: string;
         };
         ChallengeSummaryResponse: {
@@ -2934,7 +2997,7 @@ export interface components {
         };
         B3trRichlistItem: {
             address: string;
-            balance: number;
+            balance: string;
             /** Format: int64 */
             rank: number;
         };
@@ -2944,7 +3007,7 @@ export interface components {
         };
         B3trRankResponse: {
             address: string;
-            balance: number;
+            balance: string;
             /** Format: int64 */
             rank: number;
             /** Format: int64 */
@@ -2958,17 +3021,17 @@ export interface components {
             support: "AGAINST" | "FOR" | "ABSTAIN";
             /** Format: int64 */
             voters: number;
-            totalWeight: number;
-            totalPower: number;
+            totalWeight: string;
+            totalPower: string;
         };
         Navigator: {
             address: string;
             /** @enum {string} */
             status: "ACTIVE" | "EXITING" | "DEACTIVATED";
-            stake: number;
+            stake: string;
             /** Format: int32 */
             citizenCount: number;
-            totalDelegated: number;
+            totalDelegated: string;
             metadataURI?: string | null;
             /** Format: int64 */
             registeredAt: number;
@@ -2984,20 +3047,20 @@ export interface components {
         NavigatorOverview: {
             /** Format: int64 */
             activeNavigators: number;
-            totalStaked: number;
+            totalStaked: string;
             /** Format: int64 */
             totalCitizens: number;
-            totalDelegated: number;
+            totalDelegated: string;
         };
         NavigatorFeeSummary: {
-            totalEarned: number;
-            totalClaimed: number;
+            totalEarned: string;
+            totalClaimed: string;
         };
         NavigatorFee: {
             navigator: string;
             /** Format: int32 */
             roundId: number;
-            totalDeposited: number;
+            totalDeposited: string;
             /** Format: int64 */
             claimedAt?: number | null;
             /** Format: int64 */
@@ -3018,8 +3081,8 @@ export interface components {
             navigator: string;
             citizen: string;
             eventType: string;
-            amount: number;
-            delta: number;
+            amount: string;
+            delta: string;
         };
         PaginatedResponseNavigatorDelegationEvent: {
             data: components["schemas"]["NavigatorDelegationEvent"][];
@@ -3028,7 +3091,7 @@ export interface components {
         NavigatorCitizen: {
             address: string;
             navigator: string;
-            amount: number;
+            amount: string;
             /** Format: int64 */
             delegatedAt: number;
             active: boolean;
@@ -3247,23 +3310,23 @@ export interface components {
             transactionsSent: number;
             /** Format: int64 */
             clausesSent: number;
-            vthoBurned: number;
-            vthoDelegated: number;
-            gasUsed: number;
-            vetSent: number;
-            vetReceived: number;
-            vetBalance: number;
-            vthoBlockRewards: number;
-            vthoPassiveGeneration: number;
-            vthoClaimedStargate: number;
-            vthoEarnedTotal: number;
+            vthoBurned: string;
+            vthoDelegated: string;
+            gasUsed: string;
+            vetSent: string;
+            vetReceived: string;
+            vetBalance: string;
+            vthoBlockRewards: string;
+            vthoPassiveGeneration: string;
+            vthoClaimedStargate: string;
+            vthoEarnedTotal: string;
         };
         VetBalance: {
             /** Format: int64 */
             blockNumber: number;
             /** Format: int64 */
             blockTimestamp: number;
-            balance: number;
+            balance: string;
         };
     };
     responses: never;
@@ -6357,7 +6420,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": number;
+                    "*/*": string;
                 };
             };
             /** @description Invalid request, such as a malformed parameter */
@@ -6497,7 +6560,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": number;
+                    "*/*": string;
                 };
             };
             /** @description Invalid request, such as a malformed parameter */
@@ -6569,7 +6632,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": number;
+                    "*/*": string;
                 };
             };
             /** @description Invalid request, such as a malformed parameter */
@@ -6643,7 +6706,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": number;
+                    "*/*": string;
                 };
             };
             /** @description Invalid request, such as a malformed parameter */
@@ -7410,6 +7473,157 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TimeSeriesRecordLong"][];
+                };
+            };
+            /** @description Invalid request, such as a malformed parameter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Temporarily unavailable; try again shortly */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getListings: {
+        parameters: {
+            query?: {
+                /** @description Optional query parameter to filter by level. If not provided, all levels will be included. */
+                level?: "Strength" | "Thunder" | "Mjolnir" | "VeThorX" | "StrengthX" | "ThunderX" | "MjolnirX" | "Dawn" | "Lightning" | "Flash";
+                /**
+                 * @description Only listings by this address.
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                seller?: string;
+                /** @description `newest` orders by the block the listing was made in, `price` by the asking price; `direction` applies to either. */
+                sort?: "newest" | "price";
+                /**
+                 * @description Page number, starting at 0.
+                 * @example 0
+                 */
+                page?: number;
+                /**
+                 * @description Results per page.
+                 * @example 20
+                 */
+                size?: number;
+                /** @description Sort order. */
+                direction?: "ASC" | "DESC";
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseMarketplaceListing"];
+                };
+            };
+            /** @description Invalid request, such as a malformed parameter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Temporarily unavailable; try again shortly */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getListing: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path: {
+                /** @description A valid tokenId */
+                tokenId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MarketplaceListing"];
                 };
             };
             /** @description Invalid request, such as a malformed parameter */
