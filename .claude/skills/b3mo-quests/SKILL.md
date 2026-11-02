@@ -111,7 +111,7 @@ Each section hook picks a fetcher + filter. The indexer's `ChallengeFilter` (see
 | Section | Viewer present → fetcher | Guest fallback |
 |---------|--------------------------|----------------|
 | Action needed | `fetchWalletChallenges(viewer, "NeededAction")` | — (viewer-only) |
-| Your Challenges | `fetchWalletChallenges(viewer, "MyChallenges")` | — (viewer-only) |
+| Your Challenges | `fetchWalletChallenges(viewer, "MyChallenges")` + frontend drops non-actionable Active past `endRound` | — (viewer-only) |
 | Open to Join | `fetchWalletChallenges(viewer, "OpenToJoin")` | `fetchPublicChallenges("Pending")` |
 | What Others Are Doing | `fetchWalletChallenges(viewer, "OthersActive")` + frontend drops Active past `endRound` | `fetchPublicChallenges("Active")` + frontend drops Active past `endRound` |
 | History | `fetchWalletChallenges(viewer, "History")` | — (viewer-only) |
@@ -130,8 +130,8 @@ Pure function from raw state → per-viewer `canX` booleans. Key rules:
 - `canClaimCreatorSplitWinRefund`: SplitWin + creator + `currentRound > endRound` + slots left + `!creatorRefunded`
 - `canRefund`: `Cancelled\|Invalid` + (Stake ? joined : creator) + not already refunded
 - `isActionable`: any `canX` OR pending invite acceptable
-- `isHistorical`: `(declined && canAccept)` OR `(terminal && (creator \|\| joined) && !needsPastAction)`
-- `isParticipating`: `(Pending\|Active)` + not awaiting completion + (creator \|\| joined)
+- `isHistorical`: `(declined && canAccept)` OR `((terminal \|\| (SplitWin && Active && endRound < currentRound)) && (creator \|\| joined) && !needsPastAction)`
+- `isParticipating`: `(Pending\|Active)` + not past `endRound` + (creator \|\| joined)
 - `wasInvited`: equals `isInvitationEligible` — true iff the viewer was ever in the invited pool (flag never gets cleared on-chain). Used by the leave action to decide whether to chain a decline clause.
 
 ## UI Structure
@@ -146,7 +146,7 @@ Pure function from raw state → per-viewer `canX` booleans. Key rules:
 
 `ChallengeCard` action buttons come from `canX` flags; detail page uses the same flags (`ChallengeActionsRow`, modals under [`[challengeId]/components/`](apps/frontend/src/app/b3mo-quests/[challengeId]/components/)).
 
-`nextChallengeStatus.ts` selects one wallet-aware state in urgency order (claim/refund/finalize, invitation/action, live progress, upcoming, fully-claimed Split Win outcome). The `NextChallengeStatusCard` is a homepage summary only; the Quest hub keeps the same Quest in its relevant live carousel, avoiding a duplicate card and a no-op “See all” loop. Max Actions copy reports progress without implying a guaranteed win.
+`nextChallengeStatus.ts` selects one wallet-aware state in urgency order (claim/refund/finalize, invitation/action, live progress, upcoming, fully-claimed Split Win outcome while `endRound >= currentRound`). The `NextChallengeStatusCard` is a homepage summary only; the Quest hub keeps the same Quest in its relevant live carousel, avoiding a duplicate card and a no-op “See all” loop. Max Actions copy reports progress without implying a guaranteed win.
 
 The app-detail Quest launchpad is shown near the top of the page to app admins, moderators, and the configured team wallet. It exposes sponsored Quest creation, the readiness/compliance checklist, and the participation guide.
 

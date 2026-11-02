@@ -23,19 +23,26 @@ export interface NextChallengeStatus {
   messageValues?: Record<string, number>
 }
 
-const isRelevantFullyClaimedOutcome = (challenge: ChallengeView) =>
+const isChallengeWindowOpen = (challenge: ChallengeView, currentRound?: number) =>
+  currentRound === undefined || challenge.endRound >= currentRound
+
+const isRelevantFullyClaimedOutcome = (challenge: ChallengeView, currentRound?: number) =>
   challenge.challengeType === ChallengeType.SplitWin &&
   challenge.isJoined &&
   !challenge.isSplitWinWinner &&
   challenge.numWinners > 0 &&
-  challenge.winnersClaimed >= challenge.numWinners
+  challenge.winnersClaimed >= challenge.numWinners &&
+  isChallengeWindowOpen(challenge, currentRound)
 
 /**
  * Turns a wallet-aware challenge view into the single status worth surfacing.
  * Lower priorities are more urgent. Presentation copy stays as translation keys
  * so this domain helper is reusable outside the homepage.
  */
-export const resolveNextChallengeStatus = (challenge: ChallengeView): NextChallengeStatus | null => {
+export const resolveNextChallengeStatus = (
+  challenge: ChallengeView,
+  currentRound?: number,
+): NextChallengeStatus | null => {
   if (challenge.canClaim || challenge.canClaimSplitWin) {
     return { challenge, kind: NextChallengeStatusKind.Claim, priority: 0, messageKey: "Claim prize" }
   }
@@ -56,11 +63,15 @@ export const resolveNextChallengeStatus = (challenge: ChallengeView): NextChalle
     return { challenge, kind: NextChallengeStatusKind.Action, priority: 3, messageKey: "Action needed" }
   }
 
-  if (isRelevantFullyClaimedOutcome(challenge)) {
+  if (isRelevantFullyClaimedOutcome(challenge, currentRound)) {
     return { challenge, kind: NextChallengeStatusKind.FullyClaimed, priority: 8, messageKey: "All slots claimed" }
   }
 
-  if (challenge.status === ChallengeStatus.Active && (challenge.isJoined || challenge.isCreator)) {
+  if (
+    challenge.status === ChallengeStatus.Active &&
+    isChallengeWindowOpen(challenge, currentRound) &&
+    (challenge.isJoined || challenge.isCreator)
+  ) {
     if (challenge.challengeType === ChallengeType.SplitWin && challenge.isJoined && !challenge.isSplitWinWinner) {
       const remainingActions = Math.max(Number(challenge.threshold) - challenge.viewerActions, 0)
       return {
@@ -102,11 +113,14 @@ export const resolveNextChallengeStatus = (challenge: ChallengeView): NextChalle
 }
 
 /** Selects one next move while preserving the source order for equal priorities. */
-export const selectNextChallengeStatus = (challenges: ChallengeView[]): NextChallengeStatus | null => {
+export const selectNextChallengeStatus = (
+  challenges: ChallengeView[],
+  currentRound?: number,
+): NextChallengeStatus | null => {
   let selected: NextChallengeStatus | null = null
 
   for (const challenge of challenges) {
-    const candidate = resolveNextChallengeStatus(challenge)
+    const candidate = resolveNextChallengeStatus(challenge, currentRound)
     if (candidate && (!selected || candidate.priority < selected.priority)) selected = candidate
   }
 

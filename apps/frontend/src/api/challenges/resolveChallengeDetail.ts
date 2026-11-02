@@ -191,17 +191,18 @@ export const resolveChallengeDetail = ({
     (challenge.status === ChallengeStatus.Cancelled || challenge.status === ChallengeStatus.Invalid) &&
     (challenge.kind === ChallengeKind.Stake ? isJoined : isCreator)
 
+  const isPastEndRound = challenge.status === ChallengeStatus.Active && challenge.endRound < currentRound
   // Only Max Actions challenges require an explicit completion call after endRound.
-  const isAwaitingCompletion =
-    !isSplitWin && challenge.status === ChallengeStatus.Active && challenge.endRound < currentRound
+  const isAwaitingCompletion = !isSplitWin && isPastEndRound
   const canComplete = isAwaitingCompletion && (isCreator || isJoined)
   const needsPastAction = canClaim || canRefund || canComplete || canClaimSplitWin || canClaimCreatorSplitWinRefund
   const isLive = challenge.status === ChallengeStatus.Pending || challenge.status === ChallengeStatus.Active
   const isDone =
     challenge.status === ChallengeStatus.Completed ||
     challenge.status === ChallengeStatus.Cancelled ||
-    challenge.status === ChallengeStatus.Invalid
-  const isParticipating = isLive && !isAwaitingCompletion && (isCreator || isJoined)
+    challenge.status === ChallengeStatus.Invalid ||
+    (isSplitWin && isPastEndRound)
+  const isParticipating = isLive && !isPastEndRound && (isCreator || isJoined)
   const isActionable = needsPastAction || ((canAccept || canDecline) && viewerStatus !== ParticipantStatus.Declined)
   const isHistorical =
     (viewerStatus === ParticipantStatus.Declined && canAccept) ||
