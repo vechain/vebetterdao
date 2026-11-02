@@ -328,6 +328,25 @@ describe("resolveChallengeDetail", () => {
     expect(participating.isParticipating).toBe(true)
     expect(history.isHistorical).toBe(true)
   })
+
+  it("marks an unsettled Split Win challenge past endRound as historical for participants", () => {
+    const detail = resolveChallengeDetail({
+      challenge: createChallenge({
+        challengeType: ChallengeType.SplitWin,
+        status: ChallengeStatus.Active,
+        participants: [VIEWER],
+        participantCount: 1,
+        numWinners: 2,
+        winnersClaimed: 1,
+        endRound: 7,
+      }),
+      viewerAddress: VIEWER,
+      currentRound: 8,
+    })
+
+    expect(detail.isParticipating).toBe(false)
+    expect(detail.isHistorical).toBe(true)
+  })
 })
 
 describe("needsChallengeParticipantActions", () => {

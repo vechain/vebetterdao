@@ -98,11 +98,65 @@ describe("nextChallengeStatus", () => {
     expect(status?.messageValues).toEqual({ count: 7 })
   })
 
-  it("surfaces a fully claimed Split Win outcome for a participant who did not win", () => {
-    const status = resolveNextChallengeStatus(challenge({ winnersClaimed: 2, numWinners: 2 }))
+  it("surfaces a fully claimed Split Win outcome for a participant who did not win while the round window is open", () => {
+    const status = resolveNextChallengeStatus(
+      challenge({ status: ChallengeStatus.Completed, endRound: 12, winnersClaimed: 2, numWinners: 2 }),
+      12,
+    )
 
     expect(status?.kind).toBe(NextChallengeStatusKind.FullyClaimed)
     expect(status?.messageKey).toBe("All slots claimed")
+  })
+
+  it("does not surface a fully claimed Split Win outcome once endRound has passed", () => {
+    const status = resolveNextChallengeStatus(
+      challenge({
+        status: ChallengeStatus.Completed,
+        startRound: 116,
+        endRound: 116,
+        winnersClaimed: 2,
+        numWinners: 2,
+      }),
+      123,
+    )
+
+    expect(status).toBeNull()
+  })
+
+  it("does not surface active progress for an unsettled challenge once endRound has passed", () => {
+    const status = resolveNextChallengeStatus(
+      challenge({ status: ChallengeStatus.Active, startRound: 116, endRound: 116, winnersClaimed: 1, numWinners: 2 }),
+      123,
+    )
+
+    expect(status).toBeNull()
+  })
+
+  it("still surfaces actionable claims from past rounds after endRound has passed", () => {
+    const selected = selectNextChallengeStatus(
+      [
+        challenge({
+          challengeId: 20,
+          status: ChallengeStatus.Completed,
+          startRound: 116,
+          endRound: 116,
+          winnersClaimed: 2,
+          numWinners: 2,
+        }),
+        challenge({
+          challengeId: 21,
+          status: ChallengeStatus.Completed,
+          startRound: 116,
+          endRound: 116,
+          canClaim: true,
+          isActionable: true,
+        }),
+      ],
+      123,
+    )
+
+    expect(selected?.challenge.challengeId).toBe(21)
+    expect(selected?.kind).toBe(NextChallengeStatusKind.Claim)
   })
 
   it("does not surface a fully claimed loss for a winner", () => {
