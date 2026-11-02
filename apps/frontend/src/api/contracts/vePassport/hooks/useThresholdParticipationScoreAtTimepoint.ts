@@ -1,7 +1,6 @@
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
-import { formatEther } from "viem"
 
 const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
@@ -27,7 +26,8 @@ export const useThresholdParticipationScoreAtTimepoint = (blockNumber: string) =
     args: [Number(blockNumber)],
     queryOptions: {
       enabled: !!blockNumber,
-      select: data => formatEther(BigInt(data[0])),
+      select: data => Number(data[0]),
+      staleTime: Infinity,
     },
   })
 }
