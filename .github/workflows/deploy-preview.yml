@@ -179,8 +179,9 @@ jobs:
               });
             }
 
-  # Verify the SHA image exists in GHCR (built by build-fe-image.yml on this PR
-  # push). Never builds. Waits up to 15 min for the parallel build to finish.
+  # Verify the content-tagged image exists in GHCR (built by build-fe-image.yml
+  # on this PR push, or reused from an earlier build with the same content).
+  # Never builds. Waits up to 15 min for the parallel build to finish.
   verify-image:
     name: Verify GHCR image
     needs: [setup, preview-start-comment, preview-relevant]
@@ -189,10 +190,24 @@ jobs:
     permissions:
       contents: read
       packages: read
+    outputs:
+      content_tag: ${{ steps.content.outputs.tag }}
     env:
       GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
-      SHA_TAG: ${{ github.event.pull_request.head.sha }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Compute content tag
+        id: content
+        run: |
+          set -euo pipefail
+          tag="content.$(.github/scripts/image-content-hash.sh frontend)"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "CONTENT_TAG=${tag}" >> "$GITHUB_ENV"
+
       - name: Normalize GHCR_IMAGE to lowercase
         run: echo "GHCR_IMAGE=$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
@@ -205,18 +220,18 @@ jobs:
 
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Wait for GHCR image at PR head SHA
+      - name: Wait for GHCR image at content tag
         run: |
           set -euo pipefail
           for attempt in $(seq 1 30); do
-            if docker buildx imagetools inspect "${GHCR_IMAGE}:${SHA_TAG}" >/dev/null 2>&1; then
-              echo "Found ${GHCR_IMAGE}:${SHA_TAG} on attempt ${attempt}."
+            if docker buildx imagetools inspect "${GHCR_IMAGE}:${CONTENT_TAG}" >/dev/null 2>&1; then
+              echo "Found ${GHCR_IMAGE}:${CONTENT_TAG} on attempt ${attempt}."
               exit 0
             fi
-            echo "Attempt ${attempt}/30: ${GHCR_IMAGE}:${SHA_TAG} not present yet; sleeping 30s..."
+            echo "Attempt ${attempt}/30: ${GHCR_IMAGE}:${CONTENT_TAG} not present yet; sleeping 30s..."
             sleep 30
           done
-          echo "::error::Timed out waiting for ${GHCR_IMAGE}:${SHA_TAG}. build-fe-image.yml may have failed."
+          echo "::error::Timed out waiting for ${GHCR_IMAGE}:${CONTENT_TAG}. build-fe-image.yml may have failed."
           exit 1
 
   # Instant-success stand-in when preview is not needed (path-filter or missing label)
@@ -256,7 +271,7 @@ jobs:
       status_beta: ${{ steps.save-urls.outputs.status_beta }}
     env:
       GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
-      SHA_TAG: ${{ github.event.pull_request.head.sha }}
+      CONTENT_TAG: ${{ needs.verify-image.outputs.content_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -291,11 +306,11 @@ jobs:
           ECR_IMAGE="${ECR_REGISTRY}/${ECR_REPOSITORY}"
           if aws ecr describe-images \
               --repository-name "${ECR_REPOSITORY}" \
-              --image-ids "imageTag=${SHA_TAG}" >/dev/null 2>&1; then
-            echo "ECR ${ECR_IMAGE}:${SHA_TAG} already present — skipping copy."
+              --image-ids "imageTag=${CONTENT_TAG}" >/dev/null 2>&1; then
+            echo "ECR ${ECR_IMAGE}:${CONTENT_TAG} already present — skipping copy."
           else
-            echo "Copying ${GHCR_IMAGE}:${SHA_TAG} → ${ECR_IMAGE}:${SHA_TAG}"
-            docker buildx imagetools create --tag "${ECR_IMAGE}:${SHA_TAG}" "${GHCR_IMAGE}:${SHA_TAG}"
+            echo "Copying ${GHCR_IMAGE}:${CONTENT_TAG} → ${ECR_IMAGE}:${CONTENT_TAG}"
+            docker buildx imagetools create --tag "${ECR_IMAGE}:${CONTENT_TAG}" "${GHCR_IMAGE}:${CONTENT_TAG}"
           fi
 
       - name: Setup Terraform
@@ -329,8 +344,8 @@ jobs:
           # Define paths
           WORKSPACE_NAME="preview-pr-${PR_NUMBER}-${FLAVOR}"
           # Both preview flavors pull the same env-agnostic image from ECR.
-          # The image is content-addressed by full commit SHA (matches GHCR).
-          IMAGE_TAG="${SHA_TAG}"
+          # The image is content-addressed by build-input hash (matches GHCR).
+          IMAGE_TAG="${CONTENT_TAG}"
           SOURCE_CONFIG="${{ env.TERRAFORM_ENV_DIR }}/${FLAVOR}/${FLAVOR}.yaml"
           TARGET_DIR="${{ env.TERRAFORM_ENV_DIR }}/${WORKSPACE_NAME}"
           TARGET_FILE="${TARGET_DIR}/${WORKSPACE_NAME}.yaml"

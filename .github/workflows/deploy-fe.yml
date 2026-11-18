@@ -1,7 +1,8 @@
 name: Deploy Frontend
 
-# Consolidated deploy workflow. Never builds — verifies the SHA image
-# exists in GHCR (built by build-fe-image.yml), promotes it to the
+# Consolidated deploy workflow. Never builds — verifies the content-tagged
+# image exists in GHCR (built by build-fe-image.yml), re-scans it with
+# Trivy (catches CVEs disclosed since it was built), promotes it to the
 # target env's ECR, then terraform applies. Tag push fans out to
 # [staging, beta]; release publish → prod; workflow_dispatch is the
 # only path for dev, and break-glass for staging/beta/prod.
@@ -43,10 +44,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       envs: ${{ steps.plan.outputs.envs }}
-      sha: ${{ steps.plan.outputs.sha }}
+      content_tag: ${{ steps.plan.outputs.content_tag }}
       version_tag: ${{ steps.plan.outputs.version_tag }}
+    permissions:
+      contents: read
     steps:
-      - name: Derive envs, SHA, version tag
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Derive envs, content tag, version tag
         id: plan
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -90,9 +97,10 @@ jobs:
               ;;
           esac
           echo "envs=${envs}" >> "$GITHUB_OUTPUT"
-          echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          content_tag="content.$(.github/scripts/image-content-hash.sh frontend "${GITHUB_SHA}")"
+          echo "content_tag=${content_tag}" >> "$GITHUB_OUTPUT"
           echo "version_tag=${version_tag}" >> "$GITHUB_OUTPUT"
-          echo "Deploying to ${envs}, SHA=${GITHUB_SHA}, version=${version_tag:-<none>}"
+          echo "Deploying to ${envs}, SHA=${GITHUB_SHA}, image=${content_tag}, version=${version_tag:-<none>}"
 
   verify-image:
     name: Verify GHCR image
@@ -103,7 +111,7 @@ jobs:
       packages: read
     env:
       GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
-      SHA_TAG: ${{ needs.derive.outputs.sha }}
+      CONTENT_TAG: ${{ needs.derive.outputs.content_tag }}
     steps:
       - name: Normalize GHCR_IMAGE to lowercase
         run: echo "GHCR_IMAGE=$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
@@ -117,21 +125,35 @@ jobs:
 
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Wait for GHCR image at SHA
+      - name: Wait for GHCR image at content tag
         run: |
           set -euo pipefail
           # build-fe-image.yml may still be running for the same commit.
-          # Wait up to 15 minutes for the SHA tag to appear.
+          # Wait up to 15 minutes for the content tag to appear.
           for attempt in $(seq 1 30); do
-            if docker buildx imagetools inspect "${GHCR_IMAGE}:${SHA_TAG}" >/dev/null 2>&1; then
-              echo "Found ${GHCR_IMAGE}:${SHA_TAG} on attempt ${attempt}."
+            if docker buildx imagetools inspect "${GHCR_IMAGE}:${CONTENT_TAG}" >/dev/null 2>&1; then
+              echo "Found ${GHCR_IMAGE}:${CONTENT_TAG} on attempt ${attempt}."
               exit 0
             fi
-            echo "Attempt ${attempt}/30: ${GHCR_IMAGE}:${SHA_TAG} not present yet; sleeping 30s..."
+            echo "Attempt ${attempt}/30: ${GHCR_IMAGE}:${CONTENT_TAG} not present yet; sleeping 30s..."
             sleep 30
           done
-          echo "::error::Timed out after 15 minutes waiting for ${GHCR_IMAGE}:${SHA_TAG}. build-fe-image.yml may have failed — deploy will not build on demand."
+          echo "::error::Timed out after 15 minutes waiting for ${GHCR_IMAGE}:${CONTENT_TAG}. build-fe-image.yml may have failed — deploy will not build on demand."
           exit 1
+
+      # The build-time scan only saw the CVEs known then; re-scan so a
+      # newly disclosed fixable HIGH/CRITICAL blocks the release.
+      - name: Re-scan image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ env.GHCR_IMAGE }}:${{ env.CONTENT_TAG }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          vuln-type: os,library
 
   deploy:
     name: Deploy → ${{ matrix.env }}
@@ -152,7 +174,7 @@ jobs:
       cancel-in-progress: false
     env:
       GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
-      SHA_TAG: ${{ needs.derive.outputs.sha }}
+      CONTENT_TAG: ${{ needs.derive.outputs.content_tag }}
       VERSION_TAG: ${{ needs.derive.outputs.version_tag }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -179,7 +201,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Promote GHCR → ECR (SHA${{ needs.derive.outputs.version_tag != '' && ' + VERSION' || '' }})
+      - name: Promote GHCR → ECR (CONTENT${{ needs.derive.outputs.version_tag != '' && ' + VERSION' || '' }})
         env:
           ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
@@ -194,13 +216,13 @@ jobs:
               echo "ECR ${ECR_IMAGE}:${target_tag} already present — skipping."
               return
             fi
-            echo "Copying ${GHCR_IMAGE}:${SHA_TAG} → ${ECR_IMAGE}:${target_tag}"
+            echo "Copying ${GHCR_IMAGE}:${CONTENT_TAG} → ${ECR_IMAGE}:${target_tag}"
             docker buildx imagetools create \
               --tag "${ECR_IMAGE}:${target_tag}" \
-              "${GHCR_IMAGE}:${SHA_TAG}"
+              "${GHCR_IMAGE}:${CONTENT_TAG}"
           }
 
-          copy_from_sha "${SHA_TAG}"
+          copy_from_sha "${CONTENT_TAG}"
           if [ -n "${VERSION_TAG}" ]; then
             copy_from_sha "${VERSION_TAG}"
           fi
@@ -215,11 +237,11 @@ jobs:
         env:
           ENVIRONMENT: ${{ matrix.env }}
         run: |
-          # Pin App Runner to the SHA-tagged image. VERSION tag exists in
-          # ECR too (via promote step) but SHA is the canonical identifier
+          # Pin App Runner to the content-tagged image. VERSION tag exists in
+          # ECR too (via promote step) but CONTENT is the canonical identifier
           # — one image, one tag, one deployed version.
           CONFIG_FILE="${TERRAFORM_ENV_DIR}/${ENVIRONMENT}/${ENVIRONMENT}.yaml"
-          sed -i "s/^image_tag:.*/image_tag: ${SHA_TAG}/" "${CONFIG_FILE}"
+          sed -i "s/^image_tag:.*/image_tag: ${CONTENT_TAG}/" "${CONFIG_FILE}"
 
       - name: Terraform Init
         working-directory: ${{ env.TERRAFORM_DIR }}
@@ -266,7 +288,7 @@ jobs:
           {
             echo "### Deployed to \`${ENVIRONMENT}\`"
             echo ""
-            echo "- Image: \`${SHA_TAG}\`"
+            echo "- Image: \`${CONTENT_TAG}\`"
             if [ -n "${VERSION_TAG}" ]; then
               echo "- Version: \`${VERSION_TAG}\`"
             fi

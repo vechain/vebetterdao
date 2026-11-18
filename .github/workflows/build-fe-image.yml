@@ -1,10 +1,15 @@
 name: Build frontend image
 
-# Content-addressed build. Pushes one image per commit to GHCR under two
-# tags: the commit SHA (canonical — what deploy workflows pin) and the
-# semver tag when a v.* push is at HEAD (alias). Skip-on-existence: if
-# the SHA tag is already in GHCR, we only alias the semver tag onto it
-# instead of rebuilding.
+# Content-addressed build. Pushes one image per content hash to GHCR as
+# `content.<hash>` (canonical — what deploy workflows pin), plus the semver
+# tag when a v.* push is at HEAD (alias). The hash covers only the image's
+# build inputs (.github/scripts/image-content-hash.sh), so it survives squash
+# merges: the image a PR built is reused on main and by every deploy.
+# Skip-on-existence: if the content tag is already in GHCR, we only alias the
+# semver tag onto it instead of rebuilding.
+#
+# Every new build is scanned by Trivy before it is pushed; a HIGH/CRITICAL
+# finding with an upstream fix blocks the push.
 #
 # Triggers on PR pushes (so preview deploys have an image ready when
 # someone adds the create-preview label), on main pushes, and on v.* tag
@@ -34,18 +39,24 @@ jobs:
       pull-requests: write
     env:
       GHCR_IMAGE: ghcr.io/${{ github.repository }}-frontend
-      SHA_TAG: ${{ github.event.pull_request.head.sha || github.sha }}
       # Empty for non-tag events; set to v.X.Y.Z on tag pushes.
       VERSION_TAG: ${{ startsWith(github.ref, 'refs/tags/v.') && github.ref_name || '' }}
+      # Fork PRs get a read-only token: scan only, never push.
+      CAN_PUSH: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
 
       - name: Normalize GHCR_IMAGE to lowercase
         run: echo "GHCR_IMAGE=$(echo "$GHCR_IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
+      - name: Compute content tag
+        run: echo "CONTENT_TAG=content.$(.github/scripts/image-content-hash.sh frontend)" >> "$GITHUB_ENV"
+
       - name: GHCR login
+        if: env.CAN_PUSH == 'true'
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
@@ -54,24 +65,24 @@ jobs:
 
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Probe GHCR for image at SHA
+      - name: Probe GHCR for image at content tag
         id: probe
         run: |
-          if docker buildx imagetools inspect "${GHCR_IMAGE}:${SHA_TAG}" >/dev/null 2>&1; then
+          if docker buildx imagetools inspect "${GHCR_IMAGE}:${CONTENT_TAG}" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "SHA ${SHA_TAG} already in GHCR — no rebuild."
+            echo "${CONTENT_TAG} already in GHCR — no rebuild."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "SHA ${SHA_TAG} not in GHCR — will build."
+            echo "${CONTENT_TAG} not in GHCR — will build."
           fi
 
-      - name: Alias SHA → VERSION (no rebuild)
+      - name: Alias CONTENT → VERSION (no rebuild)
         if: steps.probe.outputs.exists == 'true' && env.VERSION_TAG != ''
         run: |
           set -euo pipefail
           docker buildx imagetools create \
             --tag "${GHCR_IMAGE}:${VERSION_TAG}" \
-            "${GHCR_IMAGE}:${SHA_TAG}"
+            "${GHCR_IMAGE}:${CONTENT_TAG}"
 
       - name: Build image (load, no push)
         if: steps.probe.outputs.exists == 'false'
@@ -84,7 +95,7 @@ jobs:
           push: false
           provenance: false
           sbom: false
-          tags: ${{ env.GHCR_IMAGE }}:${{ env.SHA_TAG }}
+          tags: ${{ env.GHCR_IMAGE }}:${{ env.CONTENT_TAG }}
           # No registry cache: on lockfile changes it never hit, and exporting
           # it cost ~90s per build.
 
@@ -93,7 +104,7 @@ jobs:
         if: steps.probe.outputs.exists == 'false'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ${{ env.GHCR_IMAGE }}:${{ env.SHA_TAG }}
+          image-ref: ${{ env.GHCR_IMAGE }}:${{ env.CONTENT_TAG }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
@@ -129,7 +140,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment scan failure on PR
-        if: failure() && steps.trivy.conclusion == 'failure' && github.event_name == 'pull_request'
+        if: failure() && steps.trivy.conclusion == 'failure' && github.event_name == 'pull_request' && env.CAN_PUSH == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -145,24 +156,24 @@ jobs:
           gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file comment.md
 
       - name: Push image
-        if: steps.probe.outputs.exists == 'false'
+        if: steps.probe.outputs.exists == 'false' && env.CAN_PUSH == 'true'
         run: |
           set -euo pipefail
-          docker push "${GHCR_IMAGE}:${SHA_TAG}"
+          docker push "${GHCR_IMAGE}:${CONTENT_TAG}"
           if [ -n "${VERSION_TAG}" ]; then
-            docker tag "${GHCR_IMAGE}:${SHA_TAG}" "${GHCR_IMAGE}:${VERSION_TAG}"
+            docker tag "${GHCR_IMAGE}:${CONTENT_TAG}" "${GHCR_IMAGE}:${VERSION_TAG}"
             docker push "${GHCR_IMAGE}:${VERSION_TAG}"
           fi
 
       - name: Summary
         env:
-          ACTION: ${{ steps.probe.outputs.exists == 'true' && (env.VERSION_TAG != '' && 'aliased' || 'skipped') || 'built' }}
+          ACTION: ${{ steps.probe.outputs.exists == 'true' && (env.VERSION_TAG != '' && 'aliased' || 'skipped') || (env.CAN_PUSH == 'true' && 'built' || 'scanned (fork, not pushed)') }}
         run: |
           {
             echo "### Frontend image (${ACTION})"
             echo ""
-            echo "- \`${GHCR_IMAGE}:${SHA_TAG}\`"
+            echo "- \`${GHCR_IMAGE}:${CONTENT_TAG}\`"
             if [ -n "${VERSION_TAG}" ]; then
-              echo "- \`${GHCR_IMAGE}:${VERSION_TAG}\` → \`${GHCR_IMAGE}:${SHA_TAG}\`"
+              echo "- \`${GHCR_IMAGE}:${VERSION_TAG}\` → \`${GHCR_IMAGE}:${CONTENT_TAG}\`"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
