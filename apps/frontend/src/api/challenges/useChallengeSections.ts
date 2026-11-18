@@ -151,7 +151,18 @@ export const useNeededActionsSection = (viewer?: string) => {
 export const useUserChallengesSection = (viewer?: string) => {
   const deps = useSectionDeps()
   const fetcher = viewer ? walletSectionFetcher(viewer, "MyChallenges") : null
-  return useSectionQuery("userChallenges", viewer, deps, fetcher)
+  const section = useSectionQuery("userChallenges", viewer, deps, fetcher)
+  const items = useMemo(
+    () =>
+      deps
+        ? section.items.filter(
+          challenge => isActiveChallengeWindowOpen(challenge, deps.currentRound) || challenge.isActionable,
+        )
+        : section.items,
+    [deps, section.items],
+  )
+
+  return { ...section, items }
 }
 
 export const useOpenToJoinSection = (viewer?: string) => {

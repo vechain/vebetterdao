@@ -10,6 +10,7 @@ import {
   useNeededActionsSection,
   useUserChallengesSection,
 } from "@/api/challenges/useChallengeSections"
+import { useCurrentAllocationsRoundId } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { NextChallengeStatusCard } from "@/app/b3mo-quests/shared/NextChallengeStatusCard"
 
 export const HomeQuestStatusCard = () => {
@@ -20,11 +21,14 @@ export const HomeQuestStatusCard = () => {
 }
 
 const ConnectedHomeQuestStatusCard = ({ viewer }: { viewer: string }) => {
+  const { data: currentRoundRaw, isLoading: isRoundLoading } = useCurrentAllocationsRoundId()
   const neededActions = useNeededActionsSection(viewer)
   const userChallenges = useUserChallengesSection(viewer)
   const history = useHistorySection(viewer)
+  const currentRound = currentRoundRaw !== undefined ? Number(currentRoundRaw) : undefined
 
   const status = useMemo(() => {
+    if (currentRound === undefined) return null
     const seen = new Set<number>()
     const unique = [...neededActions.items, ...userChallenges.items, ...history.items].filter(
       (challenge: ChallengeView) => {
@@ -33,13 +37,13 @@ const ConnectedHomeQuestStatusCard = ({ viewer }: { viewer: string }) => {
         return true
       },
     )
-    return selectNextChallengeStatus(unique)
-  }, [history.items, neededActions.items, userChallenges.items])
+    return selectNextChallengeStatus(unique, currentRound)
+  }, [currentRound, history.items, neededActions.items, userChallenges.items])
 
   return (
     <NextChallengeStatusCard
       status={status}
-      isLoading={neededActions.isLoading || userChallenges.isLoading || history.isLoading}
+      isLoading={isRoundLoading || neededActions.isLoading || userChallenges.isLoading || history.isLoading}
     />
   )
 }
