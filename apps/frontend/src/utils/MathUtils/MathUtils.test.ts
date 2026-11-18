@@ -3,6 +3,8 @@
  * npx vitest run src/utils/MathUtils/MathUtils.test.ts --globals
  */
 
+import { describe, expect, test } from "vitest"
+
 import {
   removingExcessDecimals,
   scaledDivision,

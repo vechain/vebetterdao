@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import { vi } from "vitest"
 import {
   formatAlias,
   humanAddress,

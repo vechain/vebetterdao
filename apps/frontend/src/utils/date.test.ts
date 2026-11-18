@@ -1,3 +1,5 @@
+import { expect, test } from "vitest"
+
 import { timestampToTimeLeft, timestampToTimeLeftCompact } from "./date"
 
 test("timestampToTimeLeftCompact", () => {
