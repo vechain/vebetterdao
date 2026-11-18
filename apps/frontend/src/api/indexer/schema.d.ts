@@ -93,6 +93,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v2/transactions/contract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List transactions that called a contract
+         * @description Results can be up to a minute old. For the next page, pass `pagination.cursor` back as `cursor` with the same `direction`.
+         */
+        get: operations["getTransactionsByContract"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v2/history/{account}": {
         parameters: {
             query?: never;
@@ -634,10 +654,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List transactions that called a contract
-         * @description Results can be up to a minute old.
+         * List transactions that called a contract (deprecated)
+         * @deprecated
+         * @description **Deprecated:** use `GET /api/v2/transactions/contract`, which pages by cursor
+         *     with no page limit and filters by block range.
+         *
+         *     Results can be up to a minute old. `page` stops at 10000.
          */
-        get: operations["getTransactionsByContract"];
+        get: operations["getTransactionsByContract_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2090,6 +2114,72 @@ export interface components {
             /** Format: double */
             uptimeRatio: number;
         };
+        Clause: {
+            to?: string | null;
+            value: string;
+            data: string;
+        };
+        DecodedEvent: {
+            address: string;
+            topics: string[];
+            data: string;
+            name?: string | null;
+            params?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        DecodedOutputs: {
+            contractAddress?: string | null;
+            events: components["schemas"]["DecodedEvent"][];
+            transfers: components["schemas"]["TxTransfer"][];
+        };
+        IndexedTransaction: {
+            id: string;
+            blockId: string;
+            /** Format: int64 */
+            blockNumber: number;
+            /** Format: int64 */
+            blockTimestamp: number;
+            /** Format: int64 */
+            type?: number | null;
+            /** Format: int64 */
+            size: number;
+            /** Format: int64 */
+            chainTag: number;
+            blockRef: string;
+            /** Format: int64 */
+            expiration: number;
+            /** @description Only returned when expanded=true. */
+            clauses?: components["schemas"]["Clause"][];
+            /** Format: int64 */
+            gasPriceCoef?: number | null;
+            /** Format: int64 */
+            gas: number;
+            maxFeePerGas?: string | null;
+            maxPriorityFeePerGas?: string | null;
+            dependsOn?: string | null;
+            nonce: string;
+            /** Format: int64 */
+            gasUsed: number;
+            gasPayer: string;
+            paid: string;
+            reward: string;
+            reverted: boolean;
+            origin: string;
+            /** @description Only returned when expanded=true. */
+            outputs?: components["schemas"]["DecodedOutputs"][];
+            /** Format: int32 */
+            clauseCount: number;
+        };
+        PaginatedResponseIndexedTransaction: {
+            data: components["schemas"]["IndexedTransaction"][];
+            pagination: components["schemas"]["PaginationDetail"];
+        };
+        TxTransfer: {
+            sender: string;
+            recipient: string;
+            amount: string;
+        };
         AppVote: {
             appId: string;
             voteWeight: string;
@@ -2450,72 +2540,6 @@ export interface components {
         PaginatedResponseString: {
             data: string[];
             pagination: components["schemas"]["PaginationDetail"];
-        };
-        Clause: {
-            to?: string | null;
-            value: string;
-            data: string;
-        };
-        DecodedEvent: {
-            address: string;
-            topics: string[];
-            data: string;
-            name?: string | null;
-            params?: {
-                [key: string]: unknown;
-            } | null;
-        };
-        DecodedOutputs: {
-            contractAddress?: string | null;
-            events: components["schemas"]["DecodedEvent"][];
-            transfers: components["schemas"]["TxTransfer"][];
-        };
-        IndexedTransaction: {
-            id: string;
-            blockId: string;
-            /** Format: int64 */
-            blockNumber: number;
-            /** Format: int64 */
-            blockTimestamp: number;
-            /** Format: int64 */
-            type?: number | null;
-            /** Format: int64 */
-            size: number;
-            /** Format: int64 */
-            chainTag: number;
-            blockRef: string;
-            /** Format: int64 */
-            expiration: number;
-            /** @description Only returned when expanded=true. */
-            clauses?: components["schemas"]["Clause"][];
-            /** Format: int64 */
-            gasPriceCoef?: number | null;
-            /** Format: int64 */
-            gas: number;
-            maxFeePerGas?: string | null;
-            maxPriorityFeePerGas?: string | null;
-            dependsOn?: string | null;
-            nonce: string;
-            /** Format: int64 */
-            gasUsed: number;
-            gasPayer: string;
-            paid: string;
-            reward: string;
-            reverted: boolean;
-            origin: string;
-            /** @description Only returned when expanded=true. */
-            outputs?: components["schemas"]["DecodedOutputs"][];
-            /** Format: int32 */
-            clauseCount: number;
-        };
-        PaginatedResponseIndexedTransaction: {
-            data: components["schemas"]["IndexedTransaction"][];
-            pagination: components["schemas"]["PaginationDetail"];
-        };
-        TxTransfer: {
-            sender: string;
-            recipient: string;
-            amount: string;
         };
         TransactionCountSummary: {
             totalTransactions: string;
@@ -3622,6 +3646,99 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ValidatorSlotStats"][];
+                };
+            };
+            /** @description Invalid request, such as a malformed parameter */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                    "application/problem+json": string;
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+            /** @description Temporarily unavailable; try again shortly */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExceptionResponse"];
+                    "application/problem+json": components["schemas"]["ExceptionResponse"];
+                };
+            };
+        };
+    };
+    getTransactionsByContract: {
+        parameters: {
+            query: {
+                /**
+                 * @description A valid address
+                 * @example 0xf077b491b355e64048ce21e3a6fc4751eeea77fa
+                 */
+                contractAddress: string;
+                /**
+                 * @description Return full details instead of the summary.
+                 * @example true
+                 */
+                expanded?: boolean;
+                /**
+                 * @description Results per page.
+                 * @example 20
+                 */
+                size?: number;
+                /** @description Sort order. */
+                direction?: "ASC" | "DESC";
+                /** @description The `pagination.cursor` from the previous page. Omit for the first page. */
+                cursor?: string;
+                /**
+                 * @description Lowest block, inclusive.
+                 * @example 12345678
+                 */
+                fromBlock?: number;
+                /**
+                 * @description Highest block, inclusive.
+                 * @example 12345678
+                 */
+                toBlock?: number;
+            };
+            header?: {
+                /** @description Optional caller/project identifier used for observability and usage tracking. */
+                "X-Project-Id"?: components["parameters"]["XProjectIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PaginatedResponseIndexedTransaction"];
                 };
             };
             /** @description Invalid request, such as a malformed parameter */
@@ -5889,7 +6006,7 @@ export interface operations {
             };
         };
     };
-    getTransactionsByContract: {
+    getTransactionsByContract_1: {
         parameters: {
             query: {
                 /**
