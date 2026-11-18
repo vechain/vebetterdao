@@ -1,3 +1,5 @@
+import { describe, expect, it } from "vitest"
+
 import { NextChallengeStatusKind, resolveNextChallengeStatus, selectNextChallengeStatus } from "./nextChallengeStatus"
 import {
   ChallengeKind,
