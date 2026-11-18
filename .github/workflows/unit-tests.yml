@@ -101,6 +101,10 @@ jobs:
         if: needs.check-changes.outputs.frontend-changed == 'true' || needs.check-changes.outputs.contracts-changed == 'true' || needs.check-changes.outputs.utils-changed == 'true'
         run: yarn workspace frontend test
 
+      - name: Frontend Lint
+        if: needs.check-changes.outputs.frontend-changed == 'true'
+        run: yarn workspace frontend lint
+
       # Run Backend unit tests only if there are backend changes and no contracts/utils changes
       - name: Backend Unit Tests
         if: env.UNIT_SHOULD_RUN == 'true' && needs.check-changes.outputs.backend-changed == 'true' && needs.check-changes.outputs.contracts-changed != 'true' && needs.check-changes.outputs.utils-changed != 'true'
